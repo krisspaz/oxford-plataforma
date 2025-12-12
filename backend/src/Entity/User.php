@@ -19,6 +19,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Assert\NotBlank(message: "El email es obligatorio")]
+    #[Assert\Email(message: "El email no es válido")]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -28,6 +30,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Assert\NotBlank(message: "La contraseña es obligatoria")]
+    #[Assert\Length(min: 8, minMessage: "La contraseña debe tener al menos 8 caracteres")]
     private ?string $password = null;
 
     public function getId(): ?int

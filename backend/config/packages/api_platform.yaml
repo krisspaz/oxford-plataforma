@@ -1,7 +1,12 @@
 api_platform:
-    title: Hello API Platform
-    version: 1.0.0
+    title: 'Corpo Oxford API'
+    version: '1.0.0'
     defaults:
-        stateless: true
+        pagination_enabled: true
+        pagination_items_per_page: 30
         cache_headers:
             vary: ['Content-Type', 'Authorization', 'Origin']
+    enable_swagger_ui: true
+    enable_re_doc: true
+    eager_loading:
+        force_eager: false

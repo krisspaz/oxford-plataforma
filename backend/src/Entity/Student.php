@@ -19,10 +19,12 @@ class Student
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
+    #[Assert\Length(min: 2)]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
+    #[Assert\Length(min: 2)]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 20, unique: true)]

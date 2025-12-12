@@ -7,28 +7,31 @@ import Students from './pages/Students';
 import Academic from './pages/Academic';
 import Financial from './pages/Financial';
 import Login from './pages/Login';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
-    <AuthProvider>
+    <ErrorBoundary>
       <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Dashboard />} />
-            <Route path="students" element={<Students />} />
-            <Route path="academic" element={<Academic />} />
-            <Route path="financial" element={<Financial />} />
-            {/* Add more routes here as we build them */}
-            <Route path="*" element={<div className="p-10">Página no encontrada</div>} />
-          </Route>
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="students" element={<Students />} />
+              <Route path="academic" element={<Academic />} />
+              <Route path="financial" element={<Financial />} />
+              {/* Add more routes here as we build them */}
+              <Route path="*" element={<div className="p-10">Página no encontrada</div>} />
+            </Route>
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
-    </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

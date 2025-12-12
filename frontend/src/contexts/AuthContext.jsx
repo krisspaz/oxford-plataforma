@@ -15,9 +15,22 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    const login = (token) => {
-        localStorage.setItem('token', token);
-        setUser({ email: 'admin@oxford.edu', role: 'ADMIN' });
+    const login = async (email, password) => { // Modified to accept email and password
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/login_check`, {
+                username: email,
+                password: password
+            });
+            const token = response.data.token; // Assuming the token is in response.data.token
+            localStorage.setItem('token', token);
+            // In a real app, you'd decode the token or fetch user profile based on the token
+            setUser({ email: email, role: 'USER' }); // Simplified user setting after successful login
+            return true; // Indicate successful login
+        } catch (error) {
+            console.error("Login failed:", error);
+            // Handle login error (e.g., show error message to user)
+            return false; // Indicate failed login
+        }
     };
 
     const logout = () => {
