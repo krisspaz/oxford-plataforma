@@ -1,0 +1,16 @@
+# Ignorar dependencias grandes y minificadas
+public/css/bootstrap.css
+public/css/responsive.css
+public/css/style.css
+public/js/bootstrap1.js
+public/js/jquery-3.4.1.min1.js
+
+# Ignorar workflows
+.github/**/*
+
+# Ignorar docker
+docker-compose.yml
+
+# Ignorar otros archivos de configuración
+*.yml
+*.yaml
