@@ -16,7 +16,7 @@ services:
   # === BACKEND (Symfony) ===
   backend:
     build:
-      context: ./backend
+      context: ./backend/symfony
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgresql://app:!ChangeMe!@database:5432/app?serverVersion=16&charset=utf8
@@ -24,7 +24,7 @@ services:
     depends_on:
       - database
     volumes:
-      - ./backend:/var/www/symfony
+      - ./backend/symfony:/var/www/symfony
     networks:
       - app_net
 
@@ -39,7 +39,7 @@ services:
   # === AI SERVICE (Python) ===
   ai_service:
     build:
-      context: ./ai_service
+      context: ./backend/ai_service
       dockerfile: Dockerfile
     networks:
       - app_net
@@ -50,7 +50,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./backend/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - backend
       - frontend

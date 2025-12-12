@@ -16,11 +16,11 @@ jobs:
       with:
         php-version: '8.2'
     - name: Install Dependencies
-      run: cd backend && composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      run: cd backend/symfony && composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
     - name: Directory Permissions
-      run: chmod -R 777 backend/var
+      run: chmod -R 777 backend/symfony/var
     #- name: Execute Tests
-    #  run: cd backend && php bin/phpunit
+    #  run: cd backend/symfony && php bin/phpunit
 
   frontend-test:
     runs-on: ubuntu-latest
