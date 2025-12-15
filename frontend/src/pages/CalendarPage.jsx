@@ -1,0 +1,137 @@
+import React, { useState, useEffect } from 'react';
+import { Calendar, Clock, BookOpen, CheckCircle, AlertCircle } from 'lucide-react';
+
+const CalendarPage = () => {
+    const [tasks, setTasks] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Mock data for now - API integration can be added later
+        const mockTasks = [
+            {
+                id: 1,
+                title: 'Tarea de Matemáticas #1',
+                description: 'Resolver ejercicios 1-10 de la página 45.',
+                course: '1ro Básico A',
+                dueDate: '2025-02-20',
+                status: 'PENDING'
+            },
+            {
+                id: 2,
+                title: 'Proyecto de Ciencias',
+                description: 'Presentación sobre el sistema solar.',
+                course: '2do Básico B',
+                dueDate: '2025-02-25',
+                status: 'PENDING'
+            },
+            {
+                id: 3,
+                title: 'Examen de Inglés',
+                description: 'Preparar vocabulario unidad 3.',
+                course: '1ro Básico A',
+                dueDate: '2025-02-18',
+                status: 'COMPLETED'
+            },
+            {
+                id: 4,
+                title: 'Lectura de Literatura',
+                description: 'Leer capítulos 5-8 del libro asignado.',
+                course: '3ro Básico',
+                dueDate: '2025-02-22',
+                status: 'PENDING'
+            }
+        ];
+
+        setTimeout(() => {
+            setTasks(mockTasks);
+            setLoading(false);
+        }, 500);
+    }, []);
+
+    const getStatusBadge = (status, dueDate) => {
+        const isOverdue = new Date(dueDate) < new Date() && status !== 'COMPLETED';
+
+        if (status === 'COMPLETED') {
+            return (
+                <span className="flex items-center gap-1 text-green-600 bg-green-50 px-3 py-1 rounded-full text-sm font-medium">
+                    <CheckCircle size={14} /> Completada
+                </span>
+            );
+        }
+        if (isOverdue) {
+            return (
+                <span className="flex items-center gap-1 text-red-600 bg-red-50 px-3 py-1 rounded-full text-sm font-medium">
+                    <AlertCircle size={14} /> Vencida
+                </span>
+            );
+        }
+        return (
+            <span className="flex items-center gap-1 text-orange-600 bg-orange-50 px-3 py-1 rounded-full text-sm font-medium">
+                <Clock size={14} /> Pendiente
+            </span>
+        );
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <Calendar className="text-teal-600" size={28} />
+                    <h1 className="text-2xl font-bold text-gray-800">Cronograma de Tareas</h1>
+                </div>
+                <button className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    + Nueva Tarea
+                </button>
+            </div>
+
+            <div className="grid gap-4">
+                {tasks.map(task => (
+                    <div
+                        key={task.id}
+                        className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all"
+                    >
+                        <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1">
+                                <h3 className="font-bold text-lg text-gray-900">{task.title}</h3>
+                                <p className="text-gray-600 mt-1">{task.description}</p>
+                            </div>
+                            {getStatusBadge(task.status, task.dueDate)}
+                        </div>
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                            <div className="flex items-center gap-2 text-sm">
+                                <BookOpen size={16} className="text-teal-600" />
+                                <span className="font-medium text-teal-700">{task.course}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <Clock size={16} />
+                                <span>Vence: {new Date(task.dueDate).toLocaleDateString('es-GT', {
+                                    weekday: 'short',
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                })}</span>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+
+                {tasks.length === 0 && (
+                    <div className="text-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                        <Calendar size={48} className="mx-auto mb-3 text-gray-300" />
+                        <p className="text-gray-500">No hay tareas asignadas.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default CalendarPage;

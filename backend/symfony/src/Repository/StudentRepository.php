@@ -20,4 +20,27 @@ class StudentRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Student::class);
     }
+
+    public function countActive(): int
+    {
+        return $this->count(['isActive' => true]);
+    }
+
+    public function countAtRisk(float $threshold = 0.7): int
+    {
+        return $this->createQueryBuilder('s')
+            ->select('count(s.id)')
+            ->where('s.academicRiskScore > :threshold')
+            ->setParameter('threshold', $threshold)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * @return Student[]
+     */
+    public function findRecent(int $limit = 5): array
+    {
+        return $this->findBy([], ['id' => 'DESC'], $limit);
+    }
 }

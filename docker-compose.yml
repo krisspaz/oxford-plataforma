@@ -20,7 +20,7 @@ services:
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgresql://app:!ChangeMe!@database:5432/app?serverVersion=16&charset=utf8
-      APP_ENV: prod
+      APP_ENV: dev
     depends_on:
       - database
     volumes:
@@ -51,6 +51,7 @@ services:
       - "80:80"
     volumes:
       - ./backend/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./backend/symfony/public:/var/www/symfony/public
     depends_on:
       - backend
       - frontend

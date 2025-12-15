@@ -25,7 +25,7 @@ class Payment
     #[Assert\Positive]
     private ?string $amount = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $paymentDate = null;
 
     #[ORM\Column(length: 255)]
@@ -33,6 +33,51 @@ class Payment
 
     #[ORM\Column(length: 50)]
     private ?string $status = 'PAID'; // PENDING, PAID, CANCELLED
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $description = null;
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dueDate = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $paidAt = null;
+
+    public function getDueDate(): ?\DateTimeInterface
+    {
+        return $this->dueDate;
+    }
+
+    public function setDueDate(?\DateTimeInterface $dueDate): static
+    {
+        $this->dueDate = $dueDate;
+
+        return $this;
+    }
+
+    public function getPaidAt(): ?\DateTimeInterface
+    {
+        return $this->paidAt;
+    }
+
+    public function setPaidAt(?\DateTimeInterface $paidAt): static
+    {
+        $this->paidAt = $paidAt;
+
+        return $this;
+    }
 
     public function getId(): ?int
     {

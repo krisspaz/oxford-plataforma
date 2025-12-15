@@ -1,9 +1,12 @@
-FROM python:3.10-slim
+FROM python:3.10-alpine
 
 WORKDIR /app
 
-# Install system dependencies (if any needed for scipy/numpy)
-RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
+# Install system dependencies
+# build-base for compilation, openblas-dev for numpy/pandas optimization
+RUN apk add --no-cache \
+    build-base \
+    openblas-dev
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 const AuthContext = createContext(null);
 
@@ -17,7 +18,8 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => { // Modified to accept email and password
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/login_check`, {
+            const apiUrl = import.meta.env.VITE_API_URL || '';
+            const response = await axios.post(`${apiUrl}/api/login_check`, {
                 username: email,
                 password: password
             });

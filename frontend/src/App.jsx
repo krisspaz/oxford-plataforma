@@ -6,6 +6,10 @@ import Dashboard from './pages/Dashboard';
 import Students from './pages/Students';
 import Academic from './pages/Academic';
 import Financial from './pages/Financial';
+import CalendarPage from './pages/CalendarPage';
+import ExonerationPage from './pages/ExonerationPage';
+import ContractsPage from './pages/ContractsPage';
+import ReportsPage from './pages/ReportsPage';
 import Login from './pages/Login';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -25,6 +29,11 @@ function App() {
               <Route path="students" element={<Students />} />
               <Route path="academic" element={<Academic />} />
               <Route path="financial" element={<Financial />} />
+              <Route path="financial" element={<Financial />} />
+              <Route path="calendar" element={<CalendarPage />} />
+              <Route path="exonerations" element={<ExonerationPage />} />
+              <Route path="contracts" element={<ContractsPage />} />
+              <Route path="reports" element={<ReportsPage />} />
               {/* Add more routes here as we build them */}
               <Route path="*" element={<div className="p-10">Página no encontrada</div>} />
             </Route>

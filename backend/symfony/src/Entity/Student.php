@@ -136,6 +136,36 @@ class Student
         return $this;
     }
 
+    #[ORM\ManyToOne(inversedBy: 'students')]
+    private ?SchoolCycle $schoolCycle = null;
+
+    public function getSchoolCycle(): ?SchoolCycle
+    {
+        return $this->schoolCycle;
+    }
+
+    public function setSchoolCycle(?SchoolCycle $schoolCycle): static
+    {
+        $this->schoolCycle = $schoolCycle;
+
+        return $this;
+    }
+
+    #[ORM\ManyToOne(inversedBy: 'students')]
+    private ?Course $course = null;
+
+    public function getCourse(): ?Course
+    {
+        return $this->course;
+    }
+
+    public function setCourse(?Course $course): static
+    {
+        $this->course = $course;
+
+        return $this;
+    }
+
     public function getAcademicRiskScore(): ?float
     {
         return $this->academicRiskScore;

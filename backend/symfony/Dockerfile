@@ -1,14 +1,15 @@
-FROM php:8.2-fpm
+FROM php:8.3-fpm-alpine
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
     git \
     unzip \
-    libpq-dev \
-    libicu-dev \
+    postgresql-dev \
+    icu-dev \
     libzip-dev \
-    acl \
-    && docker-php-ext-install \
+    acl
+
+RUN docker-php-ext-install \
     pdo_pgsql \
     intl \
     zip \
@@ -24,7 +25,8 @@ WORKDIR /var/www/symfony
 COPY . .
 
 # Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN rm -f composer.lock
+RUN APP_ENV=prod composer install --no-dev --optimize-autoloader
 
 # Set permissions
 RUN setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX var

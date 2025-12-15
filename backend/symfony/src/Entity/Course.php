@@ -36,10 +36,14 @@ class Course
     #[ORM\ManyToMany(targetEntity: Subject::class, mappedBy: 'courses')]
     private Collection $subjects;
 
+    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Task::class)]
+    private Collection $tasks;
+
     public function __construct()
     {
         $this->students = new ArrayCollection();
         $this->subjects = new ArrayCollection();
+        $this->tasks = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -135,6 +139,36 @@ class Course
     {
         if ($this->subjects->removeElement($subject)) {
             $subject->removeCourse($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Task>
+     */
+    public function getTasks(): Collection
+    {
+        return $this->tasks;
+    }
+
+    public function addTask(Task $task): static
+    {
+        if (!$this->tasks->contains($task)) {
+            $this->tasks->add($task);
+            $task->setCourse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTask(Task $task): static
+    {
+        if ($this->tasks->removeElement($task)) {
+            // set the owning side to null (unless already changed)
+            if ($task->getCourse() === $this) {
+                $task->setCourse(null);
+            }
         }
 
         return $this;
