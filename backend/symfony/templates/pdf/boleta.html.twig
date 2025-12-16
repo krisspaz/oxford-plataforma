@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; font-size: 10pt; padding: 20px; }
+        .header { text-align: center; border-bottom: 2px solid #0d9488; padding-bottom: 15px; margin-bottom: 20px; }
+        .logo { font-size: 24pt; font-weight: bold; color: #0d9488; }
+        .subtitle { font-size: 14pt; color: #666; margin-top: 5px; }
+        .student-info { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .student-name { font-size: 16pt; font-weight: bold; color: #1f2937; }
+        .student-detail { font-size: 10pt; color: #6b7280; margin-top: 5px; }
+        .bimester-title { font-size: 14pt; font-weight: bold; color: #0d9488; margin-bottom: 15px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th { background: #0d9488; color: white; padding: 10px; text-align: left; }
+        td { padding: 8px 10px; border-bottom: 1px solid #e5e7eb; }
+        tr:nth-child(even) { background: #f9fafb; }
+        .grade { font-weight: bold; text-align: center; }
+        .grade.aprobado { color: #059669; }
+        .grade.reprobado { color: #dc2626; }
+        .promedio { font-size: 14pt; font-weight: bold; text-align: right; margin-top: 10px; }
+        .footer { margin-top: 40px; text-align: center; font-size: 8pt; color: #9ca3af; }
+        .firma { margin-top: 60px; display: flex; justify-content: space-between; }
+        .firma-line { width: 200px; border-top: 1px solid #333; text-align: center; padding-top: 5px; font-size: 9pt; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">COLEGIO OXFORD</div>
+        <div class="subtitle">Boleta de Calificaciones</div>
+    </div>
+
+    <div class="student-info">
+        <div class="student-name">{{ student.firstName }} {{ student.lastName }}</div>
+        <div class="student-detail">Carnet: {{ student.carnet }} | Grado: {{ student.grade ?? 'N/A' }}</div>
+    </div>
+
+    <div class="bimester-title">{{ bimester }}</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 50%;">Materia</th>
+                <th style="width: 25%;">Punteo</th>
+                <th style="width: 25%;">Nota</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for grade in grades %}
+            <tr>
+                <td>{{ grade.subject }}</td>
+                <td class="grade">{{ grade.score }}/{{ grade.maxScore }}</td>
+                <td class="grade {{ grade.score >= 60 ? 'aprobado' : 'reprobado' }}">
+                    {{ grade.score >= 60 ? 'Aprobado' : 'Reprobado' }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="promedio">
+        Promedio General: <span style="color: #0d9488;">{{ grades|map(g => g.score)|reduce((a, b) => a + b, 0) / grades|length|number_format(1) }}</span>
+    </div>
+
+    <div class="firma">
+        <div class="firma-line">Coordinación Académica</div>
+        <div class="firma-line">Padre/Encargado</div>
+    </div>
+
+    <div class="footer">
+        <p>Documento generado el {{ date|date('d/m/Y H:i') }}</p>
+        <p>Este documento es válido sin firmas ni sellos al ser generado electrónicamente.</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; font-size: 8pt; }
+        .carnet { width: 85.6mm; height: 53.98mm; border: 1px solid #333; border-radius: 8px; overflow: hidden; position: relative; background: linear-gradient(135deg, #0d9488, #115e59); }
+        .header { background: #fff; padding: 5px 10px; display: flex; align-items: center; }
+        .logo { width: 30px; height: 30px; background: #0d9488; border-radius: 50%; margin-right: 10px; }
+        .school-name { font-size: 12pt; font-weight: bold; color: #0d9488; }
+        .content { padding: 8px 10px; color: #fff; display: flex; }
+        .photo { width: 50px; height: 60px; background: #fff; border-radius: 4px; margin-right: 10px; }
+        .info { flex: 1; }
+        .name { font-size: 11pt; font-weight: bold; margin-bottom: 4px; }
+        .detail { font-size: 8pt; margin-bottom: 2px; }
+        .carnet-number { font-size: 14pt; font-weight: bold; background: #fff; color: #0d9488; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+        .footer { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.2); padding: 4px 10px; font-size: 7pt; color: #fff; }
+        .barcode { font-family: 'Libre Barcode 128', monospace; font-size: 24pt; letter-spacing: 2px; text-align: center; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="carnet">
+        <div class="header">
+            <div class="logo"></div>
+            <div class="school-name">COLEGIO OXFORD</div>
+        </div>
+        <div class="content">
+            <div class="photo">
+                {% if student.photoUrl %}
+                    <img src="{{ student.photoUrl }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% endif %}
+            </div>
+            <div class="info">
+                <div class="name">{{ student.firstName }} {{ student.lastName }}</div>
+                <div class="detail">{{ enrollment.grade.name }} - Sección {{ enrollment.section.name }}</div>
+                <div class="detail">Ciclo Escolar {{ year }}</div>
+                <div class="carnet-number">{{ student.carnet }}</div>
+            </div>
+        </div>
+        <div class="footer">
+            <div>Si encuentra este carnet, favor comunicarse al Tel: 2222-3333</div>
+        </div>
+    </div>
+</body>
+</html>

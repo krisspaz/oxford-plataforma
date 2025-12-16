@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; font-size: 8pt; padding: 10px; }
+        .header { text-align: center; margin-bottom: 15px; }
+        .logo { font-size: 16pt; font-weight: bold; color: #0d9488; }
+        .title { font-size: 12pt; color: #374151; margin-top: 3px; }
+        .subtitle { font-size: 10pt; color: #6b7280; }
+        table { width: 100%; border-collapse: collapse; font-size: 7pt; }
+        th { background: #0d9488; color: white; padding: 5px 3px; text-align: center; font-size: 7pt; border: 1px solid #0d9488; }
+        td { padding: 4px 3px; border: 1px solid #e5e7eb; text-align: center; }
+        tr:nth-child(even) { background: #f9fafb; }
+        .student-name { text-align: left; font-weight: bold; }
+        .grade { font-weight: bold; }
+        .grade.high { color: #059669; }
+        .grade.medium { color: #d97706; }
+        .grade.low { color: #dc2626; }
+        .average { background: #f3f4f6; font-weight: bold; }
+        .footer { margin-top: 20px; text-align: center; font-size: 7pt; color: #9ca3af; }
+        .official { margin-top: 30px; display: flex; justify-content: space-between; font-size: 8pt; }
+        .seal-area { width: 100px; height: 100px; border: 1px dashed #ccc; text-align: center; line-height: 100px; color: #ccc; }
+        .signature-area { width: 200px; text-align: center; }
+        .signature-area hr { border: 0; border-top: 1px solid #333; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">COLEGIO OXFORD</div>
+        <div class="title">Cuadro Final de Calificaciones</div>
+        <div class="subtitle">{{ grade }} - Ciclo Escolar {{ cycle }}</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%;">No.</th>
+                <th style="width: 20%;">Estudiante</th>
+                {% for subject in students[0].subjects|default([]) %}
+                <th>{{ subject.name|slice(0, 10) }}</th>
+                {% endfor %}
+                <th style="width: 8%;">Prom.</th>
+                <th style="width: 8%;">Resultado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i, student in students %}
+            <tr>
+                <td>{{ i + 1 }}</td>
+                <td class="student-name">{{ student.name }}</td>
+                {% for subject in student.subjects %}
+                <td class="grade {{ subject.average >= 80 ? 'high' : (subject.average >= 60 ? 'medium' : 'low') }}">
+                    {{ subject.average|number_format(0) }}
+                </td>
+                {% endfor %}
+                <td class="average">{{ student.finalAverage|number_format(1) }}</td>
+                <td class="grade {{ student.finalAverage >= 60 ? 'high' : 'low' }}">
+                    {{ student.finalAverage >= 60 ? 'APROBADO' : 'REPROBADO' }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="official">
+        <div class="seal-area">Sello</div>
+        <div class="signature-area">
+            <hr>
+            <span>Director(a)</span>
+        </div>
+        <div class="signature-area">
+            <hr>
+            <span>Coordinación Académica</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Documento oficial - Ministerio de Educación de Guatemala</p>
+        <p>Generado el {{ date|date('d/m/Y') }}</p>
+    </div>
+</body>
+</html>

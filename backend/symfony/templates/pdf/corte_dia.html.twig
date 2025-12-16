@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; font-size: 9pt; padding: 15px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .logo { font-size: 18pt; font-weight: bold; color: #0d9488; }
+        .title { font-size: 14pt; color: #374151; margin-top: 5px; }
+        .date-info { font-size: 12pt; color: #6b7280; margin-top: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        th { background: #0d9488; color: white; padding: 8px; text-align: left; font-size: 8pt; }
+        td { padding: 6px 8px; border-bottom: 1px solid #e5e7eb; font-size: 8pt; }
+        tr:nth-child(even) { background: #f9fafb; }
+        .amount { text-align: right; font-family: monospace; }
+        .totals-section { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .totals-grid { display: flex; flex-wrap: wrap; gap: 20px; }
+        .total-box { flex: 1; min-width: 150px; text-align: center; }
+        .total-label { font-size: 9pt; color: #6b7280; }
+        .total-value { font-size: 16pt; font-weight: bold; color: #0d9488; font-family: monospace; }
+        .method-breakdown { margin-top: 20px; }
+        .method-title { font-size: 11pt; font-weight: bold; color: #374151; margin-bottom: 10px; }
+        .method-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #e5e7eb; }
+        .footer { margin-top: 30px; text-align: center; font-size: 8pt; color: #9ca3af; }
+        .signature-section { margin-top: 50px; display: flex; justify-content: space-between; }
+        .signature-line { width: 200px; text-align: center; }
+        .signature-line hr { border: 0; border-top: 1px solid #333; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">COLEGIO OXFORD</div>
+        <div class="title">Corte de Caja Diario</div>
+        <div class="date-info">{{ date|date('d de F de Y') }}</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Hora</th>
+                <th>Carnet</th>
+                <th>Estudiante</th>
+                <th>Concepto</th>
+                <th>Método</th>
+                <th>Documento</th>
+                <th style="text-align: right;">Monto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set grandTotal = 0 %}
+            {% for row in data.transactions %}
+            {% set grandTotal = grandTotal + row.amount %}
+            <tr>
+                <td>{{ row.time }}</td>
+                <td>{{ row.carnet }}</td>
+                <td>{{ row.studentName }}</td>
+                <td>{{ row.concept }}</td>
+                <td>{{ row.paymentMethod }}</td>
+                <td>{{ row.documentNumber ?? '-' }}</td>
+                <td class="amount">Q {{ row.amount|number_format(2, '.', ',') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totals-section">
+        <div class="totals-grid">
+            <div class="total-box">
+                <div class="total-label">Total Transacciones</div>
+                <div class="total-value">{{ data.transactions|length }}</div>
+            </div>
+            <div class="total-box">
+                <div class="total-label">Total Recaudado</div>
+                <div class="total-value">Q {{ grandTotal|number_format(2, '.', ',') }}</div>
+            </div>
+            <div class="total-box">
+                <div class="total-label">Facturas</div>
+                <div class="total-value">{{ data.invoiceCount ?? 0 }}</div>
+            </div>
+            <div class="total-box">
+                <div class="total-label">Recibos</div>
+                <div class="total-value">{{ data.receiptCount ?? 0 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="method-breakdown">
+        <div class="method-title">Desglose por Método de Pago</div>
+        {% for method, amount in data.byMethod|default({}) %}
+        <div class="method-row">
+            <span>{{ method }}</span>
+            <span style="font-family: monospace; font-weight: bold;">Q {{ amount|number_format(2, '.', ',') }}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-line">
+            <hr>
+            <span>Cajero(a)</span>
+        </div>
+        <div class="signature-line">
+            <hr>
+            <span>Supervisor(a)</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Documento generado el {{ 'now'|date('d/m/Y H:i') }}</p>
+        <p>Sistema de Gestión Escolar - Colegio Oxford</p>
+    </div>
+</body>
+</html>
