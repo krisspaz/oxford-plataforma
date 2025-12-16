@@ -46,7 +46,9 @@ security:
         ROLE_ADMIN: [ROLE_TEACHER, ROLE_ALLOWED_TO_SWITCH]
 
     access_control:
+        - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/seed, roles: PUBLIC_ACCESS }
         - { path: ^/api/users, roles: ROLE_ADMIN }
         - { path: ^/api/financial, roles: ROLE_ADMIN }
         - { path: ^/api/doc, roles: PUBLIC_ACCESS } # Swagger UI
