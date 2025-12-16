@@ -31,6 +31,7 @@ import FamiliasPage from './pages/FamiliasPage';
 import GradosPage from './pages/GradosPage';
 import DocentesPage from './pages/DocentesPage';
 import CatalogosPage from './pages/CatalogosPage';
+import MatriculacionPage from './pages/MatriculacionPage';
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
 
                 {/* Secretaría */}
                 <Route path="inscripciones" element={<InscripcionesPage />} />
+                <Route path="matriculacion" element={<MatriculacionPage />} />
                 <Route path="students" element={<Students />} />
                 <Route path="familias" element={<FamiliasPage />} />
                 <Route path="contracts" element={<ContractsPage />} />
