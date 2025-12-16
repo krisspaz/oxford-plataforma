@@ -1,0 +1,12 @@
+// Export all services from single entry point
+export { default as api } from './api';
+export { default as enrollmentService } from './enrollmentService';
+export { default as invoiceService } from './invoiceService';
+export { default as gradeRecordService } from './gradeRecordService';
+export { default as packageService } from './packageService';
+export { default as bimesterService } from './bimesterService';
+export { default as userService } from './userService';
+export { default as studentService } from './studentService';
+export { default as paymentService } from './paymentService';
+export { default as catalogService } from './catalogService';
+export { default as requestService } from './requestService';

@@ -7,16 +7,31 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ApiResource]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    // Roles del sistema
+    public const ROLE_USER = 'ROLE_USER';
+    public const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
+    public const ROLE_CONTABILIDAD = 'ROLE_CONTABILIDAD';
+    public const ROLE_SECRETARIA = 'ROLE_SECRETARIA';
+    public const ROLE_COORDINACION = 'ROLE_COORDINACION';
+    public const ROLE_DIRECCION = 'ROLE_DIRECCION';
+    public const ROLE_INFORMATICA = 'ROLE_INFORMATICA';
+    public const ROLE_DOCENTE = 'ROLE_DOCENTE';
+    public const ROLE_ALUMNO = 'ROLE_ALUMNO';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $name = null;
 
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\NotBlank(message: "El email es obligatorio")]
@@ -103,4 +118,50 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(?string $name): static
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return in_array($role, $this->getRoles());
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole(self::ROLE_SUPER_ADMIN);
+    }
+
+    public function isDocente(): bool
+    {
+        return $this->hasRole(self::ROLE_DOCENTE);
+    }
+
+    public function isAlumno(): bool
+    {
+        return $this->hasRole(self::ROLE_ALUMNO);
+    }
+
+    public static function getAvailableRoles(): array
+    {
+        return [
+            self::ROLE_SUPER_ADMIN => 'Super Administrador',
+            self::ROLE_CONTABILIDAD => 'Contabilidad',
+            self::ROLE_SECRETARIA => 'Secretaría',
+            self::ROLE_COORDINACION => 'Coordinación',
+            self::ROLE_DIRECCION => 'Dirección',
+            self::ROLE_INFORMATICA => 'Informática',
+            self::ROLE_DOCENTE => 'Docente',
+            self::ROLE_ALUMNO => 'Alumno',
+        ];
+    }
 }
+

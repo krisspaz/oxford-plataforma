@@ -1,27 +1,28 @@
 import React from 'react';
 import { Download, FileText } from 'lucide-react';
-import axios from 'axios';
+import { useTheme } from '../contexts/ThemeContext';
 
 const ReportsPage = () => {
+    const { darkMode } = useTheme();
+
     const handleDownload = (type) => {
         alert(`Iniciando descarga de ${type}... (Simulado)`);
-        // axios.get(...)
     };
 
     return (
         <div className="p-6">
-            <h1 className="text-2xl font-bold mb-6 text-gray-800">Reportes y Boletas</h1>
+            <h1 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Reportes y Boletas</h1>
 
             <div className="grid md:grid-cols-2 gap-6">
                 {/* Grades */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} p-6 rounded-xl shadow-sm border`}>
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="p-3 bg-purple-100 text-purple-600 rounded-lg">
+                        <div className={`p-3 ${darkMode ? 'bg-purple-900/50' : 'bg-purple-100'} text-purple-500 rounded-lg`}>
                             <FileText size={24} />
                         </div>
                         <div>
-                            <h3 className="font-bold text-lg">Boletas de Calificaciones</h3>
-                            <p className="text-gray-500 text-sm">Descarga por grado o estudiante</p>
+                            <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'}`}>Boletas de Calificaciones</h3>
+                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Descarga por grado o estudiante</p>
                         </div>
                     </div>
                     <button
@@ -33,14 +34,14 @@ const ReportsPage = () => {
                 </div>
 
                 {/* Certificates */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} p-6 rounded-xl shadow-sm border`}>
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="p-3 bg-blue-100 text-blue-600 rounded-lg">
+                        <div className={`p-3 ${darkMode ? 'bg-blue-900/50' : 'bg-blue-100'} text-blue-500 rounded-lg`}>
                             <FileText size={24} />
                         </div>
                         <div>
-                            <h3 className="font-bold text-lg">Cuadros Finales</h3>
-                            <p className="text-gray-500 text-sm">Consolidado para MINEDUC</p>
+                            <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'}`}>Cuadros Finales</h3>
+                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Consolidado para MINEDUC</p>
                         </div>
                     </div>
                     <button

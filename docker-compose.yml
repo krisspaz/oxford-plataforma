@@ -21,6 +21,10 @@ services:
     environment:
       DATABASE_URL: postgresql://app:!ChangeMe!@database:5432/app?serverVersion=16&charset=utf8
       APP_ENV: dev
+      APP_SECRET: oxford2025secretkey
+      CORPOSISTEMAS_API_URL: https://api.corposistemas.gt
+      CORPOSISTEMAS_API_KEY: demo_key_oxford
+      CORPOSISTEMAS_NIT: 12345678
     depends_on:
       - database
     volumes:
