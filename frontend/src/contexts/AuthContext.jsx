@@ -3,35 +3,81 @@ import axios from 'axios';
 
 const AuthContext = createContext(null);
 
+// Decode JWT token without external library
+const decodeJWT = (token) => {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+            atob(base64)
+                .split('')
+                .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                .join('')
+        );
+        return JSON.parse(jsonPayload);
+    } catch (error) {
+        console.error('Failed to decode token:', error);
+        return null;
+    }
+};
+
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // Parse user from token
+    const parseUserFromToken = (token) => {
+        const decoded = decodeJWT(token);
+        if (decoded) {
+            return {
+                email: decoded.username || decoded.email,
+                roles: decoded.roles || ['ROLE_USER'],
+                exp: decoded.exp
+            };
+        }
+        return null;
+    };
+
     useEffect(() => {
-        // Check if user is logged in (simplified for now)
+        // Check if user is logged in
         const token = localStorage.getItem('token');
         if (token) {
-            setUser({ email: 'admin@oxford.edu', role: 'ADMIN' }); // In real app, decode JWT or fetch profile
+            const userData = parseUserFromToken(token);
+            if (userData) {
+                // Check if token is expired
+                const now = Math.floor(Date.now() / 1000);
+                if (userData.exp && userData.exp < now) {
+                    // Token expired, logout
+                    localStorage.removeItem('token');
+                    setUser(null);
+                } else {
+                    setUser(userData);
+                }
+            }
         }
         setLoading(false);
     }, []);
 
-    const login = async (email, password) => { // Modified to accept email and password
+    const login = async (email, password) => {
         try {
             const apiUrl = import.meta.env.VITE_API_URL || '';
             const response = await axios.post(`${apiUrl}/api/login_check`, {
                 username: email,
                 password: password
             });
-            const token = response.data.token; // Assuming the token is in response.data.token
+            const token = response.data.token;
             localStorage.setItem('token', token);
-            // In a real app, you'd decode the token or fetch user profile based on the token
-            setUser({ email: email, role: 'USER' }); // Simplified user setting after successful login
-            return true; // Indicate successful login
+
+            // Decode token to get user info and roles
+            const userData = parseUserFromToken(token);
+            if (userData) {
+                setUser(userData);
+                return true;
+            }
+            return false;
         } catch (error) {
             console.error("Login failed:", error);
-            // Handle login error (e.g., show error message to user)
-            return false; // Indicate failed login
+            return false;
         }
     };
 
@@ -40,8 +86,26 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
+    // Check if user has a specific role
+    const hasRole = (role) => {
+        return user?.roles?.includes(role) || false;
+    };
+
+    // Get primary role (first non-USER role)
+    const getPrimaryRole = () => {
+        if (!user?.roles) return null;
+        return user.roles.find(r => r !== 'ROLE_USER') || user.roles[0];
+    };
+
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{
+            user,
+            login,
+            logout,
+            loading,
+            hasRole,
+            getPrimaryRole
+        }}>
             {!loading && children}
         </AuthContext.Provider>
     );
