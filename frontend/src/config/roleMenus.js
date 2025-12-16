@@ -122,7 +122,7 @@ export const ROLE_MENUS = {
 
     [ROLES.DIRECCION]: [
         { section: 'Principal', items: ['dashboard'] },
-        { section: 'Académico', items: ['grados', 'secciones', 'materias', 'docentes', 'bimestres'] },
+        { section: 'Académico', items: ['grados', 'secciones', 'materias', 'docentes', 'bimestres', 'horarios'] },
         { section: 'Reportes', items: ['reportes', 'estudiantes'] },
     ],
 

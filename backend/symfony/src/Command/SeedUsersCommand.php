@@ -34,6 +34,7 @@ class SeedUsersCommand extends Command
             ['email' => 'padre@oxford.edu.gt', 'name' => 'Juan López', 'roles' => ['ROLE_PADRE'], 'password' => 'padre123'],
             ['email' => 'estudiante@oxford.edu.gt', 'name' => 'Pedro Ramírez', 'roles' => ['ROLE_ALUMNO'], 'password' => 'estudiante123'],
             ['email' => 'direccion@oxford.edu.gt', 'name' => 'Laura Morales', 'roles' => ['ROLE_DIRECCION'], 'password' => 'direccion123'],
+            ['email' => 'informatica@oxford.edu.gt', 'name' => 'José Castillo', 'roles' => ['ROLE_INFORMATICA'], 'password' => 'informatica123'],
         ];
 
         foreach ($users as $userData) {

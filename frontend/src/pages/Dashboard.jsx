@@ -184,6 +184,24 @@ const Dashboard = () => {
         </>
     );
 
+    // INFORMATICA DASHBOARD
+    const InformaticaDashboard = () => (
+        <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <StatCard title="Usuarios Activos" value="45" icon={Users} color="text-blue-500" bg={darkMode ? 'bg-blue-900/30' : 'bg-blue-100'} onClick={() => navigate('/usuarios')} />
+                <StatCard title="Roles del Sistema" value="9" icon={Users} color="text-purple-500" bg={darkMode ? 'bg-purple-900/30' : 'bg-purple-100'} onClick={() => navigate('/roles')} />
+                <StatCard title="Catálogos" value="12" icon={FileText} color="text-teal-500" bg={darkMode ? 'bg-teal-900/30' : 'bg-teal-100'} onClick={() => navigate('/catalogos')} />
+                <StatCard title="Configuraciones" value="8" icon={RefreshCw} color="text-orange-500" bg={darkMode ? 'bg-orange-900/30' : 'bg-orange-100'} onClick={() => navigate('/settings')} />
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                <QuickAction title="Gestión Usuarios" icon={Users} color="text-blue-500" bgColor={darkMode ? 'bg-blue-900/50' : 'bg-blue-100'} onClick={() => navigate('/usuarios')} />
+                <QuickAction title="Roles y Permisos" icon={Users} color="text-purple-500" bgColor={darkMode ? 'bg-purple-900/50' : 'bg-purple-100'} onClick={() => navigate('/roles')} />
+                <QuickAction title="Catálogos" icon={FileText} color="text-teal-500" bgColor={darkMode ? 'bg-teal-900/50' : 'bg-teal-100'} onClick={() => navigate('/catalogos')} />
+                <QuickAction title="Configuración" icon={RefreshCw} color="text-orange-500" bgColor={darkMode ? 'bg-orange-900/50' : 'bg-orange-100'} onClick={() => navigate('/settings')} />
+            </div>
+        </>
+    );
+
     // Render appropriate dashboard based on role
     const renderDashboard = () => {
         switch (userRole) {
@@ -199,7 +217,9 @@ const Dashboard = () => {
             case 'ROLE_COORDINACION':
                 return <CoordinacionDashboard />;
             case 'ROLE_DIRECCION':
-                return <CoordinacionDashboard />; // Similar to coordination
+                return <CoordinacionDashboard />;
+            case 'ROLE_INFORMATICA':
+                return <InformaticaDashboard />;
             case 'ROLE_ALUMNO':
                 return <AlumnoDashboard />;
             case 'ROLE_PADRE':
@@ -219,6 +239,7 @@ const Dashboard = () => {
             'ROLE_DOCENTE': 'Panel del Docente',
             'ROLE_COORDINACION': 'Panel de Coordinación',
             'ROLE_DIRECCION': 'Panel de Dirección',
+            'ROLE_INFORMATICA': 'Panel de Informática',
             'ROLE_ALUMNO': 'Mi Portal Estudiantil',
             'ROLE_PADRE': 'Portal de Padres',
         };
