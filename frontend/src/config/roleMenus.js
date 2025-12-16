@@ -3,6 +3,7 @@
 
 export const ROLES = {
     SUPER_ADMIN: 'ROLE_SUPER_ADMIN',
+    ADMIN: 'ROLE_ADMIN',
     CONTABILIDAD: 'ROLE_CONTABILIDAD',
     SECRETARIA: 'ROLE_SECRETARIA',
     COORDINACION: 'ROLE_COORDINACION',
@@ -10,10 +11,12 @@ export const ROLES = {
     INFORMATICA: 'ROLE_INFORMATICA',
     DOCENTE: 'ROLE_DOCENTE',
     ALUMNO: 'ROLE_ALUMNO',
+    PADRE: 'ROLE_PADRE',
 };
 
 export const ROLE_LABELS = {
     [ROLES.SUPER_ADMIN]: 'Super Administrador',
+    [ROLES.ADMIN]: 'Administrador',
     [ROLES.CONTABILIDAD]: 'Contabilidad',
     [ROLES.SECRETARIA]: 'Secretaría',
     [ROLES.COORDINACION]: 'Coordinación',
@@ -21,6 +24,7 @@ export const ROLE_LABELS = {
     [ROLES.INFORMATICA]: 'Informática',
     [ROLES.DOCENTE]: 'Docente',
     [ROLES.ALUMNO]: 'Alumno',
+    [ROLES.PADRE]: 'Padre de Familia',
 };
 
 // Menu items definition
@@ -89,6 +93,14 @@ export const ROLE_MENUS = {
         { section: 'Administración', items: ['usuarios', 'roles', 'menus', 'catalogos', 'configuracion'] },
     ],
 
+    [ROLES.ADMIN]: [
+        { section: 'Principal', items: ['dashboard'] },
+        { section: 'Secretaría', items: ['inscripciones', 'matriculacion', 'familias', 'estudiantes', 'contratos'] },
+        { section: 'Finanzas', items: ['registroPagos', 'estadoCuenta', 'corteDia', 'comprobantes', 'solicitudesAnulacion', 'paquetes', 'exoneraciones'] },
+        { section: 'Académico', items: ['academico', 'grados', 'secciones', 'materias', 'docentes', 'asignaciones', 'bimestres', 'cierreNotas', 'reportes'] },
+        { section: 'Administración', items: ['usuarios', 'roles', 'menus', 'catalogos', 'configuracion'] },
+    ],
+
     [ROLES.CONTABILIDAD]: [
         { section: 'Principal', items: ['dashboard'] },
         { section: 'Finanzas', items: ['corteDia', 'comprobantes', 'solicitudesAnulacion', 'paquetes', 'exoneraciones', 'estadoCuenta'] },
@@ -129,6 +141,13 @@ export const ROLE_MENUS = {
         { section: 'Principal', items: ['dashboard'] },
         { section: 'Académico', items: ['misNotas', 'miHorario'] },
         { section: 'Finanzas', items: ['miEstadoCuenta'] },
+    ],
+
+    [ROLES.PADRE]: [
+        { section: 'Principal', items: ['dashboard'] },
+        { section: 'Mis Hijos', items: ['estudiantes'] },
+        { section: 'Académico', items: ['misNotas', 'miHorario'] },
+        { section: 'Finanzas', items: ['estadoCuenta'] },
     ],
 };
 

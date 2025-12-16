@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     Home,
@@ -14,10 +14,42 @@ import {
     ChevronLeft,
     ChevronRight,
     Moon,
-    Sun
+    Sun,
+    UserPlus,
+    User,
+    CreditCard,
+    FileCheck,
+    FileSpreadsheet,
+    Receipt,
+    AlertCircle,
+    Package,
+    MinusCircle,
+    Layers,
+    LayoutGrid,
+    Book,
+    Link as LinkIcon,
+    Lock,
+    BarChart,
+    Edit,
+    Clock,
+    Bookmark,
+    UserCog,
+    Shield,
+    Menu,
+    Database
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { getMenuForRole, ROLE_LABELS } from '../config/roleMenus';
+
+// Icon mapping from string to component
+const ICON_MAP = {
+    Home, BookOpen, Calendar, Users, Settings, GraduationCap, DollarSign,
+    FileText, UserPlus, User, CreditCard, FileCheck, FileSpreadsheet,
+    Receipt, AlertCircle, Package, MinusCircle, Layers, LayoutGrid,
+    Book, Link: LinkIcon, Lock, BarChart, Edit, Clock, Bookmark,
+    UserCog, Shield, Menu, Database, Bell
+};
 
 const Layout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -26,21 +58,37 @@ const Layout = () => {
     const { user, logout } = useAuth();
     const { darkMode, toggleDarkMode } = useTheme();
 
-    const menuItems = [
-        { name: 'Inicio', path: '/', icon: Home },
-        { name: 'Estudiantes', path: '/students', icon: Users },
-        { name: 'Académico (IA)', path: '/academic', icon: GraduationCap },
-        { name: 'Calendario', path: '/calendar', icon: Calendar },
-        { name: 'Financiero', path: '/financial', icon: DollarSign },
-        { name: 'Exoneraciones', path: '/exonerations', icon: FileText },
-        { name: 'Contratos', path: '/contracts', icon: BookOpen },
-        { name: 'Reportes', path: '/reports', icon: FileText },
-        { name: 'Configuración', path: '/settings', icon: Settings },
-    ];
+    // Get user's primary role
+    const userRole = useMemo(() => {
+        if (!user?.roles || user.roles.length === 0) return 'ROLE_ALUMNO';
+        // Filter out ROLE_USER and get the first actual role
+        const mainRole = user.roles.find(r => r !== 'ROLE_USER');
+        return mainRole || user.roles[0];
+    }, [user?.roles]);
+
+    // Get role label
+    const roleLabel = useMemo(() => {
+        return ROLE_LABELS[userRole] || 'Usuario';
+    }, [userRole]);
+
+    // Get menu items for this role
+    const menuSections = useMemo(() => {
+        return getMenuForRole(userRole);
+    }, [userRole]);
+
+    // Flatten menu items for header title lookup
+    const allMenuItems = useMemo(() => {
+        return menuSections.flatMap(section => section.items);
+    }, [menuSections]);
 
     const handleLogout = () => {
         logout();
         navigate('/login');
+    };
+
+    const getIcon = (iconName, size = 20) => {
+        const IconComponent = ICON_MAP[iconName];
+        return IconComponent ? <IconComponent size={size} /> : <Home size={size} />;
     };
 
     return (
@@ -74,28 +122,41 @@ const Layout = () => {
                     )}
                 </div>
 
-                {/* Navigation */}
-                <nav className="flex-1 px-3 py-4 space-y-1">
-                    {menuItems.map((item) => {
-                        const isActive = location.pathname === item.path;
-                        return (
-                            <Link
-                                key={item.path}
-                                to={item.path}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
-                                    ? darkMode
-                                        ? 'bg-teal-600 text-white shadow-lg font-semibold'
-                                        : 'bg-white text-teal-700 shadow-lg font-semibold'
-                                    : darkMode
-                                        ? 'text-gray-300 hover:bg-gray-700/50'
-                                        : 'text-teal-100 hover:bg-white/10'
-                                    }`}
-                            >
-                                <item.icon size={20} />
-                                {isSidebarOpen && <span className="text-sm">{item.name}</span>}
-                            </Link>
-                        );
-                    })}
+                {/* Navigation - Role-based */}
+                <nav className="flex-1 px-3 py-4 overflow-y-auto">
+                    {menuSections.map((section, sectionIndex) => (
+                        <div key={sectionIndex} className="mb-4">
+                            {isSidebarOpen && (
+                                <p className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-gray-500' : 'text-teal-200/70'}`}>
+                                    {section.section}
+                                </p>
+                            )}
+                            <div className="space-y-1">
+                                {section.items.map((item) => {
+                                    const isActive = location.pathname === item.path ||
+                                        (item.path === '/dashboard' && location.pathname === '/');
+                                    return (
+                                        <Link
+                                            key={item.id}
+                                            to={item.path}
+                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
+                                                ? darkMode
+                                                    ? 'bg-teal-600 text-white shadow-lg font-semibold'
+                                                    : 'bg-white text-teal-700 shadow-lg font-semibold'
+                                                : darkMode
+                                                    ? 'text-gray-300 hover:bg-gray-700/50'
+                                                    : 'text-teal-100 hover:bg-white/10'
+                                                }`}
+                                            title={!isSidebarOpen ? item.label : undefined}
+                                        >
+                                            {getIcon(item.icon)}
+                                            {isSidebarOpen && <span className="text-sm">{item.label}</span>}
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
                 </nav>
 
                 {/* User Profile & Logout */}
@@ -110,7 +171,7 @@ const Layout = () => {
                                 <p className="text-sm font-semibold text-white truncate">
                                     {user?.email?.split('@')[0] || 'Usuario'}
                                 </p>
-                                <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-teal-200'} truncate`}>Administrador</p>
+                                <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-teal-200'} truncate`}>{roleLabel}</p>
                             </div>
                         )}
                     </div>
@@ -131,9 +192,15 @@ const Layout = () => {
                 {/* Header */}
                 <header className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} shadow-sm px-6 py-4 flex justify-between items-center z-10 border-b`}>
                     <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                        {menuItems.find(m => m.path === location.pathname)?.name || 'Dashboard'}
+                        {allMenuItems.find(m => m.path === location.pathname)?.label ||
+                            (location.pathname === '/' ? 'Dashboard' : 'Página')}
                     </h2>
                     <div className="flex items-center gap-4">
+                        {/* Role Badge */}
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${darkMode ? 'bg-teal-900/50 text-teal-300' : 'bg-teal-100 text-teal-700'}`}>
+                            {roleLabel}
+                        </span>
+
                         {/* Dark Mode Toggle */}
                         <button
                             onClick={toggleDarkMode}
@@ -153,12 +220,12 @@ const Layout = () => {
                         <div className="flex items-center gap-3">
                             <div className="text-right hidden sm:block">
                                 <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                                    {user?.email?.split('@')[0] || 'Administrador'}
+                                    {user?.email?.split('@')[0] || 'Usuario'}
                                 </p>
-                                <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{user?.email || 'admin@oxford.edu'}</p>
+                                <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{user?.email || 'usuario@oxford.edu.gt'}</p>
                             </div>
                             <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-teal-700 rounded-full flex items-center justify-center text-white font-bold shadow-md">
-                                {user?.email?.charAt(0)?.toUpperCase() || 'A'}
+                                {user?.email?.charAt(0)?.toUpperCase() || 'U'}
                             </div>
                         </div>
                     </div>
