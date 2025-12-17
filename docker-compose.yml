@@ -1,19 +1,23 @@
-version: '3.8'
-
 services:
   # === DATABASE ===
   database:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: app
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: '!ChangeMe!'
+      POSTGRES_DB: ${POSTGRES_DB:-oxford_db}
+      POSTGRES_USER: ${POSTGRES_USER:-oxford_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Database password required}
     ports:
       - "5433:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
       - app_net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-oxford_user} -d ${POSTGRES_DB:-oxford_db}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # === BACKEND (Symfony) ===
   backend:
@@ -21,18 +25,29 @@ services:
       context: ./backend/symfony
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://app:!ChangeMe!@database:5432/app?serverVersion=16&charset=utf8
-      APP_ENV: dev
-      APP_SECRET: oxford2025secretkey
-      CORPOSISTEMAS_API_URL: https://api.corposistemas.gt
-      CORPOSISTEMAS_API_KEY: demo_key_oxford
-      CORPOSISTEMAS_NIT: 12345678
+      DATABASE_URL: ${DATABASE_URL:-postgresql://oxford_user:password@database:5432/oxford_db?serverVersion=16&charset=utf8}
+      APP_ENV: ${APP_ENV:-dev}
+      APP_SECRET: ${APP_SECRET:?App secret required}
+      CORPOSISTEMAS_API_URL: ${CORPOSISTEMAS_API_URL:-https://api.corposistemas.gt}
+      CORPOSISTEMAS_API_KEY: ${CORPOSISTEMAS_API_KEY:-demo_key}
+      CORPOSISTEMAS_NIT: ${CORPOSISTEMAS_NIT:-12345678}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-%kernel.project_dir%/config/jwt/private.pem}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-%kernel.project_dir%/config/jwt/public.pem}
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE:-changeme}
+      AI_SERVICE_URL: ${AI_SERVICE_URL:-http://ai_service:8001}
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     volumes:
       - ./backend/symfony:/var/www/symfony
     networks:
       - app_net
+    healthcheck:
+      test: [ "CMD", "php", "-r", "echo 'OK';" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # === FRONTEND (React) ===
   frontend:
@@ -41,14 +56,28 @@ services:
       dockerfile: Dockerfile
     networks:
       - app_net
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # === AI SERVICE (Python) ===
   ai_service:
     build:
       context: ./backend/ai_service
       dockerfile: Dockerfile
+    environment:
+      AI_SERVICE_PORT: 8001
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
     networks:
       - app_net
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # === GATEWAY (Nginx) ===
   nginx:
@@ -59,11 +88,19 @@ services:
       - ./backend/nginx/default.conf:/etc/nginx/conf.d/default.conf
       - ./backend/symfony/public:/var/www/symfony/public
     depends_on:
-      - backend
-      - frontend
-      - ai_service
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+      ai_service:
+        condition: service_healthy
     networks:
       - app_net
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   app_net:

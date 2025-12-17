@@ -1,0 +1,30 @@
+# Rate Limiting Configuration
+framework:
+    rate_limiter:
+        # Login rate limiter - prevent brute force attacks
+        login_limiter:
+            policy: 'sliding_window'
+            limit: 5
+            interval: '1 minute'
+            lock_factory: lock.factory
+        
+        # API rate limiter - general API protection
+        api_limiter:
+            policy: 'sliding_window'
+            limit: 100
+            interval: '1 minute'
+            lock_factory: lock.factory
+        
+        # Strict rate limiter for sensitive operations
+        sensitive_limiter:
+            policy: 'fixed_window'
+            limit: 3
+            interval: '5 minutes'
+            lock_factory: lock.factory
+        
+        # Password reset limiter
+        password_reset_limiter:
+            policy: 'fixed_window'
+            limit: 3
+            interval: '1 hour'
+            lock_factory: lock.factory
