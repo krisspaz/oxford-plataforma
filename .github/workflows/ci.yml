@@ -104,11 +104,11 @@ jobs:
         working-directory: frontend
 
       - name: Run ESLint
-        run: npm run lint || true
+        run: npm run lint
         working-directory: frontend
 
       - name: Run Tests
-        run: npm test -- --coverage --watchAll=false || true
+        run: npm test -- --coverage --watchAll=false
         working-directory: frontend
 
       - name: Build
@@ -141,7 +141,7 @@ jobs:
         working-directory: backend/ai_service
 
       - name: Run Tests
-        run: pytest --cov=. --cov-report=xml || true
+        run: pytest --cov=. --cov-report=xml
         working-directory: backend/ai_service
 
   # ========================================
@@ -169,7 +169,7 @@ jobs:
         working-directory: frontend
 
       - name: Run E2E Tests
-        run: npx playwright test || true
+        run: npx playwright test
         working-directory: frontend
 
       - name: Upload Test Results

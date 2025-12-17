@@ -1,0 +1,493 @@
+openapi: 3.0.3
+info:
+  title: Sistema Oxford API
+  description: |
+    API REST para el Sistema de Gestión Escolar Oxford.
+    
+    ## Autenticación
+    La API usa cookies HttpOnly para autenticación:
+    - `access_token`: Token JWT (HttpOnly, Secure)
+    - `refresh_token`: Token de refresco (HttpOnly, Secure)
+    - `csrf_token`: Token CSRF (readable por JS)
+    
+    ## Rate Limiting
+    - Login: 5 requests/minuto
+    - API General: 100 requests/minuto
+    - Endpoints sensibles: 10 requests/minuto
+  version: 1.0.0
+  contact:
+    name: Soporte Técnico
+    email: soporte@oxford.edu.gt
+
+servers:
+  - url: /api
+    description: API Base
+
+tags:
+  - name: Auth
+    description: Autenticación y sesiones
+  - name: 2FA
+    description: Two-Factor Authentication
+  - name: Users
+    description: Gestión de usuarios
+  - name: Tasks
+    description: Tareas y asignaciones
+  - name: Schedules
+    description: Horarios
+  - name: Attendance
+    description: Control de asistencia
+  - name: AI
+    description: Servicio de IA
+
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Iniciar sesión
+      description: Autentica al usuario y establece cookies de sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: docente@oxford.edu.gt
+                password:
+                  type: string
+                  format: password
+                  example: docente123
+      responses:
+        '200':
+          description: Login exitoso
+          headers:
+            Set-Cookie:
+              description: Cookies de autenticación
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Cerrar sesión
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Logout exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logged out successfully
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refrescar token
+      description: Usa el refresh_token cookie para obtener nuevos tokens
+      responses:
+        '200':
+          description: Tokens refrescados
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Obtener usuario actual
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Datos del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/2fa/status:
+    get:
+      tags: [2FA]
+      summary: Estado de 2FA
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Estado de 2FA
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                  backup_codes_remaining:
+                    type: integer
+
+  /tasks:
+    get:
+      tags: [Tasks]
+      summary: Listar tareas
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: grade
+          in: query
+          schema:
+            type: integer
+        - name: bimester
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, graded, overdue]
+      responses:
+        '200':
+          description: Lista de tareas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+
+    post:
+      tags: [Tasks]
+      summary: Crear tarea
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreate'
+      responses:
+        '201':
+          description: Tarea creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+  /schedules:
+    get:
+      tags: [Schedules]
+      summary: Obtener horarios
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: grade_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: section_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Horario del grado/sección
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Schedule'
+
+  /attendance:
+    post:
+      tags: [Attendance]
+      summary: Registrar asistencia
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttendanceBatch'
+      responses:
+        '200':
+          description: Asistencia registrada
+
+  /ai/chat:
+    post:
+      tags: [AI]
+      summary: Chat con IA
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message:
+                  type: string
+                  example: Genera horario para 1ro primaria
+                context:
+                  type: object
+      responses:
+        '200':
+          description: Respuesta de IA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIResponse'
+
+  /ai/generate-schedule:
+    post:
+      tags: [AI]
+      summary: Generar horario con IA
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                config:
+                  type: object
+                teachers:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Teacher'
+                subjects:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Subject'
+                constraints:
+                  type: object
+      responses:
+        '200':
+          description: Horario generado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneratedSchedule'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+
+  responses:
+    Unauthorized:
+      description: No autenticado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Invalid credentials
+    
+    TooManyRequests:
+      description: Rate limit excedido
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Too many requests
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [admin, director, teacher, parent, student]
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/User'
+        requires_2fa:
+          type: boolean
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [tarea, examen, proyecto]
+        points:
+          type: integer
+        dueDate:
+          type: string
+          format: date-time
+        bimester:
+          type: integer
+
+    TaskCreate:
+      type: object
+      required: [title, type, dueDate]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [tarea, examen, proyecto]
+        points:
+          type: integer
+          default: 100
+        dueDate:
+          type: string
+          format: date-time
+        gradeIds:
+          type: array
+          items:
+            type: integer
+
+    Schedule:
+      type: object
+      properties:
+        id:
+          type: integer
+        day:
+          type: integer
+          description: 1=Monday, 5=Friday
+        period:
+          type: integer
+        startTime:
+          type: string
+        endTime:
+          type: string
+        subject:
+          $ref: '#/components/schemas/Subject'
+        teacher:
+          $ref: '#/components/schemas/Teacher'
+        classroom:
+          type: string
+
+    Subject:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        hoursPerWeek:
+          type: integer
+
+    Teacher:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        subjects:
+          type: array
+          items:
+            type: integer
+
+    AttendanceBatch:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        scheduleId:
+          type: integer
+        records:
+          type: array
+          items:
+            type: object
+            properties:
+              studentId:
+                type: integer
+              status:
+                type: string
+                enum: [present, absent, late]
+              notes:
+                type: string
+
+    AIResponse:
+      type: object
+      properties:
+        intent:
+          type: string
+        confidence:
+          type: number
+        response_text:
+          type: string
+        suggestions:
+          type: array
+          items:
+            type: string
+
+    GeneratedSchedule:
+      type: object
+      properties:
+        success:
+          type: boolean
+        schedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/Schedule'
+        conflicts:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              severity:
+                type: string
+              message:
+                type: string
+        attempts:
+          type: integer
