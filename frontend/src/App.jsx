@@ -33,6 +33,7 @@ import DocentesPage from './pages/DocentesPage';
 import CatalogosPage from './pages/CatalogosPage';
 import MatriculacionPage from './pages/MatriculacionPage';
 import HorariosPage from './pages/HorariosPage';
+import MiHorarioPage from './pages/MiHorarioPage';
 
 function App() {
   return (
@@ -75,6 +76,7 @@ function App() {
                 <Route path="bimestres" element={<BimestresPage />} />
                 <Route path="carga-notas" element={<CargaNotasPage />} />
                 <Route path="horarios" element={<HorariosPage />} />
+                <Route path="mi-horario" element={<MiHorarioPage />} />
 
                 {/* Administración */}
                 <Route path="usuarios" element={<GestionUsuariosPage />} />

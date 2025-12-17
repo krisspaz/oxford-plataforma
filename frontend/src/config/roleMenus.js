@@ -133,7 +133,7 @@ export const ROLE_MENUS = {
 
     [ROLES.DOCENTE]: [
         { section: 'Principal', items: ['dashboard'] },
-        { section: 'Académico', items: ['cargaNotas', 'misMaterias', 'horarios'] },
+        { section: 'Académico', items: ['cargaNotas', 'misMaterias', 'miHorario'] },
         { section: 'Consultas', items: ['estudiantes', 'calendario'] },
     ],
 
