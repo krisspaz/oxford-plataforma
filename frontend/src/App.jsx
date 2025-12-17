@@ -35,6 +35,7 @@ import MatriculacionPage from './pages/MatriculacionPage';
 import HorariosPage from './pages/HorariosPage';
 import MiHorarioPage from './pages/MiHorarioPage';
 import MisAlumnosPage from './pages/MisAlumnosPage';
+import GestionTareasPage from './pages/GestionTareasPage';
 
 function App() {
   return (
@@ -79,6 +80,7 @@ function App() {
                 <Route path="horarios" element={<HorariosPage />} />
                 <Route path="mi-horario" element={<MiHorarioPage />} />
                 <Route path="mis-alumnos" element={<MisAlumnosPage />} />
+                <Route path="gestion-tareas" element={<GestionTareasPage />} />
 
                 {/* Administración */}
                 <Route path="usuarios" element={<GestionUsuariosPage />} />

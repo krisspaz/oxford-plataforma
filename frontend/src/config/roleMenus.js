@@ -65,6 +65,7 @@ export const MENU_ITEMS = {
     horarios: { id: 'horarios', label: 'Horarios', path: '/horarios', icon: 'Clock' },
     misMaterias: { id: 'misMaterias', label: 'Mis Materias', path: '/mis-materias', icon: 'Bookmark' },
     misAlumnos: { id: 'misAlumnos', label: 'Mis Alumnos', path: '/mis-alumnos', icon: 'Users' },
+    gestionTareas: { id: 'gestionTareas', label: 'Gestión de Tareas', path: '/gestion-tareas', icon: 'ClipboardList' },
 
     // Alumno
     misNotas: { id: 'misNotas', label: 'Mis Notas', path: '/mis-notas', icon: 'FileText' },
@@ -134,7 +135,7 @@ export const ROLE_MENUS = {
 
     [ROLES.DOCENTE]: [
         { section: 'Principal', items: ['dashboard'] },
-        { section: 'Académico', items: ['cargaNotas', 'misMaterias', 'miHorario'] },
+        { section: 'Académico', items: ['cargaNotas', 'gestionTareas', 'misMaterias', 'miHorario'] },
         { section: 'Consultas', items: ['misAlumnos', 'calendario'] },
     ],
 
