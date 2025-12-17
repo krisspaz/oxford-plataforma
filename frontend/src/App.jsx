@@ -34,6 +34,7 @@ import CatalogosPage from './pages/CatalogosPage';
 import MatriculacionPage from './pages/MatriculacionPage';
 import HorariosPage from './pages/HorariosPage';
 import MiHorarioPage from './pages/MiHorarioPage';
+import MisAlumnosPage from './pages/MisAlumnosPage';
 
 function App() {
   return (
@@ -77,6 +78,7 @@ function App() {
                 <Route path="carga-notas" element={<CargaNotasPage />} />
                 <Route path="horarios" element={<HorariosPage />} />
                 <Route path="mi-horario" element={<MiHorarioPage />} />
+                <Route path="mis-alumnos" element={<MisAlumnosPage />} />
 
                 {/* Administración */}
                 <Route path="usuarios" element={<GestionUsuariosPage />} />
