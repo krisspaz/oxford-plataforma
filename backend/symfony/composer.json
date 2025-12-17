@@ -33,7 +33,8 @@
         "symfony/serializer": "7.4.*",
         "symfony/twig-bundle": "7.4.*",
         "symfony/validator": "7.4.*",
-        "symfony/yaml": "7.4.*"
+        "symfony/yaml": "7.4.*",
+        "spomky-labs/otphp": "^11.0"
     },
     "config": {
         "allow-plugins": {
@@ -86,6 +87,10 @@
         }
     },
     "require-dev": {
-        "doctrine/doctrine-fixtures-bundle": "^4.3"
+        "doctrine/doctrine-fixtures-bundle": "^4.3",
+        "phpunit/phpunit": "^10.5",
+        "symfony/phpunit-bridge": "^7.4",
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "phpstan/phpstan": "^1.0"
     }
 }
