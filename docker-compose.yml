@@ -19,6 +19,20 @@ services:
       retries: 5
       start_period: 30s
 
+  # === REDIS (Cache) ===
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - app_net
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # === BACKEND (Symfony) ===
   backend:
     build:
@@ -108,3 +122,4 @@ networks:
 
 volumes:
   db_data:
+  redis_data:
