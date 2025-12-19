@@ -1,16 +1,42 @@
-# React + Vite
+# Frontend - Colegio Connect
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este es el frontend de la aplicación Colegio Connect, construido con **React**, **Vite**, y **Tailwind CSS**.
 
-Currently, two official plugins are available:
+## Estructura del Proyecto
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```
+src/
+├── components/     # Componentes reutilizables (UI, Layouts)
+├── contexts/       # Contextos globales (AuthContext, ThemeContext)
+├── pages/          # Vistas principales (Dashboard, Login, Módulos)
+├── services/       # Comunicación con el Backend (Axios)
+├── hooks/          # Custom hooks
+└── config/         # Configuraciones (Menús por rol)
+```
 
-## React Compiler
+## Autenticación
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+El sistema utiliza **JWT (JSON Web Tokens)** almacenados en `localStorage` para mantener la sesión del usuario.
+- El `AuthContext` gestiona el estado global del usuario y verifica la expiración del token.
+- Los roles se extraen del payload del token JWT (`ROLE_ADMIN`, `ROLE_TEACHER`, etc.).
 
-## Expanding the ESLint configuration
+## Scripts Disponibles
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `npm run dev`: Inicia el servidor de desarrollo en `http://localhost:5173`.
+- `npm run build`: Construye la aplicación para producción.
+- `npm run preview`: Previsualiza la build de producción localmente.
+
+## Configuración y Variables de Entorno
+
+Crear un archivo `.env` basado en `.env.example` (si existe) o definir:
+
+```
+VITE_API_URL=http://localhost:8000/api
+```
+
+## Módulos Principales
+
+1.  **Dashboard**: Vista personalizada por rol.
+2.  **Inscripciones**: Gestión de alumnos y familias.
+3.  **Finanzas**: Pagos, facturación, exoneraciones y reportes de corte.
+4.  **Académico**: Gestión de materias, notas y reportes.

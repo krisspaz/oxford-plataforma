@@ -137,4 +137,10 @@ class Package
         $this->isActive = $isActive;
         return $this;
     }
+
+    #[ApiResource]
+    public function getCycle(): ?string
+    {
+        return $this->schoolCycle ? $this->schoolCycle->getName() : null;
+    }
 }

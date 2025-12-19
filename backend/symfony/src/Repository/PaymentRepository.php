@@ -20,4 +20,19 @@ class PaymentRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Payment::class);
     }
+
+    /**
+     * @return Payment[] Returns an array of overdue Payment objects
+     */
+    public function findOverduePayments(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.status = :status')
+            ->andWhere('p.dueDate < :now')
+            ->setParameter('status', 'PENDING')
+            ->setParameter('now', new \DateTime())
+            ->orderBy('p.dueDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

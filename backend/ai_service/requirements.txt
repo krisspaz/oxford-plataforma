@@ -4,3 +4,7 @@ pydantic==2.5.3
 numpy==1.26.3
 pandas==2.2.0
 scikit-learn==1.4.0
+rapidfuzz==3.6.1
+pyspellchecker==0.8.1
+textblob==0.17.1
+deap==1.4.1

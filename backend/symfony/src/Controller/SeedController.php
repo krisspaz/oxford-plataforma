@@ -22,52 +22,68 @@ class SeedController extends AbstractController
     {
         $users = [
             [
-                'email' => 'admin@oxford.edu.gt',
+                'email' => 'admin@oxford.edu',
                 'name' => 'Administrador Sistema',
-                'roles' => ['ROLE_ADMIN'],
-                'password' => 'admin123'
+                'roles' => [
+                    'ROLE_ADMIN', 
+                    'ROLE_DIRECTOR', 
+                    'ROLE_COORDINATION', 
+                    'ROLE_SECRETARY', 
+                    'ROLE_ACCOUNTANT', 
+                    'ROLE_INFORMATICS',
+                    'ROLE_TEACHER',
+                    'ROLE_STUDENT',
+                    'ROLE_PARENT'
+                ],
+                'password' => 'oxford123'
             ],
             [
-                'email' => 'secretaria@oxford.edu.gt',
+                'email' => 'secretary@oxford.edu',
                 'name' => 'María González',
-                'roles' => ['ROLE_SECRETARIA'],
-                'password' => 'secretaria123'
+                'roles' => ['ROLE_SECRETARY'],
+                'password' => 'oxford123'
             ],
             [
-                'email' => 'contabilidad@oxford.edu.gt',
+                'email' => 'accountant@oxford.edu',
                 'name' => 'Roberto Pérez',
-                'roles' => ['ROLE_CONTABILIDAD'],
-                'password' => 'contabilidad123'
+                'roles' => ['ROLE_ACCOUNTANT'],
+                'password' => 'oxford123'
             ],
             [
-                'email' => 'coordinacion@oxford.edu.gt',
+                'email' => 'coordination@oxford.edu',
                 'name' => 'Ana Martínez',
-                'roles' => ['ROLE_COORDINACION'],
-                'password' => 'coordinacion123'
+                'roles' => ['ROLE_COORDINATION'],
+                'password' => 'oxford123'
             ],
             [
-                'email' => 'docente@oxford.edu.gt',
+                'email' => 'teacher@oxford.edu',
                 'name' => 'Carlos Hernández',
-                'roles' => ['ROLE_DOCENTE'],
-                'password' => 'docente123'
+                'roles' => ['ROLE_TEACHER'],
+                'password' => 'oxford123'
             ],
             [
-                'email' => 'padre@oxford.edu.gt',
+                'email' => 'parent@oxford.edu',
                 'name' => 'Juan López',
-                'roles' => ['ROLE_PADRE'],
-                'password' => 'padre123'
+                'roles' => ['ROLE_PARENT'],
+                'password' => 'oxford123'
             ],
             [
-                'email' => 'estudiante@oxford.edu.gt',
+                'email' => 'student@oxford.edu',
                 'name' => 'Pedro Ramírez',
-                'roles' => ['ROLE_ALUMNO'],
-                'password' => 'estudiante123'
+                'roles' => ['ROLE_STUDENT'],
+                'password' => 'oxford123'
             ],
             [
-                'email' => 'direccion@oxford.edu.gt',
+                'email' => 'director@oxford.edu',
                 'name' => 'Laura Morales',
-                'roles' => ['ROLE_DIRECCION'],
-                'password' => 'direccion123'
+                'roles' => ['ROLE_DIRECTOR'],
+                'password' => 'oxford123'
+            ],
+            [
+                'email' => 'informatics@oxford.edu',
+                'name' => 'Soporte TI',
+                'roles' => ['ROLE_INFORMATICS'],
+                'password' => 'oxford123'
             ],
         ];
 

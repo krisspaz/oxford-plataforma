@@ -67,6 +67,10 @@ class Task
     #[ORM\JoinColumn(nullable: false)]
     private ?SchoolCycle $schoolCycle = null;
 
+    #[ORM\ManyToOne(inversedBy: 'tasks')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Course $course = null;
+
     #[ORM\OneToMany(mappedBy: 'task', targetEntity: TaskGrade::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $taskGrades;
 
@@ -198,6 +202,17 @@ class Task
     public function setSchoolCycle(?SchoolCycle $schoolCycle): static
     {
         $this->schoolCycle = $schoolCycle;
+        return $this;
+    }
+
+    public function getCourse(): ?Course
+    {
+        return $this->course;
+    }
+
+    public function setCourse(?Course $course): static
+    {
+        $this->course = $course;
         return $this;
     }
 

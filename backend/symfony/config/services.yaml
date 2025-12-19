@@ -21,3 +21,7 @@ services:
             $corposistemasApiUrl: '%corposistemas_api_url%'
             $corposistemasApiKey: '%corposistemas_api_key%'
             $corposistemasNit: '%corposistemas_nit%'
+
+    App\Service\AuthenticationService:
+        arguments:
+            $secureCookies: false

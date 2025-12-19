@@ -39,11 +39,15 @@ class Course
     #[ORM\OneToMany(mappedBy: 'course', targetEntity: Task::class)]
     private Collection $tasks;
 
+    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Schedule::class)]
+    private Collection $schedules;
+
     public function __construct()
     {
         $this->students = new ArrayCollection();
         $this->subjects = new ArrayCollection();
         $this->tasks = new ArrayCollection();
+        $this->schedules = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -168,6 +172,36 @@ class Course
             // set the owning side to null (unless already changed)
             if ($task->getCourse() === $this) {
                 $task->setCourse(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Schedule>
+     */
+    public function getSchedules(): Collection
+    {
+        return $this->schedules;
+    }
+
+    public function addSchedule(Schedule $schedule): static
+    {
+        if (!$this->schedules->contains($schedule)) {
+            $this->schedules->add($schedule);
+            $schedule->setCourse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSchedule(Schedule $schedule): static
+    {
+        if ($this->schedules->removeElement($schedule)) {
+            // set the owning side to null (unless already changed)
+            if ($schedule->getCourse() === $this) {
+                $schedule->setCourse(null);
             }
         }
 

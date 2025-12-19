@@ -36,6 +36,9 @@ class Grade
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
+    #[ORM\ManyToOne(inversedBy: 'grades')]
+    private ?AcademicLevel $level = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -97,6 +100,18 @@ class Grade
     public function setDate(\DateTimeInterface $date): static
     {
         $this->date = $date;
+
+        return $this;
+    }
+
+    public function getLevel(): ?AcademicLevel
+    {
+        return $this->level;
+    }
+
+    public function setLevel(?AcademicLevel $level): static
+    {
+        $this->level = $level;
 
         return $this;
     }

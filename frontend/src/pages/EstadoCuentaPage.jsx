@@ -3,89 +3,72 @@ import { User, Search, DollarSign, Check, Clock, AlertCircle, RefreshCw } from '
 import { useTheme } from '../contexts/ThemeContext';
 import { studentService } from '../services';
 
+import { usePdfExport } from '../hooks/usePdfExport';
+
 const EstadoCuentaPage = () => {
     const { darkMode } = useTheme();
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedStudent, setSelectedStudent] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [students, setStudents] = useState([]);
-    const [accountData, setAccountData] = useState(null);
+    const { exportTable } = usePdfExport(); // Hook
 
-    const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
+    // ... (state)
 
-    // Search students
-    useEffect(() => {
-        if (searchTerm.length >= 2) {
-            const searchStudents = async () => {
-                try {
-                    const response = await studentService.search(searchTerm);
-                    if (response.success) {
-                        setStudents(response.data);
+    // Export Handler
+    const handleExportPDF = () => {
+        if (!selectedStudent || !accountData) {
+            alert('Selecciona un estudiante primero');
+            return;
+        }
+
+        const columns = ["Concepto", "Monto", "Pagado", "Pendiente", "Vencimiento", "Estado", "Documento"];
+        const data = accountData.quotas.map(q => [
+            q.concept,
+            `Q ${q.amount.toLocaleString()}`,
+            `Q ${q.paid.toLocaleString()}`,
+            `Q ${q.pending.toLocaleString()}`,
+            q.dueDate,
+            q.status,
+            q.document || '-'
+        ]);
+
+        // Add Summary Row
+        data.push(['RESUMEN', `Asignado: Q ${accountData.summary.totalAssigned}`, `Pagado: Q ${accountData.summary.totalPaid}`, `Pendiente: Q ${accountData.summary.totalPending}`, '', '', '']);
+
+        exportTable({
+            title: 'Estado de Cuenta',
+            subtitle: `Estudiante: ${selectedStudent.fullName} - Carnet: ${selectedStudent.carnet}`,
+            columns: columns,
+            data: data,
+            filename: `estado_cuenta_${selectedStudent.carnet}.pdf`,
+            autoTableOptions: {
+                didParseCell: function (data) {
+                    // Colorize Status
+                    if (data.section === 'body' && data.column.index === 5) {
+                        if (data.cell.raw === 'PAGADO') data.cell.styles.textColor = [25, 135, 84];
+                        else if (data.cell.raw === 'VENCIDO') data.cell.styles.textColor = [220, 53, 69];
+                        else data.cell.styles.textColor = [255, 193, 7];
                     }
-                } catch (error) {
-                    // Demo data
-                    setStudents([
-                        { id: 1, fullName: 'Juan Pérez', carnet: '2025-001', grade: '1ro Básico A' },
-                        { id: 2, fullName: 'María López', carnet: '2025-002', grade: '2do Básico B' },
-                        { id: 3, fullName: 'Carlos García', carnet: '2025-003', grade: '3ro Básico A' },
-                    ].filter(s => s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || s.carnet.includes(searchTerm)));
+                    // Highlight Summary Row
+                    if (data.row.index === accountData.quotas.length) {
+                        data.cell.styles.fontStyle = 'bold';
+                        data.cell.styles.fillColor = [220, 220, 220];
+                    }
                 }
-            };
-            searchStudents();
-        } else {
-            setStudents([]);
-        }
-    }, [searchTerm]);
-
-    // Load account when student selected
-    useEffect(() => {
-        if (selectedStudent) {
-            loadAccountStatus();
-        }
-    }, [selectedStudent]);
-
-    const loadAccountStatus = async () => {
-        setLoading(true);
-        try {
-            const response = await studentService.getAccountStatus(selectedStudent.id);
-            if (response.success) {
-                setAccountData(response.data);
             }
-        } catch (error) {
-            console.error('Error loading account:', error);
-            // Demo data
-            setAccountData({
-                summary: { totalAssigned: 9000, totalPaid: 2500, totalPending: 6500 },
-                quotas: [
-                    { id: 1, concept: 'Inscripción', amount: 1000, paid: 1000, pending: 0, dueDate: '2025-01-15', status: 'PAGADO', paymentDate: '2025-01-10', document: 'RECI B-001' },
-                    { id: 2, concept: 'Mensualidad Enero', amount: 750, paid: 750, pending: 0, dueDate: '2025-01-30', status: 'PAGADO', paymentDate: '2025-01-20', document: 'RECI B-002' },
-                    { id: 3, concept: 'Mensualidad Febrero', amount: 750, paid: 750, pending: 0, dueDate: '2025-02-28', status: 'PAGADO', paymentDate: '2025-02-15', document: 'RECI B-003' },
-                    { id: 4, concept: 'Mensualidad Marzo', amount: 750, paid: 0, pending: 750, dueDate: '2025-03-31', status: 'PENDIENTE' },
-                    { id: 5, concept: 'Mensualidad Abril', amount: 750, paid: 0, pending: 750, dueDate: '2025-04-30', status: 'PENDIENTE' },
-                    { id: 6, concept: 'Paquete Escolar', amount: 3500, paid: 0, pending: 3500, dueDate: '2025-02-15', status: 'VENCIDO' },
-                ]
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const getStatusBadge = (status) => {
-        switch (status) {
-            case 'PAGADO': return <span className="flex items-center gap-1 text-green-500"><Check size={14} /> Pagado</span>;
-            case 'PENDIENTE': return <span className="flex items-center gap-1 text-yellow-500"><Clock size={14} /> Pendiente</span>;
-            case 'VENCIDO': return <span className="flex items-center gap-1 text-red-500"><AlertCircle size={14} /> Vencido</span>;
-            default: return status;
-        }
+        });
     };
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Estado de Cuenta</h1>
+                {selectedStudent && (
+                    <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+                        <Check size={18} /> Descargar PDF
+                    </button>
+                )}
             </div>
 
-            {/* Search */}
+            {/* Search Code ... */}
+
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-4 shadow-sm`}>
                 <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     <User size={16} className="inline mr-2" />Buscar Estudiante

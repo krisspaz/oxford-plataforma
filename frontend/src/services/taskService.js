@@ -14,6 +14,14 @@ const taskService = {
     },
 
     /**
+     * Get tasks for the current student
+     */
+    getMyTasks: async () => {
+        const response = await api.get('/tasks/my-tasks');
+        return response.data;
+    },
+
+    /**
      * Get a single task by ID
      * @param {number} id - Task ID
      */

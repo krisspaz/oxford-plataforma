@@ -14,3 +14,4 @@ export const paymentPlanService = {
     payQuota: (quotaId, amount) =>
         api.post(`/payment-plans/quotas/${quotaId}/pay`, { amount }),
 };
+export default paymentPlanService;

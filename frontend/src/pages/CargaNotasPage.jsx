@@ -120,12 +120,21 @@ const CargaNotasPage = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Carga de Notas</h1>
-                {selectedSubject && !isLocked && students.length > 0 && (
-                    <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg disabled:opacity-50">
-                        {saving ? <RefreshCw size={18} className="animate-spin" /> : <Save size={18} />}
-                        {saving ? 'Guardando...' : 'Guardar Notas'}
+                <div className="flex gap-2">
+                    {selectedSubject && !isLocked && students.length > 0 && (
+                        <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg disabled:opacity-50">
+                            {saving ? <RefreshCw size={18} className="animate-spin" /> : <Save size={18} />}
+                            {saving ? 'Guardando...' : 'Guardar Avance'}
+                        </button>
+                    )}
+                    <button
+                        onClick={() => window.location.href = '/docente/notas-finales'}
+                        className={`flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 ${darkMode ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-700'}`}
+                    >
+                        <CheckCircle size={18} />
+                        Finalizar / Ver Resumen
                     </button>
-                )}
+                </div>
             </div>
 
             {/* Filters */}

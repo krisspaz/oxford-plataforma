@@ -60,16 +60,29 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || '';
+            const apiUrl = '/api';
+            console.log('Intentando login a:', `${apiUrl}/login_check`);
+            console.log('Credenciales:', { username: email, password: '***' });
+
             const response = await axios.post(`${apiUrl}/login_check`, {
                 username: email,
                 password: password
             });
+
+            console.log('Respuesta del servidor:', response);
             const token = response.data.token;
+
+            if (!token) {
+                console.error('No se recibió token en la respuesta');
+                return false;
+            }
+
             localStorage.setItem('token', token);
 
             // Decode token to get user info and roles
             const userData = parseUserFromToken(token);
+            console.log('Usuario decodificado:', userData);
+
             if (userData) {
                 setUser(userData);
                 return true;
@@ -77,6 +90,7 @@ export const AuthProvider = ({ children }) => {
             return false;
         } catch (error) {
             console.error("Login failed:", error);
+            console.error("Error details:", error.response?.data || error.message);
             return false;
         }
     };

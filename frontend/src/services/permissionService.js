@@ -18,3 +18,4 @@ export const permissionService = {
     // Seed default permissions
     seed: () => api.post('/permissions/seed'),
 };
+export default permissionService;

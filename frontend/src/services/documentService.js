@@ -33,3 +33,5 @@ export const documentService = {
     uploadPhoto: (file, entityType, entityId) =>
         documentService.upload(file, entityType, entityId, 'FOTO'),
 };
+
+export default documentService;

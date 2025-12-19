@@ -81,6 +81,61 @@ class TaskController extends AbstractController
     }
 
     /**
+     * Get tasks for the current student
+     */
+    #[Route('/my-tasks', name: 'task_student_list', methods: ['GET'])]
+    public function myTasks(Request $request): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['error' => 'User not found'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $student = $this->em->getRepository(Student::class)->findOneBy(['user' => $user]);
+        if (!$student) {
+            // Try parent
+            // checking if user is parent... simplified for now
+            return $this->json(['error' => 'Student profile not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Get enrollments to find Grade/Section
+        $enrollments = $student->getEnrollments();
+        if ($enrollments->isEmpty()) {
+            return $this->json([]);
+        }
+
+        $currentEnrollment = $enrollments->last(); // Assuming last is current
+        $grade = $currentEnrollment->getGrade();
+        $section = $currentEnrollment->getSection();
+
+        if (!$grade) {
+             return $this->json([]);
+        }
+
+        // Find tasks for this grade/section
+        $tasks = $this->taskRepository->findForStudent($grade, $section);
+        
+        // Enrich with submission status
+        $data = [];
+        foreach ($tasks as $task) {
+            $submission = $this->em->getRepository(TaskSubmission::class)->findOneBy(['task' => $task, 'student' => $student]);
+            
+            $taskData = $this->serializeTask($task);
+            $taskData['mySubmission'] = $submission ? [
+                'id' => $submission->getId(),
+                'status' => $submission->getStatus(),
+                'score' => $submission->getScore(),
+                'submittedAt' => $submission->getSubmittedAt()->format('Y-m-d H:i:s'),
+                'isLate' => $submission->isLate(),
+            ] : null;
+
+            $data[] = $taskData;
+        }
+
+        return $this->json($data);
+    }
+
+    /**
      * Get a single task by ID
      */
     #[Route('/{id}', name: 'task_show', methods: ['GET'])]

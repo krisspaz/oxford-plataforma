@@ -10,6 +10,7 @@ const PaquetesPage = () => {
     const [selectedPackage, setSelectedPackage] = useState(null);
     const [loading, setLoading] = useState(true);
     const [packages, setPackages] = useState([]);
+    const [selectedCycle, setSelectedCycle] = useState('2025');
 
     const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
     const labelClass = `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`;
@@ -31,9 +32,10 @@ const PaquetesPage = () => {
             setPackages([
                 {
                     id: 1,
-                    name: 'Paquete Normal',
+                    name: 'Paquete Normal 2025',
+                    cycle: '2025',
                     totalPrice: 9500,
-                    description: 'Paquete estándar para estudiantes regulares',
+                    description: 'Paquete estándar para estudiantes regulares 2025',
                     isActive: true,
                     applicableGrades: ['1ro Básico', '2do Básico', '3ro Básico'],
                     details: [
@@ -44,7 +46,8 @@ const PaquetesPage = () => {
                 },
                 {
                     id: 2,
-                    name: 'Paquete Becado 50%',
+                    name: 'Paquete Becado 50% 2025',
+                    cycle: '2025',
                     totalPrice: 4750,
                     description: 'Paquete con 50% de descuento para becados',
                     isActive: true,
@@ -55,6 +58,16 @@ const PaquetesPage = () => {
                         { id: 6, productName: 'Paquete de Libros', price: 1500, documentType: 'FACTURA_SAT', productType: 'Bien' },
                     ]
                 },
+                {
+                    id: 3,
+                    name: 'Paquete 2024 (Histórico)',
+                    cycle: '2024',
+                    totalPrice: 9000,
+                    description: 'Paquete del año anterior',
+                    isActive: false,
+                    applicableGrades: ['General'],
+                    details: []
+                }
             ]);
         } finally {
             setLoading(false);
@@ -77,6 +90,8 @@ const PaquetesPage = () => {
         }
     };
 
+    const filteredPackages = packages.filter(pkg => pkg.cycle === selectedCycle);
+
     if (loading) {
         return (
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-12 text-center`}>
@@ -88,16 +103,36 @@ const PaquetesPage = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Paquetes Escolares</h1>
-                <button onClick={() => { setSelectedPackage({}); setShowModal(true); }} className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg">
-                    <Plus size={18} /> Nuevo Paquete
-                </button>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Paquetes Escolares</h1>
+                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Gestión de costos y productos por ciclo</p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <select
+                        value={selectedCycle}
+                        onChange={(e) => setSelectedCycle(e.target.value)}
+                        className={`px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-teal-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                    >
+                        <option value="2025">Ciclo 2025</option>
+                        <option value="2024">Ciclo 2024</option>
+                    </select>
+
+                    <button onClick={() => { setSelectedPackage({}); setShowModal(true); }} className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg shadow-lg shadow-teal-900/20">
+                        <Plus size={18} /> Nuevo Paquete
+                    </button>
+                </div>
             </div>
 
             {/* Packages List */}
             <div className="space-y-4">
-                {packages.map(pkg => (
+                {filteredPackages.length === 0 && (
+                    <div className="text-center py-12 text-gray-500">
+                        No hay paquetes registrados para el ciclo {selectedCycle}.
+                    </div>
+                )}
+                {filteredPackages.map(pkg => (
                     <div key={pkg.id} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm overflow-hidden`}>
                         {/* Header */}
                         <div

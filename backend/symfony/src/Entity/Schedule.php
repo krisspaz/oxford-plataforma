@@ -42,9 +42,9 @@ class Schedule
     #[ORM\JoinColumn(nullable: false)]
     private ?Subject $subject = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'schedules')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Grade $grade = null;
+    private ?Course $course = null;
 
     #[ORM\ManyToOne]
     private ?Section $section = null;
@@ -100,14 +100,14 @@ class Schedule
         return $this;
     }
 
-    public function getGrade(): ?Grade
+    public function getCourse(): ?Course
     {
-        return $this->grade;
+        return $this->course;
     }
 
-    public function setGrade(?Grade $grade): static
+    public function setCourse(?Course $course): static
     {
-        $this->grade = $grade;
+        $this->course = $course;
         return $this;
     }
 

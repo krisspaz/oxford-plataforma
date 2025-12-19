@@ -15,6 +15,16 @@ const scheduleService = {
     },
 
     /**
+     * Get the current student's schedule
+     */
+    getMyStudentSchedule: async (cycleId = null) => {
+        const params = cycleId ? { cycleId } : {};
+        const response = await api.get('/schedule/my-student-schedule', { params });
+        return response.data;
+    },
+
+
+    /**
      * Get schedule by teacher ID
      * @param {number} teacherId - Teacher ID
      * @param {number} cycleId - Optional school cycle ID

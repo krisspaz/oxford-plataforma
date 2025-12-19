@@ -36,11 +36,12 @@ import {
     UserCog,
     Shield,
     Menu,
-    Database
+    Database,
+    Brain
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { getMenuForRole, ROLE_LABELS } from '../config/roleMenus';
+import { getMenuForRole, getCombinedMenu, ROLE_LABELS } from '../config/roleMenus';
 
 // Icon mapping from string to component
 const ICON_MAP = {
@@ -48,7 +49,7 @@ const ICON_MAP = {
     FileText, UserPlus, User, CreditCard, FileCheck, FileSpreadsheet,
     Receipt, AlertCircle, Package, MinusCircle, Layers, LayoutGrid,
     Book, Link: LinkIcon, Lock, BarChart, Edit, Clock, Bookmark,
-    UserCog, Shield, Menu, Database, Bell
+    UserCog, Shield, Menu, Database, Bell, Brain
 };
 
 const Layout = () => {
@@ -73,8 +74,11 @@ const Layout = () => {
 
     // Get menu items for this role
     const menuSections = useMemo(() => {
+        if (user?.roles && user.roles.length > 0) {
+            return getCombinedMenu(user.roles);
+        }
         return getMenuForRole(userRole);
-    }, [userRole]);
+    }, [user?.roles, userRole]);
 
     // Flatten menu items for header title lookup
     const allMenuItems = useMemo(() => {

@@ -107,19 +107,14 @@ class ScheduleController extends AbstractController
     }
 
     /**
-     * Get schedule by grade/section
+     * Get schedule by course ID
      */
-    #[Route('/grade/{gradeId}', name: 'schedule_by_grade', methods: ['GET'])]
-    public function getByGrade(int $gradeId, Request $request): JsonResponse
+    #[Route('/course/{courseId}', name: 'schedule_by_course', methods: ['GET'])]
+    public function getByCourse(int $courseId, Request $request): JsonResponse
     {
-        $sectionId = $request->query->get('sectionId');
         $cycleId = $request->query->get('cycleId');
 
-        $schedules = $this->scheduleRepository->findByGradeSection(
-            $gradeId, 
-            $sectionId ? (int)$sectionId : null, 
-            $cycleId ? (int)$cycleId : null
-        );
+        $schedules = $this->scheduleRepository->findByCourse($courseId, $cycleId);
 
         return $this->json(array_map(fn($s) => $this->serializeSchedule($s), $schedules));
     }
@@ -140,10 +135,11 @@ class ScheduleController extends AbstractController
         $schedule = new Schedule();
         $schedule->setTeacher($teacher);
         $schedule->setSubject($this->em->getReference('App\Entity\Subject', $data['subjectId']));
-        $schedule->setGrade($this->em->getReference('App\Entity\Grade', $data['gradeId']));
         
-        if (isset($data['sectionId'])) {
-            $schedule->setSection($this->em->getReference('App\Entity\Section', $data['sectionId']));
+        if (isset($data['courseId'])) {
+             $schedule->setCourse($this->em->getReference('App\Entity\Course', $data['courseId']));
+        } else {
+             return $this->json(['error' => 'Course ID is required'], Response::HTTP_BAD_REQUEST);
         }
         
         $schedule->setSchoolCycle($this->em->getReference('App\Entity\SchoolCycle', $data['cycleId']));
@@ -163,22 +159,53 @@ class ScheduleController extends AbstractController
         ], Response::HTTP_CREATED);
     }
 
+    // ... delete method ...
+
+    // ... student methods ...
+
     /**
-     * Delete schedule entry
+     * Get schedule for a student (based on enrollment)
      */
-    #[Route('/{id}', name: 'schedule_delete', methods: ['DELETE'])]
-    public function delete(int $id): JsonResponse
+    #[Route('/student/{studentId}', name: 'schedule_student', methods: ['GET'])]
+    public function getStudentSchedule(int $studentId, Request $request): JsonResponse
     {
-        $schedule = $this->scheduleRepository->find($id);
-        if (!$schedule) {
-            return $this->json(['error' => 'Schedule not found'], Response::HTTP_NOT_FOUND);
+        $cycleId = $request->query->get('cycleId');
+        
+        // Find active enrollment
+        $qb = $this->em->createQueryBuilder();
+        $qb->select('e')
+           ->from('App\Entity\Enrollment', 'e')
+           ->where('e.student = :studentId')
+           ->orderBy('e.id', 'DESC') // Get latest
+           ->setMaxResults(1)
+           ->setParameter('studentId', $studentId);
+           
+        if ($cycleId) {
+             $qb->andWhere('e.schoolCycle = :cycleId')
+                ->setParameter('cycleId', $cycleId);
+        }
+           
+        $enrollment = $qb->getQuery()->getOneOrNullResult();
+        
+        if (!$enrollment) {
+            return $this->json(['error' => 'Student not enrolled'], Response::HTTP_NOT_FOUND);
+        }
+        
+        $course = $enrollment->getCourse();
+        
+        if (!$course) {
+             return $this->json(['error' => 'Enrollment has no course assigned'], Response::HTTP_BAD_REQUEST);
         }
 
-        $this->em->remove($schedule);
-        $this->em->flush();
+        $schedules = $this->scheduleRepository->findByCourse(
+            $course->getId(), 
+            $cycleId ? (int)$cycleId : null
+        );
 
-        return $this->json(['success' => true, 'message' => 'Horario eliminado']);
+        return $this->json(array_map(fn($s) => $this->serializeSchedule($s), $schedules));
     }
+
+    // ... getMyStudentSchedule ...
 
     private function serializeSchedule(Schedule $s): array
     {
@@ -194,14 +221,13 @@ class ScheduleController extends AbstractController
             'subject' => $s->getSubject() ? [
                 'id' => $s->getSubject()->getId(),
                 'name' => $s->getSubject()->getName(),
+                'code' => $s->getSubject()->getCode(),
             ] : null,
-            'grade' => $s->getGrade() ? [
-                'id' => $s->getGrade()->getId(),
-                'name' => $s->getGrade()->getName(),
-            ] : null,
-            'section' => $s->getSection() ? [
-                'id' => $s->getSection()->getId(),
-                'name' => $s->getSection()->getName(),
+            'course' => $s->getCourse() ? [
+                'id' => $s->getCourse()->getId(),
+                'name' => $s->getCourse()->getName(),
+                'gradeLevel' => $s->getCourse()->getGradeLevel(),
+                'section' => $s->getCourse()->getSection(),
             ] : null,
             'teacher' => $s->getTeacher() ? [
                 'id' => $s->getTeacher()->getId(),

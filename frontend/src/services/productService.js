@@ -14,3 +14,4 @@ export const productService = {
     // Update product
     update: (id, data) => api.put(`/products/${id}`, data),
 };
+export default productService;

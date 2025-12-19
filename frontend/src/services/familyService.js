@@ -21,3 +21,4 @@ export const familyService = {
     // Find family by student
     getByStudent: (studentId) => api.get(`/families/by-student/${studentId}`),
 };
+export default familyService;

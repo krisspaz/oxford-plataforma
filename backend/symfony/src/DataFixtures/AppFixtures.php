@@ -24,7 +24,17 @@ class AppFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         $roles = [
-            'admin@oxford.edu' => ['ROLE_ADMIN'],
+            'admin@oxford.edu' => [
+                'ROLE_ADMIN', 
+                'ROLE_DIRECTOR', 
+                'ROLE_COORDINATION', 
+                'ROLE_SECRETARY', 
+                'ROLE_ACCOUNTANT', 
+                'ROLE_INFORMATICS',
+                'ROLE_TEACHER',
+                'ROLE_STUDENT',
+                'ROLE_PARENT'
+            ],
             'teacher@oxford.edu' => ['ROLE_TEACHER'],
             'student@oxford.edu' => ['ROLE_STUDENT'],
             'parent@oxford.edu' => ['ROLE_PARENT'],
@@ -88,14 +98,47 @@ class AppFixtures extends Fixture
             $manager->persist($payment);
         }
 
-        // 5. Tasks
-        $task = new Task();
-        $task->setTitle('Tarea de Matemáticas #1');
-        $task->setDescription('Resolver ejercicios 1-10 de la página 45.');
-        $task->setDueDate(new \DateTime('2025-02-20 23:59:00'));
-        $task->setStatus('PENDING');
-        $task->setCourse($course);
-        $manager->persist($task);
+        // 5. Tasks (commented out - entity structure changed)
+        // $task = new Task();
+        // $task->setTitle('Tarea de Matemáticas #1');
+        // $task->setDescription('Resolver ejercicios 1-10 de la página 45.');
+        // $task->setDueDate(new \DateTime('2025-02-20 23:59:00'));
+        // $task->setStatus('PENDING');
+        // $task->setCourse($course);
+        // $manager->persist($task);
+
+        // 5. Teachers
+        $teachers = [];
+        $teacherNames = ['Prof. García', 'Prof. López', 'Prof. Martínez', 'Prof. Hernández', 'Prof. Smith'];
+        foreach ($teacherNames as $i => $name) {
+            $teacher = new \App\Entity\Teacher(); // Use FQCN or import
+            $teacher->setFirstName(explode(' ', $name)[1]);
+            $teacher->setLastName('Docente');
+            $teacher->setEmail('teacher' . ($i + 1) . '@oxford.edu');
+            $teacher->setEmployeeCode('EMP-' . ($i + 100));
+            $teacher->setContractType('Tiempo Completo');
+            $manager->persist($teacher);
+            $teachers[] = $teacher;
+        }
+
+        // 6. Subjects
+        $subjectsData = [
+            ['name' => 'Matemáticas', 'code' => 'MAT101'],
+            ['name' => 'Ciencias Naturales', 'code' => 'CN101'],
+            ['name' => 'Comunicación y Lenguaje', 'code' => 'CL101'],
+            ['name' => 'Estudios Sociales', 'code' => 'SOC101'],
+            ['name' => 'Inglés', 'code' => 'ING101'],
+            ['name' => 'Educación Física', 'code' => 'EF101'],
+            ['name' => 'Arte y Música', 'code' => 'ART101'],
+            ['name' => 'Computación', 'code' => 'COMP101'],
+        ];
+
+        foreach ($subjectsData as $data) {
+            $subject = new \App\Entity\Subject();
+            $subject->setName($data['name']);
+            $subject->setCode($data['code']);
+            $manager->persist($subject);
+        }
 
         $manager->flush();
     }

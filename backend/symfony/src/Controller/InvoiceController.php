@@ -65,6 +65,7 @@ class InvoiceController extends AbstractController
         $invoice->setRecipientNit($data['nit'] ?? 'CF');
         $invoice->setRecipientName($data['name'] ?? 'Consumidor Final');
         $invoice->setTotalAmount($data['total'] ?? 0);
+        $invoice->setPaymentMethod($data['paymentMethod'] ?? 'Efectivo');
         $invoice->setIssuedAt(new \DateTime());
         $invoice->setStatus(Invoice::STATUS_EMITIDO);
         
@@ -147,8 +148,18 @@ class InvoiceController extends AbstractController
         
         foreach ($invoices as $invoice) {
             if ($invoice->getStatus() === Invoice::STATUS_EMITIDO) {
-                // TODO: Agregar método de pago al invoice
                 $totals['total'] += $invoice->getTotalAmount();
+                
+                // Sumar por método de pago
+                $method = strtolower($invoice->getPaymentMethod() ?? 'efectivo');
+                if (isset($totals[$method])) {
+                    $totals[$method] += $invoice->getTotalAmount();
+                } else {
+                    // Mapeo básico si el string varía (ej: "Tarjeta de Crédito" -> "tarjeta")
+                    if (str_contains($method, 'tarjeta')) $totals['tarjeta'] += $invoice->getTotalAmount();
+                    elseif (str_contains($method, 'deposito')) $totals['deposito'] += $invoice->getTotalAmount();
+                    else $totals['efectivo'] += $invoice->getTotalAmount();
+                }
             }
         }
         
@@ -175,6 +186,8 @@ class InvoiceController extends AbstractController
             'issuedAt' => $i->getIssuedAt()?->format('Y-m-d H:i:s'),
             'annulledAt' => $i->getAnnulledAt()?->format('Y-m-d H:i:s'),
             'annulmentReason' => $i->getAnnulmentReason(),
+            'paymentMethod' => $i->getPaymentMethod(),
+            'products' => $i->getPayment() ? ($i->getPayment()->getConcept() . ($i->getPayment()->getDescription() ? ' - ' . $i->getPayment()->getDescription() : '')) : 'Sin detalle',
         ];
     }
 }

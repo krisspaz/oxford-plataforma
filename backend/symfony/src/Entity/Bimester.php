@@ -152,4 +152,16 @@ class Bimester
     {
         return !$this->isClosed && $this->endDate && new \DateTime() > $this->endDate;
     }
+
+    public function close(): static
+    {
+        $this->isClosed = true;
+        return $this;
+    }
+
+    public function open(): static
+    {
+        $this->isClosed = false;
+        return $this;
+    }
 }

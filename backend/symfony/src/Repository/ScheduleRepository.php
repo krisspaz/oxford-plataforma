@@ -23,9 +23,8 @@ class ScheduleRepository extends ServiceEntityRepository
             ->setParameter('teacherId', $teacherId)
             ->andWhere('s.isActive = true')
             ->leftJoin('s.subject', 'sub')
-            ->leftJoin('s.grade', 'g')
-            ->leftJoin('s.section', 'sec')
-            ->addSelect('sub', 'g', 'sec')
+            ->leftJoin('s.course', 'c')
+            ->addSelect('sub', 'c')
             ->orderBy('s.dayOfWeek', 'ASC')
             ->addOrderBy('s.period', 'ASC');
 
@@ -46,9 +45,8 @@ class ScheduleRepository extends ServiceEntityRepository
             ->setParameter('day', $dayOfWeek)
             ->andWhere('s.isActive = true')
             ->leftJoin('s.subject', 'sub')
-            ->leftJoin('s.grade', 'g')
-            ->leftJoin('s.section', 'sec')
-            ->addSelect('sub', 'g', 'sec')
+            ->leftJoin('s.course', 'c')
+            ->addSelect('sub', 'c')
             ->orderBy('s.period', 'ASC');
 
         if ($cycleId) {
@@ -59,22 +57,17 @@ class ScheduleRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findByGradeSection(int $gradeId, ?int $sectionId = null, ?int $cycleId = null): array
+    public function findByCourse(int $courseId, ?int $cycleId = null): array
     {
         $qb = $this->createQueryBuilder('s')
-            ->andWhere('s.grade = :gradeId')
-            ->setParameter('gradeId', $gradeId)
+            ->andWhere('s.course = :courseId')
+            ->setParameter('courseId', $courseId)
             ->andWhere('s.isActive = true')
             ->leftJoin('s.teacher', 't')
             ->leftJoin('s.subject', 'sub')
             ->addSelect('t', 'sub')
             ->orderBy('s.dayOfWeek', 'ASC')
             ->addOrderBy('s.period', 'ASC');
-
-        if ($sectionId) {
-            $qb->andWhere('s.section = :sectionId')
-               ->setParameter('sectionId', $sectionId);
-        }
 
         if ($cycleId) {
             $qb->andWhere('s.schoolCycle = :cycleId')
@@ -103,9 +96,8 @@ class ScheduleRepository extends ServiceEntityRepository
             ->setParameter('time', $now->format('H:i:s'))
             ->andWhere('s.isActive = true')
             ->leftJoin('s.subject', 'sub')
-            ->leftJoin('s.grade', 'g')
-            ->leftJoin('s.section', 'sec')
-            ->addSelect('sub', 'g', 'sec')
+            ->leftJoin('s.course', 'c')
+            ->addSelect('sub', 'c')
             ->getQuery()
             ->getOneOrNullResult();
     }

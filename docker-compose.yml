@@ -39,7 +39,7 @@ services:
       context: ./backend/symfony
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://oxford_user:password@database:5432/oxford_db?serverVersion=16&charset=utf8}
+      DATABASE_URL: postgresql://oxford_user:${POSTGRES_PASSWORD}@database:5432/oxford_db?serverVersion=16&charset=utf8
       APP_ENV: ${APP_ENV:-dev}
       APP_SECRET: ${APP_SECRET:?App secret required}
       CORPOSISTEMAS_API_URL: ${CORPOSISTEMAS_API_URL:-https://api.corposistemas.gt}
@@ -87,7 +87,7 @@ services:
     networks:
       - app_net
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')" ]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
       interval: 30s
       timeout: 10s
       retries: 3

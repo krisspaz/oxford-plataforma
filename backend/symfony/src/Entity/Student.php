@@ -136,6 +136,14 @@ class Student
         return $this;
     }
 
+    #[ORM\ManyToMany(targetEntity: Guardian::class, mappedBy: 'students')]
+    private Collection $guardians;
+
+    public function __construct()
+    {
+        $this->guardians = new ArrayCollection();
+    }
+
     #[ORM\ManyToOne(inversedBy: 'students')]
     private ?SchoolCycle $schoolCycle = null;
 
@@ -174,6 +182,33 @@ class Student
     public function setAcademicRiskScore(?float $academicRiskScore): static
     {
         $this->academicRiskScore = $academicRiskScore;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Guardian>
+     */
+    public function getGuardians(): Collection
+    {
+        return $this->guardians;
+    }
+
+    public function addGuardian(Guardian $guardian): static
+    {
+        if (!$this->guardians->contains($guardian)) {
+            $this->guardians->add($guardian);
+            $guardian->addStudent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGuardian(Guardian $guardian): static
+    {
+        if ($this->guardians->removeElement($guardian)) {
+            $guardian->removeStudent($this);
+        }
 
         return $this;
     }

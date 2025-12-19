@@ -74,6 +74,20 @@ class Invoice
     #[ORM\ManyToOne(targetEntity: User::class)]
     private ?User $createdBy = null;
 
+    #[ORM\Column(length: 50)]
+    private ?string $paymentMethod = 'Efectivo'; // Efectivo, Tarjeta, Deposito
+
+    public function getPaymentMethod(): ?string
+    {
+        return $this->paymentMethod;
+    }
+
+    public function setPaymentMethod(string $paymentMethod): static
+    {
+        $this->paymentMethod = $paymentMethod;
+        return $this;
+    }
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();

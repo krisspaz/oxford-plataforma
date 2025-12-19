@@ -72,10 +72,10 @@ class GradeRecordController extends AbstractController
         // Verificar si el bimestre está cerrado
         if ($bimesterId) {
             $bimester = $this->bimesterRepository->find($bimesterId);
-            if ($bimester && $bimester->getIsClosed()) {
+            if ($bimester && ($bimester->getIsClosed() || $bimester->shouldAutoClose())) {
                 return $this->json([
                     'success' => false,
-                    'error' => 'El bimestre está cerrado. No se pueden modificar notas.'
+                    'error' => 'El bimestre está cerrado o ha finalizado. No se pueden modificar notas.'
                 ], 403);
             }
         }
@@ -132,10 +132,65 @@ class GradeRecordController extends AbstractController
         ]);
     }
 
+    #[Route('/teacher-summary', methods: ['GET'])]
+    public function teacherSummary(Request $request): JsonResponse
+    {
+        $assignmentId = $request->query->get('assignmentId');
+        if (!$assignmentId) {
+            return $this->json(['error' => 'Subject Assignment ID is required'], 400);
+        }
+
+        // Fetch all records for this assignment (across all bimesters)
+        $records = $this->gradeRecordRepository->findBy([
+            'subjectAssignment' => $assignmentId
+        ]);
+
+        $studentsData = [];
+        
+        foreach ($records as $record) {
+            $studentId = $record->getStudent()->getId();
+            if (!isset($studentsData[$studentId])) {
+                $studentsData[$studentId] = [
+                    'id' => $studentId,
+                    'student' => $record->getStudent()->getFullName(),
+                    'b1' => null, 'b2' => null, 'b3' => null, 'b4' => null,
+                    'final' => 0
+                ];
+            }
+            
+            // Map bimester IDs to columns (Assuming IDs 1-4 match B1-B4, otherwise need logic)
+            // Just for simplicity we assume bimester ID maps roughly or we use bimester name matching
+            // Ideally we should use Bimester Name or SortOrder
+            $bimesterName = $record->getBimester()->getName();
+            
+            // Simple mapping logic (adapt based on real DB names)
+            if (stripos($bimesterName, '1') !== false || stripos($bimesterName, 'Primer') !== false) $studentsData[$studentId]['b1'] = $record->getScore();
+            if (stripos($bimesterName, '2') !== false || stripos($bimesterName, 'Segundo') !== false) $studentsData[$studentId]['b2'] = $record->getScore();
+            if (stripos($bimesterName, '3') !== false || stripos($bimesterName, 'Tercer') !== false) $studentsData[$studentId]['b3'] = $record->getScore();
+            if (stripos($bimesterName, '4') !== false || stripos($bimesterName, 'Cuarto') !== false) $studentsData[$studentId]['b4'] = $record->getScore();
+        }
+
+        // Calculate Final and Status
+        foreach ($studentsData as &$data) {
+            $sum = 0;
+            $count = 0;
+            if ($data['b1'] !== null) { $sum += $data['b1']; $count++; }
+            if ($data['b2'] !== null) { $sum += $data['b2']; $count++; }
+            if ($data['b3'] !== null) { $sum += $data['b3']; $count++; }
+            if ($data['b4'] !== null) { $sum += $data['b4']; $count++; }
+            
+            $data['final'] = $count > 0 ? round($sum / 4, 2) : 0; // Average over 4 bimesters generally
+            $data['status'] = $data['final'] >= 60 ? 'APROBADO' : 'REPROBADO';
+        }
+
+        return $this->json([
+            'success' => true,
+            'data' => array_values($studentsData)
+        ]);
+    }
     private function serializeGradeRecord(GradeRecord $r): array
     {
         return [
-            'id' => $r->getId(),
             'student' => $r->getStudent()?->getId(),
             'studentName' => $r->getStudent() ? $r->getStudent()->getFirstName() . ' ' . $r->getStudent()->getLastName() : null,
             'studentCarnet' => $r->getStudent()?->getCarnet(),
