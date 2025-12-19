@@ -124,23 +124,46 @@ const HorariosPage = () => {
 
     // Send message to AI
     const sendMessage = async () => {
-        // ... (keep logic, but update processLocalCommand or generateWithAI as needed)
-        // For now, let's keep the existing structure but maybe disable "Generate" if it relies on mocks.
-        // Actually, user wants "Real Data", so "Generate with AI" might be misleading if it just generates client-side mocks.
-        // I will keep it as "Simulation" feedback.
-
         if (!inputMessage.trim() || isSending) return;
-        const userMessage = inputMessage.trim();
+
+        const userMsg = {
+            type: 'user',
+            text: inputMessage.trim(),
+            time: new Date()
+        };
+
+        setMessages(prev => [...prev, userMsg]);
         setInputMessage('');
         setIsSending(true);
 
-        // ... basic echo for now ...
-        setMessages(prev => [...prev, { type: 'user', text: userMessage, time: new Date() }]);
+        try {
+            const response = await fetch('http://localhost:8001/process-command', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: userMsg.text })
+            });
 
-        setTimeout(() => {
-            setMessages(prev => [...prev, { type: 'ai', text: "La funcionalidad de IA de texto está en modo demostración. Por favor usa los controles manuales.", time: new Date() }]);
+            if (!response.ok) throw new Error('AI Service Error');
+
+            const data = await response.json();
+
+            const botMsg = {
+                type: 'ai', // Matches existing 'ai' type
+                text: data.response_text || "Procesado.",
+                time: new Date()
+            };
+            setMessages(prev => [...prev, botMsg]);
+
+        } catch (error) {
+            console.error(error);
+            setMessages(prev => [...prev, {
+                type: 'ai',
+                text: "⚠️ Error conectando con Inteligencia Artificial (Puerto 8001).",
+                time: new Date()
+            }]);
+        } finally {
             setIsSending(false);
-        }, 1000);
+        }
     };
 
     // ... (Keep existing simple functions or simplified versions) ...
