@@ -190,4 +190,35 @@ class InvoiceController extends AbstractController
             'products' => $i->getPayment() ? ($i->getPayment()->getConcept() . ($i->getPayment()->getDescription() ? ' - ' . $i->getPayment()->getDescription() : '')) : 'Sin detalle',
         ];
     }
+
+    #[Route('/{id}/download', methods: ['GET'])]
+    public function downloadPdf(int $id): JsonResponse
+    {
+        $invoice = $this->invoiceRepository->find($id);
+        
+        if (!$invoice) {
+            return $this->json(['success' => false, 'error' => 'Comprobante no encontrado'], 404);
+        }
+
+        // Return invoice data for frontend PDF generation
+        return $this->json([
+            'success' => true,
+            'data' => [
+                'id' => $invoice->getId(),
+                'uuid' => $invoice->getUuid(),
+                'type' => $invoice->getDocumentType(),
+                'series' => $invoice->getSeries(),
+                'number' => $invoice->getNumber(),
+                'nit' => $invoice->getRecipientNit(),
+                'name' => $invoice->getRecipientName(),
+                'total' => $invoice->getTotalAmount(),
+                'status' => $invoice->getStatus(),
+                'issuedAt' => $invoice->getIssuedAt()?->format('Y-m-d H:i:s'),
+                'paymentMethod' => $invoice->getPaymentMethod(),
+                'products' => $invoice->getPayment() 
+                    ? ($invoice->getPayment()->getConcept() . ($invoice->getPayment()->getDescription() ? ' - ' . $invoice->getPayment()->getDescription() : '')) 
+                    : 'Sin detalle'
+            ]
+        ]);
+    }
 }

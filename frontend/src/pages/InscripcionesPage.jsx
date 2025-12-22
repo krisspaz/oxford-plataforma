@@ -9,13 +9,13 @@ const InscripcionesPage = () => {
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [guardianType, setGuardianType] = useState(null); // 'father', 'mother', 'other'
-    const [catalogs, setCatalogs] = useState({ grades: [], packages: [], relationships: [] });
+    const [catalogs, setCatalogs] = useState({ grades: [], packages: [], relationships: [], levels: [] });
     const [formData, setFormData] = useState({
         student: { firstName: '', lastName: '', birthDate: '', gender: '', cui: '' },
         father: { name: '', dpi: '', phone: '', email: '', occupation: '' },
         mother: { name: '', dpi: '', phone: '', email: '', occupation: '' },
         guardian: { name: '', dpi: '', phone: '', email: '', relationship: '' },
-        enrollment: { grade: '', section: '', package: '' }
+        enrollment: { level: '', grade: '', section: '', package: '' }
     });
 
     const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
@@ -35,15 +35,17 @@ const InscripcionesPage = () => {
     const loadCatalogs = async () => {
         setLoading(true);
         try {
-            const [gradesRes, packagesRes, relRes] = await Promise.all([
+            const [gradesRes, packagesRes, relRes, levelsRes] = await Promise.all([
                 catalogService.getGrades(),
                 packageService.getAll({ active: true }),
-                catalogService.getRelationshipTypes()
+                catalogService.getRelationshipTypes(),
+                catalogService.getAcademicLevels()
             ]);
             setCatalogs({
                 grades: gradesRes.success ? gradesRes.data : [],
                 packages: packagesRes.success ? packagesRes.data : [],
-                relationships: relRes.success ? relRes.data : []
+                relationships: relRes.success ? relRes.data : [],
+                levels: levelsRes.success ? levelsRes.data : []
             });
         } catch (error) {
             // Demo data
@@ -264,10 +266,10 @@ const InscripcionesPage = () => {
                                 onClick={() => selectGuardian('father')}
                                 disabled={!formData.father.name}
                                 className={`p-6 rounded-xl border-2 transition-all ${guardianType === 'father'
-                                        ? 'border-teal-500 bg-teal-500/20'
-                                        : darkMode
-                                            ? 'border-gray-600 hover:border-teal-500 bg-gray-700'
-                                            : 'border-gray-300 hover:border-teal-500 bg-gray-50'
+                                    ? 'border-teal-500 bg-teal-500/20'
+                                    : darkMode
+                                        ? 'border-gray-600 hover:border-teal-500 bg-gray-700'
+                                        : 'border-gray-300 hover:border-teal-500 bg-gray-50'
                                     } ${!formData.father.name ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                             >
                                 <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-3 ${guardianType === 'father' ? 'bg-teal-500 text-white' : darkMode ? 'bg-gray-600 text-gray-300' : 'bg-blue-100 text-blue-600'
@@ -291,10 +293,10 @@ const InscripcionesPage = () => {
                                 onClick={() => selectGuardian('mother')}
                                 disabled={!formData.mother.name}
                                 className={`p-6 rounded-xl border-2 transition-all ${guardianType === 'mother'
-                                        ? 'border-teal-500 bg-teal-500/20'
-                                        : darkMode
-                                            ? 'border-gray-600 hover:border-teal-500 bg-gray-700'
-                                            : 'border-gray-300 hover:border-teal-500 bg-gray-50'
+                                    ? 'border-teal-500 bg-teal-500/20'
+                                    : darkMode
+                                        ? 'border-gray-600 hover:border-teal-500 bg-gray-700'
+                                        : 'border-gray-300 hover:border-teal-500 bg-gray-50'
                                     } ${!formData.mother.name ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                             >
                                 <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-3 ${guardianType === 'mother' ? 'bg-teal-500 text-white' : darkMode ? 'bg-gray-600 text-gray-300' : 'bg-pink-100 text-pink-600'
@@ -317,10 +319,10 @@ const InscripcionesPage = () => {
                                 type="button"
                                 onClick={() => selectGuardian('other')}
                                 className={`p-6 rounded-xl border-2 transition-all cursor-pointer ${guardianType === 'other'
-                                        ? 'border-teal-500 bg-teal-500/20'
-                                        : darkMode
-                                            ? 'border-gray-600 hover:border-teal-500 bg-gray-700'
-                                            : 'border-gray-300 hover:border-teal-500 bg-gray-50'
+                                    ? 'border-teal-500 bg-teal-500/20'
+                                    : darkMode
+                                        ? 'border-gray-600 hover:border-teal-500 bg-gray-700'
+                                        : 'border-gray-300 hover:border-teal-500 bg-gray-50'
                                     }`}
                             >
                                 <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-3 ${guardianType === 'other' ? 'bg-teal-500 text-white' : darkMode ? 'bg-gray-600 text-gray-300' : 'bg-orange-100 text-orange-600'
@@ -388,10 +390,28 @@ const InscripcionesPage = () => {
                         <h2 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Datos de Inscripción</h2>
                         <div className="grid grid-cols-3 gap-4">
                             <div>
-                                <label className={labelClass}>Grado *</label>
-                                <select className={inputClass} value={formData.enrollment.grade} onChange={e => updateField('enrollment', 'grade', e.target.value)}>
+                                <label className={labelClass}>Nivel Educativo *</label>
+                                <select className={inputClass} value={formData.enrollment.level} onChange={e => {
+                                    updateField('enrollment', 'level', e.target.value);
+                                    updateField('enrollment', 'grade', ''); // Reset grade when level changes
+                                }}>
                                     <option value="">Seleccionar...</option>
-                                    {catalogs.grades.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                                    {catalogs.levels.map(l => <option key={l.id} value={l.name}>{l.name}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className={labelClass}>Grado *</label>
+                                <select
+                                    className={inputClass}
+                                    value={formData.enrollment.grade}
+                                    onChange={e => updateField('enrollment', 'grade', e.target.value)}
+                                    disabled={!formData.enrollment.level}
+                                >
+                                    <option value="">Seleccionar...</option>
+                                    {catalogs.grades
+                                        .filter(g => !formData.enrollment.level || g.level === formData.enrollment.level)
+                                        .map(g => <option key={g.id} value={g.id}>{g.name}</option>)
+                                    }
                                 </select>
                             </div>
                             <div>

@@ -25,3 +25,6 @@ export { default as subjectService } from './subjectService';
 export { default as gradeService } from './gradeService';
 export { default as contractService } from './contractService';
 export { default as reportService } from './reportService';
+
+// Scholarship/Convenios service
+export { default as scholarshipService } from './scholarshipService';

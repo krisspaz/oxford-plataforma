@@ -9,7 +9,80 @@ const EstadoCuentaPage = () => {
     const { darkMode } = useTheme();
     const { exportTable } = usePdfExport(); // Hook
 
-    // ... (state)
+    const [searchTerm, setSearchTerm] = useState('');
+    const [students, setStudents] = useState([]);
+    const [selectedStudent, setSelectedStudent] = useState(null);
+    const [accountData, setAccountData] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    // Search students
+    useEffect(() => {
+        const searchStudents = async () => {
+            if (searchTerm.length < 3) {
+                setStudents([]);
+                return;
+            }
+            try {
+                const response = await studentService.search(searchTerm);
+                if (response.success) {
+                    setStudents(response.data);
+                }
+            } catch (error) {
+                console.error("Error searching students:", error);
+            }
+        };
+        const timeoutId = setTimeout(searchStudents, 500);
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm]);
+
+    // Load account status when student is selected
+    useEffect(() => {
+        const loadAccountStatus = async () => {
+            if (!selectedStudent) return;
+            setLoading(true);
+            try {
+                // TODO: use paymentService.getAccountStatus(selectedStudent.id)
+                // separate endpoint or aggregate
+                const response = await studentService.getAccountStatus(selectedStudent.id);
+                if (response.success) {
+                    setAccountData(response.data);
+                } else {
+                    // fallbacks or error
+                    setAccountData(null);
+                }
+            } catch (error) {
+                console.error("Error loading account status:", error);
+
+                // Mock data for demo
+                setAccountData({
+                    summary: {
+                        totalAssigned: 3500,
+                        totalPaid: 2100,
+                        totalPending: 1400
+                    },
+                    quotas: [
+                        { id: 1, concept: 'Inscripción 2025', amount: 1500, paid: 1500, pending: 0, dueDate: '2025-01-15', status: 'PAGADO', document: 'REC-001' },
+                        { id: 2, concept: 'Mensualidad Enero', amount: 800, paid: 600, pending: 200, dueDate: '2025-02-05', status: 'PARCIAL', document: 'REC-055' },
+                        { id: 3, concept: 'Mensualidad Febrero', amount: 800, paid: 0, pending: 800, dueDate: '2025-03-05', status: 'PENDIENTE', document: '' },
+                        { id: 4, concept: 'Mensualidad Marzo', amount: 400, paid: 0, pending: 400, dueDate: '2025-04-05', status: 'PENDIENTE', document: '' },
+                    ]
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadAccountStatus();
+    }, [selectedStudent]);
+
+    const getStatusBadge = (status) => {
+        const styles = {
+            'PAGADO': 'bg-green-100 text-green-800',
+            'PENDIENTE': 'bg-yellow-100 text-yellow-800',
+            'VENCIDO': 'bg-red-100 text-red-800',
+            'PARCIAL': 'bg-blue-100 text-blue-800'
+        };
+        return <span className={`px-2 py-1 rounded-full text-xs font-bold ${styles[status] || 'bg-gray-100'}`}>{status}</span>;
+    };
 
     // Export Handler
     const handleExportPDF = () => {

@@ -99,7 +99,7 @@ class ContractController extends AbstractController
         ], 201);
     }
 
-    #[Route('/list', name: 'list', methods: ['GET'])]
+    #[Route('', name: 'list', methods: ['GET'])]
     public function list(): JsonResponse
     {
         // Custom list endpoint if API Platform isn't enough or need custom serialization
@@ -116,6 +116,118 @@ class ContractController extends AbstractController
             ];
         }
 
-        return $this->json($result);
+        return $this->json([
+            'success' => true,
+            'data' => $result
+        ]);
+    }
+
+    #[Route('/{id}/download', name: 'download', methods: ['GET'])]
+    public function downloadPdf(int $id): JsonResponse
+    {
+        $contract = $this->contractRepository->find($id);
+        
+        if (!$contract) {
+            return $this->json(['success' => false, 'error' => 'Contrato no encontrado'], 404);
+        }
+
+        // Return PDF data for frontend to generate
+        $student = $contract->getStudent();
+        $cycle = $contract->getSchoolCycle();
+        
+        return $this->json([
+            'success' => true,
+            'data' => [
+                'id' => $contract->getId(),
+                'studentName' => $student ? $student->getName() . ' ' . $student->getLastname() : 'N/A',
+                'studentCarnet' => $student ? $student->getCarnet() : 'N/A',
+                'cycleName' => $cycle ? $cycle->getName() : 'N/A',
+                'status' => $contract->getStatus(),
+                'createdAt' => $contract->getCreatedAt()->format('Y-m-d'),
+                'filePath' => $contract->getFilePath()
+            ]
+        ]);
+    }
+
+    #[Route('/{id}/upload', name: 'upload', methods: ['POST'])]
+    public function uploadSignedContract(int $id, Request $request): JsonResponse
+    {
+        $contract = $this->contractRepository->find($id);
+        
+        if (!$contract) {
+            return $this->json(['success' => false, 'error' => 'Contrato no encontrado'], 404);
+        }
+
+        $uploadedFile = $request->files->get('file');
+        
+        if (!$uploadedFile) {
+            return $this->json(['success' => false, 'error' => 'No se recibió ningún archivo'], 400);
+        }
+
+        // Validate file type
+        $mimeType = $uploadedFile->getMimeType();
+        if ($mimeType !== 'application/pdf') {
+            return $this->json(['success' => false, 'error' => 'Solo se permiten archivos PDF'], 400);
+        }
+
+        // Generate unique filename
+        $student = $contract->getStudent();
+        $cycle = $contract->getSchoolCycle();
+        $filename = sprintf(
+            'signed_%s_%s_%s.pdf',
+            $student ? $student->getId() : 'unknown',
+            $cycle ? $cycle->getName() : date('Y'),
+            time()
+        );
+
+        // Move file to contracts directory
+        $contractsDir = $this->getParameter('kernel.project_dir') . '/public/uploads/contracts';
+        if (!is_dir($contractsDir)) {
+            mkdir($contractsDir, 0755, true);
+        }
+
+        try {
+            $uploadedFile->move($contractsDir, $filename);
+            
+            // Update contract with signed file path
+            $contract->setFilePath('/uploads/contracts/' . $filename);
+            $contract->setStatus('SIGNED');
+            $this->entityManager->flush();
+
+            return $this->json([
+                'success' => true,
+                'message' => 'Contrato firmado subido exitosamente',
+                'data' => [
+                    'id' => $contract->getId(),
+                    'status' => $contract->getStatus(),
+                    'filePath' => $contract->getFilePath()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return $this->json(['success' => false, 'error' => 'Error al guardar el archivo: ' . $e->getMessage()], 500);
+        }
+    }
+
+    #[Route('/{id}/signed', name: 'get_signed', methods: ['GET'])]
+    public function getSignedContract(int $id): JsonResponse
+    {
+        $contract = $this->contractRepository->find($id);
+        
+        if (!$contract) {
+            return $this->json(['success' => false, 'error' => 'Contrato no encontrado'], 404);
+        }
+
+        if ($contract->getStatus() !== 'SIGNED' || !$contract->getFilePath()) {
+            return $this->json(['success' => false, 'error' => 'Contrato no está firmado'], 400);
+        }
+
+        return $this->json([
+            'success' => true,
+            'data' => [
+                'id' => $contract->getId(),
+                'filePath' => $contract->getFilePath(),
+                'signedAt' => $contract->getCreatedAt()->format('Y-m-d H:i:s')
+            ]
+        ]);
     }
 }

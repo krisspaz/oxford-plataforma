@@ -22,6 +22,25 @@ class ScheduleController extends AbstractController
     ) {}
 
     /**
+     * Get the current student's schedule
+     */
+    #[Route('/my-student-schedule', name: 'schedule_my_student_schedule', methods: ['GET'])]
+    public function getMyStudentSchedule(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        
+        // Find student linked to this user
+        $student = $this->em->getRepository(\App\Entity\Student::class)->findOneBy(['email' => $user->getEmail()]);
+        
+        if (!$student) {
+            return $this->json(['error' => 'Student profile not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->getStudentSchedule($student->getId(), $request);
+    }
+
+    /**
      * Get schedule for the current logged-in teacher
      */
     #[Route('/my-schedule', name: 'schedule_my_schedule', methods: ['GET'])]

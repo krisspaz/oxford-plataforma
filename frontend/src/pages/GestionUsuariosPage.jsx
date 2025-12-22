@@ -25,6 +25,16 @@ const GestionUsuariosPage = () => {
 
     const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
 
+    // State for form data
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        role: 'ROLE_USER',
+        password: '',
+        profileImage: null
+    });
+    const [showPassword, setShowPassword] = useState(false);
+
     useEffect(() => {
         loadUsers();
     }, []);
@@ -38,13 +48,7 @@ const GestionUsuariosPage = () => {
             }
         } catch (error) {
             console.error('Error loading users:', error);
-            // Demo data
-            setUsers([
-                { id: 1, email: 'admin@oxford.edu', name: 'Administrador', roles: ['ROLE_SUPER_ADMIN'], isActive: true, lastLogin: '2025-01-16 10:30' },
-                { id: 2, email: 'contabilidad@oxford.edu', name: 'Laura Finanzas', roles: ['ROLE_CONTABILIDAD'], isActive: true, lastLogin: '2025-01-16 09:15' },
-                { id: 3, email: 'docente@oxford.edu', name: 'Prof. García', roles: ['ROLE_DOCENTE'], isActive: true, lastLogin: '2025-01-15 16:00' },
-                { id: 4, email: 'secretaria@oxford.edu', name: 'María Secretaria', roles: ['ROLE_SECRETARIA'], isActive: false, lastLogin: '2025-01-10 11:00' },
-            ]);
+            // Fallback for demo
         } finally {
             setLoading(false);
         }
@@ -52,66 +56,93 @@ const GestionUsuariosPage = () => {
 
     const filteredUsers = users.filter(u =>
         u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.name?.toLowerCase().includes(searchTerm.toLowerCase())
+        (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     const toggleUserStatus = async (id) => {
         setActionLoading(id);
         try {
             await userService.toggleStatus(id);
+            // Optimistic update
             setUsers(users.map(u => u.id === id ? { ...u, isActive: !u.isActive } : u));
         } catch (error) {
-            console.error('Error toggling user status:', error);
-            setUsers(users.map(u => u.id === id ? { ...u, isActive: !u.isActive } : u));
+            console.error('Error toggling status:', error);
         } finally {
             setActionLoading(null);
         }
     };
 
-    const handleSave = async (formData) => {
-        try {
-            if (selectedUser) {
-                await userService.update(selectedUser.id, formData);
-            } else {
-                await userService.create(formData);
-            }
-            loadUsers();
-            setShowModal(false);
+    const openModal = (user = null) => {
+        if (user) {
+            setSelectedUser(user);
+            setFormData({
+                name: user.name || '',
+                email: user.email || '',
+                role: user.roles?.[0] || 'ROLE_USER',
+                password: '', // Don't show existing password
+                profileImage: null
+            });
+        } else {
             setSelectedUser(null);
+            setFormData({
+                name: '',
+                email: '',
+                role: 'ROLE_DOCENTE', // Default sensible
+                password: '',
+                profileImage: null
+            });
+        }
+        setShowModal(true);
+        setShowPassword(false);
+    };
+
+    const generatePassword = () => {
+        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+        let pass = "";
+        for (let i = 0; i < 12; i++) {
+            pass += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        setFormData({ ...formData, password: pass });
+    };
+
+    const handleSave = async () => {
+        try {
+            // Validation
+            if (!formData.email || !formData.name) {
+                alert('Nombre y Email son obligatorios');
+                return;
+            }
+            if (!selectedUser && !formData.password) {
+                alert('La contraseña es obligatoria para nuevos usuarios');
+                return;
+            }
+
+            const payload = {
+                name: formData.name,
+                email: formData.email,
+                role: formData.role,
+                password: formData.password
+            };
+
+            if (selectedUser) {
+                await userService.update(selectedUser.id, payload);
+            } else {
+                await userService.create(payload);
+            }
+
+            setShowModal(false);
+            loadUsers();
         } catch (error) {
             console.error('Error saving user:', error);
-            setShowModal(false);
+            alert('Error al guardar usuario: ' + error.message);
         }
     };
-
-    const getRoleColor = (role) => {
-        const colors = {
-            'ROLE_SUPER_ADMIN': 'bg-red-100 text-red-700',
-            'ROLE_DIRECCION': 'bg-purple-100 text-purple-700',
-            'ROLE_COORDINACION': 'bg-blue-100 text-blue-700',
-            'ROLE_CONTABILIDAD': 'bg-green-100 text-green-700',
-            'ROLE_SECRETARIA': 'bg-yellow-100 text-yellow-700',
-            'ROLE_INFORMATICA': 'bg-cyan-100 text-cyan-700',
-            'ROLE_DOCENTE': 'bg-orange-100 text-orange-700',
-            'ROLE_ALUMNO': 'bg-gray-100 text-gray-700',
-        };
-        return colors[role] || 'bg-gray-100 text-gray-700';
-    };
-
-    if (loading) {
-        return (
-            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-12 text-center`}>
-                <RefreshCw className="animate-spin mx-auto text-teal-500" size={32} />
-                <p className={`mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Cargando usuarios...</p>
-            </div>
-        );
-    }
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Gestión de Usuarios</h1>
-                <button onClick={() => { setSelectedUser(null); setShowModal(true); }} className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg">
+                <button onClick={() => openModal()} className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg">
                     <Plus size={18} /> Nuevo Usuario
                 </button>
             </div>
@@ -139,7 +170,6 @@ const GestionUsuariosPage = () => {
                             <th className={`px-4 py-3 text-left font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Email</th>
                             <th className={`px-4 py-3 text-left font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Rol</th>
                             <th className={`px-4 py-3 text-center font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Estado</th>
-                            <th className={`px-4 py-3 text-left font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Último Acceso</th>
                             <th className={`px-4 py-3 text-center font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Acciones</th>
                         </tr>
                     </thead>
@@ -167,23 +197,13 @@ const GestionUsuariosPage = () => {
                                         <span className="flex items-center justify-center gap-1 text-red-500"><AlertCircle size={16} /> Inactivo</span>
                                     )}
                                 </td>
-                                <td className={`px-4 py-3 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{user.lastLogin || 'Nunca'}</td>
                                 <td className="px-4 py-3">
                                     <div className="flex justify-center gap-1">
-                                        <button onClick={() => { setSelectedUser(user); setShowModal(true); }} className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`} title="Editar">
+                                        <button onClick={() => openModal(user)} className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`} title="Editar">
                                             <Edit size={16} className="text-blue-500" />
                                         </button>
                                         <button onClick={() => toggleUserStatus(user.id)} disabled={actionLoading === user.id} className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`} title="Cambiar estado">
-                                            {actionLoading === user.id ? (
-                                                <RefreshCw size={16} className="animate-spin text-gray-500" />
-                                            ) : user.isActive ? (
-                                                <Lock size={16} className="text-red-500" />
-                                            ) : (
-                                                <Unlock size={16} className="text-green-500" />
-                                            )}
-                                        </button>
-                                        <button className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`} title="Cambiar contraseña">
-                                            <Key size={16} className="text-purple-500" />
+                                            {actionLoading === user.id ? <RefreshCw size={16} className="animate-spin text-gray-500" /> : (user.isActive ? <Lock size={16} className="text-red-500" /> : <Unlock size={16} className="text-green-500" />)}
                                         </button>
                                     </div>
                                 </td>
@@ -204,30 +224,76 @@ const GestionUsuariosPage = () => {
                             <button onClick={() => setShowModal(false)}><X size={20} /></button>
                         </div>
                         <div className="space-y-4">
+                            {/* Profile Image - Mock */}
+                            <div className="flex justify-center mb-4">
+                                <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center relative cursor-pointer group">
+                                    <span className="text-gray-500 text-2xl">{formData.name?.charAt(0) || 'U'}</span>
+                                    <div className="absolute inset-0 bg-black/30 rounded-full hidden group-hover:flex items-center justify-center text-white text-xs">Cambiar</div>
+                                </div>
+                            </div>
+
                             <div>
                                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Nombre</label>
-                                <input className={`${inputClass} w-full`} defaultValue={selectedUser?.name} />
+                                <input
+                                    className={`${inputClass} w-full`}
+                                    value={formData.name}
+                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                />
                             </div>
                             <div>
                                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Email</label>
-                                <input type="email" className={`${inputClass} w-full`} defaultValue={selectedUser?.email} />
+                                <input
+                                    type="email"
+                                    className={`${inputClass} w-full`}
+                                    value={formData.email}
+                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                />
                             </div>
                             <div>
                                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Rol</label>
-                                <select className={`${inputClass} w-full`} defaultValue={selectedUser?.roles?.[0]}>
+                                <select
+                                    className={`${inputClass} w-full`}
+                                    value={formData.role}
+                                    onChange={e => setFormData({ ...formData, role: e.target.value })}
+                                >
                                     {roles.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
                                 </select>
                             </div>
-                            {!selectedUser && (
-                                <div>
-                                    <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Contraseña</label>
-                                    <input type="password" className={`${inputClass} w-full`} />
+                            <div>
+                                <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    {selectedUser ? 'Nueva Contraseña (Opcional)' : 'Contraseña'}
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        className={`${inputClass} w-full pr-20`} // Space for buttons
+                                        value={formData.password}
+                                        onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                    />
+                                    <div className="absolute right-2 top-2 flex gap-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="p-1 text-gray-500 hover:text-teal-600"
+                                            title="Ver contraseña"
+                                        >
+                                            {showPassword ? <Unlock size={16} /> : <Lock size={16} />}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={generatePassword}
+                                            className="p-1 text-gray-500 hover:text-teal-600"
+                                            title="Generar contraseña"
+                                        >
+                                            <RefreshCw size={16} />
+                                        </button>
+                                    </div>
                                 </div>
-                            )}
+                            </div>
                         </div>
                         <div className="flex justify-end gap-3 mt-6">
                             <button onClick={() => setShowModal(false)} className={`px-4 py-2 rounded-lg ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}>Cancelar</button>
-                            <button onClick={() => handleSave({})} className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg">Guardar</button>
+                            <button onClick={handleSave} className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg">Guardar</button>
                         </div>
                     </div>
                 </div>

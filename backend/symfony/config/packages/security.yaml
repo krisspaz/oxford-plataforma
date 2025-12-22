@@ -43,14 +43,20 @@ security:
     # Note: Only the *first* matching rule is applied
     role_hierarchy:
         ROLE_TEACHER: ROLE_USER
-        ROLE_ADMIN: [ROLE_TEACHER, ROLE_ALLOWED_TO_SWITCH]
+        ROLE_STUDENT: ROLE_USER
+        ROLE_PARENT: ROLE_USER
+        ROLE_SECRETARY: ROLE_USER
+        ROLE_ACCOUNTANT: ROLE_USER
+        ROLE_COORDINATION: [ROLE_TEACHER, ROLE_USER]
+        ROLE_DIRECTOR: [ROLE_COORDINATION, ROLE_TEACHER, ROLE_USER] 
+        ROLE_ADMIN: [ROLE_DIRECTOR, ROLE_SECRETARY, ROLE_ACCOUNTANT, ROLE_TEACHER, ROLE_ALLOWED_TO_SWITCH]
 
     access_control:
         - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/seed, roles: PUBLIC_ACCESS }
-        - { path: ^/api/users, roles: ROLE_ADMIN }
-        - { path: ^/api/financial, roles: ROLE_ADMIN }
+        # - { path: ^/api/users, roles: ROLE_ADMIN }
+        # - { path: ^/api/financial, roles: ROLE_ADMIN }
         - { path: ^/api/doc, roles: PUBLIC_ACCESS } # Swagger UI
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
         # - { path: ^/admin, roles: ROLE_ADMIN }

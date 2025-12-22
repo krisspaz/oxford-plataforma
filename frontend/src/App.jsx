@@ -21,10 +21,9 @@ const PageLoader = () => (
 // ========================================
 
 // Core pages
-// Core pages
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Login'));
-const ComingSoon = lazy(() => import('./pages/ComingSoon'));
+const ComingSoonPage = lazy(() => import('./pages/ComingSoonPage'));
 
 // Secretaría
 const InscripcionesPage = lazy(() => import('./pages/InscripcionesPage'));
@@ -43,6 +42,11 @@ const PaquetesPage = lazy(() => import('./pages/PaquetesPage'));
 const ExonerationPage = lazy(() => import('./pages/ExonerationPage'));
 const SolicitudesPage = lazy(() => import('./pages/SolicitudesPage'));
 const InsolventesPage = lazy(() => import('./pages/InsolventesPage'));
+const ComprobantesEmitidosPage = lazy(() => import('./pages/ComprobantesEmitidosPage'));
+const AsignarPaquetesPage = lazy(() => import('./pages/AsignarPaquetesPage'));
+const ConveniosPage = lazy(() => import('./pages/ConveniosPage'));
+const AsignarConvenioPage = lazy(() => import('./pages/AsignarConvenioPage'));
+const PaquetesSeleccionadosPage = lazy(() => import('./pages/PaquetesSeleccionadosPage'));
 
 // Académico
 const Academic = lazy(() => import('./pages/Academic'));
@@ -55,6 +59,11 @@ const HorariosPage = lazy(() => import('./pages/HorariosPage'));
 const MiHorarioPage = lazy(() => import('./pages/MiHorarioPage'));
 const MisAlumnosPage = lazy(() => import('./pages/MisAlumnosPage'));
 const GestionTareasPage = lazy(() => import('./pages/GestionTareasPage'));
+const CursosNivelesPage = lazy(() => import('./pages/CursosNivelesPage'));
+const SeccionesPage = lazy(() => import('./pages/SeccionesPage'));
+const GestionCursosPage = lazy(() => import('./pages/GestionCursosPage'));
+const IAHorariosPage = lazy(() => import('./pages/IAHorariosPage'));
+const AsignacionMateriasPage = lazy(() => import('./pages/AsignacionMateriasPage'));
 
 // Administración
 const GestionUsuariosPage = lazy(() => import('./pages/GestionUsuariosPage'));
@@ -69,6 +78,8 @@ const CierreEscolarPage = lazy(() => import('./pages/CierreEscolarPage'));
 const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const ReportsPage = lazy(() => import('./pages/ReportsPage'));
 const TareasPage = lazy(() => import('./pages/TareasPage'));
+const MisHijosPage = lazy(() => import('./pages/MisHijosPage'));
+const MonitoreoPage = lazy(() => import('./pages/MonitoreoPage'));
 
 // 404
 const NotFound = () => (
@@ -87,6 +98,42 @@ function App() {
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/login" element={<Login />} />
+                <Route path="/mis-hijos" element={
+                  <ProtectedRoute>
+                    <MisHijosPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/monitoreo" element={
+                  <ProtectedRoute>
+                    <MonitoreoPage />
+                  </ProtectedRoute>
+                } />
+
+                {/* Financial Routes */}
+                <Route path="/financiero/comprobantes" element={<ProtectedRoute><ComprobantesEmitidosPage /></ProtectedRoute>} />
+                <Route path="/financiero/paquetes" element={<ProtectedRoute><AsignarPaquetesPage /></ProtectedRoute>} />
+                <Route path="/financiero/convenios" element={<ProtectedRoute><ConveniosPage /></ProtectedRoute>} />
+                <Route path="/financiero/asignar-convenio" element={<ProtectedRoute><AsignarConvenioPage /></ProtectedRoute>} />
+                <Route path="/financiero/paquetes-seleccionados" element={<ProtectedRoute><PaquetesSeleccionadosPage /></ProtectedRoute>} />
+                <Route path="/financiero/costos" element={<ProtectedRoute><ComingSoonPage title="Costos por Nivel" /></ProtectedRoute>} />
+
+                {/* Academic Routes (Director/Coordination) */}
+                <Route path="/academico/cursos" element={<ProtectedRoute><CursosNivelesPage /></ProtectedRoute>} />
+                <Route path="/academico/secciones" element={<ProtectedRoute><SeccionesPage /></ProtectedRoute>} />
+                <Route path="/academico/gestion-cursos" element={<ProtectedRoute><GestionCursosPage /></ProtectedRoute>} />
+                <Route path="/academico/horarios-ia" element={<ProtectedRoute><IAHorariosPage /></ProtectedRoute>} />
+                <Route path="/academico/asignacion-materias" element={<ProtectedRoute><AsignacionMateriasPage /></ProtectedRoute>} />
+
+                {/* Teacher Routes */}
+                <Route path="/profesor/contenido" element={<ProtectedRoute><ComingSoonPage title="Asignar Contenido" /></ProtectedRoute>} />
+                <Route path="/profesor/tareas" element={<ProtectedRoute><GestionTareasPage /></ProtectedRoute>} />
+
+                {/* Student/Parent Portal Routes */}
+                <Route path="/portal/tareas" element={<ProtectedRoute><TareasPage /></ProtectedRoute>} />
+                <Route path="/portal/notas" element={<ProtectedRoute><ComingSoonPage title="Mis Notas" /></ProtectedRoute>} />
+                <Route path="/portal/horario" element={<ProtectedRoute><MiHorarioPage /></ProtectedRoute>} />
+                <Route path="/portal/contrato" element={<ProtectedRoute><ContractsPage /></ProtectedRoute>} />
+
                 <Route path="/" element={
                   <ProtectedRoute>
                     <Layout />
@@ -98,14 +145,14 @@ function App() {
                   {/* Secretaría */}
                   <Route path="secretaria/inscripciones" element={<InscripcionesPage />} />
                   <Route path="secretaria/matriculacion" element={<MatriculacionPage />} />
-                  <Route path="secretaria/matricular" element={<MatriculacionPage />} /> {/* Fix path alias */}
+                  <Route path="secretaria/matricular" element={<MatriculacionPage />} />
                   <Route path="secretaria/students" element={<Students />} />
                   <Route path="secretaria/familias" element={<FamiliasPage />} />
                   <Route path="secretaria/contratos" element={<ContractsPage />} />
                   <Route path="secretaria/documentos" element={<InscripcionesPage />} />
-                  <Route path="secretaria/asignar-paquetes" element={<ComingSoon />} />
-                  <Route path="secretaria/convenios" element={<ComingSoon />} />
-                  <Route path="secretaria/asignar-convenio" element={<ComingSoon />} />
+                  <Route path="secretaria/asignar-paquetes" element={<AsignarPaquetesPage />} />
+                  <Route path="secretaria/convenios" element={<ConveniosPage />} />
+                  <Route path="secretaria/asignar-convenio" element={<AsignarConvenioPage />} />
 
                   {/* Finanzas */}
                   <Route path="finanzas" element={<Financial />} />
@@ -113,15 +160,15 @@ function App() {
                   <Route path="finanzas/estado-cuenta" element={<EstadoCuentaPage />} />
                   <Route path="finanzas/corte-dia" element={<CorteDiaPage />} />
                   <Route path="finanzas/comprobantes" element={<ComprobantesPage />} />
-                  <Route path="finanzas/comprobantes-pendientes" element={<ComingSoon />} />
-                  <Route path="finanzas/comprobantes-emitidos" element={<ComingSoon />} />
+                  <Route path="finanzas/comprobantes-pendientes" element={<ComprobantesPage />} />
+                  <Route path="finanzas/comprobantes-emitidos" element={<ComprobantesEmitidosPage />} />
                   <Route path="finanzas/paquetes" element={<PaquetesPage />} />
-                  <Route path="finanzas/costos" element={<ComingSoon />} />
+                  <Route path="finanzas/costos" element={<ComingSoonPage title="Costos por Nivel" />} />
                   <Route path="finanzas/exonerados" element={<ExonerationPage />} />
-                  <Route path="finanzas/exoneraciones" element={<ComingSoon />} />
+                  <Route path="finanzas/exoneraciones" element={<ExonerationPage />} />
                   <Route path="finanzas/solicitudes" element={<SolicitudesPage />} />
                   <Route path="finanzas/insolventes" element={<InsolventesPage />} />
-                  <Route path="finanzas/paquetes-seleccionados" element={<ComingSoon />} />
+                  <Route path="finanzas/paquetes-seleccionados" element={<PaquetesSeleccionadosPage />} />
 
                   {/* Académico */}
                   <Route path="academico" element={<Academic />} />
@@ -133,32 +180,30 @@ function App() {
                   <Route path="academico/boletas" element={<ReportsPage />} />
                   <Route path="academico/cuadros" element={<ReportsPage />} />
                   <Route path="academico/cronograma" element={<TareasPage />} />
-                  <Route path="academico/cursos" element={<ComingSoon />} />
-                  <Route path="academico/secciones" element={<ComingSoon />} />
-                  <Route path="academico/asignacion-materias" element={<ComingSoon />} />
-                  <Route path="academico/asignacion-materias" element={<ComingSoon />} />
+                  <Route path="academico/cursos" element={<CursosNivelesPage />} />
+                  <Route path="academico/secciones" element={<SeccionesPage />} />
+                  <Route path="academico/asignacion-materias" element={<AsignacionMateriasPage />} />
                   <Route path="academico/horarios" element={<HorariosPage />} />
-                  <Route path="academico/gestion-cursos" element={<ComingSoon />} />
+                  <Route path="academico/gestion-cursos" element={<GestionCursosPage />} />
 
-                  {/* Docente */}
                   {/* Docente */}
                   <Route path="docente/notas" element={<CargaNotasPage />} />
                   <Route path="docente/horario" element={<MiHorarioPage />} />
                   <Route path="docente/alumnos" element={<MisAlumnosPage />} />
                   <Route path="docente/tareas" element={<GestionTareasPage />} />
-                  <Route path="docente/tareas-calificadas" element={<ComingSoon />} />
-                  <Route path="docente/contenido" element={<ComingSoon />} />
+                  <Route path="docente/tareas-calificadas" element={<GestionTareasPage />} />
+                  <Route path="docente/contenido" element={<ComingSoonPage title="Asignar Contenido" />} />
                   <Route path="docente/notas-finales" element={<NotasFinalesPage />} />
 
                   {/* Alumno */}
-                  <Route path="alumno/notas" element={<ComingSoon />} />
-                  <Route path="alumno/horario" element={<ComingSoon />} />
-                  <Route path="alumno/estado-cuenta" element={<ComingSoon />} />
-                  <Route path="alumno/tareas" element={<ComingSoon />} />
+                  <Route path="alumno/notas" element={<ReportsPage />} />
+                  <Route path="alumno/horario" element={<MiHorarioPage />} />
+                  <Route path="alumno/estado-cuenta" element={<EstadoCuentaPage />} />
+                  <Route path="alumno/tareas" element={<TareasPage />} />
 
                   {/* Padres */}
-                  <Route path="padres/hijos" element={<ComingSoon />} />
-                  <Route path="padres/contrato" element={<ComingSoon />} />
+                  <Route path="padres/hijos" element={<MisHijosPage />} />
+                  <Route path="padres/contrato" element={<ContractsPage />} />
 
                   {/* General / Shared */}
                   <Route path="carga-notas" element={<CargaNotasPage />} />
@@ -173,12 +218,12 @@ function App() {
                   <Route path="admin/ajustes" element={<SettingsPage />} />
                   <Route path="admin/ajustes-generales" element={<SettingsPage />} />
                   <Route path="admin/cierre-escolar" element={<CierreEscolarPage />} />
-                  <Route path="admin/cargos" element={<ComingSoon />} />
-                  <Route path="admin/notificaciones-reset" element={<ComingSoon />} />
+                  <Route path="admin/cargos" element={<ComingSoonPage title="Gestión de Cargos" />} />
+                  <Route path="admin/notificaciones-reset" element={<ComingSoonPage title="Reset de Notificaciones" />} />
                   <Route path="admin/privilegios" element={<PrivilegiosPage />} />
                   <Route path="admin/menus" element={<GestionMenusPage />} />
-                  <Route path="admin/estadisticas" element={<ComingSoon />} />
-                  <Route path="admin/logs" element={<ComingSoon />} />
+                  <Route path="admin/estadisticas" element={<MonitoreoPage />} />
+                  <Route path="admin/logs" element={<ComingSoonPage title="Logs del Sistema" />} />
                   <Route path="settings" element={<SettingsPage />} />
 
                   {/* Otros */}

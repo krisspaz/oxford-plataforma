@@ -1,4 +1,4 @@
-import { Users, AlertTriangle, GraduationCap, UserPlus, CreditCard, RefreshCw, XCircle, TrendingDown, Brain, ChevronRight, BookOpen, FileText, Calendar, Clock, Receipt, Edit, Package, Layers, Shield, Database, School } from 'lucide-react';
+import { Users, AlertTriangle, GraduationCap, UserPlus, CreditCard, RefreshCw, XCircle, TrendingDown, Brain, ChevronRight, BookOpen, FileText, Calendar, Clock, Receipt, Edit, Package, Layers, Shield, Database, School, Activity, BarChart, TrendingUp, Award, Bell, CheckCircle, Lightbulb, Zap, Rocket, Check, AlertCircle, Sparkles, Filter, Search, MoreVertical, Layout, Grid } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
@@ -105,14 +105,14 @@ const SecretariaDashboard = ({ navigate, darkMode }) => (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard title="Inscripciones Hoy" value="3" icon={UserPlus} color="text-blue-500" bg={darkMode ? 'bg-blue-900/30' : 'bg-blue-100'} darkMode={darkMode} onClick={() => navigate('/secretaria/inscripciones')} />
             <StatCard title="Familias" value="89" icon={Users} color="text-teal-500" bg={darkMode ? 'bg-teal-900/30' : 'bg-teal-100'} darkMode={darkMode} onClick={() => navigate('/secretaria/familias')} />
-            <StatCard title="Pagos Pendientes" value="12" icon={CreditCard} color="text-orange-500" bg={darkMode ? 'bg-orange-900/30' : 'bg-orange-100'} darkMode={darkMode} onClick={() => navigate('/finanzas/pagos')} />
+            {/* <StatCard title="Pagos Pendientes" value="12" icon={CreditCard} color="text-orange-500" bg={darkMode ? 'bg-orange-900/30' : 'bg-orange-100'} darkMode={darkMode} onClick={() => navigate('/finanzas/pagos')} /> */}
             <StatCard title="Contratos" value="24" icon={FileText} color="text-purple-500" bg={darkMode ? 'bg-purple-900/30' : 'bg-purple-100'} darkMode={darkMode} onClick={() => navigate('/secretaria/contratos')} />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <QuickAction title="Nueva Inscripción" icon={UserPlus} color="text-blue-500" bgColor={darkMode ? 'bg-blue-900/50' : 'bg-blue-100'} onClick={() => navigate('/secretaria/inscripciones')} darkMode={darkMode} />
-            <QuickAction title="Registrar Pago" icon={CreditCard} color="text-green-500" bgColor={darkMode ? 'bg-green-900/50' : 'bg-green-100'} onClick={() => navigate('/finanzas/pagos')} darkMode={darkMode} />
+            {/* <QuickAction title="Registrar Pago" icon={CreditCard} color="text-green-500" bgColor={darkMode ? 'bg-green-900/50' : 'bg-green-100'} onClick={() => navigate('/finanzas/pagos')} darkMode={darkMode} /> */}
             <QuickAction title="Generar Contrato" icon={FileText} color="text-purple-500" bgColor={darkMode ? 'bg-purple-900/50' : 'bg-purple-100'} onClick={() => navigate('/secretaria/contratos')} darkMode={darkMode} />
-            <QuickAction title="Estado de Cuenta" icon={Receipt} color="text-teal-500" bgColor={darkMode ? 'bg-teal-900/50' : 'bg-teal-100'} onClick={() => navigate('/finanzas/estado-cuenta')} darkMode={darkMode} />
+            {/* <QuickAction title="Estado de Cuenta" icon={Receipt} color="text-teal-500" bgColor={darkMode ? 'bg-teal-900/50' : 'bg-teal-100'} onClick={() => navigate('/finanzas/estado-cuenta')} darkMode={darkMode} /> */}
         </div>
     </>
 );
@@ -120,10 +120,10 @@ const SecretariaDashboard = ({ navigate, darkMode }) => (
 const ContabilidadDashboard = ({ navigate, darkMode }) => (
     <>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard title="Ingresos Hoy" value="Q 8,450" icon={() => <span className="text-2xl font-bold text-green-500">Q</span>} color="text-green-500" bg={darkMode ? 'bg-green-900/30' : 'bg-green-100'} isCustomIcon darkMode={darkMode} onClick={() => navigate('/finanzas/corte-dia')} />
-            <StatCard title="Facturas" value="15" icon={Receipt} color="text-blue-500" bg={darkMode ? 'bg-blue-900/30' : 'bg-blue-100'} darkMode={darkMode} onClick={() => navigate('/finanzas/comprobantes')} />
-            <StatCard title="Anulaciones" value="2" icon={XCircle} color="text-red-500" bg={darkMode ? 'bg-red-900/30' : 'bg-red-100'} darkMode={darkMode} onClick={() => navigate('/finanzas/solicitudes')} />
-            <StatCard title="Exoneraciones" value="5" icon={Package} color="text-purple-500" bg={darkMode ? 'bg-purple-900/30' : 'bg-purple-100'} darkMode={darkMode} onClick={() => navigate('/finanzas/exoneraciones')} />
+            <StatCard title="Ingresos Hoy" value="Q 8,450" icon={() => <span className="text-2xl font-bold text-green-500">Q</span>} color="text-green-500" bg={darkMode ? 'bg-green-900/30' : 'bg-green-100'} isCustomIcon darkMode={darkMode} onClick={() => { }} />
+            <StatCard title="Facturas" value="15" icon={Receipt} color="text-blue-500" bg={darkMode ? 'bg-blue-900/30' : 'bg-blue-100'} darkMode={darkMode} onClick={() => { }} />
+            <StatCard title="Anulaciones" value="2" icon={XCircle} color="text-red-500" bg={darkMode ? 'bg-red-900/30' : 'bg-red-100'} darkMode={darkMode} onClick={() => { }} />
+            <StatCard title="Exoneraciones" value="5" icon={Package} color="text-purple-500" bg={darkMode ? 'bg-purple-900/30' : 'bg-purple-100'} darkMode={darkMode} onClick={() => { }} />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <QuickAction title="Corte del Día" icon={FileText} color="text-green-500" bgColor={darkMode ? 'bg-green-900/50' : 'bg-green-100'} onClick={() => navigate('/finanzas/corte-dia')} darkMode={darkMode} />

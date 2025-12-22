@@ -22,7 +22,7 @@ export const gradeRecordService = {
     getByStudent: (studentId) => api.get(`/grade-records?student=${studentId}`),
 
     // Get teacher summary (final grades)
-    getTeacherSummary: (assignmentId) => api.get(`/grade-records/teacher-summary?assignmentId=${assignmentId}`),
+    getTeacherSummary: (assignmentId) => api.get(`/teacher/summary?assignmentId=${assignmentId}`),
 };
 
 export default gradeRecordService;

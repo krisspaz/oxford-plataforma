@@ -13,3 +13,7 @@ controllers:
 # JWT Login Route
 api_login_check:
     path: /api/login_check
+
+app_controllers:
+    resource: ../src/Controller/
+    type: attribute

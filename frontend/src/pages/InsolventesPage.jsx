@@ -12,6 +12,30 @@ const InsolventesPage = () => {
 
     // ... (state)
 
+    // Mock Data Loading
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                // await api call here
+                // Simulate API delay
+                // await new Promise(resolve => setTimeout(resolve, 500));
+                setStudents([
+                    { id: 1, studentName: 'Carlos Ruiz', studentEmail: 'carlos@test.com', description: 'Mensualidad Febrero', dueDate: '2025-02-05', amount: 450.00 },
+                    { id: 2, studentName: 'Maria Jose', studentEmail: 'maria@test.com', description: 'Inscripción', dueDate: '2025-01-15', amount: 800.00 },
+                ]);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        loadData();
+    }, []);
+
+    const filteredStudents = students.filter(student =>
+        student.studentName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const totalDeuda = filteredStudents.reduce((acc, curr) => acc + curr.amount, 0);
+
     // Export Handler
     const handleExportPDF = () => {
         if (filteredStudents.length === 0) {

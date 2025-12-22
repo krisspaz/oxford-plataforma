@@ -23,12 +23,19 @@ class UserController extends AbstractController
     #[Route('', methods: ['GET'])]
     public function index(): JsonResponse
     {
-        $users = $this->userRepository->findAll();
-        
-        return $this->json([
-            'success' => true,
-            'data' => array_map(fn($u) => $this->serializeUser($u), $users)
-        ]);
+        try {
+            $users = $this->userRepository->findAll();
+            
+            return $this->json([
+                'success' => true,
+                'data' => array_map(fn($u) => $this->serializeUser($u), $users)
+            ]);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     #[Route('/{id}', methods: ['GET'])]

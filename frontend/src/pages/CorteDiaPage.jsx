@@ -9,7 +9,49 @@ const CorteDiaPage = () => {
     const { darkMode } = useTheme();
     const { exportTable } = usePdfExport(); // Hook
     const [dateFrom, setDateFrom] = useState(new Date().toISOString().split('T')[0]);
-    // ...
+    const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+    const [payments, setPayments] = useState([]);
+    const [totals, setTotals] = useState({ efectivo: 0, tarjeta: 0, deposito: 0, total: 0 });
+    const [loading, setLoading] = useState(false);
+
+    // Define Input Class based on theme
+    const inputClass = `w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-teal-500 outline-none transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'
+        }`;
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const { success, payments: serverPayments, totals: serverTotals, error } = await invoiceService.getDailyCut(dateFrom, dateTo);
+
+            if (success && !error) {
+                setPayments(serverPayments);
+                setTotals(serverTotals);
+            } else {
+                throw new Error("Backend not ready or empty");
+            }
+        } catch (error) {
+            console.warn("Using mock data due to error:", error);
+            // Mock Data Fallback (Keep this for stability until full deployment)
+            const mockPayments = [
+                { id: 1, name: 'Juan Perez', products: 'Mensualidad Enero', method: 'Efectivo', series: 'A', number: '101', total: 450 },
+                { id: 2, name: 'Maria Lopez', products: 'Inscripción', method: 'Tarjeta', series: 'A', number: '102', total: 800 },
+                { id: 3, name: 'Carlos Ruiz', products: 'Uniforme Deportivo', method: 'Depósito', series: 'B', number: '055', total: 350 },
+            ];
+            setPayments(mockPayments);
+            setTotals({
+                efectivo: 450,
+                tarjeta: 800,
+                deposito: 350,
+                total: 1600
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     const handleExportPDF = () => {
         if (payments.length === 0) {

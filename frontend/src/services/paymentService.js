@@ -17,6 +17,7 @@ export const paymentService = {
     getByStudent: (studentId) => api.get(`/payments?student=${studentId}`),
 
     // Get pending quotas for student
+    // Get pending quotas for student
     getPendingQuotas: (studentId) => api.get(`/payments/pending/${studentId}`),
 
     // Apply payment to quotas
@@ -24,6 +25,9 @@ export const paymentService = {
 
     // Get daily totals
     getDailyTotals: (date) => api.get(`/payments/totals?date=${date}`),
+
+    // Get overdue payments (Insolventes)
+    getOverduePayments: () => api.get('/payments/overdue'),
 };
 
 export default paymentService;

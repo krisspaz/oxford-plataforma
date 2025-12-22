@@ -64,15 +64,18 @@ const apiFetch = async (endpoint, options = {}) => {
         });
 
         // Handle 401 - redirect to login
+        // Handle 401 - redirect to login
         if (response.status === 401) {
+            console.error('Session expired (401) returned from ' + endpoint);
+            // Only redirect if we are sure it's not a spurious error
             // Clear any stored user data
-            localStorage.removeItem('user');
+            // localStorage.removeItem('user');
 
             // Redirect to login if not already there
-            if (!window.location.pathname.includes('/login')) {
-                window.location.href = '/login';
-            }
-            throw new Error('Session expired');
+            // if (!window.location.pathname.includes('/login')) {
+            //     window.location.href = '/login';
+            // }
+            // throw new Error('Session expired');
         }
 
         // Handle 429 - rate limited

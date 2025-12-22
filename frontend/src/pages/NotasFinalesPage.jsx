@@ -10,7 +10,46 @@ const NotasFinalesPage = () => {
     const { exportTable } = usePdfExport(); // Hook
     const [loading, setLoading] = useState(false);
 
-    // ... (state and props)
+    const [selectedSubject, setSelectedSubject] = useState('');
+    const [subjects, setSubjects] = useState([]);
+    const [grades, setGrades] = useState([]);
+
+    // Mock subjects loading (TODO: Use teacherService.getAssignments())
+    useEffect(() => {
+        // Simulating API load for subjects
+        setSubjects([
+            { id: 1, name: 'Matemáticas', grade: '1ro Básico A' },
+            { id: 2, name: 'Ciencias Naturales', grade: '2do Básico B' },
+            { id: 3, name: 'Idioma Español', grade: '3ro Primaria A' }
+        ]);
+    }, []);
+
+    // Load grades when subject changes
+    useEffect(() => {
+        if (!selectedSubject) {
+            setGrades([]);
+            return;
+        }
+
+        const loadGrades = async () => {
+            setLoading(true);
+            try {
+                const response = await gradeRecordService.getTeacherSummary(selectedSubject);
+                if (response.success) {
+                    setGrades(response.data);
+                } else {
+                    setGrades([]);
+                }
+            } catch (error) {
+                console.error("Error loading final grades:", error);
+                setGrades([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadGrades();
+    }, [selectedSubject]);
 
     // Export Function
     const handleExportPDF = () => {
