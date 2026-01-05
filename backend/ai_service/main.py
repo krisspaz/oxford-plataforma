@@ -11,6 +11,8 @@ from database import db
 from nlp_engine import nlp_engine
 from preference_learner import PreferenceLearner
 from risk_analyzer import RiskAnalyzer
+from teacher_analyzer import TeacherAnalyzer
+from schedule_scorer import ScheduleScorer
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -381,6 +383,8 @@ def simulate_change():
         "recommendation": "Try Wednesday instead"
     })
 risk_analyzer = RiskAnalyzer()
+teacher_analyzer = TeacherAnalyzer()
+schedule_scorer = ScheduleScorer()
 
 @app.route("/predict-risk", methods=["POST"])
 def predict_risk():
@@ -393,6 +397,28 @@ def predict_risk():
         return jsonify(analysis)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/analyze-burnout", methods=["POST"])
+def analyze_burnout():
+    """
+    Analyzes a specific teacher's workload provided in the request body.
+    """
+    data = request.json
+    teacher_id = data.get("teacher_id")
+    schedule = data.get("schedule", [])
+    result = teacher_analyzer.analyze_workload(teacher_id, schedule)
+    return jsonify(result)
+
+@app.route("/institutional-health", methods=["GET"])
+def institutional_health():
+    """
+    Returns the Global ISA (Indice de Salud Académica) score.
+    """
+    # Mock aggregation of stats
+    teacher_stats = {'avg_burnout': 15}
+    student_stats = {} 
+    result = schedule_scorer.calculate_isa([], teacher_stats, student_stats)
+    return jsonify(result)
 
 if __name__ == "__main__":
     app.run(port=8001, debug=True)

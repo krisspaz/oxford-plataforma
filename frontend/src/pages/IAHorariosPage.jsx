@@ -170,6 +170,18 @@ const IAHorariosPage = () => {
                             OXFORD AI <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400">BETA 2.0</span>
                         </h2>
                         {/* Status text */}
+                        <div className="flex items-center gap-3 text-xs md:text-sm text-gray-400 font-medium">
+                            <span className="flex items-center gap-1.5">
+                                <span className={`w-2 h-2 rounded-full ${coreState === 'idle' ? 'bg-green-500 shadow-lg shadow-green-500/50' : coreState === 'processing' ? 'bg-indigo-500 animate-pulse' : 'bg-red-500'}`}></span>
+                                {coreState === 'idle' ? 'Red Neuronal Activa' : coreState === 'processing' ? 'Procesando...' : 'Error de Conexión'}
+                            </span>
+
+                            {/* ISA Indicator */}
+                            <span className="hidden md:flex items-center gap-1.5 border-l border-gray-700/50 pl-3">
+                                <Shield size={12} className="text-teal-400" />
+                                <span className="text-teal-400">ISA: 95.0 (Excelente)</span>
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <div className="flex gap-2">
