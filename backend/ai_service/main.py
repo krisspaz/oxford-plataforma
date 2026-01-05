@@ -13,6 +13,8 @@ from preference_learner import PreferenceLearner
 from risk_analyzer import RiskAnalyzer
 from teacher_analyzer import TeacherAnalyzer
 from schedule_scorer import ScheduleScorer
+from institutional_memory import InstitutionalMemory
+from rule_contract import RuleContract
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -385,6 +387,9 @@ def simulate_change():
 risk_analyzer = RiskAnalyzer()
 teacher_analyzer = TeacherAnalyzer()
 schedule_scorer = ScheduleScorer()
+memory = InstitutionalMemory()
+rule_contract = RuleContract()
+
 
 @app.route("/predict-risk", methods=["POST"])
 def predict_risk():
@@ -419,6 +424,20 @@ def institutional_health():
     student_stats = {} 
     result = schedule_scorer.calculate_isa([], teacher_stats, student_stats)
     return jsonify(result)
+
+@app.route("/memory/patterns", methods=["GET"])
+def get_memory_patterns():
+    """
+    Returns learned patterns from institutional history.
+    """
+    return jsonify(memory.get_learned_patterns())
+
+@app.route("/rules/contract", methods=["GET"])
+def get_rule_contract():
+    """
+    Returns the current Institutional Rule Contract.
+    """
+    return jsonify(rule_contract.get_contract())
 
 if __name__ == "__main__":
     app.run(port=8001, debug=True)
