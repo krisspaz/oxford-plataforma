@@ -17,6 +17,11 @@ from institutional_memory import InstitutionalMemory
 from rule_contract import RuleContract
 from assistant_factory import AssistantFactory
 from negotiation_engine import NegotiationEngine
+from decision_logger import DecisionLogger
+from legal_defense import LegalDefenseGen
+from ethics_validator import EthicsValidator
+from simulation_engine import SimulationEngine
+from localization_adapter import LocalizationAdapter
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -395,6 +400,11 @@ memory = InstitutionalMemory()
 rule_contract = RuleContract()
 assistant_factory = AssistantFactory()
 negotiation_engine = NegotiationEngine()
+decision_logger = DecisionLogger()
+legal_defense = LegalDefenseGen()
+ethics_validator = EthicsValidator()
+simulation_engine = SimulationEngine()
+localization_adapter = LocalizationAdapter()
 
 @app.route("/negotiate", methods=["POST"])
 def negotiate_change():
@@ -455,6 +465,28 @@ def get_rule_contract():
     Returns the current Institutional Rule Contract.
     """
     return jsonify(rule_contract.get_contract())
+
+@app.route("/audit/log", methods=["GET"])
+def get_audit_log():
+    return jsonify({"log": decision_logger.get_audit_trail()})
+
+@app.route("/legal/defense", methods=["POST"])
+def get_legal_defense():
+    data = request.json
+    return jsonify(legal_defense.generate_defense(data.get('id'), data))
+
+@app.route("/ethics/validate", methods=["POST"])
+def validate_ethics():
+    allowed, msg = ethics_validator.validate_request(request.json)
+    return jsonify({"allowed": allowed, "message": msg})
+
+@app.route("/simulation/future", methods=["GET"])
+def simulate_future():
+    return jsonify(simulation_engine.simulate_future_scenario(3))
+
+@app.route("/context/maturity", methods=["GET"])
+def get_maturity():
+    return jsonify(localization_adapter.get_maturity_index())
 
 if __name__ == "__main__":
     app.run(port=8001, debug=True)

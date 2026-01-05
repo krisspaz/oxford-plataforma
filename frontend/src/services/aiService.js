@@ -238,6 +238,23 @@ const aiService = {
         }
     },
 
+    async getInstitutionalHealth() {
+        try {
+            const response = await api.get('/ai/institutional-health');
+            return response.data;
+        } catch (error) {
+            console.error('ISA error:', error);
+            return null;
+        }
+    },
+
+    // --- Enterprise Extensions (Phases 11-14) ---
+    async getAuditLog() { return (await api.get('/ai/audit/log')).data; },
+    async getLegalDefense(data) { return (await api.post('/ai/legal/defense', data)).data; },
+    async validateEthics(command) { return (await api.post('/ai/ethics/validate', { command })).data; },
+    async getFutureSimulation() { return (await api.get('/ai/simulation/future')).data; },
+    async getMaturityIndex() { return (await api.get('/ai/context/maturity')).data; },
+
     /**
      * Get fallback response when AI is unavailable
      * @param {string} message - Original message
