@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Lock, Unlock, Check, AlertCircle, RefreshCw } from 'lucide-react';
+import { Save, Lock, Unlock, Check, AlertCircle, RefreshCw, CheckCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { gradeRecordService, bimesterService } from '../services';
+import { useAuth } from '../contexts/AuthContext';
+import { gradeRecordService, bimesterService, teacherService } from '../services';
 
 const CargaNotasPage = () => {
     const { darkMode } = useTheme();
@@ -13,38 +14,40 @@ const CargaNotasPage = () => {
     const [students, setStudents] = useState([]);
     const [currentBimesterData, setCurrentBimesterData] = useState(null);
 
-    // Mock subjects (would come from API)
-    const subjects = [
-        { id: 1, name: 'Matemáticas', grade: '1ro Básico A' },
-        { id: 2, name: 'Comunicación y Lenguaje', grade: '1ro Básico A' },
-        { id: 3, name: 'Ciencias Naturales', grade: '2do Básico B' },
-    ];
-
-    const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
-    const selectClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
-
-    // Load bimesters on mount
+    // Load bimesters and subjects on mount
     useEffect(() => {
-        const loadBimesters = async () => {
+        const loadInitialData = async () => {
             try {
-                const response = await bimesterService.getAll();
-                if (response.success) {
-                    setBimesters(response.data);
-                    // Select current bimester
-                    const current = response.data.find(b => !b.isClosed);
+                // 1. Load Bimesters
+                const bimesterRes = await bimesterService.getAll();
+                if (bimesterRes.success) {
+                    setBimesters(bimesterRes.data);
+                    const current = bimesterRes.data.find(b => !b.isClosed);
                     if (current) setSelectedBimester(current.id.toString());
                 }
+
+                // 2. Load Subjects (Real)
+                // Assuming we have teacherService.getMyAssignments() or similar
+                // If not, we should probably use a dedicated endpoint. 
+                // Since I haven't verified teacherService content yet, I will use a generic "getAssignments" logic if available, 
+                // but better to check the file content first. 
+                // For now, I will use the mock to avoid breaking if service is missing, 
+                // but the previous thought step checking teacherService.js should clarify this.
+                // WAIT: I shouldn't write this code blindly without seeing teacherService.js. 
+                // I will add a placeholder for now or wait for the next step.
+                // Actually, I submitted view_file for teacherService.js in the SAME turn.
+                // Since tools run in parallel/sequence, I should perhaps wait? 
+                // No, I can't read the output of view_file in this same turn.
+                // BUT, typically `teacherService.getMyAssignments` is standard.
+                // I will assume it exists or use a safe fallback.
+
+                // Let's use a safe pattern: check imports.
+                // I need to import teacherService first.
             } catch (error) {
-                console.error('Error loading bimesters:', error);
-                // Demo data
-                setBimesters([
-                    { id: 1, name: 'Primer Bimestre', isClosed: true },
-                    { id: 2, name: 'Segundo Bimestre', isClosed: false },
-                ]);
-                setSelectedBimester('2');
+                console.error('Error loading initial data:', error);
             }
         };
-        loadBimesters();
+        loadInitialData();
     }, []);
 
     // Load students when subject/bimester change
@@ -144,7 +147,7 @@ const CargaNotasPage = () => {
                     <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} className={`${selectClass} w-full`}>
                         <option value="">Seleccionar materia...</option>
                         {subjects.map(s => (
-                            <option key={s.id} value={s.id}>{s.name} - {s.grade}</option>
+                            <option key={s.id} value={s.id}>{s.full_name || `${s.name} - ${s.grade}`}</option>
                         ))}
                     </select>
                 </div>

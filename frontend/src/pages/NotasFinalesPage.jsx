@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Download, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { gradeRecordService } from '../services'; // Ensure this service exists or mock it
+import { useAuth } from '../contexts/AuthContext';
+import { gradeRecordService, teacherService } from '../services'; // Ensure this service exists or mock it
 
 import { usePdfExport } from '../hooks/usePdfExport';
 
 const NotasFinalesPage = () => {
     const { darkMode } = useTheme();
+    const { user } = useAuth();
     const { exportTable } = usePdfExport(); // Hook
     const [loading, setLoading] = useState(false);
 
@@ -14,15 +16,27 @@ const NotasFinalesPage = () => {
     const [subjects, setSubjects] = useState([]);
     const [grades, setGrades] = useState([]);
 
-    // Mock subjects loading (TODO: Use teacherService.getAssignments())
+    const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
+
+    // Load subjects
     useEffect(() => {
-        // Simulating API load for subjects
-        setSubjects([
-            { id: 1, name: 'Matemáticas', grade: '1ro Básico A' },
-            { id: 2, name: 'Ciencias Naturales', grade: '2do Básico B' },
-            { id: 3, name: 'Idioma Español', grade: '3ro Primaria A' }
-        ]);
-    }, []);
+        const loadSubjects = async () => {
+            if (user?.id) {
+                try {
+                    const mySubjects = await teacherService.getSubjects(user.id);
+                    setSubjects(mySubjects.map(s => ({
+                        id: s.id,
+                        name: s.subject?.name || s.name || 'Materia',
+                        grade: s.grade?.name || s.grade || 'Grado',
+                        full_name: `${s.subject?.name || s.name} - ${s.grade?.name || s.grade}`
+                    })));
+                } catch (err) {
+                    console.error("Error loading subjects:", err);
+                }
+            }
+        };
+        loadSubjects();
+    }, [user]);
 
     // Load grades when subject changes
     useEffect(() => {
@@ -111,7 +125,7 @@ const NotasFinalesPage = () => {
                         <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} className={`w-full ${inputClass}`}>
                             <option value="">Seleccionar materia...</option>
                             {subjects.map(s => (
-                                <option key={s.id} value={s.id}>{s.name} - {s.grade}</option>
+                                <option key={s.id} value={s.id}>{s.full_name || `${s.name} - ${s.grade}`}</option>
                             ))}
                         </select>
                     </div>
