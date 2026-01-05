@@ -71,6 +71,7 @@ const GestionUsuariosPage = lazy(() => import('./pages/GestionUsuariosPage'));
 const NotasFinalesPage = lazy(() => import('./pages/NotasFinalesPage'));
 const CatalogosPage = lazy(() => import('./pages/CatalogosPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const ResetNotificacionesPage = lazy(() => import('./pages/ResetNotificacionesPage'));
 const PrivilegiosPage = lazy(() => import('./pages/PrivilegiosPage'));
 const GestionMenusPage = lazy(() => import('./pages/GestionMenusPage'));
 const CierreEscolarPage = lazy(() => import('./pages/CierreEscolarPage'));
@@ -221,7 +222,7 @@ function App() {
                   <Route path="admin/ajustes-generales" element={<SettingsPage />} />
                   <Route path="admin/cierre-escolar" element={<CierreEscolarPage />} />
                   <Route path="admin/cargos" element={<ComingSoonPage title="Gestión de Cargos" />} />
-                  <Route path="admin/notificaciones-reset" element={<ComingSoonPage title="Reset de Notificaciones" />} />
+                  <Route path="admin/notificaciones-reset" element={<ResetNotificacionesPage />} />
                   <Route path="admin/privilegios" element={<PrivilegiosPage />} />
                   <Route path="admin/menus" element={<GestionMenusPage />} />
                   <Route path="admin/estadisticas" element={<MonitoreoPage />} />
