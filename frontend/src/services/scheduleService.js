@@ -97,6 +97,15 @@ const scheduleService = {
         const response = await api.delete(`/schedule/${id}`);
         return response.data;
     },
+
+    /**
+     * Trigger automatic schedule generation
+     * @param {number} cycleId - School Cycle ID
+     */
+    generateAuto: async (cycleId) => {
+        const response = await api.post('/schedule/generate', { cycleId });
+        return response.data;
+    }
 };
 
 export default scheduleService;

@@ -16,10 +16,45 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api/schedule')]
 class ScheduleController extends AbstractController
 {
+
     public function __construct(
         private EntityManagerInterface $em,
-        private ScheduleRepository $scheduleRepository
+        private ScheduleRepository $scheduleRepository,
+        private \App\Service\ScheduleGeneratorService $generatorService
     ) {}
+
+    /**
+     * Generate automatic schedules for a cycle
+     */
+    #[Route('/generate', name: 'schedule_generate_auto', methods: ['POST'])]
+    public function generateSchedules(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $cycleId = $data['cycleId'] ?? null;
+
+        if (!$cycleId) {
+            return $this->json(['error' => 'cycleId is required'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $cycle = $this->em->getRepository(\App\Entity\SchoolCycle::class)->find($cycleId);
+        if (!$cycle) {
+            return $this->json(['error' => 'SchoolCycle not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        try {
+            $result = $this->generatorService->generateSchedules($cycle);
+            return $this->json([
+                'success' => true,
+                'message' => "Horarios generados: {$result['generated']}. Conflictos: {$result['conflicts']}.",
+                'details' => $result
+            ]);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 
     /**
      * Get the current student's schedule

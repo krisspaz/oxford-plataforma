@@ -1,37 +1,45 @@
 import React, { useState } from 'react';
 import { Brain, Sparkles, Calendar, Check, AlertCircle, Zap, Rocket, Clock, Layers, Users } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import scheduleService from '../services/scheduleService';
 
 const IAHorariosPage = () => {
     const { darkMode } = useTheme();
     const [generating, setGenerating] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [result, setResult] = useState(null);
-    const [currentStep, setCurrentStep] = useState('Idle'); // Idle, Analyzing, Optimizing, Finalizing
 
-    const handleGenerate = () => {
+    const handleGenerate = async () => {
         setGenerating(true);
         setProgress(0);
         setResult(null);
         setCurrentStep('Analyzing');
 
-        // Simulate AI generation process with steps
+        // Simulation for UI feedback while waiting (optional, or rely on real progress if we had websockets)
+        // For now, we just simulate progress bar while the promise resolves
         const interval = setInterval(() => {
-            setProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    setGenerating(false);
-                    setResult(true);
-                    return 100;
-                }
+            setProgress(prev => Math.min(prev + 5, 90)); // Cap at 90% until done
+        }, 500);
 
-                // Update Step Text based on progress
-                if (prev > 30 && prev < 60) setCurrentStep('Optimizing');
-                if (prev > 60) setCurrentStep('Finalizing');
+        try {
+            // TODO: Get active cycle ID dynamically
+            const cycleId = 1;
+            const response = await scheduleService.generateAuto(cycleId);
 
-                return prev + 2; // Increment progress
-            });
-        }, 100);
+            clearInterval(interval);
+            setProgress(100);
+
+            if (response.success) {
+                setResult(response.details); // Store full details
+            } else {
+                console.error("Error generating:", response.error);
+                setGenerating(false);
+            }
+        } catch (error) {
+            console.error("API Error:", error);
+            setGenerating(false);
+            clearInterval(interval);
+        } finally {
+            setGenerating(false);
+        }
     };
 
     return (
@@ -141,9 +149,9 @@ const IAHorariosPage = () => {
                             </div>
 
                             <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
-                                <ResultStat label="Horarios" value="65" darkMode={darkMode} />
-                                <ResultStat label="Conflictos" value="0" darkMode={darkMode} highlight />
-                                <ResultStat label="Eficiencia" value="98%" darkMode={darkMode} />
+                                <ResultStat label="Horarios" value={result?.generated || 0} darkMode={darkMode} />
+                                <ResultStat label="Conflictos" value={result?.conflicts || 0} darkMode={darkMode} highlight />
+                                <ResultStat label="Errores" value={result?.errors?.length || 0} darkMode={darkMode} />
                             </div>
 
                             <div className="flex justify-center gap-4 pt-4">
