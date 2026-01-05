@@ -36,13 +36,17 @@ const MatriculacionPage = lazy(() => import('./pages/MatriculacionPage'));
 const Students = lazy(() => import('./pages/Students'));
 const FamiliasPage = lazy(() => import('./pages/FamiliasPage'));
 const ContractsPage = lazy(() => import('./pages/ContractsPage'));
+const CorteDiaPage = lazy(() => import('./pages/CorteDiaPage'));
+const ComprobantesPage = lazy(() => import('./pages/ComprobantesPage'));
 
 // Finanzas
 const Financial = lazy(() => import('./pages/Financial'));
 const RegistroPagosPage = lazy(() => import('./pages/RegistroPagosPage'));
 const EstadoCuentaPage = lazy(() => import('./pages/EstadoCuentaPage'));
-const CorteDiaPage = lazy(() => import('./pages/CorteDiaPage'));
-const ComprobantesPage = lazy(() => import('./pages/ComprobantesPage'));
+const ChatDocentePage = lazy(() => import('./pages/ChatDocentePage'));
+const SugerenciasPage = lazy(() => import('./pages/SugerenciasPage'));
+const EvaluacionDocentePage = lazy(() => import('./pages/EvaluacionDocentePage'));
+const CalendarioGlobalPage = lazy(() => import('./pages/CalendarioGlobalPage'));
 const PaquetesPage = lazy(() => import('./pages/PaquetesPage'));
 const CostosPage = lazy(() => import('./pages/CostosPage'));
 const ExonerationPage = lazy(() => import('./pages/ExonerationPage'));
@@ -237,6 +241,11 @@ function App() {
                   <Route path="padres/contrato" element={<ContractsPage />} />
 
                   {/* General / Shared */}
+                  <Route path="mis-notas" element={<Suspense fallback={<PageLoader />}><StudentGradesPage /></Suspense>} />
+                  <Route path="chat" element={<Suspense fallback={<PageLoader />}><ChatDocentePage /></Suspense>} />
+                  <Route path="ayuda" element={<Suspense fallback={<PageLoader />}><SugerenciasPage /></Suspense>} />
+                  <Route path="evaluacion" element={<Suspense fallback={<PageLoader />}><EvaluacionDocentePage /></Suspense>} />
+                  <Route path="calendario" element={<Suspense fallback={<PageLoader />}><CalendarioGlobalPage /></Suspense>} />
                   <Route path="carga-notas" element={<CargaNotasPage />} />
                   <Route path="horarios" element={<HorariosPage />} />
                   <Route path="mi-horario" element={<MiHorarioPage />} />

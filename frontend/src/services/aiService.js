@@ -6,6 +6,7 @@
  */
 
 import api from './api';
+import axios from 'axios';
 
 // Cache for AI responses to avoid redundant calls
 const responseCache = new Map();
@@ -85,10 +86,17 @@ const aiService = {
      */
     async processCommand(text, currentConfig = {}) {
         try {
-            const response = await api.post('/ai/process', {
+            // Direct call to Python AI Microservice
+            const token = localStorage.getItem('token');
+            const response = await axios.post('http://localhost:8001/process-command', {
                 text,
                 current_config: currentConfig,
-            }, { timeout: AI_CONFIG.timeout });
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                timeout: AI_CONFIG.timeout
+            });
 
             return response.data;
         } catch (error) {

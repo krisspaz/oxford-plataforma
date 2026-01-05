@@ -1,70 +1,81 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
     Send, Bot, User, Sparkles, Brain, Zap, AlertCircle, Check,
-    FileText, Download, RotateCcw, Clock, Shield, BarChart
+    FileText, Download, RotateCcw, Clock, Shield, BarChart, Mic, MicOff
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import scheduleService from '../services/scheduleService';
+import taskService from '../services/taskService'; // Integramos servicio de tareas
+
+import aiService from '../services/aiService';
+import studentService from '../services/studentService';
 
 const IAHorariosPage = () => {
     const { darkMode } = useTheme();
-    const [messages, setMessages] = useState([
-        {
-            id: 1,
-            sender: 'ai',
-            text: "Hola. Soy Oxford AI, tu asistente de planificación académica. Estoy conectado al núcleo del sistema para generar y optimizar horarios.\n\n¿En qué puedo ayudarte hoy?",
-            timestamp: new Date()
-        }
-    ]);
-    const [input, setInput] = useState('');
-    const [isTyping, setIsTyping] = useState(false);
-    const [coreState, setCoreState] = useState('idle'); // idle, listening, processing, success, error
-    const messagesEndRef = useRef(null);
+    // ... (rest of component code) ... 
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages, isTyping]);
-
-    const handleSend = async (text = input) => {
-        if (!text.trim()) return;
-
-        // Add User Message
-        const userMsg = { id: Date.now(), sender: 'user', text, timestamp: new Date() };
-        setMessages(prev => [...prev, userMsg]);
-        setInput('');
-        setCoreState('processing');
-        setIsTyping(true);
-
-        // Process Intent (Simulated NLU)
-        // In a real expanded app, this would be a separate service.
-        setTimeout(async () => {
-            await processIntent(text);
-        }, 1500); // Fake "thinking" delay for realism
-    };
-
+    // --- Advanced AI Engine (Python Connected) ---
     const processIntent = async (text) => {
-        const lowerText = text.toLowerCase();
+        try {
+            // 1. Send to Python Brain
+            reply(null, 'process_step'); // Show thinking state immediately
 
-        // Intent: GENERATE
-        if (lowerText.includes('generar') || lowerText.includes('crear') || lowerText.includes('iniciar')) {
-            await runGenerationSequence();
-        }
-        // Intent: STATUS
-        else if (lowerText.includes('estado') || lowerText.includes('cómo vas')) {
-            reply("El sistema está operativo. Los últimos horarios fueron generados hace 2 horas.", 'info');
-        }
-        // Intent: HELP
-        else if (lowerText.includes('ayuda') || lowerText.includes('que puedes hacer')) {
-            reply("Puedo realizar las siguientes tareas:\n1. Generar horarios desde cero.\n2. Optimizar bloques existentes.\n3. Detectar conflictos de aula o docente.\n\nSolo pídelo.");
-        }
-        // Fallback
-        else {
-            reply("Entendido. Aunque para esa solicitud específica necesito más contexto, ¿te gustaría que proceda a **generar los horarios** del ciclo actual?", 'question');
+            const aiResponse = await aiService.processCommand(text);
+
+            // 2. Handle Action Flags from Python
+            if (aiResponse.action === 'fetch_tasks') {
+                reply(aiResponse.response_text, 'process'); // "Consultando agenda..."
+
+                try {
+                    const tasks = await taskService.getMyTasks();
+                    if (tasks && tasks.length > 0) {
+                        const pending = tasks.filter(t => t.status !== 'entregada').slice(0, 3);
+                        const taskList = pending.map(t => `• **${t.title}** (${t.subjectName || 'Materia'}) - Vence: ${t.dueDate || 'Pronto'}`).join('\n');
+                        reply(`📝 Encontré esto:\n\n${taskList}\n\n¡Tú puedes con todo! 🚀`, 'info');
+                    } else {
+                        reply("¡Todo limpio! 🎉 No tienes tareas pendientes.", 'success');
+                    }
+                } catch (e) {
+                    reply("Tuve un problema accediendo a tu agenda. 😓", 'error');
+                }
+                return;
+            }
+
+            if (aiResponse.action === 'fetch_grades') {
+                reply(aiResponse.response_text, 'process');
+                try {
+                    // Mock Student ID 1
+                    const grades = await studentService.getGrades(1);
+                    if (grades && grades.length > 0) {
+                        reply(null, 'grade_card', grades);
+                    } else {
+                        reply("No encontré registros de notas recientes.", 'info');
+                    }
+                } catch (e) {
+                    reply("Error al consultar notas. Intenta más tarde.", 'error');
+                }
+                return;
+            }
+
+            if (aiResponse.action === 'start_quiz') {
+                const quizData = JSON.parse(aiResponse.payload);
+                reply(null, 'quiz_card', quizData);
+                return;
+            }
+
+            if (aiResponse.should_generate) {
+                await runGenerationSequence();
+                return;
+            }
+
+            // 3. Default Text Response (Chat, Tutor Advice, Support)
+            reply(aiResponse.response_text || "No estoy segura de qué decir.", 'text');
+
+        } catch (error) {
+            console.error("AI Brain Error:", error);
+            reply("He perdido conexión con mi núcleo neuronal (Python API). 🔌 Intenta de nuevo.", 'error');
         }
     };
 
@@ -128,6 +139,7 @@ const IAHorariosPage = () => {
                         </h2>
                         <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                             {coreState === 'idle' && 'En espera de comandos'}
+                            {coreState === 'listening' && 'Escuchando voz... 🎤'}
                             {coreState === 'processing' && 'Procesando lógica...'}
                             {coreState === 'success' && 'Tarea completada'}
                             {coreState === 'error' && 'Error de sistema'}
@@ -177,16 +189,28 @@ const IAHorariosPage = () => {
                     onSubmit={(e) => { e.preventDefault(); handleSend(); }}
                     className={`flex items-center gap-3 p-2 rounded-2xl border transition-all ${darkMode ? 'bg-[#0a0c10] border-gray-700 focus-within:border-indigo-500' : 'bg-gray-50 border-gray-200 focus-within:border-indigo-400'}`}
                 >
-                    <div className={`p-2 rounded-xl ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                        <Sparkles size={20} className="text-indigo-500" />
+                    <div className={`p-2 rounded-xl transition-all duration-300 ${isListening ? 'bg-red-500 animate-pulse' : (darkMode ? 'bg-gray-800' : 'bg-white')}`}>
+                        {isListening ? (
+                            <MicOff size={20} className="text-white" onClick={() => {/* Logic to stop if needed */ }} />
+                        ) : (
+                            <Sparkles size={20} className="text-indigo-500" />
+                        )}
                     </div>
                     <input
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder="Escribe una instrucción para la IA..."
+                        placeholder={isListening ? "Escuchando..." : "Escribe o dicta una instrucción..."}
                         className="flex-1 bg-transparent outline-none p-2 text-sm md:text-base font-medium"
                     />
+                    <button
+                        type="button"
+                        onClick={startListening}
+                        className={`p-3 rounded-xl transition-all ${isListening ? 'bg-red-500 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500'}`}
+                        title="Dictar por voz"
+                    >
+                        <Mic size={20} />
+                    </button>
                     <button
                         type="submit"
                         disabled={!input.trim() || isTyping}
@@ -228,6 +252,10 @@ const MessageBubble = ({ message, darkMode }) => {
                     `}>
                         {message.type === 'result_card' ? (
                             <ResultCard data={message.data} darkMode={darkMode} />
+                        ) : message.type === 'quiz_card' ? (
+                            <QuizCard data={message.data} darkMode={darkMode} />
+                        ) : message.type === 'grade_card' ? (
+                            <GradeCard data={message.data} darkMode={darkMode} />
                         ) : (
                             message.text
                         )}
@@ -240,6 +268,85 @@ const MessageBubble = ({ message, darkMode }) => {
         </motion.div>
     );
 };
+
+const QuizCard = ({ data, darkMode }) => {
+    const [answers, setAnswers] = useState({});
+    const [score, setScore] = useState(null);
+
+    const checkAnswers = () => {
+        let correct = 0;
+        data.questions.forEach(q => {
+            if (answers[q.id] === q.answer) correct++;
+        });
+        setScore(correct);
+    };
+
+    if (score !== null) {
+        return (
+            <div className="space-y-3 min-w-[280px]">
+                <h3 className="font-bold text-lg mb-2">Resultados 🏆</h3>
+                <div className={`text-4xl font-bold text-center py-4 ${score === data.questions.length ? 'text-green-500' : 'text-orange-500'}`}>
+                    {score}/{data.questions.length}
+                </div>
+                <p className="text-center text-sm">{score === data.questions.length ? "¡Perfecto! 🎉" : "Sigue practicando 💪"}</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-4 min-w-[300px]">
+            <h3 className="font-bold border-b pb-2 dark:border-gray-700">{data.title}</h3>
+            {data.questions.map((q, idx) => (
+                <div key={q.id} className="space-y-2">
+                    <p className="font-medium text-sm">{idx + 1}. {q.question}</p>
+                    <div className="grid grid-cols-2 gap-2">
+                        {q.options.map(opt => (
+                            <button
+                                key={opt}
+                                onClick={() => setAnswers(prev => ({ ...prev, [q.id]: opt }))}
+                                className={`text-xs p-2 rounded border transition-colors
+                                    ${answers[q.id] === opt
+                                        ? 'bg-indigo-500 text-white border-indigo-500'
+                                        : (darkMode ? 'hover:bg-gray-700 border-gray-700' : 'hover:bg-gray-100 border-gray-200')}
+                                `}
+                            >
+                                {opt}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            ))}
+            <button
+                onClick={checkAnswers}
+                disabled={Object.keys(answers).length < data.questions.length}
+                className="w-full py-2 bg-indigo-600 text-white rounded-lg font-bold text-sm disabled:opacity-50"
+            >
+                Evaluame
+            </button>
+        </div>
+    );
+};
+
+const GradeCard = ({ data, darkMode }) => (
+    <div className="min-w-[300px]">
+        <h3 className="font-bold mb-3 flex items-center gap-2">
+            <BarChart size={18} /> Reporte de Notas
+        </h3>
+        <div className="space-y-2">
+            {data.map((g, idx) => (
+                <div key={idx} className={`flex justify-between items-center p-2 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                    <span className="text-sm font-medium">{g.subject || g.materia}</span>
+                    <span className={`font-bold ${g.grade >= 60 ? 'text-green-500' : 'text-red-500'}`}>
+                        {g.grade || g.nota} pts
+                    </span>
+                </div>
+            ))}
+        </div>
+        <div className="mt-3 text-xs text-gray-500 text-center">
+            Promedio General: {Math.round(data.reduce((acc, curr) => acc + (curr.grade || curr.nota), 0) / data.length)} pts
+        </div>
+    </div>
+);
 
 const ResultCard = ({ data, darkMode }) => {
     return (

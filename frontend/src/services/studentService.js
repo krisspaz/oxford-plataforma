@@ -25,6 +25,23 @@ export const studentService = {
     // Get student grades
     getGrades: (id, bimesterId) =>
         api.get(`/students/${id}/grades${bimesterId ? `?bimester=${bimesterId}` : ''}`),
+
+    // --- Real Methods for New Features ---
+
+    // Get user's teachers (using student ID)
+    getMyTeachers: (studentId) => api.get(`/student/teachers/${studentId}`),
+
+    // Get Chat History
+    getChatHistory: (studentId, teacherId) => api.get(`/student/chat/${studentId}/${teacherId}`),
+
+    // Send Message
+    sendMessage: (data) => api.post('/student/chat', data),
+
+    // Submit teacher evaluation
+    submitTeacherRating: (data) => api.post('/student/rating', data),
+
+    // Submit complaint/suggestion
+    submitFeedback: (data) => api.post('/student/help-ticket', data),
 };
 
 export default studentService;

@@ -136,9 +136,100 @@ def process_cmd():
         response["response_text"] = "Generando horario..."
         response["should_generate"] = True
     elif response["intent"] == "greeting":
-        response["response_text"] = "¡Hola! ¿En qué puedo ayudarte?"
+        import random
+        greetings = [
+            "¡Hola! 👋 ¡Qué alegría verte! Estoy lista para ayudarte.",
+            "¡Saludos! Espero que tengas un día excelente. 🌟",
+            "¡Hola! Aquí Oxford AI con toda la energía. 🚀"
+        ]
+        response["response_text"] = random.choice(greetings)
+    elif response["intent"] == "check_homework":
+        response["response_text"] = "Consultando tu agenda de tareas..."
+        response["action"] = "fetch_tasks" 
+    elif response["intent"] == "check_grades":
+        response["response_text"] = "Buscando tus calificaciones..."
+        response["action"] = "fetch_grades"
+    elif response["intent"] == "study_tip":
+        import random
+        tips = [
+           "💡 **Tip de Super Tutor**: Intenta la técnica Pomodoro (25 min estudio, 5 min descanso). ¡Aumentará tu concentración!",
+           "📚 **Consejo**: Explícale el tema a alguien más (o a tu mascota). Si lo puedes explicar, lo entiendes.",
+           "🧠 **Memoria**: Usa mnemotecnias o canciones para recordar listas difíciles.",
+           "💧 **Salud**: ¡Mantente hidratado! Tu cerebro necesita agua para procesar información."
+        ]
+        response["response_text"] = random.choice(tips)
+    elif response["intent"] == "emotional_support":
+        import random
+        msgs = [
+           "🌿 ¡Respira profundo! Eres capaz de todo. Un paso a la vez.",
+           "💪 Confía en tu preparación. Lo has hecho bien hasta ahora.",
+           "🌟 El esfuerzo de hoy es el éxito de mañana. ¡Tú puedes!",
+           "🧘‍♀️ Tómate 5 minutos para desconectar. Todo va a salir bien."
+        ]
+        response["response_text"] = random.choice(msgs)
+    elif response["intent"] == "message_teacher":
+        response["response_text"] = "¿A qué profesor te gustaría escribirle? ✉️"
+        response["action"] = "init_teacher_chat"
+    elif response["intent"] == "report_issue":
+        response["response_text"] = "Lamento que tengas un inconveniente. 😔 Abre el formulario para contarme más (es anónimo si deseas)."
+        response["action"] = "open_feedback_modal"
+    elif response["intent"] == "suggestion":
+        response["response_text"] = "¡Nos encanta mejorar! 💡 ¿Cuál es tu idea?"
+        response["action"] = "open_feedback_modal"
+    elif response["intent"] == "check_task_history":
+        response["response_text"] = "Revisando tu historial académico..."
+        response["action"] = "fetch_task_history"
+    elif response["intent"] == "check_grades":
+        response["response_text"] = "Consultando tus calificaciones actuales..."
+        response["action"] = "fetch_grades"
+    elif response["intent"] == "generate_quiz":
+        # Check if subject detected
+        entities = nlp.extract_entities(data.get('text', ''))
+        subject = entities.get('subject')
+
+        if not subject:
+            response["response_text"] = "¡Claro! 🧠 ¿De qué materia quieres el examen? (Matemáticas, Ciencias, Historia...)"
+            # We don't trigger 'start_quiz' yet, we wait for user to specify subject in next turn
+            # In a real stateful bot, we would set context. For now, simple prompt.
+        else:
+            # Generate a dynamic quiz based on subject
+            # Mock Questions Database
+            question_bank = {
+                'Matemáticas': [
+                    {"id": 1, "question": "¿Cuánto es 8 x 7?", "options": ["54", "56", "58", "62"], "answer": "56"},
+                    {"id": 2, "question": "Raíz cuadrada de 144", "options": ["10", "11", "12", "14"], "answer": "12"},
+                    {"id": 3, "question": "Si x + 5 = 10, ¿x?", "options": ["2", "5", "8", "10"], "answer": "5"}
+                ],
+                'Ciencias': [
+                    {"id": 1, "question": "¿Símbolo químico del Oro?", "options": ["Ag", "Au", "Fe", "Cu"], "answer": "Au"},
+                    {"id": 2, "question": "¿Planeta más grande?", "options": ["Tierra", "Marte", "Júpiter", "Saturno"], "answer": "Júpiter"},
+                    {"id": 3, "question": "¿Qué respiran las plantas?", "options": ["Oxígeno", "Dióxido de Carbono", "Nitrógeno", "Helio"], "answer": "Dióxido de Carbono"}
+                ],
+                'Historia': [
+                    {"id": 1, "question": "¿Descubrimiento de América?", "options": ["1492", "1500", "1821", "1945"], "answer": "1492"},
+                    {"id": 2, "question": "¿Revolución Francesa?", "options": ["1789", "1810", "1917", "1940"], "answer": "1789"},
+                    {"id": 3, "question": "¿Primer presidente de USA?", "options": ["Lincoln", "Washington", "Jefferson", "Kennedy"], "answer": "Washington"}
+                ]
+            }
+            
+            # Default to General Knowledge if subject not in bank
+            selected_questions = question_bank.get(subject, [
+                {"id": 1, "question": "¿Capital de Guatemala?", "options": ["Xela", "Guatemala", "Antigua", "Escuintla"], "answer": "Guatemala"},
+                {"id": 2, "question": "¿Colores primarios?", "options": ["Rojo, Verde, Azul", "Amarillo, Azul, Rojo", "Blanco, Negro, Gris"], "answer": "Amarillo, Azul, Rojo"},
+                {"id": 3, "question": "¿Animal más rápido?", "options": ["León", "Guepardo", "Águila", "Caballo"], "answer": "Guepardo"}
+            ])
+
+            quiz_data = {
+                "title": f"Quiz Rápido de {subject}",
+                "questions": selected_questions
+            }
+            import json
+            response["response_text"] = f"¡Excelente! Aquí tienes tu prueba de {subject}. 📝"
+            response["action"] = "start_quiz"
+            response["payload"] = json.dumps(quiz_data)
+        
     elif response["intent"] == "unknown":
-        response["response_text"] = "No entendí la solicitud."
+        response["response_text"] = "No entendí la solicitud. ¿Podrías intentar con 'Ver tareas' o 'Generar horario'?"
     
     return jsonify(response)
 

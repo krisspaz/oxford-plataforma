@@ -165,6 +165,60 @@ class SpanishNLPEngine:
             ],
             'keywords': ['profesor', 'asignar', 'enseña', 'imparte'],
         },
+        'check_homework': {
+            'weight': 0.9,
+            'patterns': [
+                r'\b(tarea|deber|laboratorio|hoja de trabajo)\b',
+                r'\b(qu[eé] hay)\b.*\b(para hoy|pendiente)\b',
+                r'\b(tengo)\b.*\b(tarea|deber)\b',
+                r'\b(proxima|próxima)\b.*\b(entrega)\b',
+            ],
+            'keywords': ['tarea', 'deber', 'entrega', 'pendiente'],
+        },
+        'check_grades': {
+            'weight': 0.9,
+            'patterns': [
+                r'\b(mis?|mi)\b.*\b(notas?|calificaci[oó]n|puntos?|promedio)\b',
+                r'\b(cu[aá]nto)\b.*\b(saqu[eé]|tengo)\b',
+                r'\b(ver)\b.*\b(boleta|reporte)\b',
+            ],
+            'keywords': ['nota', 'calificacion', 'puntos', 'cuanto saque'],
+        },
+        'check_task_history': {
+             'weight': 0.9,
+             'patterns': [
+                 r'\b(tareas?|deberes?)\b.*\b(vencidas?|retrasadas?|viejas?)\b',
+                 r'\b(tareas?|deberes?)\b.*\b(entregadas?|hechas?|listas?)\b',
+                 r'\b(historial)\b.*\b(tareas?)\b',
+             ],
+             'keywords': ['vencida', 'entregada', 'historial'],
+        },
+        'generate_quiz': {
+             'weight': 0.9,
+             'patterns': [
+                 r'\b(quiz|examen|prueba|test)\b',
+                 r'\b(preguntame|hazme preguntas)\b',
+                 r'\b(ponme a prueba)\b',
+             ],
+             'keywords': ['quiz', 'examen', 'prueba', 'preguntar'],
+        },
+        'study_tip': {
+             'weight': 0.8,
+             'patterns': [
+                 r'\b(consejo|tip|ayuda)\b.*\b(estudiar|aprender)\b',
+                 r'\b(como)\b.*\b(mejorar|pasar)\b',
+             ],
+             'keywords': ['consejo', 'estudiar', 'tip'],
+        },
+        'emotional_support': {
+            'weight': 0.8,
+            'patterns': [
+                r'\b(estres|estrés|estresado|ansiedad|ansioso)\b',
+                r'\b(nervios|nervioso|miedo)\b.*\b(examen|parcial)\b',
+                r'\b(no puedo|me cuesta)\b.*\b(entender|concentrar)\b',
+            ],
+            'keywords': ['estres', 'nervioso', 'ansiedad', 'miedo'],
+        },
     }
     
     # Entity extractors configuration

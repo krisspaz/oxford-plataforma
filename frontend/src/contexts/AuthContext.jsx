@@ -30,8 +30,11 @@ export const AuthProvider = ({ children }) => {
         const decoded = decodeJWT(token);
         if (decoded) {
             return {
+                id: decoded.id || decoded.sub, // Primary User ID
                 email: decoded.username || decoded.email,
                 roles: decoded.roles || ['ROLE_USER'],
+                studentId: decoded.studentId || decoded.student_id || null, // If backend provides this
+                teacherId: decoded.teacherId || decoded.teacher_id || null, // If backend provides this
                 exp: decoded.exp
             };
         }

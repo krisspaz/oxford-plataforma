@@ -82,8 +82,12 @@ export const MENU_ITEMS = {
 
     // === ALUMNO ===
     misNotas: { id: 'misNotas', label: 'Mis Notas', path: '/alumno/notas', icon: 'FileText' },
+    chatDocente: { id: 'chatDocente', label: 'Chat Docente', path: '/alumno/chat', icon: 'MessageSquare' },
+    evaluarMaestros: { id: 'evaluarMaestros', label: 'Evaluar Maestros', path: '/alumno/evaluacion', icon: 'Star' },
+    buzonAyuda: { id: 'buzonAyuda', label: 'Buzón de Ayuda', path: '/alumno/ayuda', icon: 'AlertCircle' },
+    constancias: { id: 'constancias', label: 'Constancias', path: '/alumno/constancias', icon: 'FileText' },
     miHorarioAlumno: { id: 'miHorarioAlumno', label: 'Mi Horario', path: '/alumno/horario', icon: 'Calendar' },
-    calendarioTareas: { id: 'calendarioTareas', label: 'Calendario Tareas', path: '/alumno/tareas', icon: 'Calendar' },
+    calendarioTareas: { id: 'calendarioTareas', label: 'Calendario Global', path: '/alumno/calendario', icon: 'Calendar' },
 
     // === PADRES ===
     misHijos: { id: 'misHijos', label: 'Mis Hijos', path: '/padres/hijos', icon: 'Users' },
