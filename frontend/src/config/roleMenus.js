@@ -174,6 +174,8 @@ export const ROLE_MENUS = {
     [ROLES.ADMIN]: [
         { section: 'Principal', items: ['dashboard'] },
         { section: 'Administración', items: ['usuarios', 'privilegios', 'menus', 'ajustes'] },
+        { section: 'Finanzas', items: ['estadoCuenta', 'insolventes', 'corteDia', 'solicitudes', 'paquetes', 'costosNivel'] },
+        { section: 'Académico', items: ['cierreNotas'] },
     ],
 
     // === SPANISH ROLE ALIASES (para compatibilidad con BD) ===
