@@ -15,6 +15,7 @@ export { default as familyService } from './familyService';
 export { default as permissionService } from './permissionService';
 export { default as productService } from './productService';
 export { default as paymentPlanService } from './paymentPlanService';
+export { default as financialService } from './financialService';
 
 // New services for teacher modules
 export { default as attendanceService } from './attendanceService';
