@@ -11,10 +11,15 @@ const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen bg-gray-50">
     <div className="text-center">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p className="text-gray-600">Cargando...</p>
+      <p className="text-gray-600">Actualizando sistema...</p>
     </div>
   </div>
 );
+
+// Client-side version for auto-cache busting
+const APP_VERSION = '2025-01-05-v1.1.0';
+
+import { useEffect } from 'react';
 
 // ========================================
 // LAZY LOADED PAGES
@@ -94,6 +99,27 @@ const NotFound = () => (
 );
 
 function App() {
+
+  useEffect(() => {
+    const currentVersion = localStorage.getItem('oxford_app_version');
+    if (currentVersion !== APP_VERSION) {
+      console.log(`New version detected: ${APP_VERSION}. Clearing cache...`);
+      // Optional: Clear specific caches if using Service Workers
+      if ('caches' in window) {
+        caches.keys().then((names) => {
+          names.forEach((name) => {
+            caches.delete(name);
+          });
+        });
+      }
+
+      // Update version and reload
+      localStorage.setItem('oxford_app_version', APP_VERSION);
+      // We don't clear the token to keep them logged in, unless it's a major breaking change
+      window.location.reload(true);
+    }
+  }, []);
+
   return (
     <ErrorBoundary>
       <ThemeProvider>
