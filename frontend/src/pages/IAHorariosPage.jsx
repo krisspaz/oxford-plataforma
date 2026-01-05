@@ -9,8 +9,9 @@ import { useAuth } from '../contexts/AuthContext';
 import scheduleService from '../services/scheduleService';
 import taskService from '../services/taskService'; // Integramos servicio de tareas
 
-import aiService from '../services/aiService';
+import aiService from '../services/AiService';
 import studentService from '../services/studentService';
+import RiskDashboard from '../components/RiskDashboard';
 
 // ... imports
 import { useLocation } from 'react-router-dom'; // Added useLocation
@@ -146,10 +147,6 @@ const IAHorariosPage = () => {
                 </AnimatePresence>
                 <div ref={messagesEndRef} />
             </div>
-
-            import RiskDashboard from '../components/RiskDashboard';
-
-            // ... other code
 
             {/* Input Area */}
             <div className={`p-4 border-t ${darkMode ? 'border-gray-800 bg-[#151923]' : 'border-gray-100 bg-white'}`}>
