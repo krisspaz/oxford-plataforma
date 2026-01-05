@@ -104,7 +104,8 @@ const CargaNotasPage = () => {
         setSaving(true);
         try {
             const records = students.map(s => ({
-                id: s.id,
+                id: s.id, // GradeRecord ID (might be null if new)
+                studentId: s.studentId, // Essential for creating new records
                 score: s.score
             }));
 
