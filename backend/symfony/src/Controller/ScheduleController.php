@@ -214,6 +214,55 @@ class ScheduleController extends AbstractController
         ], Response::HTTP_CREATED);
     }
 
+    #[Route('/{id}', name: 'schedule_update', methods: ['PUT'])]
+    public function update(int $id, Request $request): JsonResponse
+    {
+        $schedule = $this->scheduleRepository->find($id);
+        if (!$schedule) {
+            return $this->json(['error' => 'Schedule not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        
+        // --- AI LEARNING LOGIC ---
+        // Detect if day changed
+        $oldDayName = $schedule->getDayName(); // e.g., 'Monday'
+        $newDay = $data['dayOfWeek'] ?? null;
+        
+        if ($newDay && $newDay !== $schedule->getDayOfWeek()) {
+            // Day changed!
+            $teacher = $schedule->getTeacher();
+            if ($teacher) {
+                // Map int day to name for AI
+                $daysMap = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miercoles', 4 => 'Jueves', 5 => 'Viernes'];
+                $newDayName = $daysMap[$newDay] ?? 'Unknown';
+                
+                // Report to AI
+                $this->aiService->reportScheduleChange([
+                    'teacher_id' => $teacher->getId(),
+                    'day_from' => $oldDayName,
+                    'day_to' => $newDayName,
+                    'reason' => 'manual_update'
+                ]);
+            }
+        }
+        // -------------------------
+
+        if (isset($data['dayOfWeek'])) $schedule->setDayOfWeek($data['dayOfWeek']);
+        if (isset($data['period'])) $schedule->setPeriod($data['period']);
+        if (isset($data['startTime'])) $schedule->setStartTime(new \DateTime($data['startTime']));
+        if (isset($data['endTime'])) $schedule->setEndTime(new \DateTime($data['endTime']));
+        if (isset($data['classroom'])) $schedule->setClassroom($data['classroom']);
+
+        $this->em->flush();
+
+        return $this->json([
+            'success' => true, 
+            'message' => 'Horario actualizado',
+            'ai_learning' => 'Change analyzed'
+        ]);
+    }
+
     // ... delete method ...
 
     // ... student methods ...
