@@ -430,10 +430,47 @@ class SpanishNLPEngine:
                     ))
         return entities
 
+    def extract_constraints(self, text: str, entities: List[Entity]) -> List[Dict[str, Any]]:
+        """
+        Extract strategic constraints from text
+        """
+        constraints = []
+        normalized = self.normalize(text)
+        
+        # 1. Avoid Day Constraint
+        # Pattern: "no quiero", "evita", "sin clases" + Day
+        if any(x in normalized for x in ['no quiero', 'evita', 'sin clases', 'no asignes', 'bloquea']):
+            target_day = next((e.value for e in entities if e.type == 'day'), None)
+            target_teacher = next((e.value for e in entities if e.type == 'teacher' or e.type == 'person'), None) # Assuming teacher entity exists or generic
+            
+            if target_day:
+                constraints.append({
+                    'type': 'avoid_day',
+                    'day': target_day,
+                    'teacher': target_teacher, # Might be None (global constraint) or Specific
+                    'weight': 50.0 # High penalty
+                })
+        
+        # 2. Priority Constraint
+        # Pattern: "prioridad", "prefiero", "dale a"
+        if any(x in normalized for x in ['prioridad', 'prefiero', 'importante']):
+            target_teacher = next((e.value for e in entities if e.type == 'teacher' or e.type == 'person'), None)
+            if target_teacher:
+                 constraints.append({
+                    'type': 'priority_teacher',
+                    'teacher': target_teacher,
+                    'weight': 20.0 
+                })
+
+        return constraints
+
     def process(self, text: str) -> NLPResult:
         intent = self.classify_intent(text)
         entities = self.extract_entities(text)
         normalized = self.normalize(text)
+        
+        # NEW: Extract Constraints
+        constraints = self.extract_constraints(text, entities)
         
         suggestions = []
         if intent.name == 'unknown':

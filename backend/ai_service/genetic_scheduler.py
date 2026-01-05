@@ -42,6 +42,7 @@ class GeneticScheduleOptimizer:
         grades: List[str], 
         subjects: List[str], 
         teachers: List[Dict[str, Any]],
+        constraints: List[Dict[str, Any]] = [],
         population_size: int = 50,
         generations: int = 30
     ) -> Dict[str, Any]:
@@ -54,6 +55,7 @@ class GeneticScheduleOptimizer:
         self.grades = grades
         self.subjects = subjects
         self.teachers = teachers
+        self.constraints = constraints
         
         # 1. Attribute Generator: Random Assignment of (Subject, Teacher) for a slot
         def random_slot():
@@ -105,9 +107,9 @@ class GeneticScheduleOptimizer:
         }
 
     def _evaluate_fitness(self, individual):
-        """Calculate fitness (number of conflicts)"""
+        """Calculate fitness (number of conflicts + constraint penalties)"""
         structure = self._decode_genome(individual)
-        conflicts = 0
+        conflicts = 0.0
         
         # Constraints
         # 1. Teacher Double Booking: Same teacher, Same Day/Slot, Different Grade
@@ -120,21 +122,32 @@ class GeneticScheduleOptimizer:
                     if teacher and teacher != "TBD":
                         key = (teacher, day, slot_idx)
                         if key in teacher_slots:
-                            conflicts += 10 # HARD Constraint
+                            conflicts += 10.0 # HARD Constraint
                         teacher_slots[key] = True
                         
-        # 2. Subject Distribution (Soft): Don't have same subject twice in a day for same grade? 
-        # Or simplistic check
+                        # 3. User Defined Constraints (Priorities/Avoidances)
+                        # Format: {'type': 'avoid_time', 'teacher': 'Juan', 'day': 'Viernes', 'weight': 50}
+                        for constraint in self.constraints:
+                            ctype = constraint.get('type')
+                            weight = constraint.get('weight', 10.0)
+                            
+                            if ctype == 'avoid_day' and constraint.get('teacher') == teacher:
+                                if day == constraint.get('day'):
+                                    conflicts += weight
+                                    
+                            if ctype == 'prefer_day' and constraint.get('teacher') == teacher:
+                                if day != constraint.get('day'):
+                                     conflicts += (weight * 0.5) # Soft penalty if not on preferred day
+
+        # 2. Subject Distribution (Soft)
         for grade_data in structure.values():
             for day, day_slots in grade_data.items():
                 daily_subjects = [s['subject'] for s in day_slots]
-                # Soft penalty for duplicates if not intended (blocking)
-                # For now assume duplicates allowed but punish > 2
                 from collections import Counter
                 counts = Counter(daily_subjects)
                 for subj, count in counts.items():
                     if count > 2:
-                        conflicts += 1
+                        conflicts += 1.0
                         
         return (conflicts,)
 

@@ -203,7 +203,7 @@ class AiController extends AbstractController
                     'config' => $data['config'],
                     'teachers' => $data['teachers'] ?? [],
                     'subjects' => $data['subjects'] ?? [],
-                    'constraints' => $data['constraints'] ?? [],
+                    'constraints' => $data['constraints'] ?? [], // PASS CONSTRAINTS
                 ],
                 'timeout' => 60,
             ]);
