@@ -61,5 +61,22 @@ class AiService
         } catch (\Exception $e) {
             throw new RuntimeException('Failed to generate schedule: ' . $e->getMessage());
         }
+            throw new RuntimeException('Failed to generate schedule: ' . $e->getMessage());
+        }
+    }
+
+    public function reportScheduleChange(array $changeData): void
+    {
+        try {
+            // Call the python /learn endpoint
+            // changeData = { teacher_id, day_from, day_to, reason }
+            $this->client->request('POST', "{$this->aiServiceUrl}/learn", [
+                'json' => $changeData,
+                'timeout' => 2 // Don't block user too long for async learning
+            ]);
+        } catch (\Exception $e) {
+            // Learning failure should not block the main action
+            // Just log it silently or via logger
+        }
     }
 }

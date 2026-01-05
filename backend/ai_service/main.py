@@ -9,6 +9,7 @@ from jose import JWTError, jwt
 # Local imports
 from database import db
 from nlp_engine import nlp_engine
+from preference_learner import PreferenceLearner
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -265,6 +266,29 @@ def get_horarios():
         LIMIT 50
     ''')
     return jsonify([dict(row) for row in rows])
+
+# --- LEARNING ---
+learner = PreferenceLearner()
+
+@app.route("/learn", methods=["POST"])
+def learn_preferences():
+    """
+    Endpoint for Symfony to report manual schedule changes
+    Payload: { "teacher_id": 1, "day_from": "Lunes", "day_to": "Martes", "reason": "conflict" }
+    """
+    data = request.json
+    try:
+        if 'teacher_id' in data and 'day_from' in data and 'day_to' in data:
+            learner.learn_from_move(
+                data['teacher_id'], 
+                data['day_from'], 
+                data['day_to'],
+                data.get('reason', 'manual')
+            )
+            return jsonify({"status": "learned", "message": "Preference updated"})
+        return jsonify({"error": "Missing fields"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(port=8001, debug=True)

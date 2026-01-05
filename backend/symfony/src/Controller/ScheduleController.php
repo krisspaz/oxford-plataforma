@@ -20,7 +20,8 @@ class ScheduleController extends AbstractController
     public function __construct(
         private EntityManagerInterface $em,
         private ScheduleRepository $scheduleRepository,
-        private \App\Service\ScheduleGeneratorService $generatorService
+        private \App\Service\ScheduleGeneratorService $generatorService,
+        private \App\Service\AiService $aiService
     ) {}
 
     /**
