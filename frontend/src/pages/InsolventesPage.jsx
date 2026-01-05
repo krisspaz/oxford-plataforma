@@ -7,34 +7,36 @@ import { useTheme } from '../contexts/ThemeContext';
 import { usePdfExport } from '../hooks/usePdfExport';
 
 const InsolventesPage = () => {
+    const { darkMode } = useTheme();
+    const navigate = useNavigate();
     const { exportTable } = usePdfExport(); // Hook
     const [students, setStudents] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
 
-    // ... (state)
-
-    // Mock Data Loading
+    // Load Real Data
     useEffect(() => {
         const loadData = async () => {
             try {
-                // await api call here
-                // Simulate API delay
-                // await new Promise(resolve => setTimeout(resolve, 500));
-                setStudents([
-                    { id: 1, studentName: 'Carlos Ruiz', studentEmail: 'carlos@test.com', description: 'Mensualidad Febrero', dueDate: '2025-02-05', amount: 450.00 },
-                    { id: 2, studentName: 'Maria Jose', studentEmail: 'maria@test.com', description: 'Inscripción', dueDate: '2025-01-15', amount: 800.00 },
-                ]);
+                const response = await api.get('/payment-plans/insolvents');
+                // Handle different response structures gracefully
+                const data = response.data || response;
+                if (Array.isArray(data)) {
+                    setStudents(data);
+                } else if (data.data && Array.isArray(data.data)) {
+                    setStudents(data.data);
+                }
             } catch (err) {
-                console.error(err);
+                console.error("Error loading insolvents:", err);
             }
         };
         loadData();
     }, []);
 
     const filteredStudents = students.filter(student =>
-        student.studentName.toLowerCase().includes(searchTerm.toLowerCase())
+        student.studentName?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const totalDeuda = filteredStudents.reduce((acc, curr) => acc + curr.amount, 0);
+    const totalDeuda = filteredStudents.reduce((acc, curr) => acc + (parseFloat(curr.amount) || 0), 0);
 
     // Export Handler
     const handleExportPDF = () => {
@@ -67,8 +69,6 @@ const InsolventesPage = () => {
             }
         });
     };
-
-    // ... (rest of code)
 
     return (
         <div className={`p-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>

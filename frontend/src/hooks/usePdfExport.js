@@ -7,8 +7,9 @@ export const usePdfExport = () => {
     const SCHOOL_NAME = "CORPORACIÓN EDUCACIONAL OXFORD";
     const SCHOOL_ADDRESS = "Ciudad de Guatemala";
 
-    const createDoc = (title, subtitle) => {
-        const doc = new jsPDF();
+    const createDoc = (title, subtitle, orientation = 'portrait') => {
+        const doc = new jsPDF({ orientation });
+        const pageWidth = doc.internal.pageSize.getWidth();
 
         // Header
         doc.setFontSize(18);
@@ -26,13 +27,13 @@ export const usePdfExport = () => {
 
         // Line separator
         doc.setDrawColor(200, 200, 200);
-        doc.line(14, 42, 196, 42);
+        doc.line(14, 42, pageWidth - 14, 42);
 
         return doc;
     };
 
-    const exportTable = ({ title, subtitle, columns, data, filename = 'reporte.pdf', autoTableOptions = {} }) => {
-        const doc = createDoc(title, subtitle);
+    const exportTable = ({ title, subtitle, columns, data, filename = 'reporte.pdf', orientation = 'portrait', autoTableOptions = {} }) => {
+        const doc = createDoc(title, subtitle, orientation);
 
         doc.autoTable({
             head: [columns],

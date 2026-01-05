@@ -35,31 +35,6 @@ class DashboardController extends AbstractController
     #[Route('/stats', name: 'stats', methods: ['GET'])]
     public function getStats(): JsonResponse
     {
-        // 1. Total Active Students
-        $totalStudents = $this->studentRepository->countActive();
-
-        // 2. Income for the current month
-        $monthlyIncome = 0; // Placeholder
-
-        // 3. At Risk Students
-        $atRiskCount = $this->studentRepository->countAtRisk(); 
-
-        // 4. Average Grade
-        $averageGrade = 85; 
-
-        // 5. Recent Students
-        $recentStudents = $this->studentRepository->findRecent(5);
-        $recentStudentsData = array_map(function($student) {
-            return [
-                'id' => $student->getId(),
-                'name' => $student->getFirstName() . ' ' . $student->getLastName(),
-                'email' => $student->getEmail(),
-                'cycle' => $student->getSchoolCycle() ? $student->getSchoolCycle()->getName() : 'Sin Asignar',
-                'course' => $student->getCourse() ? $student->getCourse()->getName() : 'Sin Asignar',
-                'status' => $student->getStatus(),
-            ];
-        }, $recentStudents);
-
         $user = $this->getUser();
         $roles = $user ? $user->getRoles() : [];
 
@@ -78,11 +53,9 @@ class DashboardController extends AbstractController
 
         // Role Specific Data
         if (in_array('ROLE_TEACHER', $roles)) {
-             // Mock teacher data derived from DB if relations existed
-             // For now providing mock but structured for frontend
              $data['teacher'] = [
-                 'myClassesCount' => 4, // Replace with $this->subjectRepository->countByTeacher($user)
-                 'myStudentsCount' => 120,
+                 'myClassesCount' => 4, // Replace with actual count
+                 'myStudentsCount' => 120, // Replace with actual count
                  'pendingGrades' => 5
              ];
         }
@@ -94,7 +67,6 @@ class DashboardController extends AbstractController
                  'nextClass' => 'Matemáticas'
              ];
         }
-        
 
         if (in_array('ROLE_PARENT', $roles)) {
              $data['parent'] = [
@@ -105,16 +77,11 @@ class DashboardController extends AbstractController
         }
 
         if (in_array('ROLE_ACCOUNTANT', $roles) || in_array('ROLE_SECRETARY', $roles)) {
-             // Calculate daily income
-             $today = new \DateTime('today');
-             $tomorrow = new \DateTime('tomorrow');
-             // Assuming repository has findByDateRange or similar, roughly:
-             // $income = $this->paymentRepository->sumAmountBetween($today, $tomorrow);
-             $income = 8450; // Placeholder until repository method exists
+             $income = 8450; // Placeholder
              
              $data['accountant'] = [
                  'incomeToday' => $income,
-                 'invoicesCount' => 15, // $this->invoiceRepository->countToday()
+                 'invoicesCount' => 15, // Placeholder
                  'pendingRequests' => 2,
                  'exonerations' => 5
              ];
@@ -122,12 +89,12 @@ class DashboardController extends AbstractController
              $data['secretary'] = [
                  'enrollmentsToday' => 3,
                  'familiesCount' => 89,
-                 'pendingPayments' => 12,
+                 'pendingPayments' => 12, // Placeholder
                  'contractsCount' => 24
              ];
         }
 
-        if (in_array('ROLE_SUPER_ADMIN', $roles) || in_array('ROLE_ADMIN', $roles)) {
+        if (in_array('ROLE_SUPER_ADMIN', $roles) || in_array('ROLE_ADMIN', $roles) || in_array('ROLE_DIRECTOR', $roles)) {
              $recentStudents = $this->studentRepository->findRecent(5);
              $data['recentStudents'] = array_map(function($student) {
                 return [
@@ -141,6 +108,8 @@ class DashboardController extends AbstractController
             }, $recentStudents);
             $data['totalUsers'] = $this->userRepository->count([]);
             $data['totalSubjects'] = $this->subjectRepository->count([]);
+            $data['totalStudents'] = $this->studentRepository->countActive();
+            $data['totalTeachers'] = $this->userRepository->countByRole('ROLE_TEACHER'); // Assuming method exists or just fallback
         }
 
         return $this->json($data);

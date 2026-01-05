@@ -28,7 +28,7 @@ const GestionCursosPage = () => {
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Gestión de Cursos</h1>
+                    <h1 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Gestión de Niveles</h1>
                     <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>Administra los grados, secciones y materias asignadas.</p>
                 </div>
                 <div className="flex gap-3">
@@ -39,7 +39,7 @@ const GestionCursosPage = () => {
                         <Grid size={20} />
                     </button>
                     <button className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-teal-500/20 transition-all hover:-translate-y-1">
-                        <Plus size={20} /> Crear Curso
+                        <Plus size={20} /> Crear Nivel
                     </button>
                 </div>
             </div>
@@ -50,7 +50,7 @@ const GestionCursosPage = () => {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                     <input
                         type="text"
-                        placeholder="Buscar curso..."
+                        placeholder="Buscar nivel..."
                         className={`w-full pl-10 pr-4 py-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500'} focus:ring-2 focus:ring-teal-500 outline-none`}
                     />
                 </div>
@@ -112,7 +112,7 @@ const GestionCursosPage = () => {
                         <div className={`p-4 rounded-full transition-transform group-hover:scale-110 ${darkMode ? 'bg-gray-800 text-gray-500 group-hover:text-teal-400' : 'bg-gray-100 text-gray-400 group-hover:text-teal-600 group-hover:bg-white'}`}>
                             <Plus size={40} />
                         </div>
-                        <span className={`font-medium text-lg ${darkMode ? 'text-gray-500 group-hover:text-teal-400' : 'text-gray-400 group-hover:text-teal-600'}`}>Agregar Curso</span>
+                        <span className={`font-medium text-lg ${darkMode ? 'text-gray-500 group-hover:text-teal-400' : 'text-gray-400 group-hover:text-teal-600'}`}>Agregar Nivel</span>
                     </button>
                 )}
             </div>

@@ -35,7 +35,7 @@ const CursosNivelesPage = () => {
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Niveles Educativos</h1>
-                    <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>Gestiona la estructura académica y cursos por nivel.</p>
+                    <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>Gestiona la estructura académica y niveles.</p>
                 </div>
                 <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/30 flex items-center gap-2 font-medium transition-all hover:-translate-y-1">
                     <Plus size={20} /> Nuevo Nivel
@@ -70,7 +70,7 @@ const CursosNivelesPage = () => {
                                 </div>
                                 <div className="flex items-center justify-between text-sm">
                                     <span className="flex items-center gap-2 text-gray-500">
-                                        <BookOpen size={16} /> Grados/Cursos
+                                        <BookOpen size={16} /> Grados y Niveles
                                     </span>
                                     <span className={`font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{level.courses || 0}</span>
                                 </div>

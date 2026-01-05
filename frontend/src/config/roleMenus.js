@@ -34,18 +34,17 @@ export const MENU_ITEMS = {
 
     // === FINANZAS ===
     insolventes: { id: 'insolventes', label: 'Insolventes', path: '/finanzas/insolventes', icon: 'UserMinus' },
-    exonerados: { id: 'exonerados', label: 'Exonerados', path: '/finanzas/exonerados', icon: 'CheckCircle' },
+    // exonerados: { id: 'exonerados', label: 'Exonerados', path: '/finanzas/exonerados', icon: 'CheckCircle' }, // Removed per request
     corteDia: { id: 'corteDia', label: 'Corte del Día', path: '/finanzas/corte-dia', icon: 'FileSpreadsheet' },
     comprobantes: { id: 'comprobantes', label: 'Comprobantes', path: '/finanzas/comprobantes', icon: 'Receipt' },
     comprobantesPendientes: { id: 'comprobantesPendientes', label: 'Comp. Pendientes', path: '/finanzas/comprobantes-pendientes', icon: 'AlertCircle' },
     comprobantesEmitidos: { id: 'comprobantesEmitidos', label: 'Comp. Emitidos', path: '/finanzas/comprobantes-emitidos', icon: 'FileText' },
-    solicitudes: { id: 'solicitudes', label: 'Solicitudes', path: '/finanzas/solicitudes', icon: 'HelpCircle' },
-    paquetes: { id: 'paquetes', label: 'Paquetes', path: '/finanzas/paquetes', icon: 'Package' },
+    solicitudes: { id: 'solicitudes', label: 'Solicitudes y Anulaciones', path: '/finanzas/solicitudes', icon: 'HelpCircle' },
+    paquetes: { id: 'paquetes', label: 'Paquetes Escolares', path: '/finanzas/paquetes', icon: 'Package' },
     costosNivel: { id: 'costosNivel', label: 'Costos por Nivel', path: '/finanzas/costos', icon: 'DollarSign' },
     estadoCuenta: { id: 'estadoCuenta', label: 'Estado de Cuenta', path: '/finanzas/estado-cuenta', icon: 'CreditCard' },
     registroPagos: { id: 'registroPagos', label: 'Registro de Pagos', path: '/finanzas/pagos', icon: 'PlusCircle' },
     paquetesSeleccionados: { id: 'paquetesSeleccionados', label: 'Paq. Seleccionados', path: '/finanzas/paquetes-seleccionados', icon: 'CheckSquare' },
-    exoneraciones: { id: 'exoneraciones', label: 'Exoneraciones', path: '/finanzas/exoneraciones', icon: 'MinusCircle' },
 
     // === SECRETARÍA / INSCRIPCIONES ===
     inscripciones: { id: 'inscripciones', label: 'Inscripciones', path: '/secretaria/inscripciones', icon: 'UserPlus' },
@@ -59,13 +58,13 @@ export const MENU_ITEMS = {
 
     // === ACADÉMICO (Coordinación/Dirección) ===
     cronograma: { id: 'cronograma', label: 'Cronograma Tareas', path: '/academico/cronograma', icon: 'Calendar' },
-    boletas: { id: 'boletas', label: 'Boletas Notas', path: '/academico/boletas', icon: 'FileText' },
-    cuadros: { id: 'cuadros', label: 'Cuadros Notas', path: '/academico/cuadros', icon: 'Grid' },
+    // Consolidated reports
+    reportesAcademicos: { id: 'reportesAcademicos', label: 'Reportes y Boletas', path: '/academico/boletas', icon: 'FileText' },
+
     cierreNotas: { id: 'cierreNotas', label: 'Cierre de Notas', path: '/academico/cierre-notas', icon: 'Lock' },
-    cursos: { id: 'cursos', label: 'Cursos/Niveles', path: '/academico/cursos', icon: 'Layers' },
+    niveles: { id: 'niveles', label: 'Niveles', path: '/academico/cursos', icon: 'Layers' }, // Renamed from Cursos
     secciones: { id: 'secciones', label: 'Secciones', path: '/academico/secciones', icon: 'Layout' },
     docentes: { id: 'docentes', label: 'Docentes', path: '/academico/docentes', icon: 'Briefcase' },
-    personal: { id: 'personal', label: 'Personal', path: '/academico/docentes', icon: 'Users' },
     materias: { id: 'materias', label: 'Materias', path: '/academico/materias', icon: 'Book' },
     asignacionMaterias: { id: 'asignacionMaterias', label: 'Asig. Materias', path: '/academico/asignacion-materias', icon: 'Link' },
     grados: { id: 'grados', label: 'Grados', path: '/academico/grados', icon: 'BarChart' },
@@ -84,7 +83,6 @@ export const MENU_ITEMS = {
     // === ALUMNO ===
     misNotas: { id: 'misNotas', label: 'Mis Notas', path: '/alumno/notas', icon: 'FileText' },
     miHorarioAlumno: { id: 'miHorarioAlumno', label: 'Mi Horario', path: '/alumno/horario', icon: 'Calendar' },
-    miEstadoCuenta: { id: 'miEstadoCuenta', label: 'Mi Estado de Cuenta', path: '/alumno/estado-cuenta', icon: 'DollarSign' },
     calendarioTareas: { id: 'calendarioTareas', label: 'Calendario Tareas', path: '/alumno/tareas', icon: 'Calendar' },
 
     // === PADRES ===
@@ -101,7 +99,8 @@ export const MENU_ITEMS = {
     ajustes: { id: 'ajustes', label: 'Ajustes', path: '/admin/ajustes', icon: 'Settings' },
     estadisticas: { id: 'estadisticas', label: 'Estadísticas', path: '/admin/estadisticas', icon: 'TrendingUp' },
     logs: { id: 'logs', label: 'Logs Acceso', path: '/admin/logs', icon: 'Activity' },
-    ajusteGeneral: { id: 'ajusteGeneral', label: 'Ajustes Generales', path: '/admin/ajustes-generales', icon: 'Sliders' },
+    // Consolidated adjustments
+    ajusteGeneral: { id: 'ajusteGeneral', label: 'Mantenimiento Datos', path: '/admin/ajustes-generales', icon: 'Sliders' },
     catalogos: { id: 'catalogos', label: 'Catálogos', path: '/admin/catalogos', icon: 'Database' },
     iaHorarios: { id: 'iaHorarios', label: 'IA Generador Horarios', path: '/academico/horarios', icon: 'Brain' },
 };
@@ -117,7 +116,7 @@ export const ROLE_MENUS = {
 
     [ROLES.ACCOUNTANT]: [
         { section: 'Principal', items: ['dashboard'] },
-        { section: 'Gestión Cobros', items: ['exonerados', 'insolventes', 'comprobantesPendientes', 'paquetesSeleccionados'] },
+        { section: 'Gestión Cobros', items: ['insolventes', 'comprobantesPendientes', 'paquetesSeleccionados'] },
         { section: 'Operaciones', items: ['corteDia', 'solicitudes', 'contratos'] },
         { section: 'Configuración', items: ['paquetes', 'costosNivel', 'ajusteGeneral'] },
     ],
@@ -125,7 +124,6 @@ export const ROLE_MENUS = {
     [ROLES.SECRETARY]: [
         { section: 'Principal', items: ['dashboard'] },
         { section: 'Inscripciones', items: ['inscripciones', 'matricular', 'familias', 'documentosInscripcion', 'contratos'] },
-        { section: 'Cobros', items: ['registroPagos', 'estadoCuenta', 'insolventes', 'comprobantesEmitidos', 'corteDia'] },
         { section: 'Cobros', items: ['registroPagos', 'estadoCuenta', 'insolventes', 'comprobantesEmitidos', 'corteDia'] },
         { section: 'Gestión', items: ['asignarPaquetes', 'convenios', 'asignarConvenio', 'paquetesSeleccionados'] },
         { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
@@ -141,16 +139,16 @@ export const ROLE_MENUS = {
     [ROLES.COORDINATION]: [
         { section: 'Principal', items: ['dashboard'] },
         { section: 'Gestión Académica', items: ['cronograma', 'cierreNotas', 'materias', 'asignacionMaterias', 'docentes'] },
-        { section: 'Organización', items: ['cursos', 'secciones', 'grados', 'iaHorarios', 'gestionCursos'] },
-        { section: 'Reportes', items: ['boletas', 'cuadros'] },
+        { section: 'Organización', items: ['niveles', 'secciones', 'grados', 'iaHorarios', 'gestionCursos'] },
+        { section: 'Reportes', items: ['reportesAcademicos'] },
         { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
     ],
 
     [ROLES.DIRECTOR]: [
         { section: 'Principal', items: ['dashboard'] },
         { section: 'Inteligencia Artificial', items: ['iaHorarios'] },
-        { section: 'Supervisión', items: ['cronograma', 'cierreNotas', 'boletas'] },
-        { section: 'Académico', items: ['cursos', 'secciones', 'docentes', 'materias', 'grados', 'gestionCursos'] },
+        { section: 'Supervisión', items: ['cronograma', 'cierreNotas', 'reportesAcademicos'] },
+        { section: 'Académico', items: ['niveles', 'secciones', 'docentes', 'materias', 'grados', 'gestionCursos'] },
         { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
     ],
 
@@ -164,14 +162,12 @@ export const ROLE_MENUS = {
     [ROLES.STUDENT]: [
         { section: 'Principal', items: ['dashboard'] },
         { section: 'Mi Aprendizaje', items: ['calendarioTareas', 'misNotas', 'miHorarioAlumno'] },
-        // { section: 'Finanzas', items: ['miEstadoCuenta'] }, // Removed per user request
     ],
 
     [ROLES.PARENT]: [
         { section: 'Principal', items: ['dashboard'] },
         { section: 'Mis Hijos', items: ['misHijos', 'contratoPadres'] },
-        { section: 'Seguimiento', items: ['calendarioTareas', 'boletas'] },
-        // { section: 'Finanzas', items: ['estadoCuenta'] }, 
+        { section: 'Seguimiento', items: ['calendarioTareas', 'reportesAcademicos'] },
     ],
 
     // Admin fallback
@@ -184,29 +180,28 @@ export const ROLE_MENUS = {
     'ROLE_SECRETARIA': [
         { section: 'Principal', items: ['dashboard'] },
         { section: 'Inscripciones', items: ['inscripciones', 'matricular', 'familias', 'documentosInscripcion', 'contratos'] },
-        // { section: 'Cobros', items: ['registroPagos', 'estadoCuenta', 'insolventes', 'comprobantesEmitidos', 'corteDia'] },
-        // { section: 'Cobros', items: ['registroPagos', 'estadoCuenta', 'insolventes', 'comprobantesEmitidos', 'corteDia'] },
-        // { section: 'Gestión', items: ['asignarPaquetes', 'convenios', 'asignarConvenio', 'paquetesSeleccionados'] },
+        { section: 'Cobros', items: ['registroPagos', 'estadoCuenta', 'insolventes', 'comprobantesEmitidos', 'corteDia'] },
+        { section: 'Gestión', items: ['asignarPaquetes', 'convenios', 'asignarConvenio', 'paquetesSeleccionados'] },
         { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
     ],
     'ROLE_CONTABILIDAD': [
         { section: 'Principal', items: ['dashboard'] },
-        // { section: 'Gestión Cobros', items: ['exonerados', 'insolventes', 'comprobantesPendientes', 'paquetesSeleccionados'] },
-        // { section: 'Operaciones', items: ['corteDia', 'solicitudes', 'contratos'] },
-        // { section: 'Configuración', items: ['paquetes', 'costosNivel', 'ajusteGeneral'] },
+        { section: 'Gestión Cobros', items: ['insolventes', 'comprobantesPendientes', 'paquetesSeleccionados'] },
+        { section: 'Operaciones', items: ['corteDia', 'solicitudes', 'contratos'] },
+        { section: 'Configuración', items: ['paquetes', 'costosNivel', 'ajusteGeneral'] },
     ],
     'ROLE_COORDINACION': [
         { section: 'Principal', items: ['dashboard'] },
         { section: 'Gestión Académica', items: ['cronograma', 'cierreNotas', 'materias', 'asignacionMaterias', 'docentes'] },
-        { section: 'Organización', items: ['cursos', 'secciones', 'grados', 'iaHorarios', 'gestionCursos'] },
-        { section: 'Reportes', items: ['boletas', 'cuadros'] },
+        { section: 'Organización', items: ['niveles', 'secciones', 'grados', 'iaHorarios', 'gestionCursos'] },
+        { section: 'Reportes', items: ['reportesAcademicos'] },
         { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
     ],
     'ROLE_DIRECCION': [
         { section: 'Principal', items: ['dashboard'] },
         { section: 'Inteligencia Artificial', items: ['iaHorarios'] },
-        { section: 'Supervisión', items: ['cronograma', 'cierreNotas', 'boletas'] },
-        { section: 'Académico', items: ['cursos', 'secciones', 'docentes', 'materias', 'grados', 'gestionCursos'] },
+        { section: 'Supervisión', items: ['cronograma', 'cierreNotas', 'reportesAcademicos'] },
+        { section: 'Académico', items: ['niveles', 'secciones', 'docentes', 'materias', 'grados', 'gestionCursos'] },
         { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
     ],
     'ROLE_DOCENTE': [
@@ -218,18 +213,16 @@ export const ROLE_MENUS = {
     'ROLE_ALUMNO': [
         { section: 'Principal', items: ['dashboard'] },
         { section: 'Mi Aprendizaje', items: ['calendarioTareas', 'misNotas', 'miHorarioAlumno'] },
-        // { section: 'Finanzas', items: ['miEstadoCuenta'] },
     ],
     'ROLE_PADRE': [
         { section: 'Principal', items: ['dashboard'] },
         { section: 'Mis Hijos', items: ['misHijos', 'contratoPadres'] },
-        { section: 'Seguimiento', items: ['calendarioTareas', 'boletas'] },
-        // { section: 'Finanzas', items: ['estadoCuenta'] }, 
+        { section: 'Seguimiento', items: ['calendarioTareas', 'reportesAcademicos'] },
     ],
     'ROLE_INFORMATICA': [
         { section: 'Principal', items: ['dashboard'] },
-        // { section: 'Sistema', items: ['notificacionesReset', 'cierreEscolar', 'usuarios', 'privilegios', 'menus'] },
-        // { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
+        { section: 'Sistema', items: ['notificacionesReset', 'cierreEscolar', 'usuarios', 'privilegios', 'menus'] },
+        { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
         { section: 'Monitoreo', items: ['estadisticas', 'logs'] },
     ],
 };

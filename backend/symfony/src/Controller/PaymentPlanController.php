@@ -43,6 +43,48 @@ class PaymentPlanController extends AbstractController
         ]);
     }
 
+    #[Route('/insolvents', methods: ['GET'])]
+    public function getInsolvents(): JsonResponse
+    {
+        $today = new \DateTime('today');
+        
+        // Find overdue quotas
+        $qb = $this->quotaRepository->createQueryBuilder('q')
+            ->leftJoin('q.paymentPlan', 'p')
+            ->leftJoin('p.student', 's')
+            ->where('q.dueDate < :today')
+            ->andWhere('q.status != :paidStatus')
+            ->andWhere('q.pendingAmount > 0')
+            ->setParameter('today', $today)
+            ->setParameter('paidStatus', 'PAID')
+            ->orderBy('q.dueDate', 'ASC')
+            ->addSelect('p') 
+            ->addSelect('s'); 
+
+        $quotas = $qb->getQuery()->getResult();
+
+        $data = array_map(function ($q) {
+            $plan = $q->getPaymentPlan();
+            $student = $plan->getStudent();
+            $name = $student->getFirstName() . ' ' . $student->getLastName();
+            
+            return [
+                'id' => $q->getId(),
+                'studentId' => $student->getId(),
+                'studentName' => $name,
+                'studentEmail' => $student->getEmail(),
+                'description' => $q->getConcept(),
+                'dueDate' => $q->getDueDate()->format('Y-m-d'),
+                'amount' => (float) $q->getPendingAmount(),
+            ];
+        }, $quotas);
+
+        return $this->json([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
+
     #[Route('', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {

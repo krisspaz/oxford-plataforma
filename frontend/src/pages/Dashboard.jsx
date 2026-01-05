@@ -38,9 +38,9 @@ const QuickAction = ({ title, icon: Icon, color, bgColor, onClick, darkMode }) =
 
 const AdminDashboard = ({ stats, navigate, darkMode }) => (
     <>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <StatCard
-                title="Usuarios Totales"
+                title="Usuarios Registrados"
                 value={stats?.totalUsers || 0}
                 icon={Users}
                 color="text-blue-500"
@@ -58,17 +58,8 @@ const AdminDashboard = ({ stats, navigate, darkMode }) => (
                 onClick={() => navigate('/academico/materias')}
             />
             <StatCard
-                title="Estudiantes Inscritos"
-                value={stats?.activeStudents || 0}
-                icon={GraduationCap}
-                color="text-green-500"
-                bg={darkMode ? 'bg-green-900/30' : 'bg-green-100'}
-                darkMode={darkMode}
-                onClick={() => navigate('/secretaria/students')}
-            />
-            <StatCard
-                title="Ciclo Escolar 2024"
-                value="Activo"
+                title="Ciclo Escolar Actual"
+                value={stats?.activeCycle || 'Activo'}
                 icon={Calendar}
                 color="text-orange-500"
                 bg={darkMode ? 'bg-orange-900/30' : 'bg-orange-100'}
@@ -77,24 +68,50 @@ const AdminDashboard = ({ stats, navigate, darkMode }) => (
             />
         </div>
 
-        {/* Quick Summary Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-            <div className={`lg:col-span-2 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} p-6 rounded-2xl shadow-lg border`}>
-                <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Resumen Académico</h3>
-                <div className="grid grid-cols-2 gap-4">
-                    <div className={`p-4 rounded-xl ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
-                        <p className="text-sm text-gray-500">Docentes Activos</p>
-                        <p className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>24</p>
-                    </div>
-                    <div className={`p-4 rounded-xl ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
-                        <p className="text-sm text-gray-500">Familias Registradas</p>
-                        <p className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>150</p>
-                    </div>
-                </div>
+        {/* Listado Previo de Estudiantes (Requested Feature) */}
+        <div className={`mt-8 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} rounded-2xl shadow-lg border p-6`}>
+            <div className="flex items-center justify-between mb-6">
+                <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Listado de Estudiantes (Vista Previa)</h3>
+                <button
+                    onClick={() => navigate('/secretaria/inscripciones')} // Navigating to inscriptions/students list
+                    className="text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1"
+                >
+                    Ver Todos <ChevronRight size={16} />
+                </button>
             </div>
-            <div className="space-y-4">
-                <QuickAction title="Suscripciones (Log)" icon={Activity} color="text-blue-500" bgColor={darkMode ? 'bg-blue-900/50' : 'bg-blue-100'} onClick={() => navigate('/admin/logs')} darkMode={darkMode} />
-                <QuickAction title="Gestión Usuarios" icon={Users} color="text-purple-500" bgColor={darkMode ? 'bg-purple-900/50' : 'bg-purple-100'} onClick={() => navigate('/admin/usuarios')} darkMode={darkMode} />
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead>
+                        <tr className={`text-left text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                            <th className="pb-3 pl-2">Nombre</th>
+                            <th className="pb-3">Ciclo</th>
+                            <th className="pb-3">Grado/Nivel</th>
+                            <th className="pb-3">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {stats?.recentStudents?.slice(0, 5).map((student, i) => (
+                            <tr key={i} className={`border-t ${darkMode ? 'border-gray-700' : 'border-gray-100'}`}>
+                                <td className={`py-3 pl-2 font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>{student.name}</td>
+                                <td className={`py-3 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{student.cycle}</td>
+                                <td className={`py-3 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{student.course}</td>
+                                <td className="py-3">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${student.status === 'ACTIVE'
+                                        ? (darkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700')
+                                        : (darkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700')
+                                        }`}>
+                                        {student.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                        {(!stats?.recentStudents || stats.recentStudents.length === 0) && (
+                            <tr>
+                                <td colSpan="4" className="py-6 text-center text-gray-500">No hay estudiantes recientes para mostrar.</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
         </div>
     </>
@@ -463,7 +480,7 @@ const DirectorDashboard = ({ stats, navigate, darkMode }) => (
                 </div>
                 <QuickAction title="IA Horarios" icon={Brain} color="text-indigo-600" bgColor={darkMode ? 'bg-indigo-900/50' : 'bg-indigo-100'} onClick={() => navigate('/academico/horarios')} darkMode={darkMode} />
                 <QuickAction title="Supervisión Notas" icon={FileText} color="text-green-600" bgColor={darkMode ? 'bg-green-900/50' : 'bg-green-100'} onClick={() => navigate('/academico/cuadros')} darkMode={darkMode} />
-                <QuickAction title="Gestión Cursos" icon={Layers} color="text-blue-600" bgColor={darkMode ? 'bg-blue-900/50' : 'bg-blue-100'} onClick={() => navigate('/academico/cursos')} darkMode={darkMode} />
+                <QuickAction title="Gestión Niveles" icon={Layers} color="text-blue-600" bgColor={darkMode ? 'bg-blue-900/50' : 'bg-blue-100'} onClick={() => navigate('/academico/niveles')} darkMode={darkMode} />
                 <QuickAction title="Reportes General" icon={BarChart} color="text-orange-600" bgColor={darkMode ? 'bg-orange-900/50' : 'bg-orange-100'} onClick={() => navigate('/reports')} darkMode={darkMode} />
             </div>
 
@@ -537,7 +554,7 @@ const CoordinationDashboard = ({ stats, navigate, darkMode }) => (
                         <QuickAction title="Horarios" icon={Clock} color="text-indigo-500" bgColor={darkMode ? 'bg-indigo-900/50' : 'bg-indigo-100'} onClick={() => navigate('/academico/horarios')} darkMode={darkMode} />
                         <QuickAction title="Planificaciones" icon={FileText} color="text-green-500" bgColor={darkMode ? 'bg-green-900/50' : 'bg-green-100'} onClick={() => { }} darkMode={darkMode} />
                         <QuickAction title="Observaciones" icon={AlertTriangle} color="text-orange-500" bgColor={darkMode ? 'bg-orange-900/50' : 'bg-orange-100'} onClick={() => { }} darkMode={darkMode} />
-                        <QuickAction title="Reportes" icon={BarChart} color="text-blue-500" bgColor={darkMode ? 'bg-blue-900/50' : 'bg-blue-100'} onClick={() => navigate('/reports')} darkMode={darkMode} />
+                        <QuickAction title="Reportes y Boletas" icon={BarChart} color="text-blue-500" bgColor={darkMode ? 'bg-blue-900/50' : 'bg-blue-100'} onClick={() => navigate('/academico/boletas')} darkMode={darkMode} />
                     </div>
                 </div>
             </div>
@@ -596,7 +613,7 @@ const Dashboard = () => {
                 return <DocenteDashboard navigate={navigate} darkMode={darkMode} stats={stats} />;
             case 'ROLE_INFORMATICS':
             case 'ROLE_INFORMATICA': // Español
-                return <InformaticaDashboard stats={stats} navigate={navigate} darkMode={darkMode} />;
+                return <div className="p-10 text-center text-gray-500">Panel de Informática (En Desarrollo)</div>;
             case 'ROLE_STUDENT':
             case 'ROLE_ALUMNO': // Español
                 return <StudentDashboard navigate={navigate} darkMode={darkMode} stats={stats} />;

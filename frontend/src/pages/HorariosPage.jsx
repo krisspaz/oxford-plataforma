@@ -23,7 +23,7 @@ const HorariosPage = () => {
     const [messages, setMessages] = useState([
         {
             type: 'ai',
-            text: '👋 ¡Hola! Soy tu asistente de horarios. Selecciona un curso para ver su horario real descargado de la base de datos.',
+            text: '👋 ¡Hola! Soy tu asistente de horarios. Selecciona un nivel para ver su horario real descargado de la base de datos.',
             time: new Date()
         }
     ]);
@@ -182,12 +182,12 @@ const HorariosPage = () => {
     // Export functions
     const exportSchedulePDF = () => {
         if (!selectedCourseId) {
-            alert("No hay curso seleccionado.");
+            alert("No hay nivel seleccionado.");
             return;
         }
 
         const selectedCourse = courses.find(c => c.id === parseInt(selectedCourseId));
-        const courseName = selectedCourse ? `${selectedCourse.name}` : 'Curso';
+        const courseName = selectedCourse ? `${selectedCourse.name}` : 'Nivel';
 
         // Flatten data for table
         const tableColumn = ["Hora", ...days];
@@ -206,7 +206,7 @@ const HorariosPage = () => {
 
         exportTable({
             title: 'Horario de Clases 2025',
-            subtitle: `Curso: ${courseName}`,
+            subtitle: `Nivel: ${courseName}`,
             columns: tableColumn,
             data: tableRows,
             filename: `horario_${courseName.replace(/\s+/g, '_')}.pdf`,
@@ -238,13 +238,13 @@ const HorariosPage = () => {
                     {/* Config Card */}
                     <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-sm`}>
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Selección de Curso</h2>
+                            <h2 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Selección de Nivel</h2>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className={labelClass}>Curso / Grado</label>
+                                <label className={labelClass}>Nivel / Grado</label>
                                 <select className={inputClass} value={selectedCourseId} onChange={e => setSelectedCourseId(e.target.value)}>
-                                    <option value="">-- Seleccionar Curso --</option>
+                                    <option value="">-- Seleccionar Nivel --</option>
                                     {courses.map(c => (
                                         <option key={c.id} value={c.id}>{c.name} ({c.gradeLevel} {c.section})</option>
                                     ))}

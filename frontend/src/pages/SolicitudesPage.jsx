@@ -27,21 +27,17 @@ const SolicitudesPage = () => {
             } else {
                 response = await requestService.getAll();
             }
+
+            // Handle API response structure
             if (response.success) {
+                setRequests(response.data);
+            } else if (Array.isArray(response)) {
+                setRequests(response);
+            } else if (response.data && Array.isArray(response.data)) {
                 setRequests(response.data);
             }
         } catch (error) {
             console.error('Error loading requests:', error);
-            // Demo data
-            setRequests([
-                { id: 1, type: 'ANULACION_FACTURA', document: 'FACT A-001', student: 'Juan Pérez', requestedBy: 'Laura Secretaria', date: '2025-01-16 10:30', reason: 'Error en NIT del receptor', status: 'PENDIENTE' },
-                { id: 2, type: 'ANULACION_RECIBO', document: 'RECI B-045', student: 'María López', requestedBy: 'Laura Secretaria', date: '2025-01-16 09:15', reason: 'Duplicado por error del sistema', status: 'PENDIENTE' },
-                { id: 3, type: 'HABILITACION_NOTAS', document: 'Bim 1 - Matemáticas', student: 'Carlos García', requestedBy: 'Prof. García', date: '2025-01-15 16:00', reason: 'Corrección de nota ingresada incorrectamente', status: 'APROBADA' },
-            ].filter(r => {
-                if (filter === 'pendiente') return r.status === 'PENDIENTE';
-                if (filter === 'procesadas') return r.status !== 'PENDIENTE';
-                return true;
-            }));
         } finally {
             setLoading(false);
         }
@@ -64,14 +60,19 @@ const SolicitudesPage = () => {
                 : await requestService.reject(id, 'Rechazado por administración');
 
             if (response.success) {
-                setRequests(requests.map(r => r.id === id ? { ...r, status: action } : r));
+                // Update local state to reflect change
+                setRequests(prev => prev.map(r => r.id === id ? { ...r, status: action } : r));
+                // If filter is 'pendiente', remove it or refresh
+                if (filter === 'pendiente') {
+                    setRequests(prev => prev.filter(r => r.id !== id));
+                }
+                setShowDetailModal(false);
             }
         } catch (error) {
             console.error('Error processing request:', error);
-            setRequests(requests.map(r => r.id === id ? { ...r, status: action } : r));
+            alert('Error al procesar la solicitud');
         } finally {
             setActionLoading(null);
-            setShowDetailModal(false);
         }
     };
 
@@ -117,8 +118,8 @@ const SolicitudesPage = () => {
                             <div className="flex items-start justify-between">
                                 <div className="flex items-start gap-4">
                                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${request.status === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-600' :
-                                            request.status === 'APROBADA' ? 'bg-green-100 text-green-600' :
-                                                'bg-red-100 text-red-600'
+                                        request.status === 'APROBADA' ? 'bg-green-100 text-green-600' :
+                                            'bg-red-100 text-red-600'
                                         }`}>
                                         {request.status === 'PENDIENTE' ? <Clock size={20} /> :
                                             request.status === 'APROBADA' ? <Check size={20} /> : <X size={20} />}
@@ -126,8 +127,8 @@ const SolicitudesPage = () => {
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
                                             <span className={`px-2 py-0.5 rounded text-xs font-medium ${typeInfo.color === 'red' ? 'bg-red-100 text-red-700' :
-                                                    typeInfo.color === 'orange' ? 'bg-orange-100 text-orange-700' :
-                                                        'bg-blue-100 text-blue-700'
+                                                typeInfo.color === 'orange' ? 'bg-orange-100 text-orange-700' :
+                                                    'bg-blue-100 text-blue-700'
                                                 }`}>{typeInfo.label}</span>
                                             <span className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{request.document}</span>
                                         </div>
@@ -196,8 +197,8 @@ const SolicitudesPage = () => {
                             <div><strong>Fecha:</strong> {selectedRequest.date}</div>
                             <div><strong>Motivo:</strong> {selectedRequest.reason}</div>
                             <div><strong>Estado:</strong> <span className={`px-2 py-1 rounded text-xs ${selectedRequest.status === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-700' :
-                                    selectedRequest.status === 'APROBADA' ? 'bg-green-100 text-green-700' :
-                                        'bg-red-100 text-red-700'
+                                selectedRequest.status === 'APROBADA' ? 'bg-green-100 text-green-700' :
+                                    'bg-red-100 text-red-700'
                                 }`}>{selectedRequest.status}</span></div>
                         </div>
                         {selectedRequest.status === 'PENDIENTE' && (

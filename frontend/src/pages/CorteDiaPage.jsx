@@ -34,15 +34,16 @@ const CorteDiaPage = () => {
             // Mock Data Fallback (Keep this for stability until full deployment)
             const mockPayments = [
                 { id: 1, name: 'Juan Perez', products: 'Mensualidad Enero', method: 'Efectivo', series: 'A', number: '101', total: 450 },
-                { id: 2, name: 'Maria Lopez', products: 'Inscripción', method: 'Tarjeta', series: 'A', number: '102', total: 800 },
-                { id: 3, name: 'Carlos Ruiz', products: 'Uniforme Deportivo', method: 'Depósito', series: 'B', number: '055', total: 350 },
+                { id: 2, name: 'Juan Perez', products: 'Uniforme', method: 'Efectivo', series: 'A', number: '101', total: 100 },
+                { id: 3, name: 'Maria Lopez', products: 'Inscripción', method: 'Tarjeta', series: 'A', number: '102', total: 800 },
+                { id: 4, name: 'Carlos Ruiz', products: 'Uniforme Deportivo', method: 'Depósito', series: 'B', number: '055', total: 350 },
             ];
             setPayments(mockPayments);
             setTotals({
-                efectivo: 450,
+                efectivo: 550,
                 tarjeta: 800,
                 deposito: 350,
-                total: 1600
+                total: 1700
             });
         } finally {
             setLoading(false);
@@ -59,28 +60,48 @@ const CorteDiaPage = () => {
             return;
         }
 
-        const columns = ["Nombre", "Productos", "Método", "Documento", "Monto"];
-        const data = payments.map(p => [
-            p.name,
-            p.products,
-            p.method,
-            `${p.series}-${p.number}`,
-            `Q ${p.total?.toLocaleString()}`
+        // Consolidation Logic
+        const grouped = {};
+        payments.forEach(p => {
+            const key = p.name; // Group by Name
+            if (!grouped[key]) {
+                grouped[key] = {
+                    name: p.name,
+                    products: [],
+                    methods: new Set(),
+                    documents: new Set(),
+                    total: 0
+                };
+            }
+            if (p.products) grouped[key].products.push(p.products);
+            if (p.method) grouped[key].methods.add(p.method);
+            grouped[key].documents.add(`${p.series}-${p.number}`);
+            grouped[key].total += (parseFloat(p.total) || 0);
+        });
+
+        const columns = ["Nombre Estudiante", "Conceptos / Productos", "Método Pago", "Documentos", "Total Pagado"];
+        const data = Object.values(grouped).map(g => [
+            g.name,
+            g.products.join(', '),
+            Array.from(g.methods).join(', '),
+            Array.from(g.documents).join(', '),
+            `Q ${g.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
         ]);
 
         // Add Total Row
-        data.push(['', '', '', 'TOTAL', `Q ${totals.total.toLocaleString()}`]);
+        data.push(['', '', '', 'TOTAL GENERAL', `Q ${totals.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}`]);
 
         exportTable({
-            title: 'Reporte de Corte del Día',
+            title: 'Reporte de Corte del Día (Consolidado)',
             subtitle: `Del: ${dateFrom} Al: ${dateTo}`,
             columns: columns,
             data: data,
             filename: `corte_${dateFrom}_${dateTo}.pdf`,
+            orientation: 'landscape', // Horizontal
             autoTableOptions: {
                 didParseCell: function (data) {
                     // Highlight Total Row
-                    if (data.row.index === payments.length) {
+                    if (data.row.index === Object.values(grouped).length) {
                         data.cell.styles.fontStyle = 'bold';
                         data.cell.styles.fillColor = [200, 200, 200];
                     }
@@ -95,7 +116,7 @@ const CorteDiaPage = () => {
                 <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Corte del Día</h1>
                 <div className="flex gap-2 no-print">
                     <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">
-                        <Download size={18} /> Exportar PDF
+                        <Download size={18} /> Exportar PDF Horizontal
                     </button>
                     <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
                         <Printer size={18} /> Imprimir

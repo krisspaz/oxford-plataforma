@@ -143,7 +143,7 @@ const MisAlumnosPage = () => {
                 <div>
                     <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Mis Alumnos</h1>
                     <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
-                        Estudiantes de los cursos que imparto
+                        Estudiantes de los niveles que imparto
                     </p>
                 </div>
             </div>
@@ -187,7 +187,7 @@ const MisAlumnosPage = () => {
                                 </div>
                             </div>
                             <div className="w-40">
-                                <label className={`block text-xs font-medium mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Curso</label>
+                                <label className={`block text-xs font-medium mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Nivel</label>
                                 <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} className={`${inputClass} w-full`}>
                                     <option value="">Todos</option>
                                     {teacherCourses.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
@@ -221,7 +221,7 @@ const MisAlumnosPage = () => {
                                     <th className={`text-left p-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Alumno</th>
                                     <th className={`text-left p-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Código</th>
                                     <th className={`text-left p-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Grado</th>
-                                    <th className={`text-left p-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Curso</th>
+                                    <th className={`text-left p-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Nivel</th>
                                     <th className={`text-left p-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Encargado</th>
                                     <th className={`text-left p-4 font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Contacto</th>
                                 </tr>
@@ -307,7 +307,7 @@ const MisAlumnosPage = () => {
                                         <td className="p-4">
                                             <div className="flex items-center gap-3">
                                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${attendance[student.id] === 'present' ? 'bg-green-100' :
-                                                        attendance[student.id] === 'absent' ? 'bg-red-100' : 'bg-yellow-100'
+                                                    attendance[student.id] === 'absent' ? 'bg-red-100' : 'bg-yellow-100'
                                                     }`}>
                                                     <User className={
                                                         attendance[student.id] === 'present' ? 'text-green-500' :
@@ -324,8 +324,8 @@ const MisAlumnosPage = () => {
                                                 <button
                                                     onClick={() => toggleAttendance(student.id, 'present')}
                                                     className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${attendance[student.id] === 'present'
-                                                            ? 'bg-green-500 text-white'
-                                                            : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
+                                                        ? 'bg-green-500 text-white'
+                                                        : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
                                                         }`}
                                                 >
                                                     <Check size={16} /> Presente
@@ -333,8 +333,8 @@ const MisAlumnosPage = () => {
                                                 <button
                                                     onClick={() => toggleAttendance(student.id, 'late')}
                                                     className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${attendance[student.id] === 'late'
-                                                            ? 'bg-yellow-500 text-white'
-                                                            : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
+                                                        ? 'bg-yellow-500 text-white'
+                                                        : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
                                                         }`}
                                                 >
                                                     <Clock size={16} /> Tarde
@@ -342,8 +342,8 @@ const MisAlumnosPage = () => {
                                                 <button
                                                     onClick={() => toggleAttendance(student.id, 'absent')}
                                                     className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${attendance[student.id] === 'absent'
-                                                            ? 'bg-red-500 text-white'
-                                                            : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
+                                                        ? 'bg-red-500 text-white'
+                                                        : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
                                                         }`}
                                                 >
                                                     <X size={16} /> Ausente
@@ -431,8 +431,8 @@ const MisAlumnosPage = () => {
                                             </td>
                                             <td className="p-4 text-center">
                                                 <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${stats.percentage >= 80 ? (darkMode ? 'bg-green-900/50 text-green-300' : 'bg-green-100 text-green-700') :
-                                                        stats.percentage >= 60 ? (darkMode ? 'bg-yellow-900/50 text-yellow-300' : 'bg-yellow-100 text-yellow-700') :
-                                                            (darkMode ? 'bg-red-900/50 text-red-300' : 'bg-red-100 text-red-700')
+                                                    stats.percentage >= 60 ? (darkMode ? 'bg-yellow-900/50 text-yellow-300' : 'bg-yellow-100 text-yellow-700') :
+                                                        (darkMode ? 'bg-red-900/50 text-red-300' : 'bg-red-100 text-red-700')
                                                     }`}>
                                                     <span className="font-bold">{stats.percentage}%</span>
                                                 </div>

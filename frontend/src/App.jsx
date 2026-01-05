@@ -39,6 +39,7 @@ const EstadoCuentaPage = lazy(() => import('./pages/EstadoCuentaPage'));
 const CorteDiaPage = lazy(() => import('./pages/CorteDiaPage'));
 const ComprobantesPage = lazy(() => import('./pages/ComprobantesPage'));
 const PaquetesPage = lazy(() => import('./pages/PaquetesPage'));
+const CostosPage = lazy(() => import('./pages/CostosPage'));
 const ExonerationPage = lazy(() => import('./pages/ExonerationPage'));
 const SolicitudesPage = lazy(() => import('./pages/SolicitudesPage'));
 const InsolventesPage = lazy(() => import('./pages/InsolventesPage'));
@@ -80,6 +81,7 @@ const ReportsPage = lazy(() => import('./pages/ReportsPage'));
 const TareasPage = lazy(() => import('./pages/TareasPage'));
 const MisHijosPage = lazy(() => import('./pages/MisHijosPage'));
 const MonitoreoPage = lazy(() => import('./pages/MonitoreoPage'));
+const LogsPage = lazy(() => import('./pages/LogsPage'));
 
 // 404
 const NotFound = () => (
@@ -115,7 +117,7 @@ function App() {
                 <Route path="/financiero/convenios" element={<ProtectedRoute><ConveniosPage /></ProtectedRoute>} />
                 <Route path="/financiero/asignar-convenio" element={<ProtectedRoute><AsignarConvenioPage /></ProtectedRoute>} />
                 <Route path="/financiero/paquetes-seleccionados" element={<ProtectedRoute><PaquetesSeleccionadosPage /></ProtectedRoute>} />
-                <Route path="/financiero/costos" element={<ProtectedRoute><ComingSoonPage title="Costos por Nivel" /></ProtectedRoute>} />
+                <Route path="/financiero/costos" element={<ProtectedRoute><CostosPage /></ProtectedRoute>} />
 
                 {/* Academic Routes (Director/Coordination) */}
                 <Route path="/academico/cursos" element={<ProtectedRoute><CursosNivelesPage /></ProtectedRoute>} />
@@ -163,7 +165,7 @@ function App() {
                   <Route path="finanzas/comprobantes-pendientes" element={<ComprobantesPage />} />
                   <Route path="finanzas/comprobantes-emitidos" element={<ComprobantesEmitidosPage />} />
                   <Route path="finanzas/paquetes" element={<PaquetesPage />} />
-                  <Route path="finanzas/costos" element={<ComingSoonPage title="Costos por Nivel" />} />
+                  <Route path="finanzas/costos" element={<CostosPage />} />
                   <Route path="finanzas/exonerados" element={<ExonerationPage />} />
                   <Route path="finanzas/exoneraciones" element={<ExonerationPage />} />
                   <Route path="finanzas/solicitudes" element={<SolicitudesPage />} />
@@ -223,7 +225,7 @@ function App() {
                   <Route path="admin/privilegios" element={<PrivilegiosPage />} />
                   <Route path="admin/menus" element={<GestionMenusPage />} />
                   <Route path="admin/estadisticas" element={<MonitoreoPage />} />
-                  <Route path="admin/logs" element={<ComingSoonPage title="Logs del Sistema" />} />
+                  <Route path="admin/logs" element={<LogsPage />} />
                   <Route path="settings" element={<SettingsPage />} />
 
                   {/* Otros */}
