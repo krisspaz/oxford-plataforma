@@ -10,6 +10,7 @@ from jose import JWTError, jwt
 from database import db
 from nlp_engine import nlp_engine
 from preference_learner import PreferenceLearner
+from risk_analyzer import RiskAnalyzer
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -257,6 +258,9 @@ def create_horario():
 
 # --- GENERATION ENDPOINT ---
 from genetic_scheduler import genetic_optimizer
+import hashlib
+
+RESPONSE_CACHE = {}
 
 @app.route("/generate-schedule", methods=["POST"])
 def generate_schedule():
@@ -264,6 +268,14 @@ def generate_schedule():
     Main endpoint called by Symfony to run the Genetic Algorithm
     """
     data = request.json
+    
+    # SHA-256 hash of the input to serve as cache key
+    data_str = json.dumps(data, sort_keys=True)
+    cache_key = hashlib.sha256(data_str.encode()).hexdigest()
+    
+    if cache_key in RESPONSE_CACHE:
+        print("⚡ Cache Hit!")
+        return jsonify(RESPONSE_CACHE[cache_key])
     
     # 1. Extract Data
     config = data.get('config', {})
@@ -301,13 +313,18 @@ def generate_schedule():
     )
     
     # 4. Return Result (includes 'explanation' from Phase 3)
-    return jsonify({
+    response_data = {
         "status": "success",
         "schedule": result['schedule'],
         "conflicts": result['conflicts'],
         "explanation": result.get('explanation', []),
         "optimization_score": max(0, 100 - (result['conflicts'] * 5))
-    })
+    }
+    
+    # Store in cache
+    RESPONSE_CACHE[cache_key] = response_data
+    
+    return jsonify(response_data)
 
 # --- OLD ENDPOINTS ---
 @app.route("/horario", methods=["GET"])
@@ -342,6 +359,21 @@ def learn_preferences():
             )
             return jsonify({"status": "learned", "message": "Preference updated"})
         return jsonify({"error": "Missing fields"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --- PHASE 4: RISK ANALYSIS ---
+risk_analyzer = RiskAnalyzer()
+
+@app.route("/predict-risk", methods=["POST"])
+def predict_risk():
+    """
+    Analyze student data for academic risk
+    """
+    data = request.json
+    try:
+        analysis = risk_analyzer.analyze(data)
+        return jsonify(analysis)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
