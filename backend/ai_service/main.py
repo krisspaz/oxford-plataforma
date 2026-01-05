@@ -15,6 +15,8 @@ from teacher_analyzer import TeacherAnalyzer
 from schedule_scorer import ScheduleScorer
 from institutional_memory import InstitutionalMemory
 from rule_contract import RuleContract
+from assistant_factory import AssistantFactory
+from negotiation_engine import NegotiationEngine
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -142,13 +144,15 @@ def process_cmd():
         response["response_text"] = "Generando horario..."
         response["should_generate"] = True
     elif response["intent"] == "greeting":
-        import random
-        greetings = [
-            "¡Hola! 👋 ¡Qué alegría verte! Estoy lista para ayudarte.",
-            "¡Saludos! Espero que tengas un día excelente. 🌟",
-            "¡Hola! Aquí Oxford AI con toda la energía. 🚀"
-        ]
-        response["response_text"] = random.choice(greetings)
+        # Point 3: Use AssistantFactory for role-based response
+        user_role = "admin" # Default
+        try:
+             # In a real request context we would use the token's role
+             # For now, we mock or extract from request if available
+             user_role = request.json.get('role', 'admin')
+        except: pass
+        
+        response["response_text"] = assistant_factory.get_response("greeting", user_role, {"isa": "95.0"})
     elif response["intent"] == "check_homework":
         response["response_text"] = "Consultando tu agenda de tareas..."
         response["action"] = "fetch_tasks" 
@@ -389,6 +393,19 @@ teacher_analyzer = TeacherAnalyzer()
 schedule_scorer = ScheduleScorer()
 memory = InstitutionalMemory()
 rule_contract = RuleContract()
+assistant_factory = AssistantFactory()
+negotiation_engine = NegotiationEngine()
+
+@app.route("/negotiate", methods=["POST"])
+def negotiate_change():
+    """
+    Endpoint for automatic negotiation.
+    """
+    data = request.json
+    conflict = data.get('conflict', {})
+    alternatives = negotiation_engine.propose_alternatives(conflict)
+    return jsonify({"alternatives": alternatives})
+
 
 
 @app.route("/predict-risk", methods=["POST"])
