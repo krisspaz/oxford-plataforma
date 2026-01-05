@@ -5,8 +5,11 @@ import { studentService } from '../services';
 
 import { usePdfExport } from '../hooks/usePdfExport';
 
+import { useAuth } from '../contexts/AuthContext';
+
 const EstadoCuentaPage = () => {
     const { darkMode } = useTheme();
+    const { user, hasRole } = useAuth();
     const { exportTable } = usePdfExport(); // Hook
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -17,6 +20,17 @@ const EstadoCuentaPage = () => {
 
     // Search students
     useEffect(() => {
+        // If Parent, load my children automatically
+        if (hasRole('ROLE_PARENT') || hasRole('ROLE_PADRE')) {
+            // Mock: In real app, call studentService.getMyChildren()
+            // For now, we simulate finding their children
+            setStudents([
+                { id: 1, fullName: 'Juan Pérez (Hijo)', carnet: '2025-001', grade: '1ro Primaria' },
+                { id: 4, fullName: 'Carlos Fernández (Hijo)', carnet: '2025-004', grade: 'Kinder' }
+            ]);
+            return;
+        }
+
         const searchStudents = async () => {
             if (searchTerm.length < 3) {
                 setStudents([]);
@@ -33,7 +47,7 @@ const EstadoCuentaPage = () => {
         };
         const timeoutId = setTimeout(searchStudents, 500);
         return () => clearTimeout(timeoutId);
-    }, [searchTerm]);
+    }, [searchTerm, hasRole]);
 
     // Load account status when student is selected
     useEffect(() => {
@@ -144,18 +158,21 @@ const EstadoCuentaPage = () => {
 
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-4 shadow-sm`}>
                 <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    <User size={16} className="inline mr-2" />Buscar Estudiante
+                    <User size={16} className="inline mr-2" />
+                    {(hasRole('ROLE_PARENT') || hasRole('ROLE_PADRE')) ? 'Mis Hijos' : 'Buscar Estudiante'}
                 </label>
-                <div className="relative max-w-md">
-                    <Search className={`absolute left-3 top-2.5 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={18} />
-                    <input
-                        type="text"
-                        placeholder="Buscar por nombre o carnet..."
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                        className={`${inputClass} w-full pl-10`}
-                    />
-                </div>
+                {!(hasRole('ROLE_PARENT') || hasRole('ROLE_PADRE')) && (
+                    <div className="relative max-w-md">
+                        <Search className={`absolute left-3 top-2.5 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={18} />
+                        <input
+                            type="text"
+                            placeholder="Buscar por nombre o carnet..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className={`${inputClass} w-full pl-10`}
+                        />
+                    </div>
+                )}
                 {students.length > 0 && (
                     <div className="mt-2 max-h-40 overflow-y-auto space-y-1">
                         {students.map(s => (

@@ -63,7 +63,7 @@ const CargaNotasPage = () => {
             );
             if (response.success) {
                 setCurrentBimesterData(response.bimester);
-                setStudents(response.records.map(r => ({
+                setStudents((response.records || []).map(r => ({
                     id: r.id,
                     studentId: r.student,
                     name: r.studentName,

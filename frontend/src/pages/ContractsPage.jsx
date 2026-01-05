@@ -266,11 +266,17 @@ const ContractsPage = () => {
                                 )}
 
                                 {/* Ver contrato firmado */}
-                                {contract.status === 'SIGNED' && contract.signedFile && (
+                                {contract.status === 'SIGNED' && (
                                     <button
-                                        onClick={() => window.open(contract.signedFile, '_blank')}
-                                        className={`p-2 rounded-lg transition-colors ${darkMode ? 'text-purple-400 hover:bg-gray-700' : 'text-purple-600 hover:bg-purple-50'}`}
-                                        title="Ver Contrato Firmado"
+                                        onClick={() => {
+                                            if (contract.signedFile) {
+                                                window.open(contract.signedFile, '_blank');
+                                            } else {
+                                                alert('El archivo del contrato no está disponible.');
+                                            }
+                                        }}
+                                        className={`p-2 rounded-lg transition-colors ${darkMode ? 'text-purple-400 hover:bg-gray-700' : 'text-purple-600 hover:bg-purple-50'} ${!contract.signedFile ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        title={contract.signedFile ? "Ver Contrato Firmado" : "Archivo no disponible"}
                                     >
                                         <Eye size={20} />
                                     </button>

@@ -65,6 +65,7 @@ const SeccionesPage = lazy(() => import('./pages/SeccionesPage'));
 const GestionCursosPage = lazy(() => import('./pages/GestionCursosPage'));
 const IAHorariosPage = lazy(() => import('./pages/IAHorariosPage'));
 const AsignacionMateriasPage = lazy(() => import('./pages/AsignacionMateriasPage'));
+const ContenidoPage = lazy(() => import('./pages/ContenidoPage'));
 
 // Administración
 const GestionUsuariosPage = lazy(() => import('./pages/GestionUsuariosPage'));
@@ -128,7 +129,7 @@ function App() {
                 <Route path="/academico/asignacion-materias" element={<ProtectedRoute><AsignacionMateriasPage /></ProtectedRoute>} />
 
                 {/* Teacher Routes */}
-                <Route path="/profesor/contenido" element={<ProtectedRoute><ComingSoonPage title="Asignar Contenido" /></ProtectedRoute>} />
+                <Route path="/profesor/contenido" element={<ProtectedRoute><ContenidoPage /></ProtectedRoute>} />
                 <Route path="/profesor/tareas" element={<ProtectedRoute><GestionTareasPage /></ProtectedRoute>} />
 
                 {/* Student/Parent Portal Routes */}
@@ -195,7 +196,7 @@ function App() {
                   <Route path="docente/alumnos" element={<MisAlumnosPage />} />
                   <Route path="docente/tareas" element={<GestionTareasPage />} />
                   <Route path="docente/tareas-calificadas" element={<GestionTareasPage />} />
-                  <Route path="docente/contenido" element={<ComingSoonPage title="Asignar Contenido" />} />
+                  <Route path="docente/contenido" element={<ContenidoPage />} />
                   <Route path="docente/notas-finales" element={<NotasFinalesPage />} />
 
                   {/* Alumno */}
