@@ -1,18 +1,32 @@
-import React, { useState } from 'react';
-import { Activity, Shield, Search, Filter } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Activity, Search } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import api from '../services/api';
 
 const LogsPage = () => {
     const { darkMode } = useTheme();
+    const [logs, setLogs] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // Mock data - In a real app this would come from an API
-    const [logs] = useState([
-        { id: 1, action: 'LOGIN', user: 'admin', ip: '192.168.1.10', date: '2025-01-05 08:30:12', details: 'Inicio de sesión exitoso' },
-        { id: 2, action: 'CREATE_STUDENT', user: 'secretaria', ip: '192.168.1.15', date: '2025-01-05 09:15:45', details: 'Estudiante creado: Juan Pérez' },
-        { id: 3, action: 'UPDATE_GRADE', user: 'docente_math', ip: '192.168.1.20', date: '2025-01-05 10:22:01', details: 'Nota modificada: Matemáticas - Parcial 1' },
-        { id: 4, action: 'PRINT_REPORT', user: 'director', ip: '192.168.1.12', date: '2025-01-05 11:05:33', details: 'Reporte generado: Boleta Calificaciones' },
-        { id: 5, action: 'LOGIN_FAILED', user: 'unknown', ip: '192.168.1.100', date: '2025-01-05 11:30:00', details: 'Contraseña incorrecta' },
-    ]);
+    useEffect(() => {
+        const loadLogs = async () => {
+            try {
+                const response = await api.get('/admin/logs');
+                // Adaptation helper for different response structures
+                const data = response.data || response;
+                if (Array.isArray(data)) {
+                    setLogs(data);
+                } else if (data.data && Array.isArray(data.data)) {
+                    setLogs(data.data);
+                }
+            } catch (error) {
+                console.error("Error loading logs", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadLogs();
+    }, []);
 
     return (
         <div className="space-y-6">
@@ -66,11 +80,14 @@ const LogsPage = () => {
                                 <td className="p-4 text-sm">{log.details}</td>
                             </tr>
                         ))}
+                        {logs.length === 0 && !loading && (
+                            <tr><td colSpan="5" className="p-8 text-center text-gray-500">No hay registros de logs.</td></tr>
+                        )}
                     </tbody>
                 </table>
             </div>
             <p className="text-center text-xs text-gray-500 mt-4">
-                Mostrando últimos {logs.length} eventos. Los registros se archivan cada 30 días.
+                Mostrando últimos {logs.length} eventos.
             </p>
         </div>
     );
