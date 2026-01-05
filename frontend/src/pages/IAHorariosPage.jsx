@@ -22,6 +22,9 @@ const IAHorariosPage = () => {
     const { darkMode } = useTheme();
     const location = useLocation(); // Context awareness
     const [voiceEnabled, setVoiceEnabled] = useState(false); // Voice state
+    const [showRiskDashboard, setShowRiskDashboard] = useState(false);
+    const [showEnterpriseDashboard, setShowEnterpriseDashboard] = useState(false);
+    const [teacherProfile, setTeacherProfile] = useState(null);
 
     // ... existing refs ...
 
