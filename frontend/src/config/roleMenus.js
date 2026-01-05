@@ -123,6 +123,7 @@ export const ROLE_MENUS = {
         { section: 'Gestión Cobros', items: ['insolventes', 'comprobantesPendientes', 'paquetesSeleccionados'] },
         { section: 'Operaciones', items: ['corteDia', 'solicitudes', 'contratos'] },
         { section: 'Configuración', items: ['paquetes', 'costosNivel', 'ajusteGeneral'] },
+        { section: 'Inteligencia Artificial', items: ['iaHorarios'] },
     ],
 
     [ROLES.SECRETARY]: [
@@ -131,6 +132,7 @@ export const ROLE_MENUS = {
         { section: 'Cobros', items: ['registroPagos', 'estadoCuenta', 'insolventes', 'comprobantesEmitidos', 'corteDia'] },
         { section: 'Gestión', items: ['asignarPaquetes', 'convenios', 'asignarConvenio', 'paquetesSeleccionados'] },
         { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
+        { section: 'Inteligencia Artificial', items: ['iaHorarios'] },
     ],
 
     [ROLES.INFORMATICS]: [
@@ -138,6 +140,7 @@ export const ROLE_MENUS = {
         { section: 'Sistema', items: ['notificacionesReset', 'cierreEscolar', 'usuarios', 'privilegios', 'menus'] },
         { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
         { section: 'Monitoreo', items: ['estadisticas', 'logs'] },
+        { section: 'Inteligencia Artificial', items: ['iaHorarios'] },
     ],
 
     [ROLES.COORDINATION]: [
@@ -161,6 +164,7 @@ export const ROLE_MENUS = {
         { section: 'Mis Clases', items: ['miHorario', 'listadoAlumnos', 'cronograma'] },
         { section: 'Actividades', items: ['gestionTareas', 'asignarContenido', 'tareasCalificadas'] },
         { section: 'Calificaciones', items: ['asignarNotas', 'notasFinales'] },
+        { section: 'Inteligencia Artificial', items: ['iaHorarios'] },
     ],
 
     [ROLES.STUDENT]: [
@@ -215,6 +219,7 @@ export const ROLE_MENUS = {
         { section: 'Mis Clases', items: ['miHorario', 'listadoAlumnos', 'cronograma'] },
         { section: 'Actividades', items: ['gestionTareas', 'asignarContenido', 'tareasCalificadas'] },
         { section: 'Calificaciones', items: ['asignarNotas', 'notasFinales'] },
+        { section: 'Inteligencia Artificial', items: ['iaHorarios'] },
     ],
     'ROLE_ALUMNO': [
         { section: 'Principal', items: ['dashboard'] },
