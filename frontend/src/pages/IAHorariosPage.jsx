@@ -278,6 +278,9 @@ const IAHorariosPage = () => {
                 </form>
             </div>
 
+            {/* Overlays */}
+            {showRiskDashboard && <RiskDashboard onClose={() => setShowRiskDashboard(false)} />}
+            <EnterpriseDashboard visible={showEnterpriseDashboard} onClose={() => setShowEnterpriseDashboard(false)} />
         </div>
     );
 };
