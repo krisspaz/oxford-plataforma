@@ -361,8 +361,25 @@ def learn_preferences():
         return jsonify({"error": "Missing fields"}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-# --- PHASE 4: RISK ANALYSIS ---
+# --- PHASE 5: SIMULATION ---
+@app.route("/simulate", methods=["POST"])
+def simulate_change():
+    """
+    Run a 'What-If' scenario.
+    Payload: { "base_schedule": {...}, "change": {"teacher": "Juan", "add_subject": "Math"} }
+    """
+    data = request.json
+    # Mocking the simulation result for MVP speed
+    return jsonify({
+        "status": "simulated",
+        "original_score": 85,
+        "new_score": 82,
+        "impact": "adding this class creates a conflict on Tuesday",
+        "recommendation": "Try Wednesday instead"
+    })
 risk_analyzer = RiskAnalyzer()
 
 @app.route("/predict-risk", methods=["POST"])
