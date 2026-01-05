@@ -176,11 +176,15 @@ const IAHorariosPage = () => {
                                 {coreState === 'idle' ? 'Red Neuronal Activa' : coreState === 'processing' ? 'Procesando...' : 'Error de Conexión'}
                             </span>
 
-                            {/* ISA Indicator */}
-                            <span className="hidden md:flex items-center gap-1.5 border-l border-gray-700/50 pl-3">
+                            {/* ISA Indicator - Interactive */}
+                            <button
+                                onClick={() => setShowEnterpriseDashboard(true)}
+                                className="hidden md:flex items-center gap-1.5 border-l border-gray-700/50 pl-3 hover:bg-gray-800/50 rounded transition-colors cursor-pointer"
+                            >
                                 <Shield size={12} className="text-teal-400" />
                                 <span className="text-teal-400">ISA: 95.0 (Excelente)</span>
-                            </span>
+                                <span className="text-[10px] text-gray-500 ml-1">v3.1</span>
+                            </button>
                         </div>
                     </div>
                 </div>
