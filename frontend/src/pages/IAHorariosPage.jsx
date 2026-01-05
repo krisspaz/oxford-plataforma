@@ -21,6 +21,9 @@ import { useLocation } from 'react-router-dom'; // Added useLocation
 
 const IAHorariosPage = () => {
     const { darkMode } = useTheme();
+    const { user, getPrimaryRole } = useAuth();
+    const activeRole = getPrimaryRole() || 'admin';
+
     const location = useLocation(); // Context awareness
     const [voiceEnabled, setVoiceEnabled] = useState(false); // Voice state
     const [showRiskDashboard, setShowRiskDashboard] = useState(false);
@@ -78,7 +81,7 @@ const IAHorariosPage = () => {
             // Add context to the request (simulated here as we send 'text' mostly)
             const contextEnhancedText = `[Context: ${location.pathname}] ${text}`;
 
-            const aiResponse = await aiService.processCommand(text); // Using original text for now, but context is ready
+            const aiResponse = await aiService.processCommand(text, activeRole); // Pass role for persona adaptation
 
             // ... (rest of logic) ...
 
