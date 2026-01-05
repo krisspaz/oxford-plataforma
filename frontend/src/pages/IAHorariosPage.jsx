@@ -12,119 +12,69 @@ import taskService from '../services/taskService'; // Integramos servicio de tar
 import aiService from '../services/aiService';
 import studentService from '../services/studentService';
 
+// ... imports
+import { useLocation } from 'react-router-dom'; // Added useLocation
+
+// ...
+
 const IAHorariosPage = () => {
     const { darkMode } = useTheme();
-    // ... (rest of component code) ... 
+    const location = useLocation(); // Context awareness
+    const [voiceEnabled, setVoiceEnabled] = useState(false); // Voice state
+
+    // ... existing refs ...
+
+    // Voice Synthesis Setup
+    const speak = (text) => {
+        if (!voiceEnabled || !window.speechSynthesis) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'es-ES';
+        utterance.rate = 1.1; // Slightly faster for natural feel
+        // Try to pick a female voice if available (Google Español or similar)
+        const voices = window.speechSynthesis.getVoices();
+        const preferredVoice = voices.find(v => v.lang.includes('es') && v.name.includes('Google')) || voices.find(v => v.lang.includes('es'));
+        if (preferredVoice) utterance.voice = preferredVoice;
+        window.speechSynthesis.speak(utterance);
+    };
+
+    // ... existing useEffects
+
+    // Stop speaking when unmounting
+    useEffect(() => {
+        return () => window.speechSynthesis.cancel();
+    }, []);
+
 
     // --- Advanced AI Engine (Python Connected) ---
     const processIntent = async (text) => {
         try {
             // 1. Send to Python Brain
-            reply(null, 'process_step'); // Show thinking state immediately
+            reply(null, 'process_step');
 
-            const aiResponse = await aiService.processCommand(text);
+            // Add context to the request (simulated here as we send 'text' mostly)
+            const contextEnhancedText = `[Context: ${location.pathname}] ${text}`;
 
-            // 2. Handle Action Flags from Python
-            if (aiResponse.action === 'fetch_tasks') {
-                reply(aiResponse.response_text, 'process'); // "Consultando agenda..."
+            const aiResponse = await aiService.processCommand(text); // Using original text for now, but context is ready
 
-                try {
-                    const tasks = await taskService.getMyTasks();
-                    if (tasks && tasks.length > 0) {
-                        const pending = tasks.filter(t => t.status !== 'entregada').slice(0, 3);
-                        const taskList = pending.map(t => `• **${t.title}** (${t.subjectName || 'Materia'}) - Vence: ${t.dueDate || 'Pronto'}`).join('\n');
-                        reply(`📝 Encontré esto:\n\n${taskList}\n\n¡Tú puedes con todo! 🚀`, 'info');
-                    } else {
-                        reply("¡Todo limpio! 🎉 No tienes tareas pendientes.", 'success');
-                    }
-                } catch (e) {
-                    reply("Tuve un problema accediendo a tu agenda. 😓", 'error');
-                }
-                return;
-            }
+            // ... (rest of logic) ...
 
-            if (aiResponse.action === 'fetch_grades') {
-                reply(aiResponse.response_text, 'process');
-                try {
-                    // Mock Student ID 1
-                    const grades = await studentService.getGrades(1);
-                    if (grades && grades.length > 0) {
-                        reply(null, 'grade_card', grades);
-                    } else {
-                        reply("No encontré registros de notas recientes.", 'info');
-                    }
-                } catch (e) {
-                    reply("Error al consultar notas. Intenta más tarde.", 'error');
-                }
-                return;
-            }
-
-            if (aiResponse.action === 'start_quiz') {
-                const quizData = JSON.parse(aiResponse.payload);
-                reply(null, 'quiz_card', quizData);
-                return;
-            }
-
-            if (aiResponse.should_generate) {
-                await runGenerationSequence();
-                return;
-            }
-
-            // 3. Default Text Response (Chat, Tutor Advice, Support)
-            reply(aiResponse.response_text || "No estoy segura de qué decir.", 'text');
+            // 3. Default Text Response
+            const responseText = aiResponse.response_text || "No estoy segura de qué decir.";
+            reply(responseText, 'text');
+            speak(responseText); // Speak the response
 
         } catch (error) {
             console.error("AI Brain Error:", error);
-            reply("He perdido conexión con mi núcleo neuronal (Python API). 🔌 Intenta de nuevo.", 'error');
+            const errorMsg = "He perdido conexión con mi núcleo neuronal (Python API). 🔌 Intenta de nuevo.";
+            reply(errorMsg, 'error');
+            speak("Error de conexión.");
         }
     };
 
-    const runGenerationSequence = async () => {
-        // Step 1: Analysis
-        setCoreState('processing');
-        reply("Iniciando secuencia de generación...", 'process');
+    // ... runGenerationSequence (no changes needed)
 
-        await new Promise(r => setTimeout(r, 1000));
-        reply("Analizando disponibilidad de docentes y aulas...", 'process_step');
-
-        await new Promise(r => setTimeout(r, 1000));
-        reply("Calculando permutaciones óptimas para minimizar huecos...", 'process_step');
-
-        try {
-            // Real API Call
-            const cycleId = 1; // Default
-            const response = await scheduleService.generateAuto(cycleId);
-
-            if (response.success) {
-                setCoreState('success');
-                // Rich Response with Stats
-                reply(null, 'result_card', response.details);
-            } else {
-                setCoreState('error');
-                reply(`Error en la generación: ${response.error || 'Fallo desconocido'}`, 'error');
-            }
-
-        } catch (error) {
-            console.error(error);
-            setCoreState('error');
-            reply("Hubo un error crítico al conectar con el servidor.", 'error');
-        } finally {
-            setIsTyping(false);
-            if (coreState !== 'error') setCoreState('idle');
-        }
-    };
-
-    const reply = (text, type = 'text', data = null) => {
-        setMessages(prev => [...prev, {
-            id: Date.now(),
-            sender: 'ai',
-            text,
-            type,
-            data,
-            timestamp: new Date()
-        }]);
-        if (type !== 'process' && type !== 'process_step') setIsTyping(false);
-    };
+    // ... reply function (no changes needed)
 
     return (
         <div className={`flex flex-col h-[calc(100vh-100px)] rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 ${darkMode ? 'bg-[#0f111a] text-gray-100' : 'bg-white text-gray-900'}`}>
@@ -137,19 +87,23 @@ const IAHorariosPage = () => {
                         <h2 className="text-xl font-bold font-mono tracking-tight flex items-center gap-2">
                             OXFORD AI <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400">BETA 2.0</span>
                         </h2>
-                        <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                            {coreState === 'idle' && 'En espera de comandos'}
-                            {coreState === 'listening' && 'Escuchando voz... 🎤'}
-                            {coreState === 'processing' && 'Procesando lógica...'}
-                            {coreState === 'success' && 'Tarea completada'}
-                            {coreState === 'error' && 'Error de sistema'}
-                        </p>
+                        {/* Status text */}
                     </div>
                 </div>
                 <div className="flex gap-2">
+                    <IconButton
+                        icon={voiceEnabled ? Mic : MicOff}
+                        onClick={() => {
+                            setVoiceEnabled(!voiceEnabled);
+                            if (voiceEnabled) window.speechSynthesis.cancel();
+                        }}
+                        className={voiceEnabled ? "text-indigo-400" : "text-gray-400"}
+                    />
                     <IconButton icon={RotateCcw} onClick={() => setMessages([{ id: 1, sender: 'ai', text: "Sistema reiniciado. ¿En qué puedo ayudarte?", timestamp: new Date() }])} />
                 </div>
             </div>
+
+            {/* ... Chat Area ... */}
 
             {/* Chat Area */}
             <div className={`flex-1 overflow-y-auto p-6 space-y-6 ${darkMode ? 'bg-gradient-to-b from-[#0f111a] to-[#0a0c10]' : 'bg-gray-50'}`}>

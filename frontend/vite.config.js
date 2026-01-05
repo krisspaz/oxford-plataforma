@@ -21,6 +21,20 @@ export default defineConfig({
       }
     }
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) return 'vendor';
+          if (id.includes('src/pages/')) {
+            if (id.match(/(Inscripciones|Matriculacion|Students|Familias|Contracts)/)) return 'secretaria';
+            if (id.match(/(Financial|Pagos|EstadoCuenta|Comprobantes|Paquetes|Costos)/)) return 'finanzas';
+            if (id.match(/(Academic|Grados|Materias|Docentes|Horarios|Bimestres)/)) return 'academico';
+          }
+        }
+      }
+    }
+  },
   test: {
     globals: true,
     environment: 'jsdom',
