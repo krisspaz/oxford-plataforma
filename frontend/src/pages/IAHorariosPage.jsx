@@ -91,9 +91,72 @@ const IAHorariosPage = () => {
         }
     };
 
-    // ... runGenerationSequence (no changes needed)
+    const reply = (content, type = 'text') => {
+        setMessages(prev => [
+            ...prev,
+            {
+                id: Date.now(),
+                sender: 'ai',
+                text: type === 'text' ? content : null,
+                data: type !== 'text' ? content : null,
+                type: type,
+                timestamp: new Date()
+            }
+        ]);
+        setIsTyping(false);
+    };
 
-    // ... reply function (no changes needed)
+    const runGenerationSequence = async () => {
+        setIsTyping(true);
+        // 1. Analyzing
+        await new Promise(r => setTimeout(r, 1000));
+        setCoreState('processing');
+        reply("Analizando restricciones y preferencias...", 'text');
+
+        // 2. Generating
+        await new Promise(r => setTimeout(r, 1500));
+
+        try {
+            // Fetch real data (mocked for now or use actual services)
+            // In a real scenario we'd pull from context or ask user
+            const config = { population_size: 50, generations: 30 };
+            const teachers = []; // fetch from context
+            const subjects = ["Math_1", "Science_1"]; // fetch from context
+
+            const result = await aiService.generateSchedule(config, teachers, subjects);
+
+            setCoreState('idle');
+
+            if (result.success) {
+                // Main Result Card
+                reply({
+                    generated: 15, // mock count or from result
+                    conflicts: result.conflicts || 0,
+                    errors: [],
+                    schedule: result.schedule
+                }, 'result_card');
+
+                // Explainability Card (New!)
+                if (result.explanation && result.explanation.length > 0) {
+                    // Format explanation as bullet points
+                    const explanationText = "🧠 **Por qué elegí este horario:**\n\n" +
+                        result.explanation.map(e => `• ${e}`).join("\n");
+                    reply(explanationText, 'text');
+                    speak("He completado el horario. Te explico mis decisiones abajo.");
+                } else {
+                    speak("He generado el horario con éxito.");
+                }
+
+            } else {
+                reply("Hubo un error al generar el horario.", 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            setCoreState('error');
+            reply("Error crítico en el núcleo de generación.", 'error');
+        }
+        setIsTyping(false);
+    };
 
     return (
         <div className={`flex flex-col h-[calc(100vh-100px)] rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 ${darkMode ? 'bg-[#0f111a] text-gray-100' : 'bg-white text-gray-900'}`}>
