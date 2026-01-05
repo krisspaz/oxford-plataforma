@@ -52,6 +52,24 @@ const IAHorariosPage = () => {
             // 1. Send to Python Brain
             reply(null, 'process_step');
 
+            // Specialized Handling for Risk
+            if (text.toLowerCase().includes("riesgo") || text.toLowerCase().includes("risk")) {
+                reply("Analizando base de datos de estudiantes...", 'text');
+
+                // MOCK FETCH STUDENTS for Demo
+                const mockStudents = [
+                    { id: 1, name: "Juan Pérez", grades: [{ subject: "Math", score: 55 }, { subject: "Science", score: 60 }] },
+                    { id: 2, name: "Maria Garcia", grades: [{ subject: "Math", score: 90 }, { subject: "Science", score: 95 }] },
+                    { id: 3, name: "Carlos López", grades: [{ subject: "Math", score: 40 }, { subject: "Science", score: 45 }, { subject: "History", score: 50 }] }
+                ];
+
+                reply({ type: 'risk_dashboard', data: mockStudents }, 'result_card');
+                speak("He detectado algunos estudiantes en riesgo.");
+                return;
+            }
+
+            // ... (rest of logic) ...
+
             // Add context to the request (simulated here as we send 'text' mostly)
             const contextEnhancedText = `[Context: ${location.pathname}] ${text}`;
 
@@ -129,15 +147,20 @@ const IAHorariosPage = () => {
                 <div ref={messagesEndRef} />
             </div>
 
+            import RiskDashboard from '../components/RiskDashboard';
+
+            // ... other code
+
             {/* Input Area */}
             <div className={`p-4 border-t ${darkMode ? 'border-gray-800 bg-[#151923]' : 'border-gray-100 bg-white'}`}>
                 {messages.length < 3 && (
                     <div className="flex gap-2 overflow-x-auto pb-4 mb-2 no-scrollbar">
                         <SuggestionChip label="Generar horarios" onClick={() => handleSend("Generar una nueva versión de horarios")} darkMode={darkMode} />
+                        <SuggestionChip label="🚨 Ver Riesgos" onClick={() => handleSend("Analizar riesgos académicos")} darkMode={darkMode} />
                         <SuggestionChip label="Verificar conflictos" onClick={() => handleSend("Verificar conflictos en el ciclo actual")} darkMode={darkMode} />
-                        <SuggestionChip label="Reiniciar todo" onClick={() => handleSend("Reiniciar base de datos de horarios")} darkMode={darkMode} />
                     </div>
                 )}
+// ... rest of code
 
                 <form
                     onSubmit={(e) => { e.preventDefault(); handleSend(); }}
@@ -210,6 +233,10 @@ const MessageBubble = ({ message, darkMode }) => {
                             <QuizCard data={message.data} darkMode={darkMode} />
                         ) : message.type === 'grade_card' ? (
                             <GradeCard data={message.data} darkMode={darkMode} />
+                        ) : message.type === 'risk_dashboard' ? ( // NEW CASE
+                            <div className="min-w-[320px] md:min-w-[500px]">
+                                <RiskDashboard students={message.data} />
+                            </div>
                         ) : (
                             message.text
                         )}
