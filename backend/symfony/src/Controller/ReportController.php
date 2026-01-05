@@ -2,8 +2,11 @@
 
 namespace App\Controller;
 
+use App\Repository\PaymentRepository;
+use App\Repository\StudentRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/reports', name: 'api_reports_')]
@@ -31,8 +34,6 @@ class ReportController extends AbstractController
         $scope = $data['scope'] ?? 'INDIVIDUAL'; // INDIVIDUAL, MASSIVE
         
         // Mocking the generation logic
-        // In reality, this would fetch grades, render PDF/Excel, and return URL
-        
         $filename = strtolower($type) . '_' . strtolower($scope) . '_' . date('Ymd_His') . '.pdf';
         
         return $this->json([
@@ -46,4 +47,20 @@ class ReportController extends AbstractController
             ]
         ]);
     }
+
+    #[Route('/dashboard', name: 'dashboard_stats', methods: ['GET'])]
+    public function dashboard(StudentRepository $studentRepo, PaymentRepository $paymentRepo): JsonResponse
+    {
+        $totalStudents = $studentRepo->count([]);
+        // Mocking revenue calculation
+        $totalPayments = $paymentRepo->count([]);
+        
+        return $this->json([
+            'total_students' => $totalStudents,
+            'total_payments' => $totalPayments,
+            'revenue_ytd' => 0.0,
+            'average_attendance' => '95%',
+        ]);
+    }
 }
+

@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }) => {
             hasRole,
             getPrimaryRole
         }}>
-            {!loading && children}
+            {loading ? <div className="p-4 text-center">Iniciando sesión segura...</div> : children}
         </AuthContext.Provider>
     );
 };
