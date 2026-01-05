@@ -102,7 +102,7 @@ export const MENU_ITEMS = {
     // Consolidated adjustments
     ajusteGeneral: { id: 'ajusteGeneral', label: 'Mantenimiento Datos', path: '/admin/ajustes-generales', icon: 'Sliders' },
     catalogos: { id: 'catalogos', label: 'Catálogos', path: '/admin/catalogos', icon: 'Database' },
-    iaHorarios: { id: 'iaHorarios', label: 'IA Generador Horarios', path: '/academico/horarios-ia', icon: 'Brain' },
+    iaHorarios: { id: 'iaHorarios', label: 'IA Chat Horarios', path: '/academico/oxford-ai', icon: 'Brain' },
 };
 
 // Menu configuration per role

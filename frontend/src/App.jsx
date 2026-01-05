@@ -189,7 +189,7 @@ function App() {
                   <Route path="academico/asignacion-materias" element={<AsignacionMateriasPage />} />
                   <Route path="academico/horarios" element={<HorariosPage />} />
                   <Route path="academico/gestion-cursos" element={<GestionCursosPage />} />
-                  <Route path="academico/horarios-ia" element={<IAHorariosPage />} />
+                  <Route path="academico/oxford-ai" element={<IAHorariosPage />} />
 
                   {/* Docente */}
                   <Route path="docente/notas" element={<CargaNotasPage />} />
