@@ -125,7 +125,7 @@ function App() {
                 <Route path="/academico/cursos" element={<ProtectedRoute><CursosNivelesPage /></ProtectedRoute>} />
                 <Route path="/academico/secciones" element={<ProtectedRoute><SeccionesPage /></ProtectedRoute>} />
                 <Route path="/academico/gestion-cursos" element={<ProtectedRoute><GestionCursosPage /></ProtectedRoute>} />
-                <Route path="/academico/horarios-ia" element={<ProtectedRoute><IAHorariosPage /></ProtectedRoute>} />
+
                 <Route path="/academico/asignacion-materias" element={<ProtectedRoute><AsignacionMateriasPage /></ProtectedRoute>} />
 
                 {/* Teacher Routes */}
@@ -189,6 +189,7 @@ function App() {
                   <Route path="academico/asignacion-materias" element={<AsignacionMateriasPage />} />
                   <Route path="academico/horarios" element={<HorariosPage />} />
                   <Route path="academico/gestion-cursos" element={<GestionCursosPage />} />
+                  <Route path="academico/horarios-ia" element={<IAHorariosPage />} />
 
                   {/* Docente */}
                   <Route path="docente/notas" element={<CargaNotasPage />} />
