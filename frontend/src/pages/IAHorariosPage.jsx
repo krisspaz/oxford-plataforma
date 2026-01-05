@@ -11,6 +11,7 @@ import taskService from '../services/taskService'; // Integramos servicio de tar
 
 import aiService from '../services/AiService';
 import studentService from '../services/studentService';
+import EnterpriseDashboard from '../components/EnterpriseDashboard';
 import RiskDashboard from '../components/RiskDashboard';
 
 // ... imports
