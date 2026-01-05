@@ -11,6 +11,7 @@ const CargaNotasPage = () => {
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(false);
     const [bimesters, setBimesters] = useState([]);
+    const [subjects, setSubjects] = useState([]); // Added missing state
     const [students, setStudents] = useState([]);
     const [currentBimesterData, setCurrentBimesterData] = useState(null);
 
@@ -27,24 +28,27 @@ const CargaNotasPage = () => {
                 }
 
                 // 2. Load Subjects (Real)
-                // Assuming we have teacherService.getMyAssignments() or similar
-                // If not, we should probably use a dedicated endpoint. 
-                // Since I haven't verified teacherService content yet, I will use a generic "getAssignments" logic if available, 
-                // but better to check the file content first. 
-                // For now, I will use the mock to avoid breaking if service is missing, 
-                // but the previous thought step checking teacherService.js should clarify this.
-                // WAIT: I shouldn't write this code blindly without seeing teacherService.js. 
-                // I will add a placeholder for now or wait for the next step.
-                // Actually, I submitted view_file for teacherService.js in the SAME turn.
-                // Since tools run in parallel/sequence, I should perhaps wait? 
-                // No, I can't read the output of view_file in this same turn.
-                // BUT, typically `teacherService.getMyAssignments` is standard.
-                // I will assume it exists or use a safe fallback.
-
-                // Let's use a safe pattern: check imports.
-                // I need to import teacherService first.
+                const profile = await teacherService.getMyProfile();
+                if (profile && profile.id) {
+                    const assignments = await teacherService.getSubjects(profile.id);
+                    // Format for dropdown
+                    const formatted = assignments.map(a => ({
+                        id: a.id, // SubjectAssignment ID
+                        name: a.subject.name,
+                        grade: a.grade.name,
+                        full_name: `${a.subject.name} - ${a.grade.name} ${a.section ? `(${a.section.name})` : ''}`
+                    }));
+                    setSubjects(formatted);
+                }
             } catch (error) {
                 console.error('Error loading initial data:', error);
+                // Fallback for demo/dev if backend fails
+                if (process.env.NODE_ENV === 'development') {
+                    setSubjects([
+                        { id: 101, full_name: "Matemáticas - 5to Bachillerato (A)" },
+                        { id: 102, full_name: "Física - 5to Bachillerato (A)" }
+                    ]);
+                }
             }
         };
         loadInitialData();
