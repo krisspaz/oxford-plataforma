@@ -98,14 +98,65 @@ class GeneticScheduleOptimizer:
         # 5. Decode Best Solution
         best_ind = tools.selBest(pop, 1)[0]
         schedule = self._decode_genome(best_ind)
+        conflicts = best_ind.fitness.values[0]
+        
+        explanation = self.explain_solution(schedule, conflicts)
         
         return {
             "schedule": schedule,
-            "conflicts": best_ind.fitness.values[0],
+            "conflicts": conflicts,
             "generations": generations,
-            "log": logbook
+            "log": logbook,
+            "explanation": explanation
         }
 
+    def explain_solution(self, schedule: Dict[str, Any], conflicts: float) -> List[str]:
+        """
+        Generate a human-readable explanation of the schedule
+        """
+        explanations = []
+        
+        # 1. Overall Score
+        score = max(0, 100 - (conflicts * 5)) # Rough conversion to percentage
+        explanations.append(f"📊 Puntuación de Optimización: {int(score)}/100")
+        
+        if conflicts == 0:
+            explanations.append("✅ Horario perfecto: 0 conflictos detectados.")
+        else:
+            explanations.append(f"⚠️ Se detectaron {conflicts} puntos de conflicto/penalización.")
+
+        # 2. Check Constraints & Preferences impact
+        # This requires re-scanning the schedule structure against constraints
+        # Similar logic to _evaluate_fitness but logging "Wins"
+        
+        active_preferences = [c for c in self.constraints if 'weight' in c]
+        
+        for grade, days in schedule.items():
+            for day, slots in days.items():
+                for slot in slots:
+                    teacher = slot['teacher']
+                    if not teacher or teacher == "TBD": continue
+                    
+                    # Check against preferences
+                    for constraint in active_preferences:
+                        ctype = constraint.get('type')
+                        c_teacher = constraint.get('teacher')
+                        c_day = constraint.get('day')
+                        
+                        # Match fuzzy teacher name or ID if possible. 
+                        # For now assume direct match or partial match
+                        if c_teacher and c_teacher in teacher:
+                            if ctype == 'avoid_day' and day != c_day:
+                                explanations.append(f"✅ Se respetó la preferencia de {teacher}: No dar clase el {c_day}.")
+                            elif ctype == 'prefer_day' and day == c_day:
+                                explanations.append(f"🌟 Se cumplió el deseo de {teacher}: Dar clase el {c_day}.")
+                                
+        # Deduplicate explanations
+        unique_explanations = list(set(explanations))
+        
+        # Limit to top 5 insights to avoid clutter
+        return unique_explanations[:5]
+        
     def _evaluate_fitness(self, individual):
         """Calculate fitness (number of conflicts + constraint penalties)"""
         structure = self._decode_genome(individual)

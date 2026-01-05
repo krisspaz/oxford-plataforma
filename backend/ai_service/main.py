@@ -255,6 +255,61 @@ def create_horario():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
+# --- GENERATION ENDPOINT ---
+from genetic_scheduler import genetic_optimizer
+
+@app.route("/generate-schedule", methods=["POST"])
+def generate_schedule():
+    """
+    Main endpoint called by Symfony to run the Genetic Algorithm
+    """
+    data = request.json
+    
+    # 1. Extract Data
+    config = data.get('config', {})
+    teachers = data.get('teachers', [])
+    subjects = data.get('subjects', [])
+    constraints = data.get('constraints', [])
+    
+    grades = list(set([s.split('_')[0] for s in subjects])) # Hacky deduction or pass grades explicitly
+    if 'grades' in data:
+        grades = data['grades']
+    elif not grades:
+        grades = ['1ro Basico', '2do Basico', '3ro Basico']
+
+    # 2. Inject Learned Preferences (Phase 2 & 3 integration)
+    # Fetch preferences for each teacher and add to constraints
+    learned_constraints = []
+    for t in teachers:
+        # Assuming teacher dict has 'id' or we map 'name' back to ID.
+        # For this prototype we assume teacher['id'] exists
+        if 'id' in t:
+            learned = learner.get_teacher_constraints(t['id'])
+            learned_constraints.extend(learned)
+            
+    # Merge manual constraints with learned constraints
+    final_constraints = constraints + learned_constraints
+
+    # 3. Run Optimization
+    result = genetic_optimizer.generate(
+        grades=grades,
+        subjects=subjects,
+        teachers=teachers,
+        constraints=final_constraints,
+        population_size=config.get('population_size', 50),
+        generations=config.get('generations', 30)
+    )
+    
+    # 4. Return Result (includes 'explanation' from Phase 3)
+    return jsonify({
+        "status": "success",
+        "schedule": result['schedule'],
+        "conflicts": result['conflicts'],
+        "explanation": result.get('explanation', []),
+        "optimization_score": max(0, 100 - (result['conflicts'] * 5))
+    })
+
+# --- OLD ENDPOINTS ---
 @app.route("/horario", methods=["GET"])
 def get_horarios():
     rows = db.query('''
