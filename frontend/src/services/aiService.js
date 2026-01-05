@@ -202,6 +202,42 @@ const aiService = {
         }
     },
 
+    async predictRisk(studentData) {
+        try {
+            const response = await api.post('/ai/predict-risk', studentData);
+            return response.data;
+        } catch (error) {
+            console.error('Risk prediction error:', error);
+            return { error: 'Failed to predict risk' };
+        }
+    },
+
+    /**
+     * Analyze teacher burnout
+     */
+    async analyzeTeacherBurnout(teacherId, schedule) {
+        try {
+            const response = await api.post('/ai/analyze-burnout', { teacher_id: teacherId, schedule });
+            return response.data;
+        } catch (error) {
+            console.error('Burnout analysis error:', error);
+            return null;
+        }
+    },
+
+    /**
+     * Get Institutional Health Index (ISA)
+     */
+    async getInstitutionalHealth() {
+        try {
+            const response = await api.get('/ai/institutional-health');
+            return response.data;
+        } catch (error) {
+            console.error('ISA error:', error);
+            return null;
+        }
+    },
+
     /**
      * Get fallback response when AI is unavailable
      * @param {string} message - Original message
