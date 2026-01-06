@@ -180,22 +180,37 @@ const IAHorariosPage = () => {
 • "Dame un consejo" - Tips pedagógicos
 • "Estoy estresado" - Apoyo emocional`;
             }
-            // ADMIN / SUPER_ADMIN
+            // ADMIN / SUPER_ADMIN - FULL ACCESS
             else if (activeRole === 'ROLE_ADMIN' || activeRole === 'ROLE_SUPER_ADMIN') {
-                helpText = `⚙️ **Asistente de Administración**
+                helpText = `⚙️ **Asistente de Administración (Acceso Completo)**
 
 🗓️ **Horarios:**
 • "Generar horarios" - Crear con IA
 • "Optimizar horarios" - Redistribuir
+• "Ver horarios" - Vista general
 
-👥 **Gestión:**
+👥 **Gestión de Personal:**
 • "Ver docentes" - Lista de profesores
 • "Ver estudiantes" - Lista completa
-• "Salud institucional" - Métricas ISA
+• "Carga docente" - Análisis de burnout
 
-📊 **Reportes:**
-• "Estudiantes en riesgo" - Dashboard
-• "Carga docente" - Análisis de burnout`;
+📊 **Análisis y Reportes:**
+• "Salud institucional" - Métricas ISA
+• "Estudiantes en riesgo" - Dashboard de alertas
+• "Métricas del colegio" - KPIs educativos
+
+📚 **Académico:**
+• "Ver materias" - Asignaturas
+• "Ver notas" - Calificaciones
+• "Cargar notas" - Gestión de notas
+
+📝 **Comunicación:**
+• "Contactar padres" - Comunicados
+• "Reportar problema" - Soporte
+
+💡 **Bienestar:**
+• "Dame un consejo" - Tips
+• "Motivación" - Mensajes de ánimo`;
             }
             // DIRECTOR / COORDINATION
             else if (activeRole === 'ROLE_DIRECTOR' || activeRole === 'ROLE_COORDINATION') {
