@@ -31,6 +31,24 @@ const IAHorariosPage = () => {
     const [teacherProfile, setTeacherProfile] = useState(null);
     const [coreState, setCoreState] = useState('idle'); // Fixed: Added missing state
 
+    // Helper state for chat
+    const [messages, setMessages] = useState([
+        { id: 1, sender: 'ai', text: `Hola ${user?.email || 'Usuario'}. Soy tu Asistente Personal Académico. ¿En qué puedo apoyarte hoy?`, timestamp: new Date() }
+    ]);
+    const [isTyping, setIsTyping] = useState(false);
+    const [input, setInput] = useState('');
+    const [isListening, setIsListening] = useState(false);
+    const messagesEndRef = useRef(null);
+
+    // Auto-scroll to bottom of chat
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, isTyping]);
+
     // ... existing refs ...
 
     // Voice Synthesis Setup
@@ -53,6 +71,44 @@ const IAHorariosPage = () => {
     useEffect(() => {
         return () => window.speechSynthesis.cancel();
     }, []);
+
+    // Handlers
+    const handleSend = async (textOverride = null) => {
+        const text = textOverride || input;
+        if (!text.trim()) return;
+
+        // User Message
+        const newUserMsg = {
+            id: Date.now(),
+            sender: 'user',
+            text: text,
+            timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, newUserMsg]);
+        setInput('');
+        setIsTyping(true);
+
+        // Process Logic
+        await processIntent(text);
+    };
+
+    const startListening = () => {
+        if (!('webkitSpeechRecognition' in window)) {
+            alert("Tu navegador no soporta reconocimiento de voz.");
+            return;
+        }
+        const recognition = new window.webkitSpeechRecognition();
+        recognition.lang = 'es-ES';
+        recognition.onstart = () => setIsListening(true);
+        recognition.onend = () => setIsListening(false);
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            setInput(transcript);
+            handleSend(transcript);
+        };
+        recognition.start();
+    };
 
 
     // --- Advanced AI Engine (Python Connected) ---
