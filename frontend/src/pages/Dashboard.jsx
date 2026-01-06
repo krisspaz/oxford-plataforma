@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import activityService from '../services/activityService';
 import scheduleService from '../services/scheduleService';
+import AIInsightsWidget from '../components/AIInsightsWidget';
 
 const StatCard = ({ title, value, icon: Icon, color, bg, onClick, isCustomIcon, darkMode }) => (
     <div
@@ -38,6 +39,9 @@ const QuickAction = ({ title, icon: Icon, color, bgColor, onClick, darkMode }) =
 
 const AdminDashboard = ({ stats, navigate, darkMode }) => (
     <>
+        <div className="mb-8">
+            <AIInsightsWidget darkMode={darkMode} userRole="ROLE_ADMIN" />
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <StatCard
                 title="Usuarios Registrados"
@@ -433,6 +437,11 @@ const DocenteDashboard = ({ navigate, darkMode, stats }) => (
 
 const DirectorDashboard = ({ stats, navigate, darkMode }) => (
     <>
+        {/* AI Insights for Director */}
+        <div className="mb-8">
+            <AIInsightsWidget darkMode={darkMode} userRole="ROLE_DIRECTOR" />
+        </div>
+
         {/* Key Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard

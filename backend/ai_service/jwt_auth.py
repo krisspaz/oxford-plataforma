@@ -1,14 +1,12 @@
 """
 JWT Authentication Module for AI Service
 =========================================
-Validates JWT tokens from Symfony backend
+Validates JWT tokens from Symfony backend (FastAPI version)
 """
 
 import os
 import logging
 from typing import Optional, Dict, Any
-from functools import wraps
-from flask import request, jsonify
 
 # JWT handling
 try:
@@ -17,7 +15,6 @@ try:
 except ImportError:
     JWT_AVAILABLE = False
     logging.warning("python-jose not installed. JWT validation disabled.")
-
 
 class JWTAuthenticator:
     """
@@ -64,85 +61,23 @@ class JWTAuthenticator:
                 "roles": payload.get("roles", []),
                 "teacher_id": payload.get("teacherId"),
                 "student_id": payload.get("studentId"),
+                # Keep original fields too just in case
+                "sub": payload.get("sub"),
+                "username": payload.get("username")
             }
             
         except JWTError as e:
             self.logger.warning(f"JWT validation failed: {e}")
-            return None
+            raise e
         except Exception as e:
             self.logger.error(f"Unexpected JWT error: {e}")
-            return None
-    
-    def get_user_from_request(self) -> Optional[Dict[str, Any]]:
-        """
-        Extract and validate JWT from current Flask request
-        """
-        auth_header = request.headers.get("Authorization", "")
-        
-        if not auth_header:
-            return None
-        
-        return self.validate_token(auth_header)
-
-
-def require_auth(f):
-    """
-    Decorator to require JWT authentication on an endpoint
-    """
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        auth = JWTAuthenticator()
-        user = auth.get_user_from_request()
-        
-        if not user:
-            return jsonify({
-                "error": "Unauthorized",
-                "message": "Valid JWT token required"
-            }), 401
-        
-        # Add user to request context
-        request.current_user = user
-        return f(*args, **kwargs)
-    
-    return decorated
-
-
-def require_role(allowed_roles: list):
-    """
-    Decorator to require specific roles
-    
-    Usage:
-        @require_role(['ROLE_ADMIN', 'ROLE_DIRECTOR'])
-        def admin_endpoint():
-            ...
-    """
-    def decorator(f):
-        @wraps(f)
-        def decorated(*args, **kwargs):
-            auth = JWTAuthenticator()
-            user = auth.get_user_from_request()
-            
-            if not user:
-                return jsonify({
-                    "error": "Unauthorized",
-                    "message": "Valid JWT token required"
-                }), 401
-            
-            user_roles = user.get("roles", [])
-            
-            # Check if user has any of the allowed roles
-            if not any(role in user_roles for role in allowed_roles):
-                return jsonify({
-                    "error": "Forbidden",
-                    "message": f"Required roles: {allowed_roles}"
-                }), 403
-            
-            request.current_user = user
-            return f(*args, **kwargs)
-        
-        return decorated
-    return decorator
-
+            raise e
 
 # Global instance
 jwt_auth = JWTAuthenticator()
+
+def verify_token(token: str):
+    """
+    Standalone function for FastAPI dependencies
+    """
+    return jwt_auth.validate_token(token)

@@ -2,6 +2,7 @@ import sqlite3
 import json
 from datetime import datetime, date, time
 from typing import Any, List, Dict, Optional
+from werkzeug.security import generate_password_hash
 
 DB_NAME = "schedules.db"
 
@@ -78,6 +79,45 @@ class DatabaseManager:
         
         conn.commit()
         conn.close()
+
+    def seed_data(self):
+        """Seed initial data if database is empty"""
+        self.init_db()
+        
+        # Check if users exist
+        if not self.query("SELECT 1 FROM users LIMIT 1", one=True):
+            print("Seeding Users...")
+            users = [
+                ("admin", "admin123", "administrador"),
+                ("maestro1", "pass1", "maestro"),
+                ("alumno1", "pass2", "alumno")
+            ]
+            for u, p, r in users:
+                self.execute("INSERT INTO users (username, hashed_password, role) VALUES (?, ?, ?)", 
+                           (u, generate_password_hash(p), r))
+
+            print("Seeding References...")
+            # Grades & Subjects
+            schema = {
+                "pre_primaria": ["matematicas", "lectura", "arte", "musica"],
+                "primaria": ["matematicas", "ciencias", "historia", "lengua"],
+                "secundaria": ["matematicas", "quimica", "fisica", "historia", "lengua"]
+            }
+            for g_name, subs in schema.items():
+                g_id = self.execute("INSERT INTO grades (name, level) VALUES (?, ?)", (g_name, g_name.title()))
+                for s in subs:
+                    self.execute("INSERT INTO subjects (name, grade_id) VALUES (?, ?)", (s.title(), g_id))
+            
+            # Teachers
+            teachers = [
+                ("Ana", ["matematicas", "ciencias"], ["primaria", "secundaria"]),
+                ("Luis", ["arte", "musica"], ["pre_primaria", "primaria"]),
+                ("Carla", ["quimica"], ["secundaria"])
+            ]
+            for name, mats, lvls in teachers:
+                self.execute("INSERT INTO teachers (nombre, materias_json, niveles_json) VALUES (?, ?, ?)",
+                           (name, json.dumps(mats), json.dumps(lvls)))
+            print("Seed Complete.")
 
     def query(self, sql: str, params: tuple = (), one: bool = False):
         conn = self.get_connection()

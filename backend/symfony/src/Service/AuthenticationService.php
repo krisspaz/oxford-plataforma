@@ -25,11 +25,41 @@ class AuthenticationService
         private JWTTokenManagerInterface $jwtManager,
         private EntityManagerInterface $em,
         private RefreshTokenRepository $refreshTokenRepository,
+        private \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface $passwordHasher,
         private int $accessTokenTtl = 3600,
         private int $refreshTokenTtl = 2592000, // 30 days
         private bool $secureCookies = true,
         private string $cookieDomain = ''
     ) {}
+
+    /**
+     * Generate raw JWT token
+     */
+    public function generateAccessToken(User $user): string
+    {
+        return $this->jwtManager->create($user);
+    }
+
+    /**
+     * Authenticate user by email and password
+     * @throws \Symfony\Component\Security\Core\Exception\AuthenticationException
+     */
+    public function authenticate(string $email, string $password): User
+    {
+        $user = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
+
+        if (!$user || !$this->passwordHasher->isPasswordValid($user, $password)) {
+            // Use consistent response time
+            usleep(random_int(100000, 300000));
+            throw new \Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException('Credenciales inválidas');
+        }
+
+        if (!$user->isActive()) {
+            throw new \Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException('Cuenta desactivada');
+        }
+
+        return $user;
+    }
 
     /**
      * Create authentication cookies after successful login

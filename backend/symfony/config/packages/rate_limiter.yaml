@@ -1,30 +1,17 @@
-# Rate Limiting Configuration
 framework:
     rate_limiter:
-        # Login rate limiter - prevent brute force attacks
-        login_limiter:
-            policy: 'sliding_window'
+        # Define 2 rate limiters: one for anonymous login attempts, one for authenticated API calls
+        anonymous_api:
+            policy: fixed_window
+            limit: 60
+            interval: 60 minutes
+        
+        authenticated_api:
+            policy: sliding_window
+            limit: 1000
+            interval: 60 minutes
+        
+        app_login_limiter:
+            policy: fixed_window
             limit: 5
-            interval: '1 minute'
-            lock_factory: lock.factory
-        
-        # API rate limiter - general API protection
-        api_limiter:
-            policy: 'sliding_window'
-            limit: 100
-            interval: '1 minute'
-            lock_factory: lock.factory
-        
-        # Strict rate limiter for sensitive operations
-        sensitive_limiter:
-            policy: 'fixed_window'
-            limit: 3
-            interval: '5 minutes'
-            lock_factory: lock.factory
-        
-        # Password reset limiter
-        password_reset_limiter:
-            policy: 'fixed_window'
-            limit: 3
-            interval: '1 hour'
-            lock_factory: lock.factory
+            interval: 1 minute

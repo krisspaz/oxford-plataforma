@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { gradeRecordService, bimesterService, teacherService } from '../../services'; // Adjust paths
+import { gradeRecordService, bimesterService, teacherService } from '../../../services'; // Adjust paths
 
 export const useGradeEntry = () => {
     const [assignments, setAssignments] = useState([]); // Teacher's subjects

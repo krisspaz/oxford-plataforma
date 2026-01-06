@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { catalogService } from '../../../services/api';
+import { catalogService } from '../../../services';
 
 export const useTeachers = () => {
     const [teachers, setTeachers] = useState([]);

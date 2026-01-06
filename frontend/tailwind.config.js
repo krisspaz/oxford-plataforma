@@ -8,9 +8,18 @@ export default {
         extend: {
             colors: {
                 oxford: {
-                    primary: '#1e3a8a',   // Azul oscuro corporativo
-                    secondary: '#1d4ed8', // Azul brillante
-                    accent: '#fbbf24',    // Dorado/Amarillo (común en escolares)
+                    primary: '#002046',   // OBS Navy
+                    secondary: '#D0006F', // OBS Pink
+                    accent: '#69B32D',    // OBS Green
+                    blue: '#009CDC',      // OBS Blue
+                    orange: '#F39200',    // OBS Orange
+                },
+                obs: {
+                    navy: '#002046',
+                    pink: '#D0006F',
+                    green: '#69B32D',
+                    blue: '#009CDC',
+                    orange: '#F39200',
                 }
             }
         },

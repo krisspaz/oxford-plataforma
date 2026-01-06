@@ -33,9 +33,27 @@ class AIServiceConfig:
     enable_conflict_detection: bool = True
     max_teacher_hours_per_day: int = 6
     
+    # Security
+    secret_key: str
+    algorithm: str
+
     @classmethod
     def from_env(cls) -> "AIServiceConfig":
         """Load configuration from environment variables"""
+        
+        # Security Check
+        secret = os.getenv("SECRET_KEY")
+        algo = os.getenv("ALGORITHM", "HS256")
+        env_mode = os.getenv("FLASK_ENV", "production") # Default to prod for safety
+
+        if not secret or secret == "CHANGEME_IN_PROD":
+            if env_mode == "production":
+                raise ValueError("CRITICAL: SECRET_KEY is missing or insecure in PRODUCTION environment.")
+            else:
+                # Dev fallback only
+                print("⚠️ WARNING: Using insecure default SECRET_KEY for development.")
+                secret = "dev_secret_key_change_me"
+
         return cls(
             host=os.getenv("AI_SERVICE_HOST", "0.0.0.0"),
             port=int(os.getenv("AI_SERVICE_PORT", "8001")),
@@ -50,8 +68,9 @@ class AIServiceConfig:
             max_suggestions=int(os.getenv("MAX_SUGGESTIONS", "5")),
             enable_conflict_detection=os.getenv("ENABLE_CONFLICT_DETECTION", "true").lower() == "true",
             max_teacher_hours_per_day=int(os.getenv("MAX_TEACHER_HOURS", "6")),
+            secret_key=secret,
+            algorithm=algo,
         )
-
 
 # Global config instance
 config = AIServiceConfig.from_env()

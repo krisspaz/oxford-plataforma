@@ -6,9 +6,10 @@ namespace App\CQRS;
  * CQRS Implementation
  * Command Query Responsibility Segregation
  * 
- * Commands: write operations (create, update, delete)
  * Queries: read operations (get, list, search)
  */
+
+class CQRS {}
 
 // ==========================================
 // COMMAND BUS

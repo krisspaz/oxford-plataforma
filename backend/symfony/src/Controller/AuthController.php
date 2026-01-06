@@ -42,26 +42,29 @@ class AuthController extends AbstractController
         $email = $data['email'] ?? '';
         $password = $data['password'] ?? '';
 
-        // Find user
-        $user = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
-
-        if (!$user || !$this->passwordHasher->isPasswordValid($user, $password)) {
-            // Use consistent response time to prevent timing attacks
-            usleep(random_int(100000, 300000)); // 100-300ms
-            return $this->json(['error' => 'Credenciales inválidas'], Response::HTTP_UNAUTHORIZED);
+        try {
+            $user = $this->authService->authenticate($email, $password);
+        } catch (\Symfony\Component\Security\Core\Exception\AuthenticationException $e) {
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_UNAUTHORIZED);
         }
 
-        if (!$user->isActive()) {
-            return $this->json(['error' => 'Cuenta desactivada'], Response::HTTP_FORBIDDEN);
-        }
-
-        // Create response with auth cookies
-        $response = new JsonResponse([
+        // Create response based on Accept header or client type
+        // If client expects JSON body (like our React Frontend currently does), return token in body
+        // If client supports cookies (like browser navigation), set cookies
+        // HYBRID APPROACH: Do both for maximum compatibility during transition
+        
+        // 1. Prepare JSON response
+        $responseData = [
             'success' => true,
             'user' => $this->serializeUser($user),
-            'message' => 'Login exitoso'
-        ]);
+            'message' => 'Login exitoso',
+            // Return token in body for Frontend compatibility
+            'token' => $this->authService->generateAccessToken($user) 
+        ];
+        
+        $response = new JsonResponse($responseData);
 
+        // 2. Set Cookies (Security Best Practice for future use)
         $this->authService->createAuthCookies($user, $request, $response);
 
         return $response;

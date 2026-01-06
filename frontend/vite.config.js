@@ -9,9 +9,15 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
+      },
+      '/ai': {
+        target: 'http://localhost:8001',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/ai/, ''),
       },
       '/ai-api': {
         target: 'http://127.0.0.1:8001',
@@ -19,6 +25,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/ai-api/, ''),
       },
     },
+    allowedHosts: ['vexatiously-dextrocular-esteban.ngrok-free.dev', '.ngrok-free.dev'],
   },
   test: {
     globals: true,

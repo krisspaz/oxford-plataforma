@@ -49,6 +49,7 @@ services:
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-%kernel.project_dir%/config/jwt/public.pem}
       JWT_PASSPHRASE: ${JWT_PASSPHRASE:-changeme}
       AI_SERVICE_URL: ${AI_SERVICE_URL:-http://ai_service:8001}
+      TRUSTED_PROXIES: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1"
     depends_on:
       database:
         condition: service_healthy

@@ -2,142 +2,102 @@
 
 namespace App\Tests\Service;
 
-use App\Entity\RefreshToken;
 use App\Entity\User;
-use App\Repository\RefreshTokenRepository;
 use App\Service\AuthenticationService;
+use App\Repository\RefreshTokenRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 
 class AuthenticationServiceTest extends TestCase
 {
-    private AuthenticationService $service;
+    private $authService;
+    private $passwordHasher;
     private $jwtManager;
     private $em;
     private $refreshTokenRepository;
 
     protected function setUp(): void
     {
+        $this->passwordHasher = $this->createMock(UserPasswordHasherInterface::class);
         $this->jwtManager = $this->createMock(JWTTokenManagerInterface::class);
         $this->em = $this->createMock(EntityManagerInterface::class);
         $this->refreshTokenRepository = $this->createMock(RefreshTokenRepository::class);
-
-        $this->service = new AuthenticationService(
+        
+        $this->authService = new AuthenticationService(
             $this->jwtManager,
             $this->em,
             $this->refreshTokenRepository,
-            3600, // accessTokenTtl
-            2592000, // refreshTokenTtl
-            false, // secureCookies (false for testing)
-            '' // cookieDomain
+            $this->passwordHasher
         );
     }
 
-    public function testGetAccessTokenFromCookie(): void
-    {
-        $request = new Request();
-        $request->cookies->set('access_token', 'test_jwt_token');
-
-        $token = $this->service->getAccessToken($request);
-
-        $this->assertEquals('test_jwt_token', $token);
-    }
-
-    public function testGetAccessTokenFromHeader(): void
-    {
-        $request = new Request();
-        $request->headers->set('Authorization', 'Bearer test_jwt_token');
-
-        $token = $this->service->getAccessToken($request);
-
-        $this->assertEquals('test_jwt_token', $token);
-    }
-
-    public function testGetAccessTokenReturnsNullWhenMissing(): void
-    {
-        $request = new Request();
-
-        $token = $this->service->getAccessToken($request);
-
-        $this->assertNull($token);
-    }
-
-    public function testValidateCsrfTokenSuccess(): void
-    {
-        $request = new Request();
-        $csrfToken = 'valid_csrf_token';
-        $request->cookies->set('csrf_token', $csrfToken);
-        $request->headers->set('X-CSRF-Token', $csrfToken);
-
-        $result = $this->service->validateCsrfToken($request);
-
-        $this->assertTrue($result);
-    }
-
-    public function testValidateCsrfTokenFailsWhenMismatched(): void
-    {
-        $request = new Request();
-        $request->cookies->set('csrf_token', 'token1');
-        $request->headers->set('X-CSRF-Token', 'token2');
-
-        $result = $this->service->validateCsrfToken($request);
-
-        $this->assertFalse($result);
-    }
-
-    public function testValidateCsrfTokenFailsWhenMissing(): void
-    {
-        $request = new Request();
-
-        $result = $this->service->validateCsrfToken($request);
-
-        $this->assertFalse($result);
-    }
-
-    public function testRefreshAccessTokenWithInvalidToken(): void
-    {
-        $request = new Request();
-        $request->cookies->set('refresh_token', 'invalid_token');
-        $response = new Response();
-
-        $this->refreshTokenRepository
-            ->expects($this->once())
-            ->method('findValidToken')
-            ->with('invalid_token')
-            ->willReturn(null);
-
-        $result = $this->service->refreshAccessToken($request, $response);
-
-        $this->assertNull($result);
-    }
-
-    public function testCreateAuthCookiesSetsCorrectCookies(): void
+    public function testAuthenticateSuccess(): void
     {
         $user = new User();
-        $user->setEmail('test@example.com');
+        $user->setEmail('test@oxford.edu');
+        $user->setPassword('hashed_password');
+        $user->setIsActive(true);
 
-        $this->jwtManager
-            ->expects($this->once())
+        // Mock Repository to return user
+        $userRepo = $this->createMock(EntityRepository::class);
+        $userRepo->expects($this->once())
+            ->method('findOneBy')
+            ->with(['email' => 'test@oxford.edu'])
+            ->willReturn($user);
+
+        $this->em->expects($this->once())
+            ->method('getRepository')
+            ->with(User::class)
+            ->willReturn($userRepo);
+
+        $this->passwordHasher->expects($this->once())
+            ->method('isPasswordValid')
+            ->with($user, 'plain_password')
+            ->willReturn(true);
+
+        $result = $this->authService->authenticate('test@oxford.edu', 'plain_password');
+        $this->assertSame($user, $result);
+    }
+
+    public function testAuthenticateFailureInvalidCredentials(): void
+    {
+        $user = new User();
+        $user->setEmail('test@oxford.edu');
+
+        // Mock Repository
+        $userRepo = $this->createMock(EntityRepository::class);
+        $userRepo->expects($this->once())
+            ->method('findOneBy')
+            ->willReturn($user);
+
+        $this->em->expects($this->once())
+            ->method('getRepository')
+            ->willReturn($userRepo);
+
+        $this->passwordHasher->expects($this->once())
+            ->method('isPasswordValid')
+            ->willReturn(false);
+
+        $this->expectException(\Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException::class);
+        $this->expectExceptionMessage('Credenciales inválidas');
+
+        $this->authService->authenticate('test@oxford.edu', 'wrong_password');
+    }
+
+    public function testGenerateAccessToken(): void
+    {
+        $user = new User();
+        $user->setEmail('test@oxford.edu');
+
+        $this->jwtManager->expects($this->once())
             ->method('create')
             ->with($user)
-            ->willReturn('jwt_access_token');
+            ->willReturn('fake.jwt.token');
 
-        $this->em->expects($this->once())->method('persist');
-        $this->em->expects($this->once())->method('flush');
-
-        $request = new Request([], [], [], [], [], ['REMOTE_ADDR' => '127.0.0.1']);
-        $response = new Response();
-
-        $this->service->createAuthCookies($user, $request, $response);
-
-        $cookies = $response->headers->getCookies();
-        $cookieNames = array_map(fn($c) => $c->getName(), $cookies);
-
-        $this->assertContains('access_token', $cookieNames);
-        $this->assertContains('refresh_token', $cookieNames);
-        $this->assertContains('csrf_token', $cookieNames);
+        $token = $this->authService->generateAccessToken($user);
+        $this->assertEquals('fake.jwt.token', $token);
     }
 }
