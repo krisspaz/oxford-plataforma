@@ -1,0 +1,71 @@
+groups:
+  - name: oxford_alerts
+    rules:
+      # ==========================================
+      # SERVICE AVAILABILITY
+      # ==========================================
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."
+
+      # ==========================================
+      # HIGH LATENCY
+      # ==========================================
+      - alert: HighLatency
+        expr: http_request_duration_seconds_bucket{le="0.5"} < 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API latency"
+          description: "90% of requests are taking more than 500ms"
+
+      # ==========================================
+      # ERROR RATE
+      # ==========================================
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High HTTP 5xx error rate"
+          description: "More than 1 error per second detected"
+
+      # ==========================================
+      # SYSTEM RESOURCES
+      # ==========================================
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is above 80% for 5 minutes"
+
+      - alert: LowDiskSpace
+        expr: node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} * 100 < 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space"
+          description: "Less than 10% disk space remaining"
+
+      # ==========================================
+      # BUSINESS LOGIC
+      # ==========================================
+      - alert: CircuitBreakerOpen
+        expr: oxford_circuit_breaker_state == 1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Circuit breaker OPEN"
+          description: "Circuit breaker for external services is open"

@@ -1,0 +1,44 @@
+[
+    {
+        "id": 1,
+        "code": "EST-2024-001",
+        "firstName": "Ana",
+        "lastName": "García",
+        "status": "active",
+        "grade": {
+            "name": "3ero Básico"
+        },
+        "section": {
+            "name": "A"
+        },
+        "email": "ana.garcia@oxford.edu"
+    },
+    {
+        "id": 2,
+        "code": "EST-2024-002",
+        "firstName": "Carlos",
+        "lastName": "López",
+        "status": "active",
+        "grade": {
+            "name": "4to Bachillerato"
+        },
+        "section": {
+            "name": "B"
+        },
+        "email": "carlos.lopez@oxford.edu"
+    },
+    {
+        "id": 3,
+        "code": "EST-2024-003",
+        "firstName": "María",
+        "lastName": "Rodríguez",
+        "status": "inactive",
+        "grade": {
+            "name": "3ero Básico"
+        },
+        "section": {
+            "name": "A"
+        },
+        "email": "maria.rodriguez@oxford.edu"
+    }
+]
