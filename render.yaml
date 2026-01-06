@@ -1,17 +1,12 @@
-services:
-  # ================= FRONTEND (Static Site) =================
-  - type: static
+  # ================= FRONTEND =================
+  - type: web
     name: oxford-frontend
-    env: static
+    env: docker
     plan: free
-    buildCommand: npm install && npm run build
-    publishDir: frontend/dist
+    dockerfilePath: ./frontend/Dockerfile.render
+    dockerContext: .
     branch: main
     autoDeploy: true
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
     envVars:
       - key: VITE_API_URL
         value: https://oxford-gateway.onrender.com/api

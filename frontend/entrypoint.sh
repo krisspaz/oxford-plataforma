@@ -1,10 +1,13 @@
 #!/bin/sh
 set -e
 
+echo "Starting Frontend Entrypoint..."
+echo "Current PORT: $PORT"
+
 # Replace $PORT in Nginx config
-echo "Configuring Nginx to listen on port $PORT..."
+# We match 'listen 80;' specifically because that is what is in our nginx.conf
+echo "Injecting PORT into Nginx config..."
 sed -i "s/listen 80;/listen $PORT;/g" /etc/nginx/conf.d/default.conf
 
-# Execute Nginx
-echo "Starting Nginx..."
+echo "Configuration updated. Starting Nginx..."
 exec nginx -g 'daemon off;'
