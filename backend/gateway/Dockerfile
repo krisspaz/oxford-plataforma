@@ -8,8 +8,8 @@ RUN rm /etc/nginx/conf.d/default.conf
 # Our nginx.conf includes "http" block, so it should replace /etc/nginx/nginx.conf 
 # OR we should adjust it to be a partial.
 # The user provided a full config with "events" and "http", so we replace nginx.conf.
-COPY nginx.conf /etc/nginx/nginx.conf
+# Copy custom config (Fixing path for root context)
+COPY backend/gateway/nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+# Render uses dynamic PORT
+CMD sed -i -e 's/80/'"$PORT"'/g' /etc/nginx/nginx.conf && nginx -g 'daemon off;'
