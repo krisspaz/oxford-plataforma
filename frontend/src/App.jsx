@@ -63,9 +63,9 @@ const PaquetesSeleccionadosPage = lazy(() => import('./pages/PaquetesSeleccionad
 const Academic = lazy(() => import('./pages/Academic'));
 const GradosPage = lazy(() => import('./pages/GradosPage'));
 const MateriasPage = lazy(() => import('./pages/MateriasPage'));
-const DocentesPage = lazy(() => import('./pages/DocentesPage'));
+const TeacherListPage = lazy(() => import('./features/teachers/pages/TeacherListPage'));
 const BimestresPage = lazy(() => import('./pages/BimestresPage'));
-const CargaNotasPage = lazy(() => import('./pages/CargaNotasPage'));
+const GradeEntryPage = lazy(() => import('./features/grades/pages/GradeEntryPage'));
 const HorariosPage = lazy(() => import('./pages/HorariosPage'));
 const MiHorarioPage = lazy(() => import('./pages/MiHorarioPage'));
 const MisAlumnosPage = lazy(() => import('./pages/MisAlumnosPage'));
@@ -232,7 +232,7 @@ function App() {
                   <Route path="academico" element={<Academic />} />
                   <Route path="academico/grados" element={<GradosPage />} />
                   <Route path="academico/materias" element={<MateriasPage />} />
-                  <Route path="academico/docentes" element={<DocentesPage />} />
+                  <Route path="academico/docentes" element={<TeacherListPage />} />
                   <Route path="academico/bimestres" element={<BimestresPage />} />
                   <Route path="academico/cierre-notas" element={<BimestresPage />} />
                   <Route path="academico/boletas" element={<ReportsPage />} />
@@ -246,7 +246,7 @@ function App() {
                   <Route path="academico/oxford-ai" element={<IAHorariosPage />} />
 
                   {/* Docente */}
-                  <Route path="docente/notas" element={<CargaNotasPage />} />
+                  <Route path="docente/notas" element={<GradeEntryPage />} />
                   <Route path="docente/horario" element={<MiHorarioPage />} />
                   <Route path="docente/alumnos" element={<MisAlumnosPage />} />
                   <Route path="docente/tareas" element={<GestionTareasPage />} />
