@@ -61,8 +61,6 @@ class AiService
         } catch (\Exception $e) {
             throw new RuntimeException('Failed to generate schedule: ' . $e->getMessage());
         }
-            throw new RuntimeException('Failed to generate schedule: ' . $e->getMessage());
-        }
     }
 
     public function reportScheduleChange(array $changeData): void
