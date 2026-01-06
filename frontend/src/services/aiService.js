@@ -86,9 +86,10 @@ const aiService = {
      */
     async processCommand(text, currentConfig = {}) {
         try {
-            // Direct call to Python AI Microservice
+            // Use proxied endpoint to avoid Mixed Content / CORS issues
+            // This goes to /ai-api which Vite proxies to http://127.0.0.1:8001
             const token = localStorage.getItem('token');
-            const response = await axios.post('http://localhost:8001/process-command', {
+            const response = await axios.post('/ai-api/process-command', {
                 text,
                 current_config: currentConfig,
             }, {
@@ -101,11 +102,12 @@ const aiService = {
             return response.data;
         } catch (error) {
             console.error('AI Process error:', error);
+            const errorMessage = error.response?.data?.message || error.message;
             return {
                 intent: 'unknown',
                 confidence: 0,
                 entities: {},
-                response_text: 'No pude procesar tu comando. Intenta ser más específico.',
+                response_text: `No pude procesar tu comando. Error de conexión: ${errorMessage}`,
                 should_generate: false,
             };
         }
