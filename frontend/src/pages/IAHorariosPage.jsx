@@ -128,48 +128,173 @@ const IAHorariosPage = () => {
     };
 
 
-    // --- Advanced AI Engine (Python Connected) ---
+    // --- Smart AI Engine with Frontend Fallback ---
     const processIntent = async (text) => {
+        const lowerText = text.toLowerCase().trim();
+        setCoreState('processing');
+
+        // Simulate slight delay for natural feel
+        await new Promise(r => setTimeout(r, 500));
+
+        // --- LOCAL INTENT MATCHING (No Backend Required) ---
+
+        // 1. GREETINGS
+        if (/^(hola|buenos d[ií]as|buenas tardes|buenas noches|hey|hi|que tal|qué tal|saludos)/.test(lowerText)) {
+            const greetings = [
+                `¡Hola ${teacherName}! 👋 Soy tu asistente personal. ¿En qué te puedo ayudar hoy?`,
+                `¡Buenos días, ${teacherName}! ¿Listo para hacer tu día más productivo?`,
+                `¡Qué gusto saludarte, ${teacherName}! Estoy aquí para ayudarte. 🎓`
+            ];
+            setCoreState('idle');
+            reply(greetings[Math.floor(Math.random() * greetings.length)], 'text');
+            speak(`Hola ${teacherName}`);
+            return;
+        }
+
+        // 2. HOW ARE YOU / ESTADO
+        if (/^(cómo est[aá]s|como estas|que tal|qué tal|como te encuentras)/.test(lowerText)) {
+            setCoreState('idle');
+            reply("¡Estoy funcionando al 100%! 🤖 Todos los sistemas operativos. ¿Y tú? ¿En qué puedo ayudarte?", 'text');
+            return;
+        }
+
+        // 3. HELP / CAPABILITIES
+        if (/^(ayuda|help|que puedes hacer|qué puedes hacer|comandos|capacidades|funciones)/.test(lowerText) ||
+            lowerText.includes("puedes hacer") || lowerText.includes("sabes hacer")) {
+            const helpText = `🧠 **Soy tu Asistente Personal Académico.** Puedo ayudarte con:
+
+📊 **Consultas Académicas:**
+• "Ver mis materias" - Lista tus asignaturas
+• "Ver mis grupos" - Muestra tus secciones asignadas
+• "Ver tareas pendientes" - Revisa tu agenda
+
+📝 **Gestión de Notas:**
+• "Cargar notas" - Te llevo a la página de notas
+• "Ver promedios" - Resumen de calificaciones
+
+🗓️ **Horarios:**
+• "Ver mi horario" - Tu horario semanal
+• "Generar horarios" - Crear nuevos horarios (Admin)
+
+💡 **Tips y Ayuda:**
+• "Dame un consejo" - Tips pedagógicos
+• "Motivación" - Mensajes de ánimo
+
+¿Qué te gustaría hacer?`;
+            setCoreState('idle');
+            reply(helpText, 'text');
+            return;
+        }
+
+        // 4. VIEW SUBJECTS / MATERIAS
+        if (lowerText.includes("materia") || lowerText.includes("asignatura") || lowerText.includes("curso")) {
+            setCoreState('idle');
+            if (activeRole === 'ROLE_TEACHER' || activeRole === 'ROLE_DOCENTE') {
+                try {
+                    const profile = await teacherService.getMyProfile();
+                    if (profile && profile.id) {
+                        const assignments = await teacherService.getSubjects(profile.id);
+                        if (assignments && assignments.length > 0) {
+                            const subjectList = assignments.map(a =>
+                                `• **${a.subject.name}** - ${a.grade.name} ${a.section ? `(${a.section.name})` : ''}`
+                            ).join('\n');
+                            reply(`📚 **Tus Materias Asignadas:**\n\n${subjectList}`, 'text');
+                        } else {
+                            reply("No encontré materias asignadas en tu perfil. Contacta a coordinación si esto es un error.", 'text');
+                        }
+                    }
+                } catch (e) {
+                    reply("Hubo un problema al consultar tus materias. Intenta de nuevo.", 'text');
+                }
+            } else {
+                reply("Esta función está disponible para docentes. Tu rol actual no tiene materias asignadas.", 'text');
+            }
+            return;
+        }
+
+        // 5. GRADES / NOTAS
+        if (lowerText.includes("nota") || lowerText.includes("calificacion") || lowerText.includes("promedio")) {
+            setCoreState('idle');
+            reply("📝 Para gestionar notas, ve a **Carga de Notas** en el menú lateral.\n\n¿Te llevo ahí? (Di 'sí' o haz clic en el menú)", 'text');
+            return;
+        }
+
+        // 6. SCHEDULE / HORARIO
+        if (lowerText.includes("horario") || lowerText.includes("schedule")) {
+            setCoreState('idle');
+            reply("🗓️ Para ver horarios, consulta el módulo de **Horarios** en el menú.\n\nSi eres administrador, puedo ayudarte a generar nuevos horarios con IA.", 'text');
+            return;
+        }
+
+        // 7. MOTIVATION / SUPPORT
+        if (lowerText.includes("motivación") || lowerText.includes("ánimo") || lowerText.includes("cansado") || lowerText.includes("estres")) {
+            const motivations = [
+                "🌟 Recuerda: cada clase que das transforma una vida. ¡Eres increíble!",
+                "💪 El trabajo de un maestro es el más noble. Tus estudiantes te admiran.",
+                "🧘 Tómate 5 minutos para respirar. Lo estás haciendo muy bien.",
+                "☀️ Mañana es una nueva oportunidad. Hoy, celebra lo que lograste."
+            ];
+            setCoreState('idle');
+            reply(motivations[Math.floor(Math.random() * motivations.length)], 'text');
+            return;
+        }
+
+        // 8. TIPS / CONSEJOS
+        if (lowerText.includes("consejo") || lowerText.includes("tip") || lowerText.includes("sugerencia")) {
+            const tips = [
+                "💡 **Tip Pedagógico:** Usa preguntas abiertas para fomentar el pensamiento crítico.",
+                "📱 **Tip Tech:** Proyecta un temporizador visual para mantener el ritmo de la clase.",
+                "🎮 **Tip Gamificación:** Pequeños retos con puntos extra aumentan la participación.",
+                "📚 **Tip Lectura:** 10 minutos de lectura silenciosa al inicio calma y enfoca a los alumnos."
+            ];
+            setCoreState('idle');
+            reply(tips[Math.floor(Math.random() * tips.length)], 'text');
+            return;
+        }
+
+        // 9. RISK ANALYSIS (MOCK)
+        if (lowerText.includes("riesgo") || lowerText.includes("alerta") || lowerText.includes("estudiantes en riesgo")) {
+            reply("🔍 Analizando base de datos de estudiantes...", 'text');
+            await new Promise(r => setTimeout(r, 1000));
+
+            const mockStudents = [
+                { id: 1, name: "Carlos López", grades: [{ subject: "Matemáticas", score: 45 }, { subject: "Ciencias", score: 50 }] },
+                { id: 2, name: "Ana Martínez", grades: [{ subject: "Matemáticas", score: 55 }, { subject: "Historia", score: 48 }] }
+            ];
+            setCoreState('idle');
+            reply({ type: 'risk_dashboard', data: mockStudents }, 'result_card');
+            speak("He detectado algunos estudiantes en riesgo.");
+            return;
+        }
+
+        // 10. GENERATE SCHEDULE (Director/Admin only)
+        if (lowerText.includes("generar horario") || lowerText.includes("crear horario")) {
+            if (activeRole === 'ROLE_ADMIN' || activeRole === 'ROLE_DIRECTOR' || activeRole === 'ROLE_SUPER_ADMIN') {
+                setCoreState('idle');
+                reply("🚀 Iniciando generador de horarios con IA...\n\nEsta función requiere configurar parámetros. Ve al módulo de **Generación de Horarios**.", 'text');
+            } else {
+                setCoreState('idle');
+                reply("🔒 La generación de horarios está reservada para Dirección y Administración.", 'text');
+            }
+            return;
+        }
+
+        // 11. FALLBACK - Try backend, but gracefully handle errors
         try {
-            // 1. Send to Python Brain
-            reply(null, 'process_step');
-
-            // Specialized Handling for Risk
-            if (text.toLowerCase().includes("riesgo") || text.toLowerCase().includes("risk")) {
-                reply("Analizando base de datos de estudiantes...", 'text');
-
-                // MOCK FETCH STUDENTS for Demo
-                const mockStudents = [
-                    { id: 1, name: "Juan Pérez", grades: [{ subject: "Math", score: 55 }, { subject: "Science", score: 60 }] },
-                    { id: 2, name: "Maria Garcia", grades: [{ subject: "Math", score: 90 }, { subject: "Science", score: 95 }] },
-                    { id: 3, name: "Carlos López", grades: [{ subject: "Math", score: 40 }, { subject: "Science", score: 45 }, { subject: "History", score: 50 }] }
-                ];
-
-                reply({ type: 'risk_dashboard', data: mockStudents }, 'result_card');
-                speak("He detectado algunos estudiantes en riesgo.");
+            const aiResponse = await aiService.processCommand(text, activeRole);
+            if (aiResponse && aiResponse.response_text && !aiResponse.response_text.includes("Error")) {
+                setCoreState('idle');
+                reply(aiResponse.response_text, 'text');
+                speak(aiResponse.response_text);
                 return;
             }
-
-            // ... (rest of logic) ...
-
-            // Add context to the request (simulated here as we send 'text' mostly)
-            const contextEnhancedText = `[Context: ${location.pathname}] ${text}`;
-
-            const aiResponse = await aiService.processCommand(text, activeRole); // Pass role for persona adaptation
-
-            // ... (rest of logic) ...
-
-            // 3. Default Text Response
-            const responseText = aiResponse.response_text || "No estoy segura de qué decir.";
-            reply(responseText, 'text');
-            speak(responseText); // Speak the response
-
-        } catch (error) {
-            console.error("AI Brain Error:", error);
-            const errorMsg = "He perdido conexión con mi núcleo neuronal (Python API). 🔌 Intenta de nuevo.";
-            reply(errorMsg, 'error');
-            speak("Error de conexión.");
+        } catch (e) {
+            console.warn("Backend AI unavailable, using fallback", e);
         }
+
+        // 12. FINAL FALLBACK
+        setCoreState('idle');
+        reply(`Hmm, no estoy seguro de cómo ayudarte con "${text}". 🤔\n\nIntenta preguntarme sobre:\n• Tus materias\n• Tus horarios\n• Tips pedagógicos\n• O escribe "ayuda" para ver todo lo que puedo hacer.`, 'text');
     };
 
     const reply = (content, type = 'text') => {
