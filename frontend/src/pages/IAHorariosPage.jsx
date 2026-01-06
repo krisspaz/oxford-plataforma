@@ -8,16 +8,11 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import scheduleService from '../services/scheduleService';
 import taskService from '../services/taskService'; // Integramos servicio de tareas
+import teacherService from '../services/teacherService'; // NEW: Import teacherService
 
 import aiService from '../services/AiService';
 import studentService from '../services/studentService';
-import EnterpriseDashboard from '../components/EnterpriseDashboard';
-import RiskDashboard from '../components/RiskDashboard';
-
-// ... imports
-import { useLocation } from 'react-router-dom'; // Added useLocation
-
-// ...
+// ... rest of imports
 
 const IAHorariosPage = () => {
     const { darkMode } = useTheme();
@@ -29,11 +24,30 @@ const IAHorariosPage = () => {
     const [showRiskDashboard, setShowRiskDashboard] = useState(false);
     const [showEnterpriseDashboard, setShowEnterpriseDashboard] = useState(false);
     const [teacherProfile, setTeacherProfile] = useState(null);
+    const [teacherName, setTeacherName] = useState(user?.email?.split('@')[0] || 'Usuario'); // NEW: Name state
     const [coreState, setCoreState] = useState('idle'); // Fixed: Added missing state
+
+    // Load teacher profile if applicable
+    useEffect(() => {
+        const loadProfile = async () => {
+            if (activeRole === 'ROLE_TEACHER' || activeRole === 'ROLE_DOCENTE') {
+                try {
+                    const profile = await teacherService.getMyProfile();
+                    if (profile && profile.firstName) {
+                        setTeacherName(`${profile.firstName} ${profile.lastName}`);
+                        setTeacherProfile(profile);
+                    }
+                } catch (e) {
+                    console.error("Error loading profile", e);
+                }
+            }
+        };
+        loadProfile();
+    }, [activeRole]);
 
     // Helper state for chat
     const [messages, setMessages] = useState([
-        { id: 1, sender: 'ai', text: `Hola ${user?.email || 'Usuario'}. Soy tu Asistente Personal Académico. ¿En qué puedo apoyarte hoy?`, timestamp: new Date() }
+        { id: 1, sender: 'ai', text: `Hola. Soy tu Asistente Personal Académico. ¿En qué puedo apoyarte hoy?`, timestamp: new Date() }
     ]);
     const [isTyping, setIsTyping] = useState(false);
     const [input, setInput] = useState('');
@@ -231,7 +245,7 @@ const IAHorariosPage = () => {
                     <NeuralCore state={coreState} />
                     <div>
                         <h2 className="text-xl font-bold font-mono tracking-tight flex items-center gap-2">
-                            ASISTENTE PERSONAL <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400">BETA 2.0</span>
+                            ASISTENTE PERSONAL DE {teacherName.toUpperCase()} <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400">BETA 2.0</span>
                         </h2>
                         {/* Status text */}
                         <div className="flex items-center gap-3 text-xs md:text-sm text-gray-400 font-medium">
