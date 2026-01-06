@@ -1,46 +1,51 @@
-FROM php:8.3-fpm-alpine
+# Backend Symfony Production Dockerfile
+FROM php:8.2-fpm-alpine AS base
 
 # Install system dependencies
 RUN apk add --no-cache \
-    git \
-    unzip \
-    postgresql-dev \
     icu-dev \
+    postgresql-dev \
     libzip-dev \
-    acl \
-    linux-headers \
-    $PHPIZE_DEPS
-
-# Install PHP extensions
-RUN docker-php-ext-install \
-    pdo_pgsql \
+    && docker-php-ext-install \
     intl \
+    pdo_pgsql \
     zip \
     opcache
 
 # Install Redis extension
-RUN pecl install redis && docker-php-ext-enable redis
-
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apk del .build-deps
 
 # Set working directory
-WORKDIR /var/www/symfony
+WORKDIR /var/www/html
 
-# Copy project files
+# Copy composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Production configuration
+FROM base AS production
+
+# Copy application
 COPY . .
 
-# Install PHP dependencies (skip scripts to avoid issues in build)
-RUN rm -f composer.lock
-RUN APP_ENV=prod COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-scripts
-
-# Run cache:clear manually with warnings allowed
-RUN php bin/console cache:clear --env=prod --no-warmup || true
-RUN php bin/console cache:warmup --env=prod || true
+# Install dependencies (production only)
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Set permissions
-RUN setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX var || true
-RUN setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX var || true
+RUN chown -R www-data:www-data var
+
+# Opcache configuration
+RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.memory_consumption=256" >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.max_accelerated_files=20000" >> /usr/local/etc/php/conf.d/opcache.ini \
+    && echo "opcache.validate_timestamps=0" >> /usr/local/etc/php/conf.d/opcache.ini
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD php bin/console about || exit 1
 
 EXPOSE 9000
+
 CMD ["php-fpm"]
