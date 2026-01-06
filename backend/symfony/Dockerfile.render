@@ -1,10 +1,11 @@
 FROM php:8.2-apache
 
-# Install dependencies (Postgres PDO, Zip, OpCache)
+# Install dependencies and dos2unix
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     libzip-dev \
     unzip \
+    dos2unix \
     && docker-php-ext-install \
     pdo \
     pdo_pgsql \
@@ -27,6 +28,7 @@ COPY backend/symfony .
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+ENV COMPOSER_MEMORY_LIMIT=-1
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Permissions
@@ -34,7 +36,7 @@ RUN chown -R www-data:www-data var
 
 # Entrypoint script to handle PORT
 COPY backend/symfony/entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN dos2unix /usr/local/bin/docker-entrypoint.sh && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["apache2-foreground"]
