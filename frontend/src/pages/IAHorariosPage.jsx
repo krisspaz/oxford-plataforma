@@ -27,8 +27,10 @@ const IAHorariosPage = () => {
     const location = useLocation(); // Context awareness
     const [voiceEnabled, setVoiceEnabled] = useState(false); // Voice state
     const [showRiskDashboard, setShowRiskDashboard] = useState(false);
+    const [showRiskDashboard, setShowRiskDashboard] = useState(false);
     const [showEnterpriseDashboard, setShowEnterpriseDashboard] = useState(false);
     const [teacherProfile, setTeacherProfile] = useState(null);
+    const [coreState, setCoreState] = useState('idle'); // Fixed: Added missing state
 
     // ... existing refs ...
 
@@ -174,7 +176,7 @@ const IAHorariosPage = () => {
                     <NeuralCore state={coreState} />
                     <div>
                         <h2 className="text-xl font-bold font-mono tracking-tight flex items-center gap-2">
-                            OXFORD AI <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400">BETA 2.0</span>
+                            ASISTENTE PERSONAL <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400">BETA 2.0</span>
                         </h2>
                         {/* Status text */}
                         <div className="flex items-center gap-3 text-xs md:text-sm text-gray-400 font-medium">
