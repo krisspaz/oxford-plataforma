@@ -10,7 +10,7 @@ import scheduleService from '../services/scheduleService';
 import taskService from '../services/taskService'; // Integramos servicio de tareas
 import teacherService from '../services/teacherService'; // NEW: Import teacherService
 
-import aiService from '../services/AiService';
+import aiService from '../services/aiService';
 import studentService from '../services/studentService';
 import EnterpriseDashboard from '../components/EnterpriseDashboard'; // Fixed duplicates
 import RiskDashboard from '../components/RiskDashboard';
