@@ -1,0 +1,49 @@
+FROM php:8.3-fpm-alpine
+
+# Install dependencies including Nginx (needed to serve HTTP on Render)
+RUN apk add --no-cache \
+    icu-dev \
+    oniguruma-dev \
+    libzip-dev \
+    nginx \
+    && docker-php-ext-install intl pdo pdo_pgsql zip opcache
+
+WORKDIR /app
+
+# Copy application code
+COPY backend/symfony .
+
+# Install Composer dependencies
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+RUN composer install --no-dev --optimize-autoloader
+
+# Configure Nginx for PHP-FPM
+RUN echo 'server { \
+    listen 80; \
+    root /app/public; \
+    index index.php; \
+    location / { \
+    try_files $uri /index.php$is_args$args; \
+    } \
+    location ~ ^/index\.php(/|$) { \
+    fastcgi_pass 127.0.0.1:9000; \
+    fastcgi_split_path_info ^(.+\.php)(/.*)$; \
+    include fastcgi_params; \
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \
+    fastcgi_param DOCUMENT_ROOT $document_root; \
+    internal; \
+    } \
+    }' > /etc/nginx/http.d/default.conf
+
+# Create startup script to run both FPM and Nginx
+RUN echo '#!/bin/sh' > /start.sh && \
+    echo 'php-fpm -D' >> /start.sh && \
+    echo 'nginx -g "daemon off;"' >> /start.sh && \
+    chmod +x /start.sh
+
+# Render provides $PORT, but we configure Nginx to listen on 80 and let Render handle mapping?
+# Actually Render expects the app to bind to $PORT or default 10000.
+# The user Nginx config above uses listen 80.
+# We will use sed to replace 80 with $PORT at runtime.
+
+CMD sed -i "s/listen 80;/listen $PORT;/g" /etc/nginx/http.d/default.conf && /start.sh
