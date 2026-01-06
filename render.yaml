@@ -10,7 +10,23 @@ services:
     autoDeploy: true
     envVars:
       - key: VITE_API_URL
-        value: https://oxford-backend.onrender.com
+        value: https://oxford-gateway.onrender.com/api # Point to Gateway
+      - key: VITE_AI_URL
+        value: https://oxford-gateway.onrender.com/ai  # Point to Gateway
+
+  # ================= GATEWAY (NEW) =================
+  - type: web
+    name: oxford-gateway
+    env: docker
+    plan: free
+    dockerfilePath: ./backend/gateway/Dockerfile
+    dockerContext: .
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 80
 
   # ================= BACKEND =================
   - type: web
@@ -37,7 +53,7 @@ services:
           name: oxford-redis
           property: connectionString
       - key: CORS_ALLOW_ORIGIN
-        value: https://oxford-frontend.onrender.com
+        value: https://oxford-frontend.onrender.com # Frontend still needs CORS from Backend
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: JWT_PUBLIC_KEY
@@ -59,12 +75,7 @@ services:
     branch: main
     autoDeploy: true
     healthCheckPath: /health
-    startCommand: >
-      gunicorn main_fastapi:app
-      -k uvicorn.workers.UvicornWorker
-      --workers 2
-      --timeout 120
-      --bind 0.0.0.0:8000
+    # startCommand removed per previous fix, rely on Dockerfile CMD
     envVars:
       - key: REDIS_URL
         fromService:
