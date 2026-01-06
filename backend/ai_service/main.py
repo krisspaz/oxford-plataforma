@@ -134,7 +134,11 @@ def me():
 
 @app.route("/process-command", methods=["POST"])
 def process_cmd():
+    import random
+    from datetime import datetime
+    
     text = request.json.get('text', '')
+    user_role = request.json.get('role', 'admin')
     res = nlp_engine.process(text)
     
     response = {
@@ -142,109 +146,219 @@ def process_cmd():
         "confidence": res.intent.confidence,
         "response_text": "Procesado.",
         "entities": {e.type: e.value for e in res.entities},
-        "should_generate": False
+        "should_generate": False,
+        "action": None
     }
     
-    if response["intent"] == "generate_schedule":
-        response["response_text"] = "Generando horario..."
-        response["should_generate"] = True
-    elif response["intent"] == "greeting":
-        # Point 3: Use AssistantFactory for role-based response
-        user_role = "admin" # Default
-        try:
-             # In a real request context we would use the token's role
-             # For now, we mock or extract from request if available
-             user_role = request.json.get('role', 'admin')
-        except: pass
-        
-        response["response_text"] = assistant_factory.get_response("greeting", user_role, {"isa": "95.0"})
-    elif response["intent"] == "check_homework":
-        response["response_text"] = "Consultando tu agenda de tareas..."
-        response["action"] = "fetch_tasks" 
-    elif response["intent"] == "check_grades":
-        response["response_text"] = "Buscando tus calificaciones..."
-        response["action"] = "fetch_grades"
-    elif response["intent"] == "study_tip":
-        import random
-        tips = [
-           "💡 **Tip de Super Tutor**: Intenta la técnica Pomodoro (25 min estudio, 5 min descanso). ¡Aumentará tu concentración!",
-           "📚 **Consejo**: Explícale el tema a alguien más (o a tu mascota). Si lo puedes explicar, lo entiendes.",
-           "🧠 **Memoria**: Usa mnemotecnias o canciones para recordar listas difíciles.",
-           "💧 **Salud**: ¡Mantente hidratado! Tu cerebro necesita agua para procesar información."
+    intent = response["intent"]
+    
+    # === GREETINGS & CONVERSATIONAL ===
+    if intent == "greeting":
+        greetings = [
+            f"¡Hola! 👋 Soy tu Asistente Personal. ¿En qué puedo ayudarte hoy?",
+            f"¡Buen día! 🌟 Estoy aquí para apoyarte. ¿Qué necesitas?",
+            f"¡Hola! ¿Listo para hacer tu día más productivo? 💼",
         ]
-        response["response_text"] = random.choice(tips)
-    elif response["intent"] == "emotional_support":
-        import random
+        response["response_text"] = assistant_factory.get_response("greeting", user_role, {"isa": "95.0"})
+    
+    elif intent == "how_are_you":
+        responses = [
+            "¡Estoy funcionando al 100%! 🤖 Todos los sistemas operativos. ¿Y tú? ¿En qué puedo apoyarte?",
+            "¡Excelente! Procesando a toda velocidad. ☕ ¿Qué te gustaría hacer hoy?",
+            "¡Muy bien, gracias por preguntar! 💚 Aquí estoy para lo que necesites.",
+        ]
+        response["response_text"] = random.choice(responses)
+    
+    elif intent == "thanks":
+        responses = [
+            "¡De nada! 🙏 Es un placer ayudarte.",
+            "¡Para servirte! Si necesitas algo más, aquí estaré. 😊",
+            "¡Con gusto! Recuerda que siempre puedes contar conmigo. ✨",
+        ]
+        response["response_text"] = random.choice(responses)
+    
+    elif intent == "goodbye":
+        responses = [
+            "¡Hasta pronto! 👋 Que tengas un excelente día.",
+            "¡Nos vemos! Recuerda que aquí estaré cuando me necesites. 🌟",
+            "¡Cuídate mucho! ¡Éxito en todo! 💪",
+        ]
+        response["response_text"] = random.choice(responses)
+    
+    # === HELP & ABOUT ===
+    elif intent == "help":
+        response["response_text"] = """🧠 **Soy tu Asistente Personal Académico.** Puedo ayudarte con:
+
+📊 **Consultas Académicas:**
+• "Ver mis materias" - Lista tus asignaturas
+• "Ver mis estudiantes" - Lista de alumnos
+• "Cargar notas" - Ir a gestión de calificaciones
+
+📝 **Para Estudiantes:**
+• "Mis notas" - Ver calificaciones
+• "Tareas pendientes" - Ver deberes
+• "Mi asistencia" - Registro de faltas
+
+🗓️ **Horarios:**
+• "Ver mi horario" - Tu horario semanal
+• "Generar horarios" - Crear con IA (Admin)
+
+💡 **Bienestar:**
+• "Dame un consejo" - Tips de estudio
+• "Necesito motivación" - Apoyo emocional
+• "Estoy estresado" - Ayuda
+
+📊 **Analítica:**
+• "Estudiantes en riesgo" - Dashboard de alertas
+• "Salud institucional" - Métricas ISA
+
+¿Qué te gustaría hacer?"""
+    
+    elif intent == "about_ai":
+        response["response_text"] = """🤖 **Soy el Asistente Personal de Oxford Sistema**
+
+• **Nombre:** Asistente Oxford AI
+• **Versión:** 2.0 Beta (Enterprise)
+• **Creador:** Equipo de Desarrollo Oxford Sistema
+• **Tecnología:** Machine Learning + NLP en Español
+• **Capacidades:** Generación de horarios, análisis de riesgo, aprendizaje continuo
+
+Fui diseñado para hacer tu vida académica más fácil. 🎓"""
+    
+    # === SCHEDULE ===
+    elif intent == "generate_schedule":
+        response["response_text"] = "🚀 Iniciando el generador de horarios con IA...\n\nEsta función usa algoritmos genéticos para optimizar la distribución."
+        response["should_generate"] = True
+        response["action"] = "start_generation"
+    
+    elif intent == "view_schedule":
+        response["response_text"] = "📅 Consultando tu horario actual..."
+        response["action"] = "fetch_schedule"
+    
+    # === ACADEMIC - TEACHER ===
+    elif intent == "my_subjects":
+        response["response_text"] = "📚 Consultando tus materias asignadas..."
+        response["action"] = "fetch_subjects"
+    
+    elif intent == "my_students":
+        response["response_text"] = "👨‍🎓 Consultando la lista de tus estudiantes..."
+        response["action"] = "fetch_students"
+    
+    elif intent == "student_grades":
+        response["response_text"] = "📊 Consultando las calificaciones del grupo..."
+        response["action"] = "fetch_group_grades"
+    
+    elif intent == "load_grades":
+        response["response_text"] = "📝 Te dirijo al módulo de **Carga de Notas**.\n\nAhí puedes registrar calificaciones por materia y bimestre."
+        response["action"] = "navigate_grades"
+    
+    # === ACADEMIC - STUDENT ===
+    elif intent == "check_homework":
+        response["response_text"] = "📋 Consultando tu agenda de tareas pendientes..."
+        response["action"] = "fetch_homework"
+    
+    elif intent == "check_grades":
+        response["response_text"] = "📊 Buscando tus calificaciones actuales..."
+        response["action"] = "fetch_grades"
+    
+    elif intent == "check_attendance":
+        response["response_text"] = "📅 Consultando tu registro de asistencia..."
+        response["action"] = "fetch_attendance"
+    
+    # === EMOTIONAL SUPPORT ===
+    elif intent == "emotional_support":
         msgs = [
-           "🌿 ¡Respira profundo! Eres capaz de todo. Un paso a la vez.",
-           "💪 Confía en tu preparación. Lo has hecho bien hasta ahora.",
-           "🌟 El esfuerzo de hoy es el éxito de mañana. ¡Tú puedes!",
-           "🧘‍♀️ Tómate 5 minutos para desconectar. Todo va a salir bien."
+            "🌿 ¡Respira profundo! Eres capaz de todo. Un paso a la vez.\n\n💡 Tip: Tómate 5 minutos, cierra los ojos y respira lento.",
+            "💪 Sé que las cosas pueden sentirse abrumadoras, pero lo estás haciendo bien.\n\n🧘 Recuerda: está bien pedir ayuda cuando la necesites.",
+            "🌟 El esfuerzo de hoy construye el éxito de mañana. ¡Tú puedes!\n\n💚 Tu bienestar es importante. Si te sientes sobrecargado, habla con alguien de confianza.",
         ]
         response["response_text"] = random.choice(msgs)
-    elif response["intent"] == "message_teacher":
-        response["response_text"] = "¿A qué profesor te gustaría escribirle? ✉️"
-        response["action"] = "init_teacher_chat"
-    elif response["intent"] == "report_issue":
-        response["response_text"] = "Lamento que tengas un inconveniente. 😔 Abre el formulario para contarme más (es anónimo si deseas)."
-        response["action"] = "open_feedback_modal"
-    elif response["intent"] == "suggestion":
-        response["response_text"] = "¡Nos encanta mejorar! 💡 ¿Cuál es tu idea?"
-        response["action"] = "open_feedback_modal"
-    elif response["intent"] == "check_task_history":
-        response["response_text"] = "Revisando tu historial académico..."
-        response["action"] = "fetch_task_history"
-    elif response["intent"] == "check_grades":
-        response["response_text"] = "Consultando tus calificaciones actuales..."
-        response["action"] = "fetch_grades"
-    elif response["intent"] == "generate_quiz":
-        # Check if subject detected
-        entities = nlp.extract_entities(data.get('text', ''))
-        subject = entities.get('subject')
+    
+    elif intent == "motivation":
+        msgs = [
+            "💪 **¡Tú puedes!**\n\n\"El éxito no es la clave de la felicidad. La felicidad es la clave del éxito.\" - Albert Schweitzer",
+            "🌟 **Cada día es una nueva oportunidad.**\n\n\"No te compares con otros. Compárate con quien eras ayer.\"",
+            "🚀 **El único límite eres tú mismo.**\n\n\"La disciplina es el puente entre las metas y los logros.\" - Jim Rohn",
+            "🔥 **¡No te rindas!**\n\n\"El fracaso es el condimento que le da sabor al éxito.\" - Truman Capote",
+        ]
+        response["response_text"] = random.choice(msgs)
+    
+    elif intent == "study_tip":
+        tips = [
+            "💡 **Técnica Pomodoro:** 25 min de estudio, 5 min de descanso. ¡Aumenta la concentración!",
+            "📚 **Método Feynman:** Explica el tema como si lo enseñaras a un niño. Si puedes, lo entiendes.",
+            "🧠 **Repaso Espaciado:** Repasa el material 1 día, 3 días, 1 semana y 1 mes después.",
+            "📝 **Mapas Mentales:** Dibuja conexiones entre conceptos. Tu cerebro recuerda mejor lo visual.",
+            "🎧 **Música Instrumental:** Música sin letra ayuda a concentrarse. Prueba lo-fi o música clásica.",
+            "💧 **Hidratación:** Tu cerebro es 75% agua. Mantente hidratado para pensar mejor.",
+        ]
+        response["response_text"] = random.choice(tips)
+    
+    # === RISK & ANALYTICS ===
+    elif intent == "check_risk":
+        response["response_text"] = "🔍 Analizando base de datos de estudiantes para detectar riesgos académicos..."
+        response["action"] = "show_risk_dashboard"
+    
+    elif intent == "teacher_burnout":
+        response["response_text"] = "📊 Analizando tu carga de trabajo y distribución de horarios..."
+        response["action"] = "analyze_burnout"
+    
+    elif intent == "institutional_health":
+        result = schedule_scorer.calculate_isa([], {'avg_burnout': 15}, {})
+        response["response_text"] = f"""📊 **Índice de Salud Académica (ISA)**
 
-        if not subject:
-            response["response_text"] = "¡Claro! 🧠 ¿De qué materia quieres el examen? (Matemáticas, Ciencias, Historia...)"
-            # We don't trigger 'start_quiz' yet, we wait for user to specify subject in next turn
-            # In a real stateful bot, we would set context. For now, simple prompt.
-        else:
-            # Generate a dynamic quiz based on subject
-            # Mock Questions Database
-            question_bank = {
-                'Matemáticas': [
-                    {"id": 1, "question": "¿Cuánto es 8 x 7?", "options": ["54", "56", "58", "62"], "answer": "56"},
-                    {"id": 2, "question": "Raíz cuadrada de 144", "options": ["10", "11", "12", "14"], "answer": "12"},
-                    {"id": 3, "question": "Si x + 5 = 10, ¿x?", "options": ["2", "5", "8", "10"], "answer": "5"}
-                ],
-                'Ciencias': [
-                    {"id": 1, "question": "¿Símbolo químico del Oro?", "options": ["Ag", "Au", "Fe", "Cu"], "answer": "Au"},
-                    {"id": 2, "question": "¿Planeta más grande?", "options": ["Tierra", "Marte", "Júpiter", "Saturno"], "answer": "Júpiter"},
-                    {"id": 3, "question": "¿Qué respiran las plantas?", "options": ["Oxígeno", "Dióxido de Carbono", "Nitrógeno", "Helio"], "answer": "Dióxido de Carbono"}
-                ],
-                'Historia': [
-                    {"id": 1, "question": "¿Descubrimiento de América?", "options": ["1492", "1500", "1821", "1945"], "answer": "1492"},
-                    {"id": 2, "question": "¿Revolución Francesa?", "options": ["1789", "1810", "1917", "1940"], "answer": "1789"},
-                    {"id": 3, "question": "¿Primer presidente de USA?", "options": ["Lincoln", "Washington", "Jefferson", "Kennedy"], "answer": "Washington"}
-                ]
-            }
-            
-            # Default to General Knowledge if subject not in bank
-            selected_questions = question_bank.get(subject, [
-                {"id": 1, "question": "¿Capital de Guatemala?", "options": ["Xela", "Guatemala", "Antigua", "Escuintla"], "answer": "Guatemala"},
-                {"id": 2, "question": "¿Colores primarios?", "options": ["Rojo, Verde, Azul", "Amarillo, Azul, Rojo", "Blanco, Negro, Gris"], "answer": "Amarillo, Azul, Rojo"},
-                {"id": 3, "question": "¿Animal más rápido?", "options": ["León", "Guepardo", "Águila", "Caballo"], "answer": "Guepardo"}
-            ])
+🏆 **Puntuación Global:** {result['isa_score']}/100 ({result['level']})
 
-            quiz_data = {
-                "title": f"Quiz Rápido de {subject}",
-                "questions": selected_questions
-            }
-            import json
-            response["response_text"] = f"¡Excelente! Aquí tienes tu prueba de {subject}. 📝"
-            response["action"] = "start_quiz"
-            response["payload"] = json.dumps(quiz_data)
-        
-    elif response["intent"] == "unknown":
-        response["response_text"] = "No entendí la solicitud. ¿Podrías intentar con 'Ver tareas' o 'Generar horario'?"
+**Desglose:**
+• 👨‍🏫 Bienestar Docente: {result['breakdown']['teacher_wellness']}%
+• 👨‍🎓 Balance Estudiantil: {result['breakdown']['student_balance']}%
+• 🏢 Eficiencia: {result['breakdown']['efficiency']}%
+• 📈 Estabilidad: {result['breakdown']['stability']}%
+
+{result['trend']}"""
+    
+    # === ADMINISTRATIVE ===
+    elif intent == "report_issue":
+        response["response_text"] = "😔 Lamento que tengas un inconveniente.\n\n📝 Por favor describe el problema y lo reportaremos al equipo de soporte."
+        response["action"] = "open_feedback_modal"
+    
+    elif intent == "suggestion":
+        response["response_text"] = "💡 ¡Nos encanta mejorar! ¿Cuál es tu sugerencia?"
+        response["action"] = "open_feedback_modal"
+    
+    # === FUN & MISC ===
+    elif intent == "joke":
+        jokes = [
+            "😂 ¿Por qué los programadores prefieren el frío?\n\nPorque odian los bugs... ¡y el calor los atrae!",
+            "🤣 ¿Cuál es el colmo de un matemático?\n\n¡Tener problemas personales!",
+            "😄 ¿Qué le dice una iguana a su hermana gemela?\n\n¡Somos iguanitas!",
+            "😆 ¿Por qué el libro de matemáticas estaba triste?\n\n¡Porque tenía demasiados problemas!",
+        ]
+        response["response_text"] = random.choice(jokes)
+    
+    elif intent == "time":
+        now = datetime.now()
+        response["response_text"] = f"🕐 Son las **{now.strftime('%H:%M')}** del **{now.strftime('%d de %B de %Y')}**."
+    
+    elif intent == "random_fact":
+        facts = [
+            "🧠 **¿Sabías que?** El cerebro humano puede almacenar aproximadamente 2.5 petabytes de información.",
+            "🌍 **Dato Curioso:** Guatemala tiene 37 volcanes, 3 de ellos activos.",
+            "📚 **Fun Fact:** La palabra 'escuela' viene del griego 'scholé' que significa 'tiempo libre'.",
+            "🦋 **Increíble:** Las mariposas pueden ver colores que los humanos no pueden percibir.",
+        ]
+        response["response_text"] = random.choice(facts)
+    
+    elif intent == "weather":
+        response["response_text"] = "☁️ No tengo acceso directo al clima, pero puedes consultar **weather.com** o tu app del teléfono.\n\n💡 Tip: ¡Siempre lleva sombrilla en época de lluvias!"
+    
+    # === UNKNOWN / FALLBACK ===
+    elif intent == "unknown" or response["confidence"] < 0.4:
+        fallbacks = [
+            f"🤔 No estoy seguro de entender \"{text[:50]}...\".\n\nIntenta preguntarme sobre:\n• Tus materias\n• Tus horarios\n• Tips de estudio\n\nO escribe **\"ayuda\"** para ver todo lo que puedo hacer.",
+            "Hmm, no encontré una respuesta para eso. 🔍\n\n¿Podrías reformularlo? O escribe **\"ayuda\"** para ver opciones.",
+        ]
+        response["response_text"] = random.choice(fallbacks)
     
     return jsonify(response)
 
