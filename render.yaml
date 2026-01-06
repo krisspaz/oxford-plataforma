@@ -5,7 +5,6 @@ services:
   - type: web
     name: oxford-frontend
     env: docker
-    region: oregon
     plan: free
     dockerfilePath: ./frontend/Dockerfile.railway
     dockerContext: .
@@ -28,12 +27,12 @@ services:
   - type: web
     name: oxford-backend
     env: docker
-    region: oregon
     plan: free
     dockerfilePath: ./backend/symfony/Dockerfile.railway
     dockerContext: .
     branch: main
     healthCheckPath: /health
+    hostHeader: x-render-health-check
     envVars:
       - key: APP_ENV
         value: prod
@@ -67,7 +66,6 @@ services:
   - type: web
     name: oxford-ai
     env: docker
-    region: oregon
     plan: free
     dockerfilePath: ./backend/ai_service/Dockerfile
     dockerContext: .
@@ -90,13 +88,11 @@ databases:
   - name: oxford-db
     databaseName: oxford
     user: oxford_user
-    plan: free # Free for 90 days, then needs upgrade or reset
-    region: oregon
+    plan: free
     version: "16"
 
   # ========================================
   # REDIS
   # ========================================
   - name: oxford-redis
-    plan: free # Free instance
-    region: oregon
+    plan: free
