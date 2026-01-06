@@ -1,5 +1,22 @@
 FROM python:3.11-slim
+
 WORKDIR /app
+
+# Install system dependencies (curl for healthcheck)
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Install Python deps
 COPY backend/ai_service/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy App
 COPY backend/ai_service .
+
+# Create non-root user for security (optional but good practice)
+RUN useradd -m appuser && chown -R appuser /app
+USER appuser
+
+# Start Uvicorn directly (Simple & Robust)
+# Render passes $PORT env var, but we can't use it directly in CMD in array syntax easily without shell.
+# using shell form CMD to expand variable.
+CMD sh -c "uvicorn main_fastapi:app --host 0.0.0.0 --port ${PORT:-8000}"
