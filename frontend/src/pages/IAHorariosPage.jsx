@@ -583,7 +583,6 @@ Tu rol actual: ${activeRole || 'No identificado'}`;
                         <SuggestionChip label="Verificar conflictos" onClick={() => handleSend("Verificar conflictos en el ciclo actual")} darkMode={darkMode} />
                     </div>
                 )}
-// ... rest of code
 
                 <form
                     onSubmit={(e) => { e.preventDefault(); handleSend(); }}
