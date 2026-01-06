@@ -1,20 +1,24 @@
 services:
-  # ================= FRONTEND =================
-  - type: web
+  # ================= FRONTEND (Static Site) =================
+  - type: static
     name: oxford-frontend
-    env: docker
+    env: static
     plan: free
-    dockerfilePath: ./frontend/Dockerfile.render
-    dockerContext: .
+    buildCommand: npm install && npm run build
+    publishDir: frontend/dist
     branch: main
     autoDeploy: true
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: https://oxford-gateway.onrender.com/api # Point to Gateway
+        value: https://oxford-gateway.onrender.com/api
       - key: VITE_AI_URL
-        value: https://oxford-gateway.onrender.com/ai  # Point to Gateway
+        value: https://oxford-gateway.onrender.com/ai
 
-  # ================= GATEWAY (NEW) =================
+  # ================= GATEWAY =================
   - type: web
     name: oxford-gateway
     env: docker
@@ -26,7 +30,7 @@ services:
     healthCheckPath: /health
     envVars:
       - key: PORT
-        value: 80
+        value: 10000
 
   # ================= BACKEND =================
   - type: web
@@ -37,8 +41,10 @@ services:
     dockerContext: .
     branch: main
     autoDeploy: true
-    healthCheckPath: /health
+    healthCheckPath: /health_check.php
     envVars:
+      - key: APACHE_DOCUMENT_ROOT
+        value: /var/www/html/public
       - key: APP_ENV
         value: prod
       - key: APP_SECRET

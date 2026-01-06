@@ -3,7 +3,8 @@ set -e
 
 # Replace $PORT for the Gateway itself
 echo "Configuring Gateway to listen on port $PORT..."
-sed -i "s/listen 80;/listen $PORT;/g" /etc/nginx/nginx.conf
+# Robust regex: matches "listen" + spaces + any digits + ";"
+sed -i -E "s/listen[[:space:]]+[0-9]+;/listen $PORT;/g" /etc/nginx/nginx.conf
 
 # OPTIONAL: If we needed dynamic upstream ports, we could do it here too.
 # For now, assuming standard naming/defaults or Render's internal mesh.
