@@ -14,23 +14,30 @@ const StudentGradesPage = () => {
     }, []);
 
     const fetchGrades = async () => {
+        setLoading(true);
         try {
-            // Simulated API call - Replace with real endpoint like /api/student/grades
-            // const { data } = await api.get('/student/grades');
+            // Real API Call
+            const { data } = await api.get('/students/me/grades');
 
-            // Mock Data for MVP
-            const mockData = [
-                { id: 1, subject: 'Matemáticas', b1: 85, b2: 90, b3: 88, b4: null, final: null },
-                { id: 2, subject: 'Ciencias Naturales', b1: 92, b2: 89, b3: 95, b4: null, final: null },
-                { id: 3, subject: 'Idioma Español', b1: 78, b2: 82, b3: 80, b4: null, final: null },
-                { id: 4, subject: 'Estudios Sociales', b1: 88, b2: 85, b3: 90, b4: null, final: null },
-                { id: 5, subject: 'Inglés', b1: 95, b2: 98, b3: 96, b4: null, final: null },
-            ];
-
-            setGrades(mockData);
-            calculateStats(mockData);
+            // Validate response format
+            if (Array.isArray(data)) {
+                setGrades(data);
+                calculateStats(data);
+            } else {
+                console.error("Link invalid format:", data);
+                setGrades([]);
+            }
         } catch (error) {
             console.error("Error fetching grades:", error);
+            // Fallback for demo if API fails locally without backend running
+            if (process.env.NODE_ENV === 'development') {
+                const mockData = [
+                    { id: 1, subject: 'Matemáticas (Demo)', b1: 85, b2: 90, b3: 88, b4: null },
+                    { id: 2, subject: 'Ciencias (Demo)', b1: 92, b2: 89, b3: 95, b4: null },
+                ];
+                setGrades(mockData);
+                calculateStats(mockData);
+            }
         } finally {
             setLoading(false);
         }
