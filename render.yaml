@@ -81,6 +81,14 @@ services:
       - key: SECRET_KEY
         generateValue: true
 
+  # ========================================
+  # REDIS (Service, not Database)
+  # ========================================
+  - type: redis
+    name: oxford-redis
+    plan: free
+    ipAllowList: [] # Allow all internal
+
 databases:
   # ========================================
   # POSTGRESQL
@@ -90,9 +98,3 @@ databases:
     user: oxford_user
     plan: free
     version: "16"
-
-  # ========================================
-  # REDIS
-  # ========================================
-  - name: oxford-redis
-    plan: free
