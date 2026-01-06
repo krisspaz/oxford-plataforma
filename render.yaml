@@ -1,0 +1,102 @@
+services:
+  # ========================================
+  # FRONTEND (React)
+  # ========================================
+  - type: web
+    name: oxford-frontend
+    env: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./frontend/Dockerfile.railway
+    dockerContext: .
+    branch: main
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: oxford-backend
+          property: url
+      - key: VITE_AI_URL
+        fromService:
+          type: web
+          name: oxford-ai
+          property: url
+
+  # ========================================
+  # BACKEND (Symfony PHP)
+  # ========================================
+  - type: web
+    name: oxford-backend
+    env: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./backend/symfony/Dockerfile.railway
+    dockerContext: .
+    branch: main
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: prod
+      - key: APP_SECRET
+        generateValue: true
+      - key: CORS_ALLOW_ORIGIN
+        fromService:
+          type: web
+          name: oxford-frontend
+          property: url
+      - key: DATABASE_URL
+        fromDatabase:
+          name: oxford-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: oxford-redis
+          property: connectionString
+      - key: AI_SERVICE_URL
+        fromService:
+          type: web
+          name: oxford-ai
+          property: url
+      - key: JWT_SECRET_KEY
+        generateValue: true
+
+  # ========================================
+  # AI SERVICE (FastAPI)
+  # ========================================
+  - type: web
+    name: oxford-ai
+    env: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./backend/ai_service/Dockerfile
+    dockerContext: .
+    branch: main
+    healthCheckPath: /health
+    startCommand: uvicorn main_fastapi:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: oxford-redis
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+
+databases:
+  # ========================================
+  # POSTGRESQL
+  # ========================================
+  - name: oxford-db
+    databaseName: oxford
+    user: oxford_user
+    plan: free # Free for 90 days, then needs upgrade or reset
+    region: oregon
+    version: "16"
+
+  # ========================================
+  # REDIS
+  # ========================================
+  - name: oxford-redis
+    plan: free # Free instance
+    region: oregon
