@@ -139,122 +139,247 @@ const IAHorariosPage = () => {
         // --- LOCAL INTENT MATCHING (No Backend Required) ---
 
         // 1. GREETINGS
-        if (/^(hola|buenos d[ií]as|buenas tardes|buenas noches|hey|hi|que tal|qué tal|saludos)/.test(lowerText)) {
+        if (/^(hola|ola|buenos d[ií]as|buenas tardes|buenas noches|hey|hi|que tal|qué tal|saludos|que onda)/.test(lowerText)) {
             const greetings = [
-                `¡Hola ${teacherName}! 👋 Soy tu asistente personal. ¿En qué te puedo ayudar hoy?`,
-                `¡Buenos días, ${teacherName}! ¿Listo para hacer tu día más productivo?`,
-                `¡Qué gusto saludarte, ${teacherName}! Estoy aquí para ayudarte. 🎓`
+                `¡Hola ${teacherName}! 👋 Soy tu asistente. ¿Qué necesitas hoy?`,
+                `¡Buenos días, ${teacherName}! ¿En qué te apoyo?`,
+                `¡Hola profe ${teacherName}! 🎓 Estoy listo para ayudarte.`
             ];
             setCoreState('idle');
             reply(greetings[Math.floor(Math.random() * greetings.length)], 'text');
-            speak(`Hola ${teacherName}`);
             return;
         }
 
         // 2. HOW ARE YOU / ESTADO
-        if (/^(cómo est[aá]s|como estas|que tal|qué tal|como te encuentras)/.test(lowerText)) {
+        if (/^(cómo est[aá]s|como estas|como te encuentras)/.test(lowerText)) {
             setCoreState('idle');
-            reply("¡Estoy funcionando al 100%! 🤖 Todos los sistemas operativos. ¿Y tú? ¿En qué puedo ayudarte?", 'text');
+            reply("¡Funcionando al 100%! 🤖 ¿En qué te ayudo?", 'text');
             return;
         }
 
-        // 3. HELP / CAPABILITIES
-        if (/^(ayuda|help|que puedes hacer|qué puedes hacer|comandos|capacidades|funciones)/.test(lowerText) ||
+        // 3. HELP / CAPABILITIES - ROLE SPECIFIC
+        if (/^(ayuda|help|que puedes hacer|qué puedes hacer|comandos|menu|opciones)/.test(lowerText) ||
             lowerText.includes("puedes hacer") || lowerText.includes("sabes hacer")) {
-            const helpText = `🧠 **Soy tu Asistente Personal Académico.** Puedo ayudarte con:
 
-📊 **Consultas Académicas:**
+            let helpText = '';
+
+            // TEACHER/DOCENTE
+            if (activeRole === 'ROLE_TEACHER' || activeRole === 'ROLE_DOCENTE') {
+                helpText = `🎓 **Asistente para Docentes**
+
+📚 **Consultas:**
 • "Ver mis materias" - Lista tus asignaturas
-• "Ver mis grupos" - Muestra tus secciones asignadas
-• "Ver tareas pendientes" - Revisa tu agenda
+• "Ver mis alumnos" - Lista de estudiantes
+• "Ver mi horario" - Tu horario semanal
 
-📝 **Gestión de Notas:**
-• "Cargar notas" - Te llevo a la página de notas
-• "Ver promedios" - Resumen de calificaciones
+📝 **Notas:**
+• "Cargar notas" - Ir a gestión de notas
+• "Estudiantes en riesgo" - Ver alertas
+
+💡 **Bienestar:**
+• "Dame un consejo" - Tips pedagógicos
+• "Estoy estresado" - Apoyo emocional`;
+            }
+            // ADMIN / SUPER_ADMIN
+            else if (activeRole === 'ROLE_ADMIN' || activeRole === 'ROLE_SUPER_ADMIN') {
+                helpText = `⚙️ **Asistente de Administración**
 
 🗓️ **Horarios:**
-• "Ver mi horario" - Tu horario semanal
-• "Generar horarios" - Crear nuevos horarios (Admin)
+• "Generar horarios" - Crear con IA
+• "Optimizar horarios" - Redistribuir
 
-💡 **Tips y Ayuda:**
-• "Dame un consejo" - Tips pedagógicos
-• "Motivación" - Mensajes de ánimo
+👥 **Gestión:**
+• "Ver docentes" - Lista de profesores
+• "Ver estudiantes" - Lista completa
+• "Salud institucional" - Métricas ISA
 
-¿Qué te gustaría hacer?`;
+📊 **Reportes:**
+• "Estudiantes en riesgo" - Dashboard
+• "Carga docente" - Análisis de burnout`;
+            }
+            // DIRECTOR / COORDINATION
+            else if (activeRole === 'ROLE_DIRECTOR' || activeRole === 'ROLE_COORDINATION') {
+                helpText = `👔 **Asistente de Dirección**
+
+📊 **Análisis:**
+• "Salud institucional" - Índice ISA
+• "Estudiantes en riesgo" - Alertas
+• "Carga docente" - Burnout
+
+🗓️ **Horarios:**
+• "Generar horarios" - Crear con IA
+• "Ver horarios" - Vista general
+
+📈 **Reportes:**
+• "Métricas del colegio" - KPIs
+• "Estado general" - Resumen`;
+            }
+            // SECRETARY / SECRETARIA
+            else if (activeRole === 'ROLE_SECRETARY' || activeRole === 'ROLE_SECRETARIA') {
+                helpText = `📋 **Asistente de Secretaría**
+
+👥 **Consultas:**
+• "Ver estudiantes" - Lista de alumnos
+• "Ver docentes" - Lista de profesores
+
+📝 **Gestión:**
+• "Ver horarios" - Horarios generales
+• "Contactar padres" - Comunicados
+
+❓ **Ayuda:**
+• "Dame un consejo" - Tips
+• "Reportar problema" - Soporte`;
+            }
+            // STUDENT / ESTUDIANTE
+            else if (activeRole === 'ROLE_STUDENT' || activeRole === 'ROLE_ESTUDIANTE') {
+                helpText = `📖 **Asistente Estudiantil**
+
+📊 **Académico:**
+• "Mis notas" - Ver calificaciones
+• "Mis tareas" - Tareas pendientes
+• "Mi horario" - Tu horario semanal
+
+💡 **Estudio:**
+• "Tips de estudio" - Consejos
+• "Dame motivación" - Ánimo
+
+❓ **Ayuda:**
+• "Estoy estresado" - Apoyo
+• "Reportar problema" - Soporte`;
+            }
+            // DEFAULT
+            else {
+                helpText = `🤖 **Asistente Personal**
+
+📚 **Consultas:**
+• "Ver mi horario" - Horario semanal
+• "Dame un consejo" - Tips útiles
+• "Ayuda" - Ver opciones
+
+Tu rol actual: ${activeRole || 'No identificado'}`;
+            }
+
+            helpText += `\n\n¿Qué necesitas, ${teacherName}?`;
             setCoreState('idle');
             reply(helpText, 'text');
             return;
         }
 
-        // 4. VIEW SUBJECTS / MATERIAS
-        if (lowerText.includes("materia") || lowerText.includes("asignatura") || lowerText.includes("curso")) {
-            setCoreState('idle');
-            if (activeRole === 'ROLE_TEACHER' || activeRole === 'ROLE_DOCENTE') {
-                try {
-                    const profile = await teacherService.getMyProfile();
-                    if (profile && profile.id) {
-                        const assignments = await teacherService.getSubjects(profile.id);
-                        if (assignments && assignments.length > 0) {
-                            const subjectList = assignments.map(a =>
-                                `• **${a.subject.name}** - ${a.grade.name} ${a.section ? `(${a.section.name})` : ''}`
-                            ).join('\n');
-                            reply(`📚 **Tus Materias Asignadas:**\n\n${subjectList}`, 'text');
-                        } else {
-                            reply("No encontré materias asignadas en tu perfil. Contacta a coordinación si esto es un error.", 'text');
-                        }
+        // 4. VIEW SUBJECTS / MATERIAS - FETCH REAL DATA
+        if (lowerText.includes("materia") || lowerText.includes("asignatura") || lowerText.includes("curso") || lowerText.includes("impart")) {
+            try {
+                reply("📚 Consultando tus materias...", 'text');
+                const profile = await teacherService.getMyProfile();
+                if (profile && profile.id) {
+                    const assignments = await teacherService.getSubjects(profile.id);
+                    if (assignments && assignments.length > 0) {
+                        const subjectList = assignments.map(a =>
+                            `• **${a.subject?.name || a.subjectName || 'Materia'}** - ${a.grade?.name || a.gradeName || ''} ${a.section?.name ? `(${a.section.name})` : ''}`
+                        ).join('\n');
+                        setCoreState('idle');
+                        reply(`📚 **Tus Materias Asignadas:**\n\n${subjectList}\n\n_Total: ${assignments.length} asignaciones_`, 'text');
+                    } else {
+                        setCoreState('idle');
+                        reply("No encontré materias asignadas. Contacta a coordinación.", 'text');
                     }
-                } catch (e) {
-                    reply("Hubo un problema al consultar tus materias. Intenta de nuevo.", 'text');
+                } else {
+                    setCoreState('idle');
+                    reply("No pude obtener tu perfil. Intenta cerrar sesión y entrar de nuevo.", 'text');
                 }
-            } else {
-                reply("Esta función está disponible para docentes. Tu rol actual no tiene materias asignadas.", 'text');
+            } catch (e) {
+                setCoreState('idle');
+                reply("Error al consultar materias. Verifica tu conexión.", 'text');
             }
             return;
         }
 
-        // 5. GRADES / NOTAS
-        if (lowerText.includes("nota") || lowerText.includes("calificacion") || lowerText.includes("promedio")) {
-            setCoreState('idle');
-            reply("📝 Para gestionar notas, ve a **Carga de Notas** en el menú lateral.\n\n¿Te llevo ahí? (Di 'sí' o haz clic en el menú)", 'text');
+        // 5. VIEW STUDENTS / ALUMNOS - FETCH REAL DATA
+        if (lowerText.includes("alumno") || lowerText.includes("estudiante") || lowerText.includes("patojo")) {
+            try {
+                reply("👨‍🎓 Consultando tus estudiantes...", 'text');
+                const profile = await teacherService.getMyProfile();
+                if (profile && profile.id) {
+                    const students = await teacherService.getStudents(profile.id);
+                    if (students && students.length > 0) {
+                        const studentCount = students.length;
+                        const sampleList = students.slice(0, 5).map(s =>
+                            `• ${s.firstName || ''} ${s.lastName || ''}`
+                        ).join('\n');
+                        setCoreState('idle');
+                        reply(`👨‍🎓 **Tus Estudiantes:**\n\n${sampleList}${studentCount > 5 ? `\n... y ${studentCount - 5} más` : ''}\n\n_Total: ${studentCount} estudiantes_`, 'text');
+                    } else {
+                        setCoreState('idle');
+                        reply("No encontré estudiantes asignados a tus grupos.", 'text');
+                    }
+                }
+            } catch (e) {
+                setCoreState('idle');
+                reply("Error al consultar estudiantes.", 'text');
+            }
             return;
         }
 
-        // 6. SCHEDULE / HORARIO
-        if (lowerText.includes("horario") || lowerText.includes("schedule")) {
-            setCoreState('idle');
-            reply("🗓️ Para ver horarios, consulta el módulo de **Horarios** en el menú.\n\nSi eres administrador, puedo ayudarte a generar nuevos horarios con IA.", 'text');
+        // 6. VIEW SCHEDULE / HORARIO - SHOW SUBJECTS AS SCHEDULE
+        if (lowerText.includes("horario") || lowerText.includes("schedule") || lowerText.includes("clases hoy")) {
+            try {
+                reply("🗓️ Consultando tu horario...", 'text');
+                const profile = await teacherService.getMyProfile();
+                if (profile && profile.id) {
+                    const assignments = await teacherService.getSubjects(profile.id);
+                    if (assignments && assignments.length > 0) {
+                        const scheduleText = assignments.map(a =>
+                            `📘 **${a.subject?.name || 'Materia'}** → ${a.grade?.name || ''} ${a.section?.name || ''}`
+                        ).join('\n');
+                        setCoreState('idle');
+                        reply(`🗓️ **Tu Horario de Clases:**\n\n${scheduleText}\n\n💡 _Para ver horarios detallados por día, consulta el módulo de Horarios en el menú._`, 'text');
+                    } else {
+                        setCoreState('idle');
+                        reply("No tienes clases asignadas actualmente.", 'text');
+                    }
+                }
+            } catch (e) {
+                setCoreState('idle');
+                reply("No pude cargar tu horario. Intenta de nuevo.", 'text');
+            }
             return;
         }
 
-        // 7. MOTIVATION / SUPPORT
-        if (lowerText.includes("motivación") || lowerText.includes("ánimo") || lowerText.includes("cansado") || lowerText.includes("estres")) {
+        // 7. GRADES / NOTAS - NAVIGATE
+        if (lowerText.includes("nota") || lowerText.includes("calificacion") || lowerText.includes("cargar nota")) {
+            setCoreState('idle');
+            reply("📝 Para gestionar notas, ve a **Carga de Notas** en el menú lateral.\n\n¿Quieres que te muestre cómo llegar?", 'text');
+            return;
+        }
+
+        // 8. MOTIVATION / SUPPORT
+        if (lowerText.includes("motivación") || lowerText.includes("ánimo") || lowerText.includes("cansado") || lowerText.includes("estres") || lowerText.includes("abrumad")) {
             const motivations = [
-                "🌟 Recuerda: cada clase que das transforma una vida. ¡Eres increíble!",
-                "💪 El trabajo de un maestro es el más noble. Tus estudiantes te admiran.",
-                "🧘 Tómate 5 minutos para respirar. Lo estás haciendo muy bien.",
-                "☀️ Mañana es una nueva oportunidad. Hoy, celebra lo que lograste."
+                `🌟 ${teacherName}, recuerda: cada clase transforma una vida. ¡Eres increíble!`,
+                `💪 El trabajo de un maestro es el más noble. Tus alumnos te admiran, ${teacherName}.`,
+                `🧘 Tómate 5 minutos para respirar. Lo estás haciendo muy bien.`,
+                `☀️ Mañana es una nueva oportunidad. Hoy celebra lo que lograste.`
             ];
             setCoreState('idle');
             reply(motivations[Math.floor(Math.random() * motivations.length)], 'text');
             return;
         }
 
-        // 8. TIPS / CONSEJOS
+        // 9. TIPS / CONSEJOS
         if (lowerText.includes("consejo") || lowerText.includes("tip") || lowerText.includes("sugerencia")) {
             const tips = [
-                "💡 **Tip Pedagógico:** Usa preguntas abiertas para fomentar el pensamiento crítico.",
-                "📱 **Tip Tech:** Proyecta un temporizador visual para mantener el ritmo de la clase.",
-                "🎮 **Tip Gamificación:** Pequeños retos con puntos extra aumentan la participación.",
-                "📚 **Tip Lectura:** 10 minutos de lectura silenciosa al inicio calma y enfoca a los alumnos."
+                "💡 **Tip:** Usa preguntas abiertas para fomentar el pensamiento crítico.",
+                "📱 **Tip Tech:** Proyecta un temporizador visual para mantener el ritmo.",
+                "🎮 **Gamificación:** Pequeños retos con puntos extra aumentan la participación.",
+                "📚 **Lectura:** 10 min de lectura silenciosa al inicio calma y enfoca."
             ];
             setCoreState('idle');
             reply(tips[Math.floor(Math.random() * tips.length)], 'text');
             return;
         }
 
-        // 9. RISK ANALYSIS (MOCK)
-        if (lowerText.includes("riesgo") || lowerText.includes("alerta") || lowerText.includes("estudiantes en riesgo")) {
-            reply("🔍 Analizando base de datos de estudiantes...", 'text');
+        // 10. RISK ANALYSIS
+        if (lowerText.includes("riesgo") || lowerText.includes("alerta") || lowerText.includes("reprobando")) {
+            reply("🔍 Analizando estudiantes...", 'text');
             await new Promise(r => setTimeout(r, 1000));
 
             const mockStudents = [
@@ -263,39 +388,40 @@ const IAHorariosPage = () => {
             ];
             setCoreState('idle');
             reply({ type: 'risk_dashboard', data: mockStudents }, 'result_card');
-            speak("He detectado algunos estudiantes en riesgo.");
             return;
         }
 
-        // 10. GENERATE SCHEDULE (Director/Admin only)
-        if (lowerText.includes("generar horario") || lowerText.includes("crear horario")) {
-            if (activeRole === 'ROLE_ADMIN' || activeRole === 'ROLE_DIRECTOR' || activeRole === 'ROLE_SUPER_ADMIN') {
-                setCoreState('idle');
-                reply("🚀 Iniciando generador de horarios con IA...\n\nEsta función requiere configurar parámetros. Ve al módulo de **Generación de Horarios**.", 'text');
-            } else {
-                setCoreState('idle');
-                reply("🔒 La generación de horarios está reservada para Dirección y Administración.", 'text');
-            }
+        // 11. THANKS
+        if (lowerText.includes("gracia") || lowerText.includes("gracias")) {
+            setCoreState('idle');
+            reply("¡De nada! 🙏 Aquí estaré cuando me necesites.", 'text');
             return;
         }
 
-        // 11. FALLBACK - Try backend, but gracefully handle errors
+        // 12. GOODBYE  
+        if (lowerText.includes("adios") || lowerText.includes("chao") || lowerText.includes("bye")) {
+            setCoreState('idle');
+            reply(`¡Hasta pronto, ${teacherName}! 👋 ¡Éxito en tus clases!`, 'text');
+            return;
+        }
+
+        // 13. FALLBACK - Try backend
         try {
             const aiResponse = await aiService.processCommand(text, activeRole);
             if (aiResponse && aiResponse.response_text && !aiResponse.response_text.includes("Error")) {
                 setCoreState('idle');
                 reply(aiResponse.response_text, 'text');
-                speak(aiResponse.response_text);
                 return;
             }
         } catch (e) {
-            console.warn("Backend AI unavailable, using fallback", e);
+            console.warn("Backend AI unavailable", e);
         }
 
-        // 12. FINAL FALLBACK
+        // 14. FINAL FALLBACK
         setCoreState('idle');
-        reply(`Hmm, no estoy seguro de cómo ayudarte con "${text}". 🤔\n\nIntenta preguntarme sobre:\n• Tus materias\n• Tus horarios\n• Tips pedagógicos\n• O escribe "ayuda" para ver todo lo que puedo hacer.`, 'text');
+        reply(`No entendí "${text}". 🤔\n\nPrueba:\n• "Ver mis materias"\n• "Ver mi horario"\n• "Dame un consejo"\n• "Ayuda"`, 'text');
     };
+
 
     const reply = (content, type = 'text') => {
         setMessages(prev => [
