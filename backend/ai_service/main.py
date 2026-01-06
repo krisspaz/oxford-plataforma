@@ -24,6 +24,19 @@ from simulation_engine import SimulationEngine
 from localization_adapter import LocalizationAdapter
 from flask_cors import CORS
 
+# Enterprise AI modules
+try:
+    from learning_engine import learning_engine, FeedbackAction, FeedbackReason
+    from expert_engine import expert_engine, StructuredResponse
+    from memory import memory
+    from knowledge_base import knowledge_base
+    from rule_engine import rule_engine
+    ENTERPRISE_AI_ENABLED = True
+except ImportError as e:
+    print(f"Enterprise AI modules not fully loaded: {e}")
+    ENTERPRISE_AI_ENABLED = False
+
+
 app = Flask(__name__)
 CORS(app)
 
@@ -139,6 +152,8 @@ def process_cmd():
     
     text = request.json.get('text', '')
     user_role = request.json.get('role', 'admin')
+    user_id = request.json.get('user_id', 'anonymous')
+    
     res = nlp_engine.process(text)
     
     response = {
@@ -147,7 +162,8 @@ def process_cmd():
         "response_text": "Procesado.",
         "entities": {e.type: e.value for e in res.entities},
         "should_generate": False,
-        "action": None
+        "action": None,
+        "interaction_id": None  # For feedback tracking
     }
     
     intent = response["intent"]
