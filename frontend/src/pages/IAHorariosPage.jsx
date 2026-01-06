@@ -406,24 +406,87 @@ Tu rol actual: ${activeRole || 'No identificado'}`;
             return;
         }
 
-        // 11. THANKS
-        if (lowerText.includes("gracia") || lowerText.includes("gracias")) {
+        // 11. CLASS PLANNING / TOMORROW / HELP WITH CLASS
+        if (lowerText.includes("clase de mañana") || lowerText.includes("mañana") || lowerText.includes("planificar") ||
+            lowerText.includes("preparar clase") || lowerText.includes("ayuda con mi clase") || lowerText.includes("ayudame con")) {
             setCoreState('idle');
-            reply("¡De nada! 🙏 Aquí estaré cuando me necesites.", 'text');
+            const planningTips = [
+                `📋 **Para planificar tu clase de mañana:**\n\n1. Revisa qué materia toca → Escribe "ver mi horario"\n2. Consulta el contenido del tema en el módulo de Contenidos\n3. Prepara una actividad interactiva de 10-15 min\n\n💡 **Tip:** Empieza la clase con una pregunta sorpresa para captar atención.`,
+                `🎯 **Preparación de clase:**\n\n• Objetivo claro: ¿Qué deben aprender?\n• Actividad central: máx 20 min\n• Cierre: pregunta de reflexión\n\n¿Quieres ver qué materias tienes mañana? Escribe "ver mi horario"`,
+            ];
+            reply(planningTips[Math.floor(Math.random() * planningTips.length)], 'text');
             return;
         }
 
-        // 12. GOODBYE  
-        if (lowerText.includes("adios") || lowerText.includes("chao") || lowerText.includes("bye")) {
+        // 12. JOKES / FUN
+        if (lowerText.includes("chiste") || lowerText.includes("gracioso") || lowerText.includes("reir") || lowerText.includes("divertido")) {
+            const jokes = [
+                "😂 ¿Por qué los maestros de matemáticas no tienen amigos?\n\n¡Porque siempre están buscando problemas!",
+                "🤣 ¿Qué le dijo el 0 al 8?\n\n¡Bonito cinturón!",
+                "😄 Un estudiante: 'Profe, ¿usted me castigaría por algo que no hice?'\nProfe: 'Claro que no'\nEstudiante: 'Qué bueno, porque no hice la tarea' 📚",
+                "😆 ¿Cuál es el colmo de un profesor de historia?\n\n¡Que no tenga futuro!"
+            ];
+            setCoreState('idle');
+            reply(jokes[Math.floor(Math.random() * jokes.length)], 'text');
+            return;
+        }
+
+        // 13. TIME / DATE
+        if (lowerText.includes("hora") || lowerText.includes("fecha") || lowerText.includes("día es")) {
+            const now = new Date();
+            const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+            setCoreState('idle');
+            reply(`🕐 Son las **${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}** del **${dias[now.getDay()]} ${now.getDate()} de ${meses[now.getMonth()]}**`, 'text');
+            return;
+        }
+
+        // 14. THANKS
+        if (lowerText.includes("gracia") || lowerText.includes("gracias") || lowerText.includes("thank")) {
+            setCoreState('idle');
+            reply("¡De nada! 🙏 Para eso estoy. ¿Algo más en que te ayude?", 'text');
+            return;
+        }
+
+        // 15. GOODBYE  
+        if (lowerText.includes("adios") || lowerText.includes("chao") || lowerText.includes("bye") || lowerText.includes("nos vemos")) {
             setCoreState('idle');
             reply(`¡Hasta pronto, ${teacherName}! 👋 ¡Éxito en tus clases!`, 'text');
             return;
         }
 
-        // 13. FALLBACK - Try backend
+        // 16. RANDOM FACTS
+        if (lowerText.includes("dato") || lowerText.includes("curioso") || lowerText.includes("interesante") || lowerText.includes("sabias")) {
+            const facts = [
+                "🧠 **¿Sabías que?** El cerebro humano puede almacenar aproximadamente 2.5 petabytes de información.",
+                "🌍 **Dato Curioso:** Guatemala tiene 37 volcanes, 3 de ellos activos.",
+                "📚 **Fun Fact:** La palabra 'escuela' viene del griego 'scholé' que significa 'tiempo libre'.",
+                "🦋 **Increíble:** Las mariposas pueden ver colores que los humanos no pueden percibir.",
+                "📖 **Educación:** El primer sistema educativo formal surgió en Mesopotamia hace 5000 años."
+            ];
+            setCoreState('idle');
+            reply(facts[Math.floor(Math.random() * facts.length)], 'text');
+            return;
+        }
+
+        // 17. ABOUT ME / WHO AM I
+        if (lowerText.includes("quien eres") || lowerText.includes("qué eres") || lowerText.includes("tu nombre") || lowerText.includes("eres ia")) {
+            setCoreState('idle');
+            reply(`🤖 **Soy el Asistente Personal de Oxford**\n\nVersion 2.0 | Creado para facilitar tu trabajo académico.\n\nPuedo ayudarte con horarios, materias, estudiantes, tips pedagógicos, y más.\n\n💬 Escribe "ayuda" para ver todo lo que puedo hacer.`, 'text');
+            return;
+        }
+
+        // 18. GENERAL CHAT / SMALLTALK
+        if (lowerText.includes("como te llamas") || lowerText.includes("eres inteligente") || lowerText.includes("eres bot")) {
+            setCoreState('idle');
+            reply(`Soy tu Asistente Oxford 🤖. No soy tan inteligente como ChatGPT, pero sé TODO sobre tu colegio. ¿En qué te ayudo?`, 'text');
+            return;
+        }
+
+        // 19. FALLBACK - Try backend
         try {
             const aiResponse = await aiService.processCommand(text, activeRole);
-            if (aiResponse && aiResponse.response_text && !aiResponse.response_text.includes("Error")) {
+            if (aiResponse && aiResponse.response_text && !aiResponse.response_text.includes("Error") && !aiResponse.response_text.includes("No entendí")) {
                 setCoreState('idle');
                 reply(aiResponse.response_text, 'text');
                 return;
@@ -432,9 +495,24 @@ Tu rol actual: ${activeRole || 'No identificado'}`;
             console.warn("Backend AI unavailable", e);
         }
 
-        // 14. FINAL FALLBACK
+        // 20. SMART FALLBACK - Try to understand partial matches
         setCoreState('idle');
-        reply(`No entendí "${text}". 🤔\n\nPrueba:\n• "Ver mis materias"\n• "Ver mi horario"\n• "Dame un consejo"\n• "Ayuda"`, 'text');
+
+        // Check for partial matches and suggest
+        let suggestion = "";
+        if (lowerText.includes("clase") || lowerText.includes("mater")) {
+            suggestion = "¿Quieres ver tus materias? Escribe **\"ver mis materias\"**";
+        } else if (lowerText.includes("hora") || lowerText.includes("cuando")) {
+            suggestion = "¿Necesitas ver tu horario? Escribe **\"ver mi horario\"**";
+        } else if (lowerText.includes("ayud") || lowerText.includes("como")) {
+            suggestion = "¿Necesitas ayuda? Escribe **\"ayuda\"** para ver todo lo que puedo hacer.";
+        } else if (lowerText.includes("nota") || lowerText.includes("calific")) {
+            suggestion = "¿Quieres gestionar notas? Ve al módulo **Carga de Notas** en el menú.";
+        } else {
+            suggestion = `Puedo ayudarte con:\n• Tus materias y horarios\n• Tips para dar clase\n• Estudiantes en riesgo\n• Planificar clases\n\nEscribe **\"ayuda\"** para ver más opciones.`;
+        }
+
+        reply(`Mmm, no entendí bien "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}" 🤔\n\n${suggestion}`, 'text');
     };
 
 
