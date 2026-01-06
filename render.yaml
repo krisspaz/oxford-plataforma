@@ -32,7 +32,7 @@ services:
     dockerContext: .
     branch: main
     healthCheckPath: /health
-    hostHeader: x-render-health-check
+
     envVars:
       - key: APP_ENV
         value: prod
