@@ -95,6 +95,10 @@ const MisHijosPage = lazy(() => import('./pages/MisHijosPage'));
 const MonitoreoPage = lazy(() => import('./pages/MonitoreoPage'));
 const LogsPage = lazy(() => import('./pages/LogsPage'));
 
+// Enterprise Components (Fases 16, 19, 20)
+const CrisisModeDashboard = lazy(() => import('./components/CrisisModeDashboard'));
+const EconomicDashboard = lazy(() => import('./components/EconomicDashboard'));
+
 // 404
 const NotFound = () => (
   <div className="p-10 text-center">
@@ -267,6 +271,10 @@ function App() {
                   <Route path="mi-horario" element={<MiHorarioPage />} />
                   <Route path="mis-alumnos" element={<MisAlumnosPage />} />
                   <Route path="gestion-tareas" element={<GestionTareasPage />} />
+
+                  {/* IA / Enterprise */}
+                  <Route path="crisis-mode" element={<CrisisModeDashboard />} />
+                  <Route path="economic-dashboard" element={<EconomicDashboard />} />
 
                   {/* Administración */}
                   <Route path="admin/usuarios" element={<GestionUsuariosPage />} />
