@@ -12,7 +12,12 @@ import teacherService from '../services/teacherService'; // NEW: Import teacherS
 
 import aiService from '../services/AiService';
 import studentService from '../services/studentService';
-// ... rest of imports
+import aiService from '../services/AiService';
+import studentService from '../services/studentService';
+import EnterpriseDashboard from '../components/EnterpriseDashboard';
+import RiskDashboard from '../components/RiskDashboard';
+
+import { useLocation } from 'react-router-dom'; // Context awareness
 
 const IAHorariosPage = () => {
     const { darkMode } = useTheme();
