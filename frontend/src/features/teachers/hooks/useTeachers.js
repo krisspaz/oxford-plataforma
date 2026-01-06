@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { catalogService } from '../../services'; // Assuming alias or relative path works
+import { catalogService } from '../../../services/api';
 
 export const useTeachers = () => {
     const [teachers, setTeachers] = useState([]);
