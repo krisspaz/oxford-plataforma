@@ -12,9 +12,7 @@ import teacherService from '../services/teacherService'; // NEW: Import teacherS
 
 import aiService from '../services/AiService';
 import studentService from '../services/studentService';
-import aiService from '../services/AiService';
-import studentService from '../services/studentService';
-import EnterpriseDashboard from '../components/EnterpriseDashboard';
+import EnterpriseDashboard from '../components/EnterpriseDashboard'; // Fixed duplicates
 import RiskDashboard from '../components/RiskDashboard';
 
 import { useLocation } from 'react-router-dom'; // Context awareness
