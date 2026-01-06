@@ -1,0 +1,58 @@
+# Dockerfile for Railway (PHP Apache)
+# Simplifies deployment by combining Web Server + PHP in one container
+FROM php:8.2-apache
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    libicu-dev \
+    libpq-dev \
+    libzip-dev \
+    unzip \
+    git \
+    && docker-php-ext-install \
+    intl \
+    pdo_pgsql \
+    zip \
+    opcache
+
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
+
+# Install Redis extension
+RUN pecl install redis && docker-php-ext-enable redis
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Apache Configuration
+# Point DocumentRoot to /public
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf.conf
+# Note: In some apache images, the main config is apache2.conf or conf-available/docker-php.conf
+
+# Copy application code
+COPY . .
+
+# Install dependencies (prod)
+RUN composer install --no-dev --optimize-autoloader --no-scripts --prefer-dist
+
+# Set permissions
+RUN chown -R www-data:www-data var
+
+# Railway uses PORT env var, Apache listens on 80 by default.
+# We need to configure Apache to listen on $PORT
+RUN echo "Listen 8080" >> /etc/apache2/ports.conf
+# OR properly handle PORT env var at runtime.
+# Railway maps internal port. simpler to just expose 80 or 8080.
+# We will use a startup script to set the port if needed, but usually 
+# customizing ports.conf with a sed command in ENTRYPOINT is best.
+
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["apache2-foreground"]
