@@ -27,7 +27,6 @@ const IAHorariosPage = () => {
     const location = useLocation(); // Context awareness
     const [voiceEnabled, setVoiceEnabled] = useState(false); // Voice state
     const [showRiskDashboard, setShowRiskDashboard] = useState(false);
-    const [showRiskDashboard, setShowRiskDashboard] = useState(false);
     const [showEnterpriseDashboard, setShowEnterpriseDashboard] = useState(false);
     const [teacherProfile, setTeacherProfile] = useState(null);
     const [coreState, setCoreState] = useState('idle'); // Fixed: Added missing state
