@@ -124,6 +124,9 @@ const CargaNotasPage = () => {
         }
     };
 
+    const selectClass = `w-full p-2.5 rounded-lg border transition-colors outline-none focus:ring-2 focus:ring-indigo-500/20 ${darkMode ? 'bg-gray-700 border-gray-600 text-white focus:border-indigo-500' : 'bg-white border-gray-300 text-gray-900 focus:border-indigo-500'}`;
+    const inputClass = `p-2 rounded-lg border transition-colors outline-none focus:ring-2 focus:ring-indigo-500/20 ${darkMode ? 'bg-gray-700 border-gray-600 text-white focus:border-indigo-500' : 'bg-white border-gray-300 text-gray-900 focus:border-indigo-500'}`;
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
