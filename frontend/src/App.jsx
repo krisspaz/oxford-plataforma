@@ -99,6 +99,10 @@ const LogsPage = lazy(() => import('./pages/LogsPage'));
 const CrisisModeDashboard = lazy(() => import('./components/CrisisModeDashboard'));
 const EconomicDashboard = lazy(() => import('./components/EconomicDashboard'));
 
+// 10/10 Features
+const CalendarView = lazy(() => import('./components/CalendarView'));
+const ExportCenter = lazy(() => import('./components/ExportCenter'));
+
 // 404
 const NotFound = () => (
   <div className="p-10 text-center">
@@ -275,6 +279,8 @@ function App() {
                   {/* IA / Enterprise */}
                   <Route path="crisis-mode" element={<CrisisModeDashboard />} />
                   <Route path="economic-dashboard" element={<EconomicDashboard />} />
+                  <Route path="calendario-escolar" element={<CalendarView />} />
+                  <Route path="exportar" element={<ExportCenter />} />
 
                   {/* Administración */}
                   <Route path="admin/usuarios" element={<GestionUsuariosPage />} />

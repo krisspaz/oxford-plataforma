@@ -42,6 +42,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getMenuForRole, getCombinedMenu, ROLE_LABELS } from '../config/roleMenus';
+import NotificationCenter from './NotificationCenter';
 
 // Icon mapping from string to component
 const ICON_MAP = {
@@ -215,10 +216,7 @@ const Layout = () => {
                         </button>
 
                         {/* Notifications */}
-                        <button className={`relative p-2 ${darkMode ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'} rounded-full transition-colors`}>
-                            <Bell size={22} />
-                            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                        </button>
+                        <NotificationCenter />
 
                         {/* User Avatar */}
                         <div className="flex items-center gap-3">
