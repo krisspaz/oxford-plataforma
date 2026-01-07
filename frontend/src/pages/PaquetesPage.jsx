@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, ChevronDown, ChevronRight, Edit, X, DollarSign, RefreshCw } from 'lucide-react';
+import { Package, Plus, ChevronDown, ChevronRight, Edit, X, DollarSign, RefreshCw, Trash2, Save } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { packageService } from '../services';
 
@@ -7,10 +7,24 @@ const PaquetesPage = () => {
     const { darkMode } = useTheme();
     const [expandedPackage, setExpandedPackage] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [selectedPackage, setSelectedPackage] = useState(null);
     const [loading, setLoading] = useState(true);
     const [packages, setPackages] = useState([]);
     const [selectedCycle, setSelectedCycle] = useState('2025');
+
+    // Form state
+    const [formData, setFormData] = useState({
+        id: null,
+        name: '',
+        description: '',
+        cycle: '2025',
+        isActive: true,
+        applicableGrades: [],
+        details: []
+    });
+
+    const grades = ['Prekinder', 'Kinder', 'Preparatoria', '1ro Primaria', '2do Primaria', '3ro Primaria', '4to Primaria', '5to Primaria', '6to Primaria', '1ro Básico', '2do Básico', '3ro Básico', '4to Bachillerato', '5to Bachillerato'];
+    const documentTypes = ['FACTURA_SAT', 'RECIBO_SAT', 'NOTA_DEBITO'];
+    const productTypes = ['Servicio', 'Bien', 'Mensualidad'];
 
     const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
     const labelClass = `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`;
@@ -39,9 +53,9 @@ const PaquetesPage = () => {
                     isActive: true,
                     applicableGrades: ['1ro Básico', '2do Básico', '3ro Básico'],
                     details: [
-                        { id: 1, productName: 'Inscripción', price: 1000, documentType: 'FACTURA_SAT', productType: 'Servicio' },
-                        { id: 2, productName: 'Mensualidad (x10)', price: 750, documentType: 'RECIBO_SAT', productType: 'Servicio', quantity: 10 },
-                        { id: 3, productName: 'Paquete de Libros', price: 1500, documentType: 'FACTURA_SAT', productType: 'Bien' },
+                        { id: 1, productName: 'Inscripción', price: 1000, documentType: 'FACTURA_SAT', productType: 'Servicio', quantity: 1 },
+                        { id: 2, productName: 'Mensualidad', price: 750, documentType: 'RECIBO_SAT', productType: 'Mensualidad', quantity: 10 },
+                        { id: 3, productName: 'Paquete de Libros', price: 1500, documentType: 'FACTURA_SAT', productType: 'Bien', quantity: 1 },
                     ]
                 },
                 {
@@ -53,20 +67,10 @@ const PaquetesPage = () => {
                     isActive: true,
                     applicableGrades: ['1ro Básico', '2do Básico'],
                     details: [
-                        { id: 4, productName: 'Inscripción (50%)', price: 500, documentType: 'FACTURA_SAT', productType: 'Servicio' },
-                        { id: 5, productName: 'Mensualidad (x10)', price: 375, documentType: 'RECIBO_SAT', productType: 'Servicio', quantity: 10 },
-                        { id: 6, productName: 'Paquete de Libros', price: 1500, documentType: 'FACTURA_SAT', productType: 'Bien' },
+                        { id: 4, productName: 'Inscripción (50%)', price: 500, documentType: 'FACTURA_SAT', productType: 'Servicio', quantity: 1 },
+                        { id: 5, productName: 'Mensualidad', price: 375, documentType: 'RECIBO_SAT', productType: 'Mensualidad', quantity: 10 },
+                        { id: 6, productName: 'Paquete de Libros', price: 1500, documentType: 'FACTURA_SAT', productType: 'Bien', quantity: 1 },
                     ]
-                },
-                {
-                    id: 3,
-                    name: 'Paquete 2024 (Histórico)',
-                    cycle: '2024',
-                    totalPrice: 9000,
-                    description: 'Paquete del año anterior',
-                    isActive: false,
-                    applicableGrades: ['General'],
-                    details: []
                 }
             ]);
         } finally {
@@ -74,21 +78,95 @@ const PaquetesPage = () => {
         }
     };
 
+    const openNewPackage = () => {
+        setFormData({
+            id: null,
+            name: '',
+            description: '',
+            cycle: selectedCycle,
+            isActive: true,
+            applicableGrades: [],
+            details: [{ id: Date.now(), productName: '', price: 0, documentType: 'FACTURA_SAT', productType: 'Servicio', quantity: 1 }]
+        });
+        setShowModal(true);
+    };
+
+    const openEditPackage = (pkg) => {
+        setFormData({
+            ...pkg,
+            details: pkg.details?.length > 0 ? pkg.details : [{ id: Date.now(), productName: '', price: 0, documentType: 'FACTURA_SAT', productType: 'Servicio', quantity: 1 }]
+        });
+        setShowModal(true);
+    };
+
     const handleSave = async () => {
+        if (!formData.name) {
+            alert('Por favor ingresa un nombre para el paquete');
+            return;
+        }
+        if (formData.details.some(d => !d.productName || d.price <= 0)) {
+            alert('Por favor completa todos los productos con nombre y precio válido');
+            return;
+        }
+
+        const totalPrice = formData.details.reduce((sum, d) => sum + (d.price * (d.quantity || 1)), 0);
+        const packageData = { ...formData, totalPrice };
+
         try {
-            if (selectedPackage?.id) {
-                await packageService.update(selectedPackage.id, selectedPackage);
+            if (formData.id) {
+                await packageService.update(formData.id, packageData);
+                setPackages(prev => prev.map(p => p.id === formData.id ? packageData : p));
             } else {
-                await packageService.create(selectedPackage);
+                const newId = Math.max(0, ...packages.map(p => p.id)) + 1;
+                const newPackage = { ...packageData, id: newId };
+                await packageService.create(newPackage);
+                setPackages(prev => [...prev, newPackage]);
             }
-            loadPackages();
             setShowModal(false);
-            setSelectedPackage(null);
         } catch (error) {
             console.error('Error saving package:', error);
+            // Still update local state for demo
+            if (formData.id) {
+                setPackages(prev => prev.map(p => p.id === formData.id ? { ...formData, totalPrice } : p));
+            } else {
+                const newId = Math.max(0, ...packages.map(p => p.id)) + 1;
+                setPackages(prev => [...prev, { ...formData, id: newId, totalPrice }]);
+            }
             setShowModal(false);
         }
     };
+
+    const addProduct = () => {
+        setFormData(prev => ({
+            ...prev,
+            details: [...prev.details, { id: Date.now(), productName: '', price: 0, documentType: 'FACTURA_SAT', productType: 'Servicio', quantity: 1 }]
+        }));
+    };
+
+    const removeProduct = (id) => {
+        setFormData(prev => ({
+            ...prev,
+            details: prev.details.filter(d => d.id !== id)
+        }));
+    };
+
+    const updateProduct = (id, field, value) => {
+        setFormData(prev => ({
+            ...prev,
+            details: prev.details.map(d => d.id === id ? { ...d, [field]: value } : d)
+        }));
+    };
+
+    const toggleGrade = (grade) => {
+        setFormData(prev => ({
+            ...prev,
+            applicableGrades: prev.applicableGrades.includes(grade)
+                ? prev.applicableGrades.filter(g => g !== grade)
+                : [...prev.applicableGrades, grade]
+        }));
+    };
+
+    const calculateTotal = () => formData.details.reduce((sum, d) => sum + ((d.price || 0) * (d.quantity || 1)), 0);
 
     const filteredPackages = packages.filter(pkg => pkg.cycle === selectedCycle);
 
@@ -119,7 +197,7 @@ const PaquetesPage = () => {
                         <option value="2024">Ciclo 2024</option>
                     </select>
 
-                    <button onClick={() => { setSelectedPackage({}); setShowModal(true); }} className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg shadow-lg shadow-teal-900/20">
+                    <button onClick={openNewPackage} className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg shadow-lg shadow-teal-900/20">
                         <Plus size={18} /> Nuevo Paquete
                     </button>
                 </div>
@@ -140,8 +218,7 @@ const PaquetesPage = () => {
                             className={`p-4 flex items-center justify-between cursor-pointer ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
                         >
                             <div className="flex items-center gap-4">
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${pkg.isActive ? 'bg-teal-100 text-teal-600' : 'bg-gray-200 text-gray-500'
-                                    }`}>
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${pkg.isActive ? 'bg-teal-100 text-teal-600' : 'bg-gray-200 text-gray-500'}`}>
                                     <Package size={24} />
                                 </div>
                                 <div>
@@ -168,7 +245,7 @@ const PaquetesPage = () => {
                                     <div className="flex justify-between items-center mb-3">
                                         <h4 className={`font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Productos incluidos</h4>
                                         <button
-                                            onClick={() => { setSelectedPackage(pkg); setShowModal(true); }}
+                                            onClick={() => openEditPackage(pkg)}
                                             className="flex items-center gap-1 text-sm text-teal-500 hover:text-teal-600"
                                         >
                                             <Edit size={14} /> Editar
@@ -178,25 +255,25 @@ const PaquetesPage = () => {
                                         <thead>
                                             <tr className={darkMode ? 'text-gray-400' : 'text-gray-500'}>
                                                 <th className="text-left text-xs font-medium py-2">Producto</th>
-                                                <th className="text-left text-xs font-medium py-2">Tipo</th>
+                                                <th className="text-center text-xs font-medium py-2">Cantidad</th>
                                                 <th className="text-left text-xs font-medium py-2">Documento</th>
-                                                <th className="text-right text-xs font-medium py-2">Precio</th>
+                                                <th className="text-right text-xs font-medium py-2">Precio Unit.</th>
+                                                <th className="text-right text-xs font-medium py-2">Subtotal</th>
                                             </tr>
                                         </thead>
                                         <tbody className={`divide-y ${darkMode ? 'divide-gray-600' : 'divide-gray-200'}`}>
                                             {pkg.details?.map(detail => (
                                                 <tr key={detail.id}>
-                                                    <td className={`py-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                                                        {detail.productName}
-                                                        {detail.quantity > 1 && <span className={`ml-1 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>x{detail.quantity}</span>}
-                                                    </td>
-                                                    <td className={`py-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{detail.productType}</td>
+                                                    <td className={`py-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>{detail.productName}</td>
+                                                    <td className={`py-2 text-center ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{detail.quantity || 1}</td>
                                                     <td className="py-2">
-                                                        <span className={`px-2 py-0.5 rounded text-xs ${detail.documentType === 'FACTURA_SAT' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
-                                                            }`}>{detail.documentType?.replace('_', ' ')}</span>
+                                                        <span className={`px-2 py-0.5 rounded text-xs ${detail.documentType === 'FACTURA_SAT' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                                                            {detail.documentType?.replace('_', ' ')}
+                                                        </span>
                                                     </td>
+                                                    <td className={`py-2 text-right ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Q {detail.price?.toLocaleString()}</td>
                                                     <td className={`py-2 text-right font-medium ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
-                                                        Q {detail.price?.toLocaleString()}
+                                                        Q {((detail.price || 0) * (detail.quantity || 1)).toLocaleString()}
                                                     </td>
                                                 </tr>
                                             ))}
@@ -218,34 +295,170 @@ const PaquetesPage = () => {
             {/* Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg w-full max-w-lg p-6`}>
-                        <div className="flex items-center justify-between mb-4">
+                    <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col`}>
+                        <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex items-center justify-between`}>
                             <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                                {selectedPackage?.id ? 'Editar Paquete' : 'Nuevo Paquete'}
+                                {formData.id ? 'Editar Paquete' : 'Nuevo Paquete'}
                             </h2>
-                            <button onClick={() => setShowModal(false)}><X size={20} /></button>
+                            <button onClick={() => setShowModal(false)} className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700`}>
+                                <X size={20} />
+                            </button>
                         </div>
-                        <div className="space-y-4">
-                            <div>
-                                <label className={labelClass}>Nombre del Paquete</label>
-                                <input type="text" className={inputClass} defaultValue={selectedPackage?.name} placeholder="Ej: Paquete Normal" />
+
+                        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                            {/* Basic Info */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className={labelClass}>Nombre del Paquete *</label>
+                                    <input
+                                        type="text"
+                                        className={inputClass}
+                                        value={formData.name}
+                                        onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                                        placeholder="Ej: Paquete Normal 2025"
+                                    />
+                                </div>
+                                <div>
+                                    <label className={labelClass}>Ciclo Escolar</label>
+                                    <select
+                                        className={inputClass}
+                                        value={formData.cycle}
+                                        onChange={e => setFormData(prev => ({ ...prev, cycle: e.target.value }))}
+                                    >
+                                        <option value="2025">2025</option>
+                                        <option value="2024">2024</option>
+                                    </select>
+                                </div>
                             </div>
                             <div>
                                 <label className={labelClass}>Descripción</label>
-                                <textarea rows={2} className={inputClass} defaultValue={selectedPackage?.description} placeholder="Descripción del paquete..." />
+                                <textarea
+                                    rows={2}
+                                    className={inputClass}
+                                    value={formData.description}
+                                    onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                                    placeholder="Descripción del paquete..."
+                                />
                             </div>
+
+                            {/* Grades */}
                             <div>
                                 <label className={labelClass}>Grados Aplicables</label>
-                                <select multiple className={`${inputClass} h-24`}>
-                                    <option>1ro Básico</option>
-                                    <option>2do Básico</option>
-                                    <option>3ro Básico</option>
-                                </select>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                    {grades.map(grade => (
+                                        <button
+                                            key={grade}
+                                            type="button"
+                                            onClick={() => toggleGrade(grade)}
+                                            className={`px-3 py-1 rounded-full text-sm transition-colors ${formData.applicableGrades.includes(grade)
+                                                    ? 'bg-teal-500 text-white'
+                                                    : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                }`}
+                                        >
+                                            {grade}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Products */}
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className={labelClass}>Productos / Servicios *</label>
+                                    <button
+                                        type="button"
+                                        onClick={addProduct}
+                                        className="text-sm text-teal-500 hover:text-teal-600 flex items-center gap-1"
+                                    >
+                                        <Plus size={14} /> Agregar producto
+                                    </button>
+                                </div>
+                                <div className="space-y-3">
+                                    {formData.details.map((detail, idx) => (
+                                        <div key={detail.id} className={`p-3 rounded-lg border ${darkMode ? 'border-gray-700 bg-gray-700/50' : 'border-gray-200 bg-gray-50'}`}>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Producto {idx + 1}</span>
+                                                {formData.details.length > 1 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeProduct(detail.id)}
+                                                        className="ml-auto text-red-500 hover:text-red-600"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                                                <div className="col-span-2">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Nombre del producto"
+                                                        className={inputClass}
+                                                        value={detail.productName}
+                                                        onChange={e => updateProduct(detail.id, 'productName', e.target.value)}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <div className="relative">
+                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">Q</span>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            step="0.01"
+                                                            placeholder="Precio"
+                                                            className={`${inputClass} pl-8`}
+                                                            value={detail.price || ''}
+                                                            onChange={e => updateProduct(detail.id, 'price', parseFloat(e.target.value) || 0)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        placeholder="Cant."
+                                                        className={inputClass}
+                                                        value={detail.quantity || 1}
+                                                        onChange={e => updateProduct(detail.id, 'quantity', parseInt(e.target.value) || 1)}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <select
+                                                        className={inputClass}
+                                                        value={detail.documentType}
+                                                        onChange={e => updateProduct(detail.id, 'documentType', e.target.value)}
+                                                    >
+                                                        {documentTypes.map(dt => (
+                                                            <option key={dt} value={dt}>{dt.replace('_', ' ')}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Total */}
+                            <div className={`p-4 rounded-lg ${darkMode ? 'bg-teal-900/30' : 'bg-teal-50'} flex items-center justify-between`}>
+                                <span className={`font-medium ${darkMode ? 'text-teal-300' : 'text-teal-700'}`}>Total del Paquete</span>
+                                <span className={`text-2xl font-bold ${darkMode ? 'text-teal-400' : 'text-teal-600'}`}>Q {calculateTotal().toLocaleString()}</span>
                             </div>
                         </div>
-                        <div className="flex justify-end gap-3 mt-6">
-                            <button onClick={() => setShowModal(false)} className={`px-4 py-2 rounded-lg ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}>Cancelar</button>
-                            <button onClick={handleSave} className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg">Guardar</button>
+
+                        <div className={`p-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex justify-end gap-3`}>
+                            <button
+                                onClick={() => setShowModal(false)}
+                                className={`px-4 py-2 rounded-lg ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg flex items-center gap-2"
+                            >
+                                <Save size={16} /> Guardar Paquete
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -255,3 +468,4 @@ const PaquetesPage = () => {
 };
 
 export default PaquetesPage;
+

@@ -1,6 +1,5 @@
 import { lazy } from 'react';
 import { Route } from 'react-router-dom';
-import ProtectedRoute from '../../components/ProtectedRoute';
 
 // Lazy Imports
 const Academic = lazy(() => import('../../pages/Academic'));
@@ -35,9 +34,6 @@ export const academicRouteElements = <>
     <Route path="academico/oxford-ai" element={<IAHorariosPage />} />
 </>;
 
-export const standaloneAcademicRoutes = <>
-    <Route path="/academico/cursos" element={<ProtectedRoute><CursosNivelesPage /></ProtectedRoute>} />
-    <Route path="/academico/secciones" element={<ProtectedRoute><SeccionesPage /></ProtectedRoute>} />
-    <Route path="/academico/gestion-cursos" element={<ProtectedRoute><GestionCursosPage /></ProtectedRoute>} />
-    <Route path="/academico/asignacion-materias" element={<ProtectedRoute><AsignacionMateriasPage /></ProtectedRoute>} />
-</>;
+// No standalone routes needed - all academic pages render inside Layout
+export const standaloneAcademicRoutes = null;
+

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Layers, Plus, Edit, Trash, Check, X, BookOpen, ChevronRight, Users, GraduationCap } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { catalogService } from '../services';
 
 const CursosNivelesPage = () => {
     const { darkMode } = useTheme();
+    const navigate = useNavigate();
     const [levels, setLevels] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -76,7 +78,10 @@ const CursosNivelesPage = () => {
                                 </div>
                             </div>
 
-                            <button className={`w-full mt-6 py-2 rounded-lg border ${darkMode ? 'border-gray-600 hover:bg-gray-700 text-gray-300' : 'border-gray-200 hover:bg-gray-50 text-gray-600'} text-sm font-medium transition-colors flex items-center justify-center gap-2 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/20 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:border-indigo-200 dark:group-hover:border-indigo-800`}>
+                            <button
+                                onClick={() => navigate('/academico/grados')}
+                                className={`w-full mt-6 py-2 rounded-lg border ${darkMode ? 'border-gray-600 hover:bg-gray-700 text-gray-300' : 'border-gray-200 hover:bg-gray-50 text-gray-600'} text-sm font-medium transition-colors flex items-center justify-center gap-2 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/20 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:border-indigo-200 dark:group-hover:border-indigo-800`}
+                            >
                                 Ver Grados <ChevronRight size={16} />
                             </button>
                         </div>

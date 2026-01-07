@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Briefcase, Plus, Edit2, Trash2, Search, Users } from 'lucide-react';
+import { Briefcase, Plus, Edit2, Trash2, Search, Users, X, Save } from 'lucide-react';
 
 const AdminChargesPage = () => {
     // Mock Data
@@ -13,11 +13,51 @@ const AdminChargesPage = () => {
     ]);
 
     const [searchTerm, setSearchTerm] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingCargo, setEditingCargo] = useState(null);
+    const [formData, setFormData] = useState({ nombre: '', departamento: '' });
+
+    const departamentos = ['Dirección', 'Coordinación', 'Docencia', 'Administración', 'Finanzas', 'Mantenimiento', 'Tecnología'];
 
     const filteredCargos = cargos.filter(c =>
         c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.departamento.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const handleOpenNew = () => {
+        setEditingCargo(null);
+        setFormData({ nombre: '', departamento: '' });
+        setIsModalOpen(true);
+    };
+
+    const handleOpenEdit = (cargo) => {
+        setEditingCargo(cargo);
+        setFormData({ nombre: cargo.nombre, departamento: cargo.departamento });
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = (id) => {
+        if (confirm('¿Estás seguro de eliminar este cargo?')) {
+            setCargos(prev => prev.filter(c => c.id !== id));
+        }
+    };
+
+    const handleSave = () => {
+        if (!formData.nombre || !formData.departamento) {
+            alert('Por favor completa todos los campos');
+            return;
+        }
+
+        if (editingCargo) {
+            setCargos(prev => prev.map(c =>
+                c.id === editingCargo.id ? { ...c, ...formData } : c
+            ));
+        } else {
+            const newId = Math.max(...cargos.map(c => c.id)) + 1;
+            setCargos(prev => [...prev, { id: newId, ...formData, personal: 0 }]);
+        }
+        setIsModalOpen(false);
+    };
 
     return (
         <div className="p-6 max-w-7xl mx-auto">
@@ -29,7 +69,10 @@ const AdminChargesPage = () => {
                     </h1>
                     <p className="text-gray-500 mt-2">Administración de puestos y jerarquías institucionales</p>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
+                <button
+                    onClick={handleOpenNew}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+                >
                     <Plus size={18} />
                     Nuevo Cargo
                 </button>
@@ -82,10 +125,18 @@ const AdminChargesPage = () => {
                                 </td>
                                 <td className="p-4 text-right">
                                     <div className="flex justify-end gap-2">
-                                        <button className="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors">
+                                        <button
+                                            onClick={() => handleOpenEdit(cargo)}
+                                            className="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                            title="Editar"
+                                        >
                                             <Edit2 size={18} />
                                         </button>
-                                        <button className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                        <button
+                                            onClick={() => handleDelete(cargo.id)}
+                                            className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                            title="Eliminar"
+                                        >
                                             <Trash2 size={18} />
                                         </button>
                                     </div>
@@ -100,8 +151,71 @@ const AdminChargesPage = () => {
                     </div>
                 )}
             </div>
+
+            {/* Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+                        <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                                {editingCargo ? 'Editar Cargo' : 'Nuevo Cargo'}
+                            </h2>
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                            >
+                                <X size={20} className="text-gray-500" />
+                            </button>
+                        </div>
+                        <div className="p-4 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Nombre del Cargo
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.nombre}
+                                    onChange={e => setFormData(prev => ({ ...prev, nombre: e.target.value }))}
+                                    placeholder="Ej: Coordinador de Primaria"
+                                    className="w-full px-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Departamento
+                                </label>
+                                <select
+                                    value={formData.departamento}
+                                    onChange={e => setFormData(prev => ({ ...prev, departamento: e.target.value }))}
+                                    className="w-full px-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+                                >
+                                    <option value="">Seleccionar...</option>
+                                    {departamentos.map(d => (
+                                        <option key={d} value={d}>{d}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="p-4 border-t dark:border-gray-700 flex justify-end gap-2">
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2"
+                            >
+                                <Save size={16} /> Guardar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
 export default AdminChargesPage;
+

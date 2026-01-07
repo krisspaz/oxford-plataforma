@@ -1,91 +1,147 @@
 /**
  * Base API Configuration - Sistema Oxford
  * =========================================
- * Uses HttpOnly cookies for authentication (set by backend)
- * CSRF token is read from non-HttpOnly cookie for state-changing requests
+ * JWT Token-based Authentication with Automatic Refresh
+ * Uses localStorage for token storage with Authorization header
  */
 
 const API_BASE_URL = '/api';
 
+// Token refresh state
+let isRefreshing = false;
+let refreshSubscribers = [];
+
 /**
- * Get CSRF token from cookie (set by backend)
- * CSRF token is NOT HttpOnly so we can read it
+ * Subscribe to token refresh
  */
-const getCsrfToken = () => {
-    const cookies = document.cookie.split(';');
-    for (const cookie of cookies) {
-        const [name, value] = cookie.trim().split('=');
-        if (name === 'csrf_token') {
-            return value;
-        }
+const subscribeTokenRefresh = (callback) => {
+    refreshSubscribers.push(callback);
+};
+
+/**
+ * Notify all subscribers that token was refreshed
+ */
+const onTokenRefreshed = (token) => {
+    refreshSubscribers.forEach(callback => callback(token));
+    refreshSubscribers = [];
+};
+
+/**
+ * Get stored JWT token
+ */
+export const getToken = () => localStorage.getItem('token');
+
+/**
+ * Set JWT token
+ */
+export const setToken = (token) => {
+    if (token) {
+        localStorage.setItem('token', token);
+    } else {
+        localStorage.removeItem('token');
     }
-    return null;
 };
 
 /**
- * Check if user is likely authenticated (has csrf_token cookie)
- * Note: Actual auth is verified by backend via HttpOnly access_token cookie
+ * Check if user is authenticated (has token)
  */
-export const isAuthenticated = () => {
-    return getCsrfToken() !== null;
+export const isAuthenticated = () => !!getToken();
+
+/**
+ * Refresh the access token
+ */
+const refreshToken = async () => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include', // For refresh token cookie if used
+        });
+
+        if (!response.ok) {
+            throw new Error('Refresh failed');
+        }
+
+        const data = await response.json();
+        if (data.token) {
+            setToken(data.token);
+            return data.token;
+        }
+        throw new Error('No token in refresh response');
+    } catch (error) {
+        // Refresh failed - clear token and redirect to login
+        setToken(null);
+        if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+        }
+        throw error;
+    }
 };
 
 /**
- * Base fetch wrapper with cookie-based auth and CSRF protection
- * 
- * - Uses credentials: 'include' to send HttpOnly cookies
- * - Adds X-CSRF-Token header for state-changing requests
- * - Adds X-Requested-With header for AJAX detection
+ * Base fetch wrapper with JWT authentication
  */
-const apiFetch = async (endpoint, options = {}) => {
-    const isStateChanging = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(
-        options.method?.toUpperCase()
-    );
+const apiFetch = async (endpoint, options = {}, retry = true) => {
+    const token = getToken();
 
     const headers = {
         'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest', // Helps backend detect AJAX
+        'X-Requested-With': 'XMLHttpRequest',
         ...options.headers,
     };
 
-    // Add CSRF token for state-changing requests
-    if (isStateChanging) {
-        const csrfToken = getCsrfToken();
-        if (csrfToken) {
-            headers['X-CSRF-Token'] = csrfToken;
-        }
+    // Add Authorization header if token exists
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
     }
 
     try {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             ...options,
             headers,
-            credentials: 'include', // CRITICAL: Send cookies with request
+            credentials: 'include',
         });
 
-        // Handle 401 - redirect to login
-        // Handle 401 - redirect to login
-        if (response.status === 401) {
-            console.error('Session expired (401) returned from ' + endpoint);
-            // Only redirect if we are sure it's not a spurious error
-            // Clear any stored user data
-            // localStorage.removeItem('user');
-
-            // Redirect to login if not already there
-            // if (!window.location.pathname.includes('/login')) {
-            //     window.location.href = '/login';
-            // }
-            // throw new Error('Session expired');
+        // Handle 401 - Token expired, try to refresh
+        if (response.status === 401 && retry && token) {
+            if (!isRefreshing) {
+                isRefreshing = true;
+                try {
+                    const newToken = await refreshToken();
+                    isRefreshing = false;
+                    onTokenRefreshed(newToken);
+                    // Retry original request with new token
+                    return apiFetch(endpoint, options, false);
+                } catch (refreshError) {
+                    isRefreshing = false;
+                    throw refreshError;
+                }
+            } else {
+                // Wait for token refresh and retry
+                return new Promise((resolve, reject) => {
+                    subscribeTokenRefresh((newToken) => {
+                        headers['Authorization'] = `Bearer ${newToken}`;
+                        apiFetch(endpoint, options, false)
+                            .then(resolve)
+                            .catch(reject);
+                    });
+                });
+            }
         }
 
-        // Handle 429 - rate limited
+        // Handle 429 - Rate limited
         if (response.status === 429) {
             throw new Error('Demasiadas solicitudes. Por favor, espera un momento.');
         }
 
-        // Handle 403 - CSRF or permission error
+        // Handle 403 - Forbidden
         if (response.status === 403) {
-            throw new Error('Acceso denegado. Por favor, recarga la página.');
+            throw new Error('Acceso denegado.');
+        }
+
+        // Handle 404
+        if (response.status === 404) {
+            throw new Error('Recurso no encontrado.');
         }
 
         // Parse response
@@ -99,24 +155,22 @@ const apiFetch = async (endpoint, options = {}) => {
 
         if (!response.ok) {
             const errorMessage =
-                (typeof data === 'object' && (data.error || data.message)) ||
-                'Error en la solicitud';
+                (typeof data === 'object' && (data.error || data.message || data.detail)) ||
+                `Error ${response.status}`;
             throw new Error(errorMessage);
         }
 
         return data;
     } catch (error) {
-        // Log error in development
         if (import.meta.env.DEV) {
-            console.error('API Error:', error);
+            console.error(`API Error [${endpoint}]:`, error);
         }
         throw error;
     }
 };
 
 /**
- * API methods object
- * All methods automatically include cookies and CSRF protection
+ * API methods with JWT authentication
  */
 export const api = {
     get: (endpoint, options = {}) =>
@@ -148,3 +202,4 @@ export const api = {
 };
 
 export default api;
+
