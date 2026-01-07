@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { aiService } from '../services/aiApi';
+import { aiApi } from '../services/aiApi';
 
 const AIContext = createContext();
 

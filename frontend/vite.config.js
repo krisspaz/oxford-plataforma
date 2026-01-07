@@ -25,7 +25,16 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/ai-api/, ''),
       },
     },
-    allowedHosts: ['vexatiously-dextrocular-esteban.ngrok-free.dev', '.ngrok-free.dev'],
+    // Allow any host to fix white screen on ngrok
+    allowedHosts: true,
+    host: true,
+    cors: true,
+    hmr: {
+      clientPort: 443, // Forces the client to connect via standard HTTPS port (handled by Ngrok)
+      protocol: 'wss', // Use secure websocket
+      host: 'vexatiously-dextrocular-esteban.ngrok-free.dev', // Explicit public host
+    },
+
   },
   test: {
     globals: true,

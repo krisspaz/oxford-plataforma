@@ -4,7 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\GradeRepository;
-use Doctrine\DBAL\Types\Types;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -17,90 +18,38 @@ class Grade
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Student $student = null;
+    #[ORM\Column(length: 100)]
+    #[Assert\NotBlank]
+    private ?string $name = null; // e.g. "First Grade", "5to Bachillerato"
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(targetEntity: AcademicLevel::class, inversedBy: 'grades')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Subject $subject = null;
+    private ?AcademicLevel $level = null;
 
     #[ORM\Column]
-    #[Assert\Range(min: 0, max: 100)]
-    private ?float $score = null;
+    private ?bool $isActive = true;
 
-    #[ORM\Column(length: 50)]
-    #[Assert\Choice(choices: ['Homework', 'Exam', 'Project', 'Participation'])]
-    private ?string $type = null;
+    #[ORM\OneToMany(mappedBy: 'grade', targetEntity: Section::class)]
+    private Collection $sections;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $date = null;
-
-    #[ORM\ManyToOne(inversedBy: 'grades')]
-    private ?AcademicLevel $level = null;
+    public function __construct()
+    {
+        $this->sections = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getStudent(): ?Student
+    public function getName(): ?string
     {
-        return $this->student;
+        return $this->name;
     }
 
-    public function setStudent(?Student $student): static
+    public function setName(string $name): static
     {
-        $this->student = $student;
-
-        return $this;
-    }
-
-    public function getSubject(): ?Subject
-    {
-        return $this->subject;
-    }
-
-    public function setSubject(?Subject $subject): static
-    {
-        $this->subject = $subject;
-
-        return $this;
-    }
-
-    public function getScore(): ?float
-    {
-        return $this->score;
-    }
-
-    public function setScore(float $score): static
-    {
-        $this->score = $score;
-
-        return $this;
-    }
-
-    public function getType(): ?string
-    {
-        return $this->type;
-    }
-
-    public function setType(string $type): static
-    {
-        $this->type = $type;
-
-        return $this;
-    }
-
-    public function getDate(): ?\DateTimeInterface
-    {
-        return $this->date;
-    }
-
-    public function setDate(\DateTimeInterface $date): static
-    {
-        $this->date = $date;
-
+        $this->name = $name;
         return $this;
     }
 
@@ -112,7 +61,45 @@ class Grade
     public function setLevel(?AcademicLevel $level): static
     {
         $this->level = $level;
+        return $this;
+    }
 
+    public function isActive(): ?bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Section>
+     */
+    public function getSections(): Collection
+    {
+        return $this->sections;
+    }
+
+    public function addSection(Section $section): static
+    {
+        if (!$this->sections->contains($section)) {
+            $this->sections->add($section);
+            $section->setGrade($this);
+        }
+        return $this;
+    }
+
+    public function removeSection(Section $section): static
+    {
+        if ($this->sections->removeElement($section)) {
+            // set the owning side to null (unless already changed)
+            if ($section->getGrade() === $this) {
+                $section->setGrade(null);
+            }
+        }
         return $this;
     }
 }

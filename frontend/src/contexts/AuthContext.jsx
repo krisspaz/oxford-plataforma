@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }) => {
             console.log('Credenciales:', { username: email, password: '***' });
 
             const response = await axios.post(`${apiUrl}/login_check`, {
-                username: email,
+                email: email,
                 password: password
             });
 

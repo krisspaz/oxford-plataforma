@@ -8,7 +8,7 @@ use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Psr\Log\LoggerInterface;
 
-class AIService
+class AiService
 {
     private const CIRCUIT_OPEN_TTL = 30; // Seconds to keep circuit open
     private const FAILURE_THRESHOLD = 3;  // Max failures before opening

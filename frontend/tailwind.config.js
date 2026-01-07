@@ -20,6 +20,7 @@ export default {
                     green: '#69B32D',
                     blue: '#009CDC',
                     orange: '#F39200',
+                    purple: '#5D2E86',    // OBS Purple
                 }
             }
         },

@@ -53,6 +53,29 @@ const ICON_MAP = {
     UserCog, Shield, Menu, Database, Bell, Brain
 };
 
+// Section Color Mapping
+const SECTION_THEMES = {
+    'Principal': 'obs-pink',
+    'Finanzas': 'obs-green',
+    'Gestión Cobros': 'obs-green',
+    'Académico': 'obs-blue',
+    'Gestión Académica': 'obs-blue',
+    'Organización': 'obs-blue',
+    'Reportes': 'obs-blue',
+    'Administración': 'obs-purple',
+    'Sistema': 'obs-purple',
+    'Inscripciones': 'obs-orange',
+    'Inteligencia Artificial': 'obs-pink',
+    'Docente': 'obs-blue',
+    'Estudiante': 'obs-green',
+    'Padres': 'obs-orange',
+    'Configuración': 'gray-400',
+    // Teacher Specific
+    'Mis Clases': 'obs-blue',
+    'Actividades': 'obs-orange',
+    'Calificaciones': 'obs-green'
+};
+
 const Layout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const location = useLocation();
@@ -102,73 +125,114 @@ const Layout = () => {
             <aside
                 className={`${isSidebarOpen ? 'w-64' : 'w-20'} 
                 ${darkMode
-                        ? 'bg-gradient-to-b from-gray-800 to-gray-900 border-r border-gray-700'
-                        : 'bg-gradient-to-b from-teal-500 to-teal-700'
+                        ? 'bg-gradient-to-b from-gray-900 to-black border-r border-gray-800'
+                        : 'bg-oxford-primary'
                     } text-white transition-all duration-300 flex flex-col relative`}
             >
                 {/* Toggle Button */}
                 <button
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                    className={`absolute -right-3 top-8 ${darkMode ? 'bg-gray-700 text-gray-200' : 'bg-white text-teal-600'} rounded-full p-1 shadow-lg hover:bg-opacity-90 transition-colors z-50`}
+                    className={`absolute -right-3 top-8 ${darkMode ? 'bg-gray-700 text-gray-200' : 'bg-oxford-secondary text-white'} rounded-full p-1 shadow-lg hover:bg-opacity-90 transition-colors z-50`}
                 >
                     {isSidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
                 </button>
 
                 {/* Logo */}
                 <div className="p-5 flex items-center gap-3">
-                    <div className={`w-10 h-10 ${darkMode ? 'bg-teal-600/30' : 'bg-white/20'} rounded-xl flex items-center justify-center`}>
-                        <GraduationCap size={24} className="text-white" />
+                    <div className={`w-12 h-12 bg-white rounded-xl flex items-center justify-center p-1 overflow-hidden`}>
+                        <img src="/logo-obs.jpg" alt="Logo OBS" className="w-full h-full object-contain" />
                     </div>
                     {isSidebarOpen && (
                         <div>
                             <h1 className="font-bold text-lg leading-tight">Oxford</h1>
-                            <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-teal-100'} opacity-80`}>Portal Estudiantil</p>
+                            <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-white/70'} opacity-80`}>Portal Estudiantil</p>
                         </div>
                     )}
                 </div>
 
                 {/* Navigation - Role-based */}
                 <nav className="flex-1 px-3 py-4 overflow-y-auto">
-                    {menuSections.map((section, sectionIndex) => (
-                        <div key={sectionIndex} className="mb-4">
-                            {isSidebarOpen && (
-                                <p className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-gray-500' : 'text-teal-200/70'}`}>
-                                    {section.section}
-                                </p>
-                            )}
-                            <div className="space-y-1">
-                                {section.items.map((item) => {
-                                    const isActive = location.pathname === item.path ||
-                                        (item.path === '/dashboard' && location.pathname === '/');
-                                    return (
-                                        <Link
-                                            key={item.id}
-                                            to={item.path}
-                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
-                                                ? darkMode
-                                                    ? 'bg-teal-600 text-white shadow-lg font-semibold'
-                                                    : 'bg-white text-teal-700 shadow-lg font-semibold'
-                                                : darkMode
-                                                    ? 'text-gray-300 hover:bg-gray-700/50'
-                                                    : 'text-teal-100 hover:bg-white/10'
-                                                }`}
-                                            title={!isSidebarOpen ? item.label : undefined}
-                                        >
-                                            {getIcon(item.icon)}
-                                            {isSidebarOpen && <span className="text-sm">{item.label}</span>}
-                                        </Link>
-                                    );
-                                })}
+                    {menuSections.map((section, sectionIndex) => {
+                        const themeColor = SECTION_THEMES[section.section] || 'obs-pink';
+                        // Map tailwind colors since we can't dynamically construct full class names safely in all setups
+                        // But here we rely on the safelist or just explicit styles if needed. 
+                        // Actually, let's use style objects or known classes if possible.
+                        // Ideally we use text-${themeColor} but let's try to map to specific utility classes.
+
+                        const getActiveClasses = (theme) => {
+                            switch (theme) {
+                                case 'obs-green': return darkMode ? 'bg-obs-green text-white' : 'bg-obs-green text-white';
+                                case 'obs-blue': return darkMode ? 'bg-obs-blue text-white' : 'bg-obs-blue text-white';
+                                case 'obs-orange': return darkMode ? 'bg-obs-orange text-white' : 'bg-obs-orange text-white';
+                                case 'obs-purple': return darkMode ? 'bg-obs-purple text-white' : 'bg-obs-purple text-white';
+                                default: return darkMode ? 'bg-obs-pink text-white' : 'bg-obs-pink text-white';
+                            }
+                        };
+
+                        const getTextClass = (theme) => {
+                            switch (theme) {
+                                case 'obs-green': return 'text-obs-green';
+                                case 'obs-blue': return 'text-obs-blue';
+                                case 'obs-orange': return 'text-obs-orange';
+                                case 'obs-purple': return 'text-obs-purple';
+                                default: return 'text-obs-pink';
+                            }
+                        };
+
+                        return (
+                            <div key={sectionIndex} className="mb-6">
+                                {isSidebarOpen && (
+                                    <p className={`px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                                        <span className={`w-2 h-2 rounded-full bg-${themeColor.replace('obs-', 'obs-')}`}></span>
+                                        {section.section}
+                                    </p>
+                                )}
+                                <div className="space-y-1">
+                                    {section.items.map((item) => {
+                                        const isActive = location.pathname === item.path ||
+                                            (item.path === '/dashboard' && location.pathname === '/');
+
+                                        const activeClass = getActiveClasses(themeColor);
+                                        const inactiveIconClass = getTextClass(themeColor);
+
+                                        return (
+                                            <Link
+                                                key={item.id}
+                                                to={item.path}
+                                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden ${isActive
+                                                    ? `${activeClass} shadow-lg font-semibold`
+                                                    : darkMode
+                                                        ? 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                                        : 'text-white/70 hover:bg-white/10 hover:text-white'
+                                                    }`}
+                                                title={!isSidebarOpen ? item.label : undefined}
+                                            >
+                                                {/* Hover Gradient Effect */}
+                                                {!isActive && <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-${themeColor}`}></div>}
+
+                                                <span className={`${isActive ? 'text-white' : inactiveIconClass} transition-colors group-hover:text-white`}>
+                                                    {getIcon(item.icon)}
+                                                </span>
+                                                {isSidebarOpen && <span className="text-sm">{item.label}</span>}
+
+                                                {/* Active Indicator Dot */}
+                                                {isActive && isSidebarOpen && (
+                                                    <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white/50"></div>
+                                                )}
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </nav>
 
                 {/* User Profile & Logout */}
                 <div className={`p-4 border-t ${darkMode ? 'border-gray-700' : 'border-white/20'}`}>
                     {/* User Info */}
                     <div className="flex items-center gap-3 mb-4">
-                        <div className={`w-10 h-10 ${darkMode ? 'bg-gray-700' : 'bg-teal-800'} rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md`}>
+                        <div className={`w-10 h-10 ${darkMode ? 'bg-gray-700' : 'bg-oxford-blue'} rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md`}>
                             {user?.email?.charAt(0)?.toUpperCase() || 'U'}
                         </div>
                         {isSidebarOpen && (
@@ -176,7 +240,7 @@ const Layout = () => {
                                 <p className="text-sm font-semibold text-white truncate">
                                     {user?.email?.split('@')[0] || 'Usuario'}
                                 </p>
-                                <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-teal-200'} truncate`}>{roleLabel}</p>
+                                <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-white/70'} truncate`}>{roleLabel}</p>
                             </div>
                         )}
                     </div>
@@ -202,7 +266,7 @@ const Layout = () => {
                     </h2>
                     <div className="flex items-center gap-4">
                         {/* Role Badge */}
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${darkMode ? 'bg-teal-900/50 text-teal-300' : 'bg-teal-100 text-teal-700'}`}>
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${darkMode ? 'bg-oxford-blue/20 text-oxford-blue' : 'bg-oxford-primary/10 text-oxford-primary'}`}>
                             {roleLabel}
                         </span>
 
@@ -226,7 +290,7 @@ const Layout = () => {
                                 </p>
                                 <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{user?.email || 'usuario@oxford.edu.gt'}</p>
                             </div>
-                            <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-teal-700 rounded-full flex items-center justify-center text-white font-bold shadow-md">
+                            <div className="w-10 h-10 bg-oxford-primary rounded-full flex items-center justify-center text-white font-bold shadow-md">
                                 {user?.email?.charAt(0)?.toUpperCase() || 'U'}
                             </div>
                         </div>

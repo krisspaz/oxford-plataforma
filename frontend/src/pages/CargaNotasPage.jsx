@@ -44,6 +44,12 @@ const CargaNotasPage = () => {
                 console.error('Error loading initial data:', error);
                 // Fallback for demo/dev if backend fails
                 if (process.env.NODE_ENV === 'development') {
+                    setBimesters([
+                        { id: 1, name: '1er Bimestre', isClosed: false },
+                        { id: 2, name: '2do Bimestre', isClosed: false },
+                        { id: 3, name: '3er Bimestre', isClosed: false },
+                        { id: 4, name: '4to Bimestre', isClosed: false },
+                    ]);
                     setSubjects([
                         { id: 101, full_name: "Matemáticas - 5to Bachillerato (A)" },
                         { id: 102, full_name: "Física - 5to Bachillerato (A)" }

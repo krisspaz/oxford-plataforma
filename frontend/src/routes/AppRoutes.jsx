@@ -34,6 +34,7 @@ const MisAlumnosPage = lazy(() => import('../pages/MisAlumnosPage'));
 const GestionTareasPage = lazy(() => import('../pages/GestionTareasPage'));
 const CalendarPage = lazy(() => import('../pages/CalendarPage'));
 const TareasPage = lazy(() => import('../pages/TareasPage'));
+const NotificationsPage = lazy(() => import('../pages/NotificationsPage'));
 
 // Enterprise Components
 const CrisisModeDashboard = lazy(() => import('../components/CrisisModeDashboard'));
@@ -102,6 +103,7 @@ const AppRoutes = () => {
                 <Route path="calendar" element={<CalendarPage />} />
                 <Route path="reports" element={<ReportsPage />} />
                 <Route path="mi-portal/tareas" element={<TareasPage />} />
+                <Route path="notificaciones" element={<NotificationsPage />} />
 
                 <Route path="*" element={<NotFound />} />
             </Route>

@@ -34,18 +34,21 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex bg-[#0f172a] text-white overflow-hidden">
+        <div className="min-h-screen flex bg-gradient-to-br from-obs-navy via-[#1a1a2e] to-obs-purple text-white overflow-hidden">
             {/* Left Side - Branding */}
             <div className="hidden lg:flex lg:w-1/2 flex-col justify-center p-16 relative">
                 {/* Background Shape */}
-                <div className="absolute top-0 right-0 w-96 h-96 bg-gray-800 rounded-bl-full opacity-50 -mr-20 -mt-20"></div>
+                <div className="absolute top-0 right-0 w-96 h-96 bg-obs-blue/20 rounded-bl-full blur-3xl -mr-20 -mt-20"></div>
+                <div className="absolute bottom-0 left-0 w-80 h-80 bg-obs-pink/20 rounded-tr-full blur-3xl -ml-20 -mb-20"></div>
 
                 <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-8">
-                        <GraduationCap size={40} className="text-white" />
+                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center p-2">
+                            <img src="/logo-obs.jpg" alt="Logo OBS" className="w-full h-full object-contain" />
+                        </div>
                         <div>
-                            <h1 className="text-2xl font-bold leading-none">Oxford</h1>
-                            <p className="text-xs uppercase tracking-widest text-gray-400">Bilingual School</p>
+                            <h1 className="text-2xl font-bold leading-none">OBS</h1>
+                            <p className="text-xs uppercase tracking-widest text-gray-300">Oxford Bilingual School</p>
                         </div>
                     </div>
 
@@ -62,24 +65,24 @@ const Login = () => {
 
                     <div className="space-y-6">
                         <div className="flex items-center gap-4">
-                            <div className="p-2 bg-gray-800 rounded-lg">
-                                <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="p-2 bg-obs-green/10 rounded-lg border border-obs-green/20">
+                                <svg className="w-6 h-6 text-obs-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                 </svg>
                             </div>
                             <span className="font-medium">Educación bilingüe de excelencia</span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="p-2 bg-gray-800 rounded-lg">
-                                <svg className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="p-2 bg-obs-blue/10 rounded-lg border border-obs-blue/20">
+                                <svg className="w-6 h-6 text-obs-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
                             </div>
                             <span className="font-medium">Plataforma segura y confiable</span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="p-2 bg-gray-800 rounded-lg">
-                                <GraduationCap className="w-6 h-6 text-gray-300" />
+                            <div className="p-2 bg-obs-orange/10 rounded-lg border border-obs-orange/20">
+                                <GraduationCap className="w-6 h-6 text-obs-orange" />
                             </div>
                             <span className="font-medium">Formación integral líder</span>
                         </div>
@@ -134,11 +137,11 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full bg-[#1e293b] hover:bg-[#334155] border border-gray-700 text-white py-3 rounded-lg font-medium transition-colors flex justify-between items-center px-6 mt-4 group"
+                            className="w-full bg-gradient-to-r from-obs-pink to-obs-purple hover:from-pink-600 hover:to-purple-700 border border-transparent text-white py-3 rounded-lg font-bold tracking-wide transition-all transform hover:scale-[1.02] flex justify-between items-center px-6 mt-4 group shadow-lg shadow-obs-pink/25"
                         >
                             <span>Ingresar al Portal</span>
-                            <span className="w-6 h-6 bg-gray-700 rounded-full flex items-center justify-center group-hover:bg-gray-600 transition-colors">
-                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <span className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
                             </span>

@@ -82,12 +82,14 @@ export const MENU_ITEMS = {
 
     // === ALUMNO ===
     misNotas: { id: 'misNotas', label: 'Mis Notas', path: '/alumno/notas', icon: 'FileText' },
-    chatDocente: { id: 'chatDocente', label: 'Chat Docente', path: '/alumno/chat', icon: 'MessageSquare' },
-    evaluarMaestros: { id: 'evaluarMaestros', label: 'Evaluar Maestros', path: '/alumno/evaluacion', icon: 'Star' },
-    buzonAyuda: { id: 'buzonAyuda', label: 'Buzón de Ayuda', path: '/alumno/ayuda', icon: 'AlertCircle' },
+    chatDocente: { id: 'chatDocente', label: 'Chat Docente', path: '/alumno/chat-profesor', icon: 'MessageSquare' },
+    evaluarMaestros: { id: 'evaluarMaestros', label: 'Evaluar Maestros', path: '/alumno/evaluar-profesores', icon: 'Star' },
+    buzonAyuda: { id: 'buzonAyuda', label: 'Reportar Problema', path: '/alumno/quejas', icon: 'AlertTriangle' },
     constancias: { id: 'constancias', label: 'Constancias', path: '/alumno/constancias', icon: 'FileText' },
     miHorarioAlumno: { id: 'miHorarioAlumno', label: 'Mi Horario', path: '/alumno/horario', icon: 'Calendar' },
     calendarioTareas: { id: 'calendarioTareas', label: 'Calendario Global', path: '/alumno/calendario', icon: 'Calendar' },
+    misTareas: { id: 'misTareas', label: 'Mis Tareas', path: '/alumno/mis-tareas', icon: 'ClipboardList' },
+    sugerencias: { id: 'sugerencias', label: 'Sugerencias', path: '/alumno/sugerencias', icon: 'Lightbulb' },
 
     // === PADRES ===
     misHijos: { id: 'misHijos', label: 'Mis Hijos', path: '/padres/hijos', icon: 'Users' },
@@ -169,7 +171,9 @@ export const ROLE_MENUS = {
 
     [ROLES.STUDENT]: [
         { section: 'Principal', items: ['dashboard'] },
-        { section: 'Mi Aprendizaje', items: ['calendarioTareas', 'misNotas', 'miHorarioAlumno'] },
+        { section: 'Mi Aprendizaje', items: ['misTareas', 'calendarioTareas', 'misNotas', 'miHorarioAlumno'] },
+        { section: 'Comunicación', items: ['chatDocente', 'sugerencias', 'buzonAyuda'] },
+        { section: 'Evaluaciones', items: ['evaluarMaestros'] },
     ],
 
     [ROLES.PARENT]: [

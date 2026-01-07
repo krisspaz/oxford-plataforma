@@ -16,7 +16,7 @@ const GestionTareasPage = () => {
     const [selectedGrade, setSelectedGrade] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
-    const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none w-full ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
+    const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-obs-blue outline-none w-full ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
 
     // Demo: Teacher's courses
     const teacherCourses = [
@@ -230,7 +230,7 @@ const GestionTareasPage = () => {
                     <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Gestión de Tareas</h1>
                     <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Cree y administre tareas, exámenes y proyectos</p>
                 </div>
-                <button onClick={openNewTask} className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg flex items-center gap-2">
+                <button onClick={openNewTask} className="px-4 py-2 bg-gradient-to-r from-obs-pink to-obs-purple hover:from-pink-600 hover:to-purple-700 text-white rounded-lg flex items-center gap-2 shadow-lg shadow-obs-pink/20 transition-all hover:scale-105">
                     <Plus size={18} /> Nueva Tarea
                 </button>
             </div>
@@ -351,7 +351,7 @@ const GestionTareasPage = () => {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4 mt-3">
-                                    <span className={`px-3 py-1 rounded-lg text-sm font-medium ${darkMode ? 'bg-teal-900/50 text-teal-300' : 'bg-teal-100 text-teal-700'}`}>
+                                    <span className={`px-3 py-1 rounded-lg text-sm font-medium ${darkMode ? 'bg-obs-blue/20 text-obs-blue' : 'bg-obs-blue/10 text-obs-blue'}`}>
                                         {task.points} pts
                                     </span>
                                     <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -375,7 +375,7 @@ const GestionTareasPage = () => {
                     <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-12 text-center shadow-sm`}>
                         <ClipboardList className={`mx-auto ${darkMode ? 'text-gray-600' : 'text-gray-300'}`} size={48} />
                         <p className={`mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No se encontraron tareas</p>
-                        <button onClick={openNewTask} className="mt-4 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg">
+                        <button onClick={openNewTask} className="mt-4 px-4 py-2 bg-gradient-to-r from-obs-pink to-obs-purple hover:from-pink-600 hover:to-purple-700 text-white rounded-lg shadow-lg shadow-obs-pink/20">
                             Crear Primera Tarea
                         </button>
                     </div>
@@ -448,8 +448,8 @@ const GestionTareasPage = () => {
                                             key={grade.id}
                                             onClick={() => toggleGrade(grade.name)}
                                             className={`px-3 py-2 rounded-lg text-sm transition-all ${formData.grades.includes(grade.name)
-                                                    ? 'bg-teal-600 text-white'
-                                                    : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                ? 'bg-obs-green text-white shadow-md'
+                                                : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                                 }`}
                                         >
                                             {formData.grades.includes(grade.name) && <Check size={14} className="inline mr-1" />}
@@ -464,7 +464,7 @@ const GestionTareasPage = () => {
                             <button onClick={() => setShowModal(false)} className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
                                 Cancelar
                             </button>
-                            <button onClick={handleSave} className="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg flex items-center gap-2">
+                            <button onClick={handleSave} className="px-6 py-2 bg-gradient-to-r from-obs-pink to-obs-purple hover:from-pink-600 hover:to-purple-700 text-white rounded-lg flex items-center gap-2 shadow-lg shadow-obs-pink/20">
                                 <Save size={18} /> Guardar
                             </button>
                         </div>

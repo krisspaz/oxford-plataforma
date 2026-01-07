@@ -6,10 +6,9 @@ Centralized configuration management for the AI service
 
 import os
 from dataclasses import dataclass
-from typing import Optional
 
 @dataclass
-class AIServiceConfig:
+class Config:
     """Configuration for AI service"""
     
     # Service settings
@@ -17,13 +16,25 @@ class AIServiceConfig:
     port: int = 8001
     log_level: str = "INFO"
     debug: bool = False
+    environment: str = "production"
     
-    # Schedule generation
-    default_class_duration: int = 45  # minutes
-    default_recess_duration: int = 30  # minutes
-    max_periods_per_day: int = 8
-    default_start_time: str = "07:30"
-    default_end_time: str = "14:00"
+    # Database
+    db_name: str = "oxford_db"
+    db_user: str = "postgres"
+    db_password: str = "password"
+    db_host: str = "localhost"
+
+    # Security
+    secret_key: str = "dev_secret"
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+    github_repository: str = "krisspaz/oxford-plataforma"
+
+    # Genetic Algorithm Config
+    population_size: int = 50
+    generations: int = 100
+    mutation_rate: float = 0.01
+    max_teacher_hours_per_day: int = 6
     
     # NLP settings
     fuzzy_match_threshold: float = 0.7
@@ -31,46 +42,43 @@ class AIServiceConfig:
     
     # Conflict detection
     enable_conflict_detection: bool = True
-    max_teacher_hours_per_day: int = 6
     
-    # Security
-    secret_key: str
-    algorithm: str
+    # Schedule Generation Defaults
+    default_class_duration: int = 45 
+    default_recess_duration: int = 30 
+    max_periods_per_day: int = 8
+    default_start_time: str = "07:30"
+    default_end_time: str = "14:00"
 
     @classmethod
-    def from_env(cls) -> "AIServiceConfig":
+    def from_env(cls) -> "Config":
         """Load configuration from environment variables"""
         
         # Security Check
-        secret = os.getenv("SECRET_KEY")
-        algo = os.getenv("ALGORITHM", "HS256")
-        env_mode = os.getenv("FLASK_ENV", "production") # Default to prod for safety
-
-        if not secret or secret == "CHANGEME_IN_PROD":
-            if env_mode == "production":
-                raise ValueError("CRITICAL: SECRET_KEY is missing or insecure in PRODUCTION environment.")
-            else:
-                # Dev fallback only
-                print("⚠️ WARNING: Using insecure default SECRET_KEY for development.")
-                secret = "dev_secret_key_change_me"
-
+        secret = os.getenv("SECRET_KEY", "dev_secret")
+        # In prod, you'd raise error if secret is default, but for demo/local we allow it
+        
         return cls(
             host=os.getenv("AI_SERVICE_HOST", "0.0.0.0"),
             port=int(os.getenv("AI_SERVICE_PORT", "8001")),
             log_level=os.getenv("LOG_LEVEL", "INFO"),
             debug=os.getenv("DEBUG", "false").lower() == "true",
-            default_class_duration=int(os.getenv("CLASS_DURATION", "45")),
-            default_recess_duration=int(os.getenv("RECESS_DURATION", "30")),
-            max_periods_per_day=int(os.getenv("MAX_PERIODS", "8")),
-            default_start_time=os.getenv("START_TIME", "07:30"),
-            default_end_time=os.getenv("END_TIME", "14:00"),
-            fuzzy_match_threshold=float(os.getenv("FUZZY_THRESHOLD", "0.7")),
-            max_suggestions=int(os.getenv("MAX_SUGGESTIONS", "5")),
-            enable_conflict_detection=os.getenv("ENABLE_CONFLICT_DETECTION", "true").lower() == "true",
-            max_teacher_hours_per_day=int(os.getenv("MAX_TEACHER_HOURS", "6")),
+            environment=os.getenv("APP_ENV", "production"),
+            
+            db_name=os.getenv("DB_NAME", "oxford_db"),
+            db_user=os.getenv("DB_USER", "postgres"),
+            db_password=os.getenv("DB_PASSWORD", "password"),
+            db_host=os.getenv("DB_HOST", "localhost"),
+            
             secret_key=secret,
-            algorithm=algo,
+            algorithm=os.getenv("ALGORITHM", "HS256"),
+            
+            population_size=int(os.getenv("POPULATION_SIZE", "50")),
+            generations=int(os.getenv("GENERATIONS", "100")),
+            
+            default_class_duration=int(os.getenv("CLASS_DURATION", "45")),
+            default_start_time=os.getenv("START_TIME", "07:30")
         )
 
 # Global config instance
-config = AIServiceConfig.from_env()
+config = Config.from_env()

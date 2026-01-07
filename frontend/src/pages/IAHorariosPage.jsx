@@ -12,6 +12,7 @@ import teacherService from '../services/teacherService'; // NEW: Import teacherS
 
 import aiService from '../services/aiService';
 import studentService from '../services/studentService';
+import subjectService from '../services/subjectService'; // NEW: Import subjectService
 import EnterpriseDashboard from '../components/EnterpriseDashboard'; // Fixed duplicates
 import RiskDashboard from '../components/RiskDashboard';
 
@@ -29,6 +30,7 @@ const IAHorariosPage = () => {
     const [teacherProfile, setTeacherProfile] = useState(null);
     const [teacherName, setTeacherName] = useState(user?.email?.split('@')[0] || 'Usuario'); // NEW: Name state
     const [coreState, setCoreState] = useState('idle'); // Fixed: Added missing state
+    const [lastIntent, setLastIntent] = useState(null); // Context awareness for follow-up questions
 
     // Load teacher profile if applicable
     useEffect(() => {
@@ -137,6 +139,20 @@ const IAHorariosPage = () => {
         await new Promise(r => setTimeout(r, 500));
 
         // --- LOCAL INTENT MATCHING (No Backend Required) ---
+
+        // 0. CONTEXT AWARENESS (Follow-up answers)
+        if (lastIntent && (lowerText === 'si' || lowerText === 'sí' || lowerText === 'claro' || lowerText === 'por favor' || lowerText === 'yes')) {
+            if (lastIntent === 'navigate_grades_question') {
+                setLastIntent(null);
+                setCoreState('idle');
+                reply("Te estoy redirigiendo a **Carga de Notas**...", 'text');
+                // Simulate navigation or actually navigate if Router provided
+                // navigate('/docente/notas'); 
+                return;
+            }
+        }
+        // Reset context if not matched
+        if (lastIntent) setLastIntent(null);
 
         // 1. GREETINGS
         if (/^(hola|ola|buenos d[ií]as|buenas tardes|buenas noches|hey|hi|que tal|qué tal|saludos|que onda)/.test(lowerText)) {
@@ -283,7 +299,23 @@ Tu rol actual: ${activeRole || 'No identificado'}`;
         // 4. VIEW SUBJECTS / MATERIAS - FETCH REAL DATA
         if (lowerText.includes("materia") || lowerText.includes("asignatura") || lowerText.includes("curso") || lowerText.includes("impart")) {
             try {
-                reply("📚 Consultando tus materias...", 'text');
+                reply("📚 Consultando materias...", 'text');
+
+                // ADMIN Logic: See all subjects
+                if (activeRole === 'ROLE_ADMIN' || activeRole === 'ROLE_SUPER_ADMIN' || activeRole === 'ROLE_DIRECTOR') {
+                    const subjects = await subjectService.getAll();
+                    if (subjects && subjects.length > 0) {
+                        const subjectList = subjects.slice(0, 8).map(s => `• **${s.name}**`).join('\n');
+                        setCoreState('idle');
+                        reply(`📚 **Todas las Materias del Colegio:**\n\n${subjectList}\n\n_... y ${subjects.length - 8} más._`, 'text');
+                    } else {
+                        setCoreState('idle');
+                        reply("No hay materias registradas en el sistema.", 'text');
+                    }
+                    return;
+                }
+
+                // TEACHER Logic
                 const profile = await teacherService.getMyProfile();
                 if (profile && profile.id) {
                     const assignments = await teacherService.getSubjects(profile.id);
@@ -299,11 +331,12 @@ Tu rol actual: ${activeRole || 'No identificado'}`;
                     }
                 } else {
                     setCoreState('idle');
-                    reply("No pude obtener tu perfil. Intenta cerrar sesión y entrar de nuevo.", 'text');
+                    reply("No pude obtener tu perfil docente. Si eres Admin, usa el panel de Administración.", 'text');
                 }
             } catch (e) {
+                console.error(e);
                 setCoreState('idle');
-                reply("Error al consultar materias. Verifica tu conexión.", 'text');
+                reply("Error al consultar materias. " + (e.response?.data?.error || e.message), 'text');
             }
             return;
         }
@@ -311,7 +344,26 @@ Tu rol actual: ${activeRole || 'No identificado'}`;
         // 5. VIEW STUDENTS / ALUMNOS - FETCH REAL DATA
         if (lowerText.includes("alumno") || lowerText.includes("estudiante") || lowerText.includes("patojo")) {
             try {
-                reply("👨‍🎓 Consultando tus estudiantes...", 'text');
+                reply("👨‍🎓 Consultando estudiantes...", 'text');
+
+                // ADMIN Logic: See all students
+                if (activeRole === 'ROLE_ADMIN' || activeRole === 'ROLE_SUPER_ADMIN' || activeRole === 'ROLE_DIRECTOR' || activeRole === 'ROLE_SECRETARY') {
+                    const students = await studentService.getAll({ active: true });
+                    if (students && students.length > 0) {
+                        const studentCount = students.length;
+                        const sampleList = students.slice(0, 5).map(s =>
+                            `• **${s.firstName} ${s.lastName}** (${s.studentCode})`
+                        ).join('\n');
+                        setCoreState('idle');
+                        reply(`👨‍🎓 **Estudiantes Activos:**\n\n${sampleList}\n\n_... y ${studentCount - 5} más (Total: ${studentCount})_`, 'text');
+                    } else {
+                        setCoreState('idle');
+                        reply("No hay estudiantes registrados.", 'text');
+                    }
+                    return;
+                }
+
+                // TEACHER Logic
                 const profile = await teacherService.getMyProfile();
                 if (profile && profile.id) {
                     const students = await teacherService.getStudents(profile.id);
@@ -329,7 +381,7 @@ Tu rol actual: ${activeRole || 'No identificado'}`;
                 }
             } catch (e) {
                 setCoreState('idle');
-                reply("Error al consultar estudiantes.", 'text');
+                reply("Error al consultar estudiantes. " + (e.response?.data?.error || e.message), 'text');
             }
             return;
         }
@@ -337,7 +389,15 @@ Tu rol actual: ${activeRole || 'No identificado'}`;
         // 6. VIEW SCHEDULE / HORARIO - SHOW SUBJECTS AS SCHEDULE
         if (lowerText.includes("horario") || lowerText.includes("schedule") || lowerText.includes("clases hoy")) {
             try {
-                reply("🗓️ Consultando tu horario...", 'text');
+                reply("🗓️ Consultando horario...", 'text');
+
+                // ADMIN Logic
+                if (activeRole === 'ROLE_ADMIN' || activeRole === 'ROLE_SUPER_ADMIN') {
+                    setCoreState('idle');
+                    reply("🗓️ Como Administrador, maneja los horarios globales en el módulo **Gestión de Horarios**.\n\nEscribe \"Generar horarios\" para usar la IA.", 'text');
+                    return;
+                }
+
                 const profile = await teacherService.getMyProfile();
                 if (profile && profile.id) {
                     const assignments = await teacherService.getSubjects(profile.id);
@@ -354,7 +414,7 @@ Tu rol actual: ${activeRole || 'No identificado'}`;
                 }
             } catch (e) {
                 setCoreState('idle');
-                reply("No pude cargar tu horario. Intenta de nuevo.", 'text');
+                reply("No pude cargar tu horario. " + (e.response?.data?.error || e.message), 'text');
             }
             return;
         }
@@ -362,7 +422,8 @@ Tu rol actual: ${activeRole || 'No identificado'}`;
         // 7. GRADES / NOTAS - NAVIGATE
         if (lowerText.includes("nota") || lowerText.includes("calificacion") || lowerText.includes("cargar nota")) {
             setCoreState('idle');
-            reply("📝 Para gestionar notas, ve a **Carga de Notas** en el menú lateral.\n\n¿Quieres que te muestre cómo llegar?", 'text');
+            setLastIntent('navigate_grades_question');
+            reply("📝 Para gestionar notas, ve a **Carga de Notas** en el menú lateral.\n\n¿Quieres que te muestre cómo llegar? (Responde 'Sí')", 'text');
             return;
         }
 
