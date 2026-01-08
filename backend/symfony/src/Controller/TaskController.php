@@ -81,35 +81,51 @@ class TaskController extends AbstractController
     }
 
     /**
-     * Get tasks for the current student
+     * Get tasks for the current user (student or teacher)
      */
     #[Route('/my-tasks', name: 'task_student_list', methods: ['GET'])]
     public function myTasks(Request $request): JsonResponse
     {
         $user = $this->getUser();
         if (!$user) {
-            return $this->json(['error' => 'User not found'], Response::HTTP_UNAUTHORIZED);
+            return $this->json(['error' => 'Authentication required'], Response::HTTP_UNAUTHORIZED);
         }
 
+        // Check if user is a teacher
+        $teacher = $this->em->getRepository(Teacher::class)->findOneBy(['user' => $user]);
+        if ($teacher) {
+            // Return teacher's assigned tasks
+            $tasks = $this->taskRepository->findBy(['teacher' => $teacher], ['dueDate' => 'DESC']);
+            return $this->json(array_map(fn($t) => $this->serializeTask($t), $tasks));
+        }
+
+        // Check if user is a student
         $student = $this->em->getRepository(Student::class)->findOneBy(['user' => $user]);
         if (!$student) {
-            // Try parent
-            // checking if user is parent... simplified for now
-            return $this->json(['error' => 'Student profile not found'], Response::HTTP_NOT_FOUND);
+            // Try finding by email fallback
+            $student = $this->em->getRepository(Student::class)->findOneBy(['email' => $user->getEmail()]);
+        }
+        
+        if (!$student) {
+            return $this->json([
+                'error' => 'Profile not found',
+                'message' => 'No student or teacher profile linked to this account',
+                'tasks' => []
+            ]);
         }
 
         // Get enrollments to find Grade/Section
         $enrollments = $student->getEnrollments();
         if ($enrollments->isEmpty()) {
-            return $this->json([]);
+            return $this->json(['tasks' => [], 'message' => 'No active enrollment']);
         }
 
-        $currentEnrollment = $enrollments->last(); // Assuming last is current
+        $currentEnrollment = $enrollments->last();
         $grade = $currentEnrollment->getGrade();
         $section = $currentEnrollment->getSection();
 
         if (!$grade) {
-             return $this->json([]);
+            return $this->json(['tasks' => []]);
         }
 
         // Find tasks for this grade/section
@@ -125,7 +141,7 @@ class TaskController extends AbstractController
                 'id' => $submission->getId(),
                 'status' => $submission->getStatus(),
                 'score' => $submission->getScore(),
-                'submittedAt' => $submission->getSubmittedAt()->format('Y-m-d H:i:s'),
+                'submittedAt' => $submission->getSubmittedAt()?->format('Y-m-d H:i:s'),
                 'isLate' => $submission->isLate(),
             ] : null;
 
@@ -134,6 +150,7 @@ class TaskController extends AbstractController
 
         return $this->json($data);
     }
+
 
     /**
      * Get a single task by ID

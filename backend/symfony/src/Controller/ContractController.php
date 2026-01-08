@@ -32,6 +32,35 @@ class ContractController extends AbstractController
         $this->cycleRepository = $cycleRepository;
     }
 
+    /**
+     * List all contracts
+     */
+    #[Route('', name: 'list', methods: ['GET'])]
+    public function index(Request $request): JsonResponse
+    {
+        $studentId = $request->query->get('studentId');
+        $cycleId = $request->query->get('cycleId');
+        $status = $request->query->get('status');
+
+        $criteria = [];
+        if ($studentId) $criteria['student'] = $studentId;
+        if ($cycleId) $criteria['schoolCycle'] = $cycleId;
+        if ($status) $criteria['status'] = $status;
+
+        $contracts = $this->contractRepository->findBy($criteria, ['createdAt' => 'DESC']);
+
+        return $this->json(array_map(fn($c) => [
+            'id' => $c->getId(),
+            'studentId' => $c->getStudent()?->getId(),
+            'studentName' => $c->getStudent()?->getFullName(),
+            'cycleId' => $c->getSchoolCycle()?->getId(),
+            'cycleName' => $c->getSchoolCycle()?->getName(),
+            'status' => $c->getStatus(),
+            'filePath' => $c->getFilePath(),
+            'createdAt' => $c->getCreatedAt()?->format('Y-m-d H:i:s'),
+        ], $contracts));
+    }
+
     #[Route('/generate', name: 'generate', methods: ['POST'])]
     public function generate(Request $request): JsonResponse
     {

@@ -72,13 +72,31 @@ class TeacherController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         
-        $teacher = $this->teacherRepository->findOneBy(['email' => $user->getEmail()]);
+        if (!$user) {
+            return $this->json(['error' => 'No authenticated user'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // First, try to find teacher by User relationship (Person.user)
+        $teacher = $this->teacherRepository->findOneBy(['user' => $user]);
+        
+        // Fallback: Try to find by email match
         if (!$teacher) {
-            return $this->json(['error' => 'Teacher profile not found'], Response::HTTP_NOT_FOUND);
+            $teacher = $this->teacherRepository->findOneBy(['email' => $user->getEmail()]);
+        }
+        
+        if (!$teacher) {
+            // Return a helpful message instead of error so frontend can handle it
+            return $this->json([
+                'error' => 'Teacher profile not found',
+                'message' => 'No teacher profile associated with this user. Contact admin.',
+                'userId' => $user->getId(),
+                'email' => $user->getEmail()
+            ], Response::HTTP_NOT_FOUND);
         }
 
         return $this->json($this->serializeTeacher($teacher, true));
     }
+
 
     /**
      * Create a new teacher
