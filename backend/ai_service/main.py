@@ -9,12 +9,13 @@ from routes.auth_routes import auth_router
 from routes.core_routes import core_router
 from routes.schedule_routes import schedule_router
 from routes.analytics_routes import analytics_router
+from routes.chat_routes import chat_router
 
 def create_app():
     app = FastAPI(
         title="Corpo Oxford AI Service",
-        version="3.3",
-        description="AI Core for Academic Scheduling and Analytics"
+        version="3.4",
+        description="AI Core for Academic Scheduling, Analytics & Personal Assistant"
     )
     
     # CORS Configuration
@@ -31,6 +32,7 @@ def create_app():
     app.include_router(core_router, tags=["Core Commands"])
     app.include_router(schedule_router, tags=["Scheduling"])
     app.include_router(analytics_router, prefix="/analytics", tags=["Analytics"])
+    app.include_router(chat_router, tags=["Personal Assistant"])
     
     # Events
     @app.on_event("startup")

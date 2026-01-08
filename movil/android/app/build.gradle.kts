@@ -48,8 +48,8 @@ android {
 }
 
 dependencies {
-    // Shared KMP module
-    implementation(project(":kotlin"))
+    // Note: In production, add KMP shared module here
+    // implementation(project(":shared"))
 
     // Core Android
     implementation("androidx.core:core-ktx:1.12.0")
