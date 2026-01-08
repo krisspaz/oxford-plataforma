@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/tasks')]
 class TaskController extends AbstractController
@@ -84,6 +85,7 @@ class TaskController extends AbstractController
      * Get tasks for the current user (student or teacher)
      */
     #[Route('/my-tasks', name: 'task_student_list', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function myTasks(Request $request): JsonResponse
     {
         $user = $this->getUser();
