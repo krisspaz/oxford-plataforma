@@ -24,7 +24,7 @@ class AuthManager: ObservableObject {
     @Published var errorMessage: String?
     @Published var token: String?
 
-    private let baseURL = "https://oxford-gateway.onrender.com/api"
+    private let baseURL = "http://localhost:8000/api"
 
     func login(email: String, password: String) {
         isLoading = true
@@ -110,6 +110,13 @@ extension Color {
             .sRGB, red: Double(r) / 255, green: Double(g) / 255, blue: Double(b) / 255,
             opacity: Double(a) / 255)
     }
+
+    // MARK: - Dark Mode Theme Colors
+    static let oxfordPrimary = Color.oxfordPrimary
+    static let oxfordSecondary = Color.oxfordSecondary
+    static let cardDark = Color(hex: "1C1C1E")
+    static let backgroundDark = Color(hex: "0D0D0F")
+    static let backgroundLight = Color(hex: "F5F7FA")
 }
 
 // MARK: - Login View
@@ -123,7 +130,7 @@ struct LoginView: View {
         ZStack {
             LinearGradient(
                 gradient: Gradient(colors: [
-                    Color(hex: "1E3A5F"), Color(hex: "2E5A8F"), Color(hex: "4A7AB8"),
+                    Color.oxfordPrimary, Color.oxfordSecondary, Color.oxfordSecondary,
                 ]),
                 startPoint: .top, endPoint: .bottom
             ).ignoresSafeArea()
@@ -142,7 +149,7 @@ struct LoginView: View {
 
                 VStack(spacing: 20) {
                     Text("Iniciar Sesión").font(.title2.bold()).foregroundColor(
-                        Color(hex: "1E3A5F"))
+                        Color.oxfordPrimary)
 
                     HStack {
                         Image(systemName: "envelope").foregroundColor(.gray)
@@ -178,14 +185,14 @@ struct LoginView: View {
                             }
                         }
                         .frame(maxWidth: .infinity).padding()
-                        .background(Color(hex: "1E3A5F")).foregroundColor(.white).cornerRadius(12)
+                        .background(Color.oxfordPrimary).foregroundColor(.white).cornerRadius(12)
                     }
                     .disabled(email.isEmpty || password.isEmpty || authManager.isLoading)
 
                     Button("¿Olvidaste tu contraseña?") {}
-                        .foregroundColor(Color(hex: "2E5A8F"))
+                        .foregroundColor(Color.oxfordSecondary)
                 }
-                .padding(24).background(.white).cornerRadius(24).padding(.horizontal, 24)
+                .padding(24).background(Color(.systemBackground)).cornerRadius(24).padding(.horizontal, 24)
 
                 Spacer()
 
@@ -226,12 +233,13 @@ struct MainTabView: View {
                 Text("Perfil")
             }.tag(4)
         }
-        .tint(Color(hex: "1E3A5F"))
+        .tint(Color.oxfordPrimary)
     }
 }
 
 // MARK: - Home View
 struct HomeView: View {
+    @Environment(\.colorScheme) var colorScheme
     let userName = "Carlos Martínez"
     let grade = "5to Primaria - Sección A"
 
@@ -254,7 +262,7 @@ struct HomeView: View {
                     .padding(20)
                     .background(
                         LinearGradient(
-                            colors: [Color(hex: "1E3A5F"), Color(hex: "4A7AB8")],
+                            colors: [Color.oxfordPrimary, Color.oxfordSecondary],
                             startPoint: .leading, endPoint: .trailing)
                     )
                     .cornerRadius(20).padding(.horizontal)
@@ -273,7 +281,7 @@ struct HomeView: View {
                         HStack {
                             Text("Tareas Pendientes").font(.headline)
                             Spacer()
-                            Button("Ver todo") {}.foregroundColor(Color(hex: "4A7AB8"))
+                            Button("Ver todo") {}.foregroundColor(Color.oxfordSecondary)
                         }.padding(.horizontal)
 
                         VStack(spacing: 10) {
@@ -290,13 +298,14 @@ struct HomeView: View {
                     }
                 }.padding(.vertical)
             }
-            .background(Color(hex: "F5F7FA"))
+            .background(colorScheme == .dark ? Color.backgroundDark : Color.backgroundLight)
             .navigationTitle("Oxford")
         }
     }
 }
 
 struct QuickBtn: View {
+    @Environment(\.colorScheme) var colorScheme
     let icon: String
     let title: String
     var badge: String? = nil
@@ -306,7 +315,7 @@ struct QuickBtn: View {
         VStack(spacing: 8) {
             ZStack(alignment: .topTrailing) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 12).fill(color.opacity(0.1)).frame(
+                    RoundedRectangle(cornerRadius: 12).fill(color.opacity(0.15)).frame(
                         width: 48, height: 48)
                     Image(systemName: icon).foregroundColor(color)
                 }
@@ -315,14 +324,17 @@ struct QuickBtn: View {
                         .background(.red).clipShape(Circle()).offset(x: 4, y: -4)
                 }
             }
-            Text(title).font(.caption).foregroundColor(Color(hex: "1E3A5F"))
+            Text(title).font(.caption).foregroundColor(Color.oxfordPrimary)
         }
         .frame(maxWidth: .infinity).padding(.vertical, 12)
-        .background(.white).cornerRadius(16).shadow(color: .black.opacity(0.05), radius: 10)
+        .background(colorScheme == .dark ? Color.cardDark : .white)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(colorScheme == .dark ? 0.3 : 0.05), radius: 10)
     }
 }
 
 struct TaskCard: View {
+    @Environment(\.colorScheme) var colorScheme
     let title: String
     let subject: String
     let due: String
@@ -331,22 +343,24 @@ struct TaskCard: View {
     var body: some View {
         HStack(spacing: 12) {
             ZStack {
-                RoundedRectangle(cornerRadius: 12).fill(color.opacity(0.1)).frame(
+                RoundedRectangle(cornerRadius: 12).fill(color.opacity(0.15)).frame(
                     width: 48, height: 48)
                 Image(systemName: "doc.text").foregroundColor(color)
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.subheadline.weight(.medium))
-                Text(subject).font(.caption).foregroundColor(.gray)
+                Text(subject).font(.caption).foregroundColor(.secondary)
             }
             Spacer()
             VStack(alignment: .trailing) {
-                Image(systemName: "clock").font(.caption).foregroundColor(.gray)
-                Text(due).font(.caption).foregroundColor(.gray)
+                Image(systemName: "clock").font(.caption).foregroundColor(.secondary)
+                Text(due).font(.caption).foregroundColor(.secondary)
             }
         }
-        .padding().background(.white).cornerRadius(16).shadow(
-            color: .black.opacity(0.05), radius: 10)
+        .padding()
+        .background(colorScheme == .dark ? Color.cardDark : .white)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(colorScheme == .dark ? 0.3 : 0.05), radius: 10)
     }
 }
 
@@ -374,7 +388,7 @@ struct TasksListView: View {
                     }.padding()
                 }
             }
-            .background(Color(hex: "F5F7FA"))
+            .background(Color(.secondarySystemBackground))
             .navigationTitle("Mis Tareas")
         }
     }
@@ -392,7 +406,7 @@ struct GradesListView: View {
                         Text("Bimestre Actual").foregroundColor(.white.opacity(0.8))
                     }
                     .frame(maxWidth: .infinity).padding(.vertical, 30)
-                    .background(Color(hex: "1E3A5F")).cornerRadius(20).padding(.horizontal)
+                    .background(Color.oxfordPrimary).cornerRadius(20).padding(.horizontal)
 
                     VStack(spacing: 12) {
                         GradeRow(subject: "Matemáticas", score: 88, color: .green)
@@ -403,7 +417,7 @@ struct GradesListView: View {
                     }.padding(.horizontal)
                 }.padding(.vertical)
             }
-            .background(Color(hex: "F5F7FA"))
+            .background(Color(.secondarySystemBackground))
             .navigationTitle("Mis Notas")
         }
     }
@@ -424,7 +438,7 @@ struct GradeRow: View {
             Text(subject).font(.subheadline.weight(.medium))
             Spacer()
             Text(String(format: "%.0f", score)).font(.title2.bold()).foregroundColor(color)
-        }.padding().background(.white).cornerRadius(16)
+        }.padding().background(Color(.systemBackground)).cornerRadius(16)
     }
 }
 
@@ -451,7 +465,7 @@ struct PaymentsListView: View {
                     }.padding(.horizontal)
                 }.padding(.vertical)
             }
-            .background(Color(hex: "F5F7FA"))
+            .background(Color(.secondarySystemBackground))
             .navigationTitle("Pagos")
         }
     }
@@ -474,7 +488,7 @@ struct PayRow: View {
                 .padding(.horizontal, 12).padding(.vertical, 6)
                 .background(paid ? Color.green.opacity(0.1) : Color.orange.opacity(0.1))
                 .foregroundColor(paid ? .green : .orange).cornerRadius(20)
-        }.padding().background(.white).cornerRadius(16)
+        }.padding().background(Color(.systemBackground)).cornerRadius(16)
     }
 }
 
@@ -488,7 +502,7 @@ struct ProfileScreen: View {
                 VStack(spacing: 24) {
                     VStack(spacing: 12) {
                         ZStack {
-                            Circle().fill(Color(hex: "1E3A5F")).frame(width: 100, height: 100)
+                            Circle().fill(Color.oxfordPrimary).frame(width: 100, height: 100)
                             Text("CM").font(.largeTitle.bold()).foregroundColor(.white)
                         }
                         Text("Carlos Martínez").font(.title2.bold())
@@ -515,7 +529,7 @@ struct ProfileScreen: View {
                     }.padding(.horizontal)
                 }
             }
-            .background(Color(hex: "F5F7FA"))
+            .background(Color(.secondarySystemBackground))
             .navigationTitle("Mi Perfil")
         }
     }
@@ -527,11 +541,11 @@ struct ProfileItem: View {
 
     var body: some View {
         HStack {
-            Image(systemName: icon).foregroundColor(Color(hex: "1E3A5F")).frame(width: 24)
+            Image(systemName: icon).foregroundColor(Color.oxfordPrimary).frame(width: 24)
             Text(title)
             Spacer()
             Image(systemName: "chevron.right").foregroundColor(.gray)
-        }.padding().background(.white).cornerRadius(12)
+        }.padding().background(Color(.systemBackground)).cornerRadius(12)
     }
 }
 
@@ -601,14 +615,14 @@ struct ChatView: View {
                     Button(action: { sendMessage(inputText) }) {
                         Image(systemName: "arrow.up.circle.fill")
                             .font(.system(size: 36))
-                            .foregroundColor(inputText.isEmpty ? .gray : Color(hex: "1E3A5F"))
+                            .foregroundColor(inputText.isEmpty ? .gray : Color.oxfordPrimary)
                     }
                     .disabled(inputText.isEmpty || isLoading)
                 }
                 .padding()
-                .background(.white)
+                .background(Color(.systemBackground))
             }
-            .background(Color(hex: "F5F7FA"))
+            .background(Color(.secondarySystemBackground))
             .navigationTitle("Asistente Oxford")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -714,7 +728,7 @@ struct ChatBubble: View {
 
             Text(message.text)
                 .padding(12)
-                .background(message.isUser ? Color(hex: "1E3A5F") : .white)
+                .background(message.isUser ? Color.oxfordPrimary : .white)
                 .foregroundColor(message.isUser ? .white : .primary)
                 .cornerRadius(16)
                 .shadow(color: .black.opacity(0.05), radius: 5)
@@ -734,10 +748,10 @@ struct QuickChip: View {
                 .font(.caption)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(.white)
+                .background(Color(.systemBackground))
                 .cornerRadius(16)
                 .shadow(color: .black.opacity(0.05), radius: 3)
         }
-        .foregroundColor(Color(hex: "1E3A5F"))
+        .foregroundColor(Color.oxfordPrimary)
     }
 }
