@@ -33,9 +33,14 @@ class SchoolCycle
     #[ORM\OneToMany(mappedBy: 'schoolCycle', targetEntity: Student::class)]
     private Collection $students;
 
+    #[ORM\OneToMany(mappedBy: 'schoolCycle', targetEntity: Bimester::class, cascade: ['persist'])]
+    #[ORM\OrderBy(['number' => 'ASC'])]
+    private Collection $bimesters;
+
     public function __construct()
     {
         $this->students = new ArrayCollection();
+        $this->bimesters = new ArrayCollection();
         $this->isActive = false;
     }
 
@@ -120,5 +125,32 @@ class SchoolCycle
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Bimester>
+     */
+    public function getBimesters(): Collection
+    {
+        return $this->bimesters;
+    }
+
+    public function addBimester(Bimester $bimester): static
+    {
+        if (!$this->bimesters->contains($bimester)) {
+            $this->bimesters->add($bimester);
+            $bimester->setSchoolCycle($this);
+        }
+        return $this;
+    }
+
+    public function getActiveBimester(): ?Bimester
+    {
+        foreach ($this->bimesters as $bimester) {
+            if ($bimester->isActive() && !$bimester->isClosed()) {
+                return $bimester;
+            }
+        }
+        return null;
     }
 }
