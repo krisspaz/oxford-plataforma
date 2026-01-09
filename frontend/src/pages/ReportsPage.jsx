@@ -41,6 +41,20 @@ const ReportsPage = () => {
         r.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const handleDownload = (report) => {
+        // Simulation of download
+        const dummyContent = `Reporte: ${report.name}\nGenerado: ${new Date().toLocaleString()}\n\nEste es un archivo de prueba generado por el sistema Oxford.`;
+        const blob = new Blob([dummyContent], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${report.name.replace(/ /g, '_')}.${report.type === 'PDF' ? 'pdf' : 'xlsx'}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -60,8 +74,8 @@ const ReportsPage = () => {
                             key={cat.id}
                             onClick={() => setActiveCategory(cat.id)}
                             className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${activeCategory === cat.id
-                                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
-                                    : darkMode ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                                ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
+                                : darkMode ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
                                 }`}
                         >
                             <Icon size={16} /> {cat.label}
@@ -79,8 +93,8 @@ const ReportsPage = () => {
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
                     className={`w-full pl-12 pr-4 py-3 rounded-xl border ${darkMode
-                            ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500'
-                            : 'bg-white border-gray-200 placeholder-gray-400'
+                        ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500'
+                        : 'bg-white border-gray-200 placeholder-gray-400'
                         } focus:ring-2 focus:ring-indigo-500 outline-none`}
                 />
             </div>
@@ -111,16 +125,19 @@ const ReportsPage = () => {
 
                                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${report.type === 'PDF'
-                                            ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                            : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                        ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                        : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                         }`}>
                                         {report.type === 'PDF' ? <File size={12} className="inline mr-1" /> : <FileSpreadsheet size={12} className="inline mr-1" />}
                                         {report.type}
                                     </span>
-                                    <button className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all ${darkMode
+                                    <button
+                                        onClick={() => handleDownload(report)}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all ${darkMode
                                             ? 'bg-gray-700 hover:bg-indigo-600 text-gray-300 hover:text-white'
                                             : 'bg-gray-100 hover:bg-indigo-600 text-gray-700 hover:text-white'
-                                        } group-hover:bg-indigo-600 group-hover:text-white`}>
+                                            } group-hover:bg-indigo-600 group-hover:text-white`}
+                                    >
                                         <Download size={16} /> Descargar
                                     </button>
                                 </div>

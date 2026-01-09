@@ -125,9 +125,9 @@ const Layout = () => {
             <aside
                 className={`${isSidebarOpen ? 'w-64' : 'w-20'} 
                 ${darkMode
-                        ? 'bg-gradient-to-b from-gray-900 to-black border-r border-gray-800'
-                        : 'bg-oxford-primary'
-                    } text-white transition-all duration-300 flex flex-col relative`}
+                        ? 'bg-gradient-to-b from-gray-900 to-black border-r border-gray-800 text-white'
+                        : 'bg-white border-r border-gray-200 text-gray-800'
+                    } transition-all duration-300 flex flex-col relative`}
             >
                 {/* Toggle Button */}
                 <button
@@ -182,7 +182,7 @@ const Layout = () => {
                         return (
                             <div key={sectionIndex} className="mb-6">
                                 {isSidebarOpen && (
-                                    <p className={`px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                                    <p className={`px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
                                         <span className={`w-2 h-2 rounded-full bg-${themeColor.replace('obs-', 'obs-')}`}></span>
                                         {section.section}
                                     </p>
@@ -203,7 +203,7 @@ const Layout = () => {
                                                     ? `${activeClass} shadow-lg font-semibold`
                                                     : darkMode
                                                         ? 'text-gray-400 hover:bg-white/5 hover:text-white'
-                                                        : 'text-white/70 hover:bg-white/10 hover:text-white'
+                                                        : 'text-gray-600 hover:bg-gray-100 hover:text-oxford-primary'
                                                     }`}
                                                 title={!isSidebarOpen ? item.label : undefined}
                                             >

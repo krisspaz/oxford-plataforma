@@ -3,15 +3,18 @@ import SwiftUI
 @main
 struct OxfordApp: App {
     @StateObject private var authManager = AuthManager()
+    @AppStorage("isDarkMode") private var isDarkMode = false
 
     var body: some Scene {
         WindowGroup {
             if authManager.isAuthenticated {
                 MainTabView()
                     .environmentObject(authManager)
+                    .preferredColorScheme(isDarkMode ? .dark : .light)
             } else {
                 LoginView()
                     .environmentObject(authManager)
+                    .preferredColorScheme(isDarkMode ? .dark : .light)
             }
         }
     }
@@ -24,7 +27,7 @@ class AuthManager: ObservableObject {
     @Published var errorMessage: String?
     @Published var token: String?
 
-    private let baseURL = "http://localhost:8000/api"
+    private let baseURL = "https://vexatiously-dextrocular-esteban.ngrok-free.dev/api"
 
     func login(email: String, password: String) {
         isLoading = true
@@ -112,8 +115,8 @@ extension Color {
     }
 
     // MARK: - Dark Mode Theme Colors
-    static let oxfordPrimary = Color.oxfordPrimary
-    static let oxfordSecondary = Color.oxfordSecondary
+    static let oxfordPrimary = Color(hex: "1E3A5F")
+    static let oxfordSecondary = Color(hex: "4A7AB8")
     static let cardDark = Color(hex: "1C1C1E")
     static let backgroundDark = Color(hex: "0D0D0F")
     static let backgroundLight = Color(hex: "F5F7FA")
@@ -192,7 +195,8 @@ struct LoginView: View {
                     Button("¿Olvidaste tu contraseña?") {}
                         .foregroundColor(Color.oxfordSecondary)
                 }
-                .padding(24).background(Color(.systemBackground)).cornerRadius(24).padding(.horizontal, 24)
+                .padding(24).background(Color(.systemBackground)).cornerRadius(24).padding(
+                    .horizontal, 24)
 
                 Spacer()
 
@@ -495,6 +499,7 @@ struct PayRow: View {
 // MARK: - Profile Screen
 struct ProfileScreen: View {
     @EnvironmentObject var authManager: AuthManager
+    @AppStorage("isDarkMode") private var isDarkMode = false
 
     var body: some View {
         NavigationStack {
@@ -513,6 +518,20 @@ struct ProfileScreen: View {
                     VStack(spacing: 8) {
                         ProfileItem(icon: "person", title: "Editar Perfil")
                         ProfileItem(icon: "lock", title: "Cambiar Contraseña")
+
+                        // Dark Mode Toggle
+                        HStack {
+                            Image(systemName: "moon.fill").foregroundColor(Color.oxfordPrimary)
+                                .frame(width: 24)
+                            Text("Modo Oscuro")
+                            Spacer()
+                            Toggle("", isOn: $isDarkMode)
+                                .labelsHidden()
+                        }
+                        .padding()
+                        .background(Color(.systemBackground))
+                        .cornerRadius(12)
+
                         ProfileItem(icon: "bell", title: "Notificaciones")
                         ProfileItem(icon: "questionmark.circle", title: "Ayuda")
                     }.padding(.horizontal)
@@ -560,7 +579,7 @@ struct ChatView: View {
     @State private var inputText = ""
     @State private var isLoading = false
 
-    private let aiURL = "https://oxford-gateway.onrender.com/ai/chat/message"
+    private let aiURL = "https://vexatiously-dextrocular-esteban.ngrok-free.dev/ai/chat/message"
 
     var body: some View {
         NavigationStack {
@@ -609,7 +628,7 @@ struct ChatView: View {
                 HStack(spacing: 12) {
                     TextField("Escribe un mensaje...", text: $inputText)
                         .padding(12)
-                        .background(Color.gray.opacity(0.1))
+                        .background(Color(.systemGray6))  // Better contrast
                         .cornerRadius(20)
 
                     Button(action: { sendMessage(inputText) }) {
@@ -620,7 +639,7 @@ struct ChatView: View {
                     .disabled(inputText.isEmpty || isLoading)
                 }
                 .padding()
-                .background(Color(.systemBackground))
+                .background(Color(.systemBackground))  // Proper background
             }
             .background(Color(.secondarySystemBackground))
             .navigationTitle("Asistente Oxford")
@@ -721,6 +740,7 @@ struct ChatMessage: Identifiable {
 
 struct ChatBubble: View {
     let message: ChatMessage
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         HStack {
@@ -728,10 +748,18 @@ struct ChatBubble: View {
 
             Text(message.text)
                 .padding(12)
-                .background(message.isUser ? Color.oxfordPrimary : .white)
-                .foregroundColor(message.isUser ? .white : .primary)
+                .background(
+                    message.isUser
+                        ? Color.oxfordPrimary
+                        : (colorScheme == .dark ? Color(hex: "2C2C2E") : .white)
+                )
+                .foregroundColor(
+                    message.isUser
+                        ? .white
+                        : (colorScheme == .dark ? .white : .black)
+                )
                 .cornerRadius(16)
-                .shadow(color: .black.opacity(0.05), radius: 5)
+                .shadow(color: .black.opacity(colorScheme == .dark ? 0.3 : 0.05), radius: 5)
 
             if !message.isUser { Spacer() }
         }
@@ -748,7 +776,7 @@ struct QuickChip: View {
                 .font(.caption)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(Color(.systemBackground))
+                .background(Color(.systemGray6))
                 .cornerRadius(16)
                 .shadow(color: .black.opacity(0.05), radius: 3)
         }

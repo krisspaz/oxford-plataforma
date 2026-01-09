@@ -12,10 +12,11 @@ const MiHorarioPage = () => {
 
     const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
-    // Demo schedule for teacher - this would come from backend
-    const teacherSchedule = {
-        teacher: 'Prof. Carlos Hernández',
-        subject: 'Matemáticas',
+    // Demo schedule for STUDENT
+    const studentSchedule = {
+        student: 'Student Name',
+        grade: '5to Bachillerato',
+        section: 'A',
         periods: [
             { id: 1, time: '07:30 - 08:15', label: '1er Período' },
             { id: 2, time: '08:15 - 09:00', label: '2do Período' },
@@ -27,37 +28,37 @@ const MiHorarioPage = () => {
         ],
         classes: {
             'Lunes': [
-                { period: 1, grade: '3ro Primaria', section: 'A', room: 'Aula 5', subject: 'Matemáticas' },
-                { period: 2, grade: '3ro Primaria', section: 'B', room: 'Aula 6', subject: 'Matemáticas' },
-                { period: 3, grade: '4to Primaria', section: 'A', room: 'Aula 7', subject: 'Matemáticas' },
-                { period: 5, grade: '5to Primaria', section: 'A', room: 'Aula 8', subject: 'Matemáticas' },
-                { period: 6, grade: '5to Primaria', section: 'B', room: 'Aula 9', subject: 'Matemáticas' },
+                { period: 1, subject: 'Matemáticas', teacher: 'Prof. Carlos', room: 'Aula 5' },
+                { period: 2, subject: 'Física Fund.', teacher: 'Lic. Ana', room: 'Lab 1' },
+                { period: 3, subject: 'Literatura', teacher: 'Lic. Mario', room: 'Aula 5' },
+                { period: 5, subject: 'Inglés Avanzado', teacher: 'Teacher John', room: 'Lab Idiomas' },
+                { period: 6, subject: 'Computación', teacher: 'Ing. Sofia', room: 'Lab Comp. 2' },
             ],
             'Martes': [
-                { period: 1, grade: '2do Primaria', section: 'A', room: 'Aula 3', subject: 'Matemáticas' },
-                { period: 2, grade: '2do Primaria', section: 'B', room: 'Aula 4', subject: 'Matemáticas' },
-                { period: 3, grade: '3ro Primaria', section: 'A', room: 'Aula 5', subject: 'Matemáticas' },
-                { period: 5, grade: '4to Primaria', section: 'B', room: 'Aula 7', subject: 'Matemáticas' },
-                { period: 7, grade: '6to Primaria', section: 'A', room: 'Aula 10', subject: 'Matemáticas' },
+                { period: 1, subject: 'Química', teacher: 'Lic. Roberto', room: 'Lab 2' },
+                { period: 2, subject: 'Química', teacher: 'Lic. Roberto', room: 'Lab 2' },
+                { period: 3, subject: 'Matemáticas', teacher: 'Prof. Carlos', room: 'Aula 5' },
+                { period: 5, subject: 'Estadística', teacher: 'Lic. Elena', room: 'Aula 5' },
+                { period: 7, subject: 'Seminario', teacher: 'Lic. Patricia', room: 'Audio Visuales' },
             ],
             'Miércoles': [
-                { period: 1, grade: '1ro Primaria', section: 'A', room: 'Aula 1', subject: 'Matemáticas' },
-                { period: 2, grade: '1ro Primaria', section: 'B', room: 'Aula 2', subject: 'Matemáticas' },
-                { period: 5, grade: '3ro Primaria', section: 'B', room: 'Aula 6', subject: 'Matemáticas' },
-                { period: 6, grade: '4to Primaria', section: 'A', room: 'Aula 7', subject: 'Matemáticas' },
+                { period: 1, subject: 'Biología', teacher: 'Dra. Carmen', room: 'Lab 3' },
+                { period: 2, subject: 'Biología', teacher: 'Dra. Carmen', room: 'Lab 3' },
+                { period: 5, subject: 'Literatura', teacher: 'Lic. Mario', room: 'Aula 5' },
+                { period: 6, subject: 'Inglés Avanzado', teacher: 'Teacher John', room: 'Lab Idiomas' },
             ],
             'Jueves': [
-                { period: 1, grade: '5to Primaria', section: 'A', room: 'Aula 8', subject: 'Matemáticas' },
-                { period: 2, grade: '5to Primaria', section: 'B', room: 'Aula 9', subject: 'Matemáticas' },
-                { period: 3, grade: '6to Primaria', section: 'A', room: 'Aula 10', subject: 'Matemáticas' },
-                { period: 5, grade: '2do Primaria', section: 'A', room: 'Aula 3', subject: 'Matemáticas' },
-                { period: 6, grade: '2do Primaria', section: 'B', room: 'Aula 4', subject: 'Matemáticas' },
+                { period: 1, subject: 'Física Fund.', teacher: 'Lic. Ana', room: 'Lab 1' },
+                { period: 2, subject: 'Física Fund.', teacher: 'Lic. Ana', room: 'Lab 1' },
+                { period: 3, subject: 'Filosofía', teacher: 'Lic. David', room: 'Aula 5' },
+                { period: 5, subject: 'Computación', teacher: 'Ing. Sofia', room: 'Lab Comp. 2' },
+                { period: 6, subject: 'Computación', teacher: 'Ing. Sofia', room: 'Lab Comp. 2' },
             ],
             'Viernes': [
-                { period: 1, grade: '4to Primaria', section: 'A', room: 'Aula 7', subject: 'Matemáticas' },
-                { period: 2, grade: '4to Primaria', section: 'B', room: 'Aula 7', subject: 'Matemáticas' },
-                { period: 3, grade: '1ro Primaria', section: 'A', room: 'Aula 1', subject: 'Matemáticas' },
-                { period: 5, grade: '3ro Primaria', section: 'A', room: 'Aula 5', subject: 'Matemáticas' },
+                { period: 1, subject: 'Matemáticas', teacher: 'Prof. Carlos', room: 'Aula 5' },
+                { period: 2, subject: 'Estadística', teacher: 'Lic. Elena', room: 'Aula 5' },
+                { period: 3, subject: 'Deportes', teacher: 'Prof. Luis', room: 'Canchas' },
+                { period: 5, subject: 'Arte y Cultura', teacher: 'Lic. Clara', room: 'Salon Arte' },
             ],
         }
     };
@@ -65,7 +66,7 @@ const MiHorarioPage = () => {
     useEffect(() => {
         // Simulate loading from API
         setTimeout(() => {
-            setSchedule(teacherSchedule);
+            setSchedule(studentSchedule);
             setLoading(false);
         }, 500);
     }, []);
@@ -104,7 +105,7 @@ const MiHorarioPage = () => {
                 <div>
                     <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Mi Horario</h1>
                     <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
-                        {schedule?.teacher} - {schedule?.subject}
+                        {schedule?.grade} "{schedule?.section}"
                     </p>
                 </div>
             </div>
@@ -136,11 +137,11 @@ const MiHorarioPage = () => {
                 <div className={`p-4 rounded-xl ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
                     <div className="flex items-center gap-3">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${darkMode ? 'bg-purple-900/50' : 'bg-purple-100'}`}>
-                            <Users className="text-purple-500" size={24} />
+                            <BookOpen className="text-purple-500" size={24} />
                         </div>
                         <div>
-                            <p className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>12</p>
-                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Grados asignados</p>
+                            <p className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>8</p>
+                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Materias</p>
                         </div>
                     </div>
                 </div>
@@ -154,10 +155,10 @@ const MiHorarioPage = () => {
                             key={day}
                             onClick={() => setSelectedDay(day)}
                             className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${selectedDay === day
-                                    ? 'bg-teal-600 text-white'
-                                    : darkMode
-                                        ? 'text-gray-400 hover:bg-gray-700'
-                                        : 'text-gray-600 hover:bg-gray-100'
+                                ? 'bg-teal-600 text-white'
+                                : darkMode
+                                    ? 'text-gray-400 hover:bg-gray-700'
+                                    : 'text-gray-600 hover:bg-gray-100'
                                 }`}
                         >
                             {day}
@@ -179,10 +180,10 @@ const MiHorarioPage = () => {
                             <div
                                 key={period.id}
                                 className={`flex items-center gap-4 p-4 rounded-xl border ${period.isBreak
-                                        ? darkMode ? 'bg-yellow-900/20 border-yellow-700/30' : 'bg-yellow-50 border-yellow-200'
-                                        : classInfo
-                                            ? darkMode ? 'bg-teal-900/30 border-teal-700/50' : 'bg-teal-50 border-teal-200'
-                                            : darkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-gray-50 border-gray-200'
+                                    ? darkMode ? 'bg-yellow-900/20 border-yellow-700/30' : 'bg-yellow-50 border-yellow-200'
+                                    : classInfo
+                                        ? darkMode ? 'bg-teal-900/30 border-teal-700/50' : 'bg-teal-50 border-teal-200'
+                                        : darkMode ? 'bg-gray-700/50 border-gray-600' : 'bg-gray-50 border-gray-200'
                                     }`}
                             >
                                 {/* Time */}
@@ -199,10 +200,10 @@ const MiHorarioPage = () => {
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <p className={`font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                                                    {classInfo.grade} "{classInfo.section}"
+                                                    {classInfo.subject}
                                                 </p>
                                                 <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                    {classInfo.subject}
+                                                    {classInfo.teacher}
                                                 </p>
                                             </div>
                                             <div className={`flex items-center gap-2 px-3 py-1 rounded-lg ${darkMode ? 'bg-gray-600' : 'bg-white'}`}>
@@ -247,8 +248,8 @@ const MiHorarioPage = () => {
                                                     <span className="text-yellow-500 text-xs">Receso</span>
                                                 ) : classInfo ? (
                                                     <div className={`p-1.5 rounded text-xs ${darkMode ? 'bg-teal-900/50 text-teal-300' : 'bg-teal-100 text-teal-800'}`}>
-                                                        <div className="font-bold">{classInfo.grade}</div>
-                                                        <div className="opacity-70">"{classInfo.section}"</div>
+                                                        <div className="font-bold">{classInfo.subject}</div>
+                                                        <div className="opacity-70">{classInfo.teacher.split(' ')[1]}</div>
                                                     </div>
                                                 ) : (
                                                     <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-300'}`}>-</span>

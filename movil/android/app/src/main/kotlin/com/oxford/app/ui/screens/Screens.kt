@@ -404,6 +404,9 @@ fun PaymentRow(concept: String, amount: String, status: String) {
 // ============================================
 // PROFILE SCREEN
 // ============================================
+// ============================================
+// PROFILE SCREEN
+// ============================================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
@@ -432,15 +435,15 @@ fun ProfileScreen(
             Box(
                 modifier = Modifier
                     .size(100.dp)
-                    .background(Color(0xFF1E3A5F), shape = RoundedCornerShape(50.dp)),
+                    .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(50.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("CM", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text("CM", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary)
             }
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            Text("Carlos Martínez", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text("Carlos Martínez", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
             Text("carlos.martinez@oxford.edu", color = Color.Gray)
             Text("5to Primaria - Sección A", color = Color.Gray)
             
@@ -456,7 +459,7 @@ fun ProfileScreen(
             OutlinedButton(
                 onClick = onLogout,
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
             ) {
                 Icon(Icons.Default.Logout, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
@@ -472,15 +475,16 @@ fun ProfileMenuItem(icon: androidx.compose.ui.graphics.vector.ImageVector, title
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        onClick = onClick
+        onClick = onClick,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(icon, contentDescription = null, tint = Color(0xFF1E3A5F))
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Spacer(modifier = Modifier.width(12.dp))
-            Text(title, modifier = Modifier.weight(1f))
+            Text(title, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurface)
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.Gray)
         }
     }
@@ -526,21 +530,21 @@ fun NotificationCard(title: String, message: String, time: String, isRead: Boole
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isRead) Color.White else Color(0xFFE3F2FD)
+            containerColor = if (isRead) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primaryContainer.copy(alpha=0.3f)
         )
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
             Icon(
                 Icons.Default.Notifications,
                 contentDescription = null,
-                tint = Color(0xFF1E3A5F)
+                tint = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(title, fontWeight = FontWeight.SemiBold)
-                Text(message, fontSize = 14.sp, color = Color.Gray)
+                Text(title, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                Text(message, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text(time, fontSize = 12.sp, color = Color.Gray)
+            Text(time, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -611,13 +615,13 @@ fun ScheduleCard(time: String, subject: String, room: String) {
         ) {
             Text(
                 time,
-                color = Color(0xFF1E3A5F),
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.width(100.dp)
             )
             Column(modifier = Modifier.weight(1f)) {
-                Text(subject, fontWeight = FontWeight.SemiBold)
-                Text(room, fontSize = 14.sp, color = Color.Gray)
+                Text(subject, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                Text(room, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

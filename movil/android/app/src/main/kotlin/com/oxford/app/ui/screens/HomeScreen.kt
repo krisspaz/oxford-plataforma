@@ -32,7 +32,8 @@ fun HomeScreen(
     onNavigateToPayments: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateToNotifications: () -> Unit,
-    onNavigateToSchedule: () -> Unit
+    onNavigateToSchedule: () -> Unit,
+    onNavigateToChat: () -> Unit
 ) {
     val userName = "Carlos Martínez"
     val grade = "5to Primaria - Sección A"
@@ -44,7 +45,7 @@ fun HomeScreen(
                 actions = {
                     IconButton(onClick = onNavigateToNotifications) {
                         BadgedBox(badge = { Badge { Text("3") } }) {
-                            Icon(Icons.Outlined.Notifications, contentDescription = "Notificaciones")
+                            Icon(Icons.Outlined.Notifications, contentDescription = "Notificaciones", tint = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 },
@@ -52,12 +53,12 @@ fun HomeScreen(
                     containerColor = Color.Transparent
                 )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF5F7FA))
                 .padding(paddingValues),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -75,8 +76,8 @@ fun HomeScreen(
                             .background(
                                 Brush.horizontalGradient(
                                     colors = listOf(
-                                        Color(0xFF1E3A5F),
-                                        Color(0xFF4A7AB8)
+                                        MaterialTheme.colorScheme.primary,
+                                        MaterialTheme.colorScheme.secondary
                                     )
                                 )
                             )
@@ -132,7 +133,7 @@ fun HomeScreen(
                     text = "Acceso Rápido",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF1E3A5F)
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -142,10 +143,18 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     QuickActionCard(
+                        icon = Icons.Filled.SmartToy,
+                        title = "Asistente AI",
+                        badge = "NEW",
+                        color = MaterialTheme.colorScheme.tertiary, // Use theme color
+                        onClick = onNavigateToChat,
+                        modifier = Modifier.weight(1f)
+                    )
+                    QuickActionCard(
                         icon = Icons.Filled.Assignment,
                         title = "Tareas",
                         badge = "5",
-                        color = Color(0xFF4CAF50),
+                        color = Color(0xFF4CAF50), // Keep specific colors for semantic meaning
                         onClick = onNavigateToTasks,
                         modifier = Modifier.weight(1f)
                     )
@@ -154,13 +163,6 @@ fun HomeScreen(
                         title = "Notas",
                         color = Color(0xFF2196F3),
                         onClick = onNavigateToGrades,
-                        modifier = Modifier.weight(1f)
-                    )
-                    QuickActionCard(
-                        icon = Icons.Filled.EventAvailable,
-                        title = "Asistencia",
-                        color = Color(0xFF9C27B0),
-                        onClick = onNavigateToAttendance,
                         modifier = Modifier.weight(1f)
                     )
                     QuickActionCard(
@@ -194,7 +196,7 @@ fun HomeScreen(
                     text = "Menú Principal",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF1E3A5F)
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -239,7 +241,7 @@ fun QuickActionCard(
             .aspectRatio(1f)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -277,7 +279,7 @@ fun QuickActionCard(
                 text = title,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF1E3A5F)
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -294,10 +296,10 @@ fun SectionHeader(title: String, onSeeAll: () -> Unit) {
             text = title,
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF1E3A5F)
+            color = MaterialTheme.colorScheme.onBackground
         )
         TextButton(onClick = onSeeAll) {
-            Text("Ver todo", color = Color(0xFF4A7AB8))
+            Text("Ver todo", color = MaterialTheme.colorScheme.primaryContainer)
         }
     }
 }
@@ -316,7 +318,7 @@ fun TaskCard(task: TaskItem, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -345,7 +347,7 @@ fun TaskCard(task: TaskItem, onClick: () -> Unit) {
                     text = task.title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color(0xFF1E3A5F)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = task.subject,
@@ -382,7 +384,7 @@ fun MenuCard(
     Card(
         modifier = modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -393,13 +395,13 @@ fun MenuCard(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFF1E3A5F).copy(alpha = 0.1f)),
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     icon,
                     contentDescription = null,
-                    tint = Color(0xFF1E3A5F),
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -411,7 +413,7 @@ fun MenuCard(
                     text = title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color(0xFF1E3A5F)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = subtitle,

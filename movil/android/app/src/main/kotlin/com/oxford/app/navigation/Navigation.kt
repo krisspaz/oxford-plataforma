@@ -20,6 +20,7 @@ sealed class Screen(val route: String) {
     object Profile : Screen("profile")
     object Notifications : Screen("notifications")
     object Schedule : Screen("schedule")
+    object Chat : Screen("chat")
 }
 
 @Composable
@@ -46,7 +47,8 @@ fun OxfordNavHost(navController: NavHostController) {
                 onNavigateToPayments = { navController.navigate(Screen.Payments.route) },
                 onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
                 onNavigateToNotifications = { navController.navigate(Screen.Notifications.route) },
-                onNavigateToSchedule = { navController.navigate(Screen.Schedule.route) }
+                onNavigateToSchedule = { navController.navigate(Screen.Schedule.route) },
+                onNavigateToChat = { navController.navigate(Screen.Chat.route) }
             )
         }
         
@@ -96,6 +98,10 @@ fun OxfordNavHost(navController: NavHostController) {
         
         composable(Screen.Schedule.route) {
             ScheduleScreen(onNavigateBack = { navController.popBackStack() })
+        }
+
+        composable(Screen.Chat.route) {
+            ChatScreen(onNavigateBack = { navController.popBackStack() })
         }
     }
 }

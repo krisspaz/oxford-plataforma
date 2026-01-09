@@ -88,7 +88,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -98,7 +98,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                         text = "Iniciar Sesión",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF1E3A5F)
+                        color = MaterialTheme.colorScheme.primary
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -117,7 +117,11 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                         ),
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        singleLine = true
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary
+                        )
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -147,7 +151,11 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                         ),
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        singleLine = true
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary
+                        )
                     )
 
                     // Error Message
@@ -175,20 +183,21 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                             .height(56.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF1E3A5F)
+                            containerColor = MaterialTheme.colorScheme.primary
                         ),
                         enabled = !isLoading && email.isNotBlank() && password.isNotBlank()
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
-                                color = Color.White
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
                         } else {
                             Text(
                                 text = "Ingresar",
                                 fontSize = 18.sp,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
                         }
                     }
@@ -198,7 +207,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     TextButton(onClick = { /* TODO: Forgot password */ }) {
                         Text(
                             text = "¿Olvidaste tu contraseña?",
-                            color = Color(0xFF2E5A8F)
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }

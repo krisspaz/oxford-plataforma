@@ -76,6 +76,7 @@ export const MENU_ITEMS = {
     asignarContenido: { id: 'asignarContenido', label: 'Asignar Contenido', path: '/docente/contenido', icon: 'Upload' },
     gestionTareas: { id: 'gestionTareas', label: 'Gestión Tareas', path: '/docente/tareas', icon: 'Edit' },
     listadoAlumnos: { id: 'listadoAlumnos', label: 'Listado Alumnos', path: '/docente/alumnos', icon: 'List' },
+    cargaNotas: { id: 'cargaNotas', label: 'Cargar Notas', path: '/carga-notas', icon: 'PenTool' }, // Added Carga Notas
     asignarNotas: { id: 'asignarNotas', label: 'Asignar Notas', path: '/docente/notas', icon: 'PenTool' },
     notasFinales: { id: 'notasFinales', label: 'Notas Finales', path: '/docente/notas-finales', icon: 'Award' },
     miHorario: { id: 'miHorario', label: 'Mi Horario', path: '/docente/horario', icon: 'Clock' },
