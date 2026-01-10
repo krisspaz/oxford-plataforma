@@ -9,9 +9,12 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ApiResource]
+#[UniqueEntity(fields: ['email'], message: 'Este correo electrónico ya está registrado.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     // Roles del sistema
@@ -53,6 +56,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private bool $isActive = true;
 
     public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+
+
+    public function getIsActive(): bool
     {
         return $this->isActive;
     }

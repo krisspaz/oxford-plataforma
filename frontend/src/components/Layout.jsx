@@ -145,7 +145,7 @@ const Layout = () => {
                     {isSidebarOpen && (
                         <div>
                             <h1 className="font-bold text-lg leading-tight">Oxford</h1>
-                            <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-white/70'} opacity-80`}>Portal Estudiantil</p>
+                            <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} opacity-80`}>Portal Estudiantil</p>
                         </div>
                     )}
                 </div>
@@ -210,7 +210,7 @@ const Layout = () => {
                                                 {/* Hover Gradient Effect */}
                                                 {!isActive && <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-${themeColor}`}></div>}
 
-                                                <span className={`${isActive ? 'text-white' : inactiveIconClass} transition-colors group-hover:text-white`}>
+                                                <span className={`${isActive ? 'text-white' : inactiveIconClass} transition-colors ${darkMode ? 'group-hover:text-white' : ''}`}>
                                                     {getIcon(item.icon)}
                                                 </span>
                                                 {isSidebarOpen && <span className="text-sm">{item.label}</span>}

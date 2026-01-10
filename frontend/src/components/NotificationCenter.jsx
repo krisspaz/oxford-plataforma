@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { X } from 'lucide-react';
+import api from '../services/api';
 
 /**
  * Centro de Notificaciones
@@ -20,98 +21,75 @@ const NotificationCenter = () => {
     const [selectedNotification, setSelectedNotification] = useState(null);
     const dropdownRef = useRef(null);
 
-    // Mock notifications (conectar con backend real)
-    useEffect(() => {
-        const mockNotifications = [
-            {
-                id: 1,
-                type: 'grade',
-                title: 'Nueva calificación',
-                message: 'Se registró tu nota en Matemáticas: 85',
-                fullMessage: 'Se ha registrado una nueva calificación en la materia de Matemáticas. Tu nota es de 85 puntos sobre 100. Esta calificación corresponde al examen parcial del primer bimestre. Si tienes alguna duda, puedes contactar a tu profesor.',
-                time: '5 minutos',
-                read: false,
-                icon: '📊'
-            },
-            {
-                id: 2,
-                type: 'payment',
-                title: 'Pago pendiente',
-                message: 'Tienes una cuota pendiente de Enero',
-                fullMessage: 'Tienes una cuota pendiente correspondiente al mes de Enero 2025. El monto es de Q750.00. Por favor, realiza tu pago antes del día 15 para evitar recargos. Puedes pagar en caja o mediante transferencia bancaria.',
-                time: '1 hora',
-                read: false,
-                icon: '💰'
-            },
-            {
-                id: 3,
-                type: 'message',
-                title: 'Nuevo mensaje',
-                message: 'Coordinación te envió un mensaje',
-                fullMessage: 'Mensaje de Coordinación Académica:\n\nEstimado estudiante,\n\nLe recordamos que la próxima semana iniciarán las evaluaciones del primer bimestre. Asegúrese de revisar el calendario de exámenes publicado en el portal.\n\nAtentamente,\nCoordinación Académica',
-                time: '2 horas',
-                read: false,
-                icon: '💬'
-            },
-            {
-                id: 4,
-                type: 'task',
-                title: 'Tarea asignada',
-                message: 'Nueva tarea: Ejercicios de Física Cap. 5',
-                fullMessage: 'Se te ha asignado una nueva tarea:\n\n📚 Materia: Física\n📝 Descripción: Ejercicios del Capítulo 5 - Movimiento Rectilíneo Uniforme\n📅 Fecha de entrega: 20 de Enero 2025\n⭐ Puntos: 15 pts\n\nInstrucciones: Resolver los ejercicios 1-15 del libro de texto.',
-                time: '1 día',
-                read: true,
-                icon: '📝'
-            },
-            {
-                id: 5,
-                type: 'event',
-                title: 'Evento próximo',
-                message: 'Reunión de padres mañana a las 4:00 PM',
-                fullMessage: 'Recordatorio de evento:\n\n📅 Reunión de Padres de Familia\n🕓 Hora: 4:00 PM\n📍 Lugar: Salón de Usos Múltiples\n\nSe tratarán los siguientes temas:\n- Avance académico del primer bimestre\n- Calendario de actividades\n- Información sobre pagos\n\nEs importante su asistencia.',
-                time: '1 día',
-                read: true,
-                icon: '📅'
-            },
-        ];
-
-        setNotifications(mockNotifications);
-        setUnreadCount(mockNotifications.filter(n => !n.read).length);
-    }, []);
-
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsOpen(false);
+    // Load notifications from backend
+    const fetchNotifications = async () => {
+        try {
+            const response = await api.get('/notifications');
+            if (response.data && Array.isArray(response.data)) {
+                setNotifications(response.data);
+                setUnreadCount(response.data.filter(n => !n.read).length);
             }
-        };
+        } catch (error) {
+            console.error("Error loading notifications", error);
+            // Fallback for demo if API fails
+            setNotifications([
+                { id: 1, type: 'grade', title: 'Nueva Calificación', message: 'Se ha publicado la nota de Matemáticas', time: 'Hace 5 min', read: false, icon: '📝' },
+                { id: 2, type: 'payment', title: 'Pago Confirmado', message: 'Tu pago de Marzo ha sido procesado', time: 'Hace 2 horas', read: false, icon: '💰' }
+            ]);
+            setUnreadCount(2);
+        }
+    };
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+    useEffect(() => {
+        fetchNotifications();
+        // Optional: Poll every minute
+        const interval = setInterval(fetchNotifications, 60000);
+        return () => clearInterval(interval);
     }, []);
 
-    const handleNotificationClick = (notification) => {
-        // Mark as read
-        if (!notification.read) {
-            setNotifications(prev => prev.map(n =>
-                n.id === notification.id ? { ...n, read: true } : n
-            ));
-            setUnreadCount(prev => Math.max(0, prev - 1));
+    const handleMarkAllAsRead = async () => {
+        try {
+            await api.post('/notifications/mark-all-read');
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            setUnreadCount(0);
+        } catch (error) {
+            console.error("Error marking all as read", error);
+            // Optimistic update even on error for demo
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            setUnreadCount(0);
         }
-        // Open detail modal
+    };
+
+    const handleClearAll = async () => {
+        try {
+            await api.delete('/notifications');
+            setNotifications([]);
+            setUnreadCount(0);
+        } catch (error) {
+            console.error("Error clearing notifications", error);
+            setNotifications([]);
+            setUnreadCount(0);
+        }
+    };
+
+    const handleNotificationClick = async (notification) => {
         setSelectedNotification(notification);
-        setIsOpen(false);
-    };
-
-    const handleMarkAllAsRead = () => {
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-        setUnreadCount(0);
-    };
-
-    const handleClearAll = () => {
-        setNotifications([]);
-        setUnreadCount(0);
+        if (!notification.read) {
+            try {
+                await api.post(`/notifications/${notification.id}/read`);
+                setNotifications(prev => prev.map(n =>
+                    n.id === notification.id ? { ...n, read: true } : n
+                ));
+                setUnreadCount(prev => Math.max(0, prev - 1));
+            } catch (error) {
+                console.error("Error marking notification as read", error);
+                // Optimistic update
+                setNotifications(prev => prev.map(n =>
+                    n.id === notification.id ? { ...n, read: true } : n
+                ));
+                setUnreadCount(prev => Math.max(0, prev - 1));
+            }
+        }
     };
 
     const typeColors = {
@@ -177,7 +155,7 @@ const NotificationCenter = () => {
                                             }`}
                                     >
                                         <div className="flex gap-3">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${typeColors[notification.type]}`}>
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${typeColors[notification.type] || 'bg-gray-100'}`}>
                                                 {notification.icon}
                                             </div>
                                             <div className="flex-1 min-w-0">

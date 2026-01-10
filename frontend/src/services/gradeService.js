@@ -56,8 +56,12 @@ const gradeService = {
      * @param {number} gradeId - Grade ID
      */
     getSections: async (gradeId) => {
-        const response = await api.get(`/grades/${gradeId}/sections`);
-        return response.data;
+        const response = await api.get(`/sections`, { params: { 'grade': gradeId } });
+        // Return hydra:member or member or data
+        const res = response.data;
+        if (res['hydra:member']) return res['hydra:member'];
+        if (res.member) return res.member;
+        return res;
     },
 
     /**
@@ -66,7 +70,15 @@ const gradeService = {
      * @param {Object} data - Section data { name, code, capacity }
      */
     createSection: async (gradeId, data) => {
-        const response = await api.post(`/grades/${gradeId}/sections`, data);
+        // Construct payload with IRI for API Platform
+        const payload = {
+            ...data,
+            grade: `/api/grades/${gradeId}`,
+            isActive: true
+        };
+        const response = await api.post(`/sections`, payload, {
+            headers: { 'Content-Type': 'application/ld+json' }
+        });
         return response.data;
     },
 

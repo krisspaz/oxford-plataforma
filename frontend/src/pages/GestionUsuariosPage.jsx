@@ -27,7 +27,8 @@ const GestionUsuariosPage = () => {
 
     // State for form data
     const [formData, setFormData] = useState({
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
         role: 'ROLE_USER',
         password: '',
@@ -43,8 +44,15 @@ const GestionUsuariosPage = () => {
         setLoading(true);
         try {
             const response = await userService.getAll();
-            if (response.success) {
-                setUsers(response.data);
+            if (response && response.member) {
+                setUsers(response.member);
+            } else if (response && response['hydra:member']) {
+                setUsers(response['hydra:member']);
+            } else if (Array.isArray(response)) {
+                setUsers(response);
+            } else {
+                console.error('Unexpected response format:', response);
+                setUsers([]);
             }
         } catch (error) {
             console.error('Error loading users:', error);
@@ -64,7 +72,7 @@ const GestionUsuariosPage = () => {
         try {
             await userService.toggleStatus(id);
             // Optimistic update
-            setUsers(users.map(u => u.id === id ? { ...u, isActive: !u.isActive } : u));
+            setUsers(users.map(u => u.id === id ? { ...u, active: !u.active } : u));
         } catch (error) {
             console.error('Error toggling status:', error);
         } finally {
@@ -74,9 +82,14 @@ const GestionUsuariosPage = () => {
 
     const openModal = (user = null) => {
         if (user) {
+            const nameParts = (user.name || '').split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+
             setSelectedUser(user);
             setFormData({
-                name: user.name || '',
+                firstName,
+                lastName,
                 email: user.email || '',
                 role: user.roles?.[0] || 'ROLE_USER',
                 password: '', // Don't show existing password
@@ -85,7 +98,8 @@ const GestionUsuariosPage = () => {
         } else {
             setSelectedUser(null);
             setFormData({
-                name: '',
+                firstName: '',
+                lastName: '',
                 email: '',
                 role: 'ROLE_DOCENTE', // Default sensible
                 password: '',
@@ -108,8 +122,8 @@ const GestionUsuariosPage = () => {
     const handleSave = async () => {
         try {
             // Validation
-            if (!formData.email || !formData.name) {
-                alert('Nombre y Email son obligatorios');
+            if (!formData.firstName || !formData.lastName || !formData.email) {
+                alert('Nombre, Apellido y Email son obligatorios');
                 return;
             }
             if (!selectedUser && !formData.password) {
@@ -118,9 +132,9 @@ const GestionUsuariosPage = () => {
             }
 
             const payload = {
-                name: formData.name,
+                name: `${formData.firstName} ${formData.lastName}`.trim(),
                 email: formData.email,
-                role: formData.role,
+                roles: [formData.role],
                 password: formData.password
             };
 
@@ -135,6 +149,20 @@ const GestionUsuariosPage = () => {
         } catch (error) {
             console.error('Error saving user:', error);
             alert('Error al guardar usuario: ' + error.message);
+        }
+    };
+
+    const getRoleColor = (role) => {
+        switch (role) {
+            case 'ROLE_SUPER_ADMIN': return 'bg-purple-100 text-purple-800';
+            case 'ROLE_DIRECCION': return 'bg-blue-100 text-blue-800';
+            case 'ROLE_COORDINACION': return 'bg-indigo-100 text-indigo-800';
+            case 'ROLE_CONTABILIDAD': return 'bg-emerald-100 text-emerald-800';
+            case 'ROLE_SECRETARIA': return 'bg-pink-100 text-pink-800';
+            case 'ROLE_INFORMATICA': return 'bg-cyan-100 text-cyan-800';
+            case 'ROLE_DOCENTE': return 'bg-orange-100 text-orange-800';
+            case 'ROLE_ALUMNO': return 'bg-green-100 text-green-800';
+            default: return 'bg-gray-100 text-gray-800';
         }
     };
 
@@ -191,7 +219,7 @@ const GestionUsuariosPage = () => {
                                     </span>
                                 </td>
                                 <td className="px-4 py-3 text-center">
-                                    {user.isActive ? (
+                                    {user.active ? (
                                         <span className="flex items-center justify-center gap-1 text-green-500"><Check size={16} /> Activo</span>
                                     ) : (
                                         <span className="flex items-center justify-center gap-1 text-red-500"><AlertCircle size={16} /> Inactivo</span>
@@ -202,8 +230,8 @@ const GestionUsuariosPage = () => {
                                         <button onClick={() => openModal(user)} className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`} title="Editar">
                                             <Edit size={16} className="text-blue-500" />
                                         </button>
-                                        <button onClick={() => toggleUserStatus(user.id)} disabled={actionLoading === user.id} className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`} title="Cambiar estado">
-                                            {actionLoading === user.id ? <RefreshCw size={16} className="animate-spin text-gray-500" /> : (user.isActive ? <Lock size={16} className="text-red-500" /> : <Unlock size={16} className="text-green-500" />)}
+                                        <button onClick={() => toggleUserStatus(user.id)} disabled={actionLoading === user.id} className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`} title={user.active ? "Desactivar usuario" : "Activar usuario"}>
+                                            {actionLoading === user.id ? <RefreshCw size={16} className="animate-spin text-gray-500" /> : (user.active ? <Lock size={16} className="text-orange-500" /> : <Unlock size={16} className="text-emerald-500" />)}
                                         </button>
                                     </div>
                                 </td>
@@ -232,13 +260,25 @@ const GestionUsuariosPage = () => {
                                 </div>
                             </div>
 
-                            <div>
-                                <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Nombre</label>
-                                <input
-                                    className={`${inputClass} w-full`}
-                                    value={formData.name}
-                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Nombre</label>
+                                    <input
+                                        className={`${inputClass} w-full`}
+                                        value={formData.firstName}
+                                        onChange={e => setFormData({ ...formData, firstName: e.target.value })}
+                                        placeholder="Ej. Juan"
+                                    />
+                                </div>
+                                <div>
+                                    <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Apellido</label>
+                                    <input
+                                        className={`${inputClass} w-full`}
+                                        value={formData.lastName}
+                                        onChange={e => setFormData({ ...formData, lastName: e.target.value })}
+                                        placeholder="Ej. Pérez"
+                                    />
+                                </div>
                             </div>
                             <div>
                                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Email</label>

@@ -28,14 +28,11 @@ class AppFixtures extends Fixture
 
         $users = [
             ['email' => 'admin@oxford.edu', 'role' => User::ROLE_SUPER_ADMIN, 'name' => 'Super Admin'],
-            ['email' => 'director@oxford.edu', 'role' => User::ROLE_DIRECCION, 'name' => 'Director'],
-            ['email' => 'secretary@oxford.edu', 'role' => User::ROLE_SECRETARIA, 'name' => 'Secretaría'],
-            ['email' => 'accountant@oxford.edu', 'role' => User::ROLE_CONTABILIDAD, 'name' => 'Contabilidad'],
-            ['email' => 'coordination@oxford.edu', 'role' => User::ROLE_COORDINACION, 'name' => 'Coordinación'],
-            ['email' => 'informatics@oxford.edu', 'role' => User::ROLE_INFORMATICA, 'name' => 'Informática'],
-            ['email' => 'teacher@oxford.edu', 'role' => User::ROLE_DOCENTE, 'name' => 'Docente General'],
-            ['email' => 'student@oxford.edu', 'role' => User::ROLE_ALUMNO, 'name' => 'Estudiante General'],
-            ['email' => 'parent@oxford.edu', 'role' => 'ROLE_PADRE', 'name' => 'Padre de Familia'],
+            // ['email' => 'director@oxford.edu', 'role' => User::ROLE_DIRECCION, 'name' => 'Director'],
+            // ['email' => 'secretary@oxford.edu', 'role' => User::ROLE_SECRETARIA, 'name' => 'Secretaría'],
+            // ['email' => 'accountant@oxford.edu', 'role' => User::ROLE_CONTABILIDAD, 'name' => 'Contabilidad'],
+            // ['email' => 'coordination@oxford.edu', 'role' => User::ROLE_COORDINACION, 'name' => 'Coordinación'],
+            // ['email' => 'informatics@oxford.edu', 'role' => User::ROLE_INFORMATICA, 'name' => 'Informática'],
         ];
 
         foreach ($users as $userData) {

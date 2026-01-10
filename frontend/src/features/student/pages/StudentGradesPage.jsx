@@ -54,6 +54,71 @@ const StudentGradesPage = () => {
         });
     };
 
+    const handleDownload = () => {
+        try {
+            import('jspdf').then(({ default: jsPDF }) => {
+                import('jspdf-autotable').then(() => {
+                    const doc = new jsPDF();
+
+                    // Header
+                    doc.setFontSize(20);
+                    doc.setTextColor(40, 40, 40);
+                    doc.text('CORPORACIÓN EDUCACIONAL OXFORD', 105, 20, { align: 'center' });
+                    doc.setFontSize(16);
+                    doc.setTextColor(100, 100, 100);
+                    doc.text('BOLETA DE CALIFICACIONES - CICLO 2026', 105, 30, { align: 'center' });
+
+                    doc.setDrawColor(200, 200, 200);
+                    doc.line(14, 35, 196, 35);
+
+                    // Student Info
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`Estudiante: ${user?.username || 'Estudiante'}`, 14, 45);
+                    doc.text(`Fecha de Emisión: ${new Date().toLocaleDateString()}`, 14, 52);
+                    doc.text(`Promedio General: ${stats.average}`, 14, 59);
+
+                    // Grades Table
+                    const headers = [['Materia', 'Bimestre 1', 'Bimestre 2', 'Bimestre 3', 'Bimestre 4', 'Promedio']];
+                    const data = grades.map(item => {
+                        const rowScores = [item.b1, item.b2, item.b3, item.b4].filter(x => x !== null);
+                        const rowAvg = rowScores.length ? (rowScores.reduce((a, b) => a + b, 0) / rowScores.length).toFixed(0) : '-';
+                        return [
+                            item.subject,
+                            item.b1 ?? '-',
+                            item.b2 ?? '-',
+                            item.b3 ?? '-',
+                            item.b4 ?? '-',
+                            rowAvg
+                        ];
+                    });
+
+                    doc.autoTable({
+                        startY: 70,
+                        head: headers,
+                        body: data,
+                        theme: 'striped',
+                        headStyles: { fillColor: [79, 70, 229], textColor: 255 }, // Indigo-600
+                        styles: { fontSize: 10, cellPadding: 3 }
+                    });
+
+                    // Signatures
+                    const finalY = doc.lastAutoTable.finalY + 40;
+                    doc.setDrawColor(0, 0, 0);
+                    doc.line(30, finalY, 80, finalY);
+                    doc.text('Directora', 55, finalY + 5, { align: 'center' });
+
+                    doc.line(130, finalY, 180, finalY);
+                    doc.text('Secretaria', 155, finalY + 5, { align: 'center' });
+
+                    doc.save(`Boleta_Calificaciones_${new Date().getFullYear()}.pdf`);
+                });
+            });
+        } catch (error) {
+            console.error("Error generating PDF", error);
+        }
+    };
+
     if (loading) return <div className="p-10 text-center">Cargando notas...</div>;
 
     return (
@@ -159,7 +224,10 @@ const StudentGradesPage = () => {
             </div>
 
             <div className="mt-6 flex justify-end">
-                <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
+                <button
+                    onClick={handleDownload}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+                >
                     <Download size={18} />
                     Descargar Boleta Oficial
                 </button>

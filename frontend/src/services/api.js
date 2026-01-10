@@ -147,7 +147,7 @@ const apiFetch = async (endpoint, options = {}, retry = true) => {
         // Parse response
         let data;
         const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
+        if (contentType && (contentType.includes('application/json') || contentType.includes('application/ld+json'))) {
             data = await response.json();
         } else {
             data = await response.text();

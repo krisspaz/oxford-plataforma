@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap, Plus, Edit, ChevronDown, ChevronRight, X, RefreshCw } from 'lucide-react';
+import { GraduationCap, Plus, Edit, ChevronDown, ChevronRight, X, RefreshCw, Trash } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { catalogService } from '../services';
+import { catalogService, gradeService } from '../services';
 
 const GradosPage = () => {
     const { darkMode } = useTheme();
     const [expandedLevel, setExpandedLevel] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState('grade'); // 'grade' or 'section'
-    const [selectedItem, setSelectedItem] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null); // The grade being edited or section parent
     const [loading, setLoading] = useState(true);
     const [levels, setLevels] = useState([]);
+
+    // Form States
+    const [gradeForm, setGradeForm] = useState({ name: '', code: '', levelId: null, capacity: 30 });
+    const [sectionForm, setSectionForm] = useState({ name: '', capacity: 30 });
 
     const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
     const labelClass = `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`;
@@ -24,80 +28,105 @@ const GradosPage = () => {
         try {
             const [levelsRes, gradesRes] = await Promise.all([
                 catalogService.getAcademicLevels(),
-                catalogService.getGrades()
+                gradeService.getAll() // Use gradeService instead of catalogService
             ]);
 
-            if (levelsRes.success) {
+            // Helper to extract data from API Platform response
+            const extractData = (res) => {
+                if (!res) return [];
+                if (res.member) return res.member;
+                if (res['hydra:member']) return res['hydra:member'];
+                if (Array.isArray(res)) return res;
+                if (res.data) return res.data;
+                return [];
+            };
+
+            const levelsData = extractData(levelsRes);
+            const gradesData = extractData(gradesRes);
+
+            if (levelsData) {
                 // Organize grades by level
-                const gradesData = gradesRes.success ? gradesRes.data : [];
-                const organizedLevels = levelsRes.data.map(level => ({
-                    ...level,
-                    grades: gradesData.filter(g => g.level === level.name) || []
-                }));
+                const organizedLevels = levelsData.map(level => {
+                    // Match grades to level. Grade.level is an object {id, name}
+                    const levelGrades = gradesData.filter(g => g.level && g.level.id === level.id);
+                    return {
+                        ...level,
+                        grades: levelGrades
+                    };
+                });
                 setLevels(organizedLevels);
             }
         } catch (error) {
             console.error('Error loading data:', error);
-            // Demo data
-            setLevels([
-                {
-                    id: 1,
-                    code: 'PRE',
-                    name: 'Preprimaria',
-                    grades: [
-                        { id: 1, name: 'Kinder 4', sections: ['A', 'B'], capacity: 25 },
-                        { id: 2, name: 'Kinder 5', sections: ['A', 'B'], capacity: 25 },
-                        { id: 3, name: 'Preparatoria', sections: ['A', 'B'], capacity: 25 },
-                    ]
-                },
-                {
-                    id: 2,
-                    code: 'PRI',
-                    name: 'Primaria',
-                    grades: [
-                        { id: 4, name: '1ro Primaria', sections: ['A', 'B'], capacity: 30 },
-                        { id: 5, name: '2do Primaria', sections: ['A', 'B'], capacity: 30 },
-                        { id: 6, name: '3ro Primaria', sections: ['A', 'B'], capacity: 30 },
-                        { id: 7, name: '4to Primaria', sections: ['A', 'B'], capacity: 30 },
-                        { id: 8, name: '5to Primaria', sections: ['A', 'B'], capacity: 30 },
-                        { id: 9, name: '6to Primaria', sections: ['A', 'B'], capacity: 30 },
-                    ]
-                },
-                {
-                    id: 3,
-                    code: 'BAS',
-                    name: 'Básico',
-                    grades: [
-                        { id: 10, name: '1ro Básico', sections: ['A', 'B', 'C'], capacity: 35 },
-                        { id: 11, name: '2do Básico', sections: ['A', 'B'], capacity: 35 },
-                        { id: 12, name: '3ro Básico', sections: ['A'], capacity: 35 },
-                    ]
-                },
-                {
-                    id: 4,
-                    code: 'BAC',
-                    name: 'Bachillerato',
-                    grades: [
-                        { id: 13, name: '4to Bachillerato', sections: ['A'], capacity: 30 },
-                        { id: 14, name: '5to Bachillerato', sections: ['A'], capacity: 30 },
-                    ]
-                },
-            ]);
+            // Fallback handled by empty state in UI
         } finally {
             setLoading(false);
         }
     };
 
     const openAddGradeModal = (level) => {
-        setSelectedItem({ level });
+        setSelectedItem(null); // New Grade
+        setGradeForm({ name: '', code: '', levelId: level.id, capacity: 30 });
         setModalType('grade');
         setShowModal(true);
     };
 
     const openEditGradeModal = (grade) => {
         setSelectedItem(grade);
+        setGradeForm({
+            name: grade.name,
+            code: grade.code || '',
+            levelId: grade.level?.id,
+            capacity: 30 // Grade entity doesn't have capacity, Section does. But user might want to set default? Not critical now.
+        });
         setModalType('grade');
         setShowModal(true);
+    };
+
+    const openAddSectionModal = (grade) => {
+        setSelectedItem(grade); // Parent Grade
+        setSectionForm({ name: 'A', capacity: 30 });
+        setModalType('section');
+        setShowModal(true);
+    };
+
+    const handleSaveGrade = async () => {
+        try {
+            if (selectedItem) {
+                // Edit
+                await gradeService.update(selectedItem.id, gradeForm);
+            } else {
+                // Create
+                await gradeService.create(gradeForm);
+            }
+            setShowModal(false);
+            loadData();
+        } catch (error) {
+            console.error(error);
+            alert('Error al guardar grado: ' + (error.response?.data?.error || error.message));
+        }
+    };
+
+    const handleSaveSection = async () => {
+        try {
+            // selectedItem is the Grade
+            await gradeService.createSection(selectedItem.id, sectionForm);
+            setShowModal(false);
+            loadData();
+        } catch (error) {
+            console.error(error);
+            alert('Error al guardar sección: ' + (error.response?.data?.error || error.message));
+        }
+    };
+
+    const handleDeleteGrade = async (id) => {
+        if (!window.confirm('¿Eliminar grado? Esto borrará secciones y desvinculará alumnos.')) return;
+        try {
+            await gradeService.delete(id);
+            loadData();
+        } catch (error) {
+            alert('No se pudo eliminar el grado');
+        }
     };
 
     if (loading) {
@@ -117,6 +146,8 @@ const GradosPage = () => {
 
             {/* Levels List */}
             <div className="space-y-4">
+                {levels.length === 0 && <div className="text-gray-500 text-center py-10">No hay niveles definidos. Vaya a "Gestión de Niveles" primero.</div>}
+
                 {levels.map(level => (
                     <div key={level.id} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm overflow-hidden`}>
                         {/* Level Header */}
@@ -139,6 +170,7 @@ const GradosPage = () => {
                                 <button
                                     onClick={(e) => { e.stopPropagation(); openAddGradeModal(level); }}
                                     className="p-2 text-teal-500 hover:bg-teal-50 dark:hover:bg-teal-900/30 rounded-lg"
+                                    title="Agregar Grado"
                                 >
                                     <Plus size={18} />
                                 </button>
@@ -154,7 +186,6 @@ const GradosPage = () => {
                                         <tr>
                                             <th className={`px-4 py-2 text-left text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Grado</th>
                                             <th className={`px-4 py-2 text-center text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Secciones</th>
-                                            <th className={`px-4 py-2 text-center text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Capacidad</th>
                                             <th className={`px-4 py-2 text-center text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Acciones</th>
                                         </tr>
                                     </thead>
@@ -163,27 +194,43 @@ const GradosPage = () => {
                                             <tr key={grade.id} className={darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
                                                 <td className={`px-4 py-2 font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{grade.name}</td>
                                                 <td className="px-4 py-2 text-center">
-                                                    <div className="flex justify-center gap-1">
-                                                        {grade.sections?.map((section, i) => (
-                                                            <span key={i} className="px-2 py-0.5 bg-teal-100 text-teal-700 rounded text-sm font-medium">
-                                                                {section}
+                                                    <div className="flex justify-center gap-1 flex-wrap">
+                                                        {grade.sections?.map((section) => (
+                                                            <span key={section.id} className="px-2 py-0.5 bg-teal-100 text-teal-700 rounded text-sm font-medium">
+                                                                {section.name}
                                                             </span>
                                                         ))}
+                                                        <button
+                                                            onClick={() => openAddSectionModal(grade)}
+                                                            className="px-2 py-0.5 border border-dashed border-gray-300 text-gray-400 rounded hover:text-teal-500 hover:border-teal-500 text-xs"
+                                                        >
+                                                            +
+                                                        </button>
                                                     </div>
                                                 </td>
-                                                <td className={`px-4 py-2 text-center ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                    {grade.capacity} alumnos
-                                                </td>
                                                 <td className="px-4 py-2 text-center">
-                                                    <button
-                                                        onClick={() => openEditGradeModal(grade)}
-                                                        className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`}
-                                                    >
-                                                        <Edit size={16} className="text-blue-500" />
-                                                    </button>
+                                                    <div className="flex justify-center gap-1">
+                                                        <button
+                                                            onClick={() => openEditGradeModal(grade)}
+                                                            className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`}
+                                                        >
+                                                            <Edit size={16} className="text-blue-500" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteGrade(grade.id)}
+                                                            className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`}
+                                                        >
+                                                            <Trash size={16} className="text-red-500" />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
+                                        {level.grades.length === 0 && (
+                                            <tr>
+                                                <td colSpan="3" className="text-center py-4 text-gray-500 text-sm">No hay grados en este nivel.</td>
+                                            </tr>
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
@@ -198,40 +245,82 @@ const GradosPage = () => {
                     <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg w-full max-w-md p-6`}>
                         <div className="flex items-center justify-between mb-4">
                             <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                                {selectedItem?.id ? 'Editar Grado' : 'Nuevo Grado'}
+                                {modalType === 'grade'
+                                    ? (selectedItem ? 'Editar Grado' : 'Nuevo Grado')
+                                    : 'Nueva Sección para ' + selectedItem?.name
+                                }
                             </h2>
                             <button onClick={() => setShowModal(false)}><X size={20} /></button>
                         </div>
+
                         <div className="space-y-4">
-                            <div>
-                                <label className={labelClass}>Nivel Académico</label>
-                                <select className={inputClass} defaultValue={selectedItem?.level?.id}>
-                                    {levels.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label className={labelClass}>Nombre del Grado</label>
-                                <input type="text" className={inputClass} defaultValue={selectedItem?.name} placeholder="Ej: 1ro Básico" />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Capacidad por Sección</label>
-                                <input type="number" className={inputClass} defaultValue={selectedItem?.capacity || 30} />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Secciones</label>
-                                <div className="flex gap-2 flex-wrap mt-1">
-                                    {['A', 'B', 'C', 'D'].map(section => (
-                                        <label key={section} className="flex items-center gap-1">
-                                            <input type="checkbox" defaultChecked={selectedItem?.sections?.includes(section)} />
-                                            <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{section}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
+                            {modalType === 'grade' ? (
+                                <>
+                                    <div>
+                                        <label className={labelClass}>Nivel Académico</label>
+                                        <select
+                                            className={inputClass}
+                                            value={gradeForm.levelId}
+                                            onChange={e => setGradeForm({ ...gradeForm, levelId: parseInt(e.target.value) })}
+                                            disabled={!!selectedItem} // Disable level change on edit
+                                        >
+                                            {levels.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className={labelClass}>Nombre del Grado</label>
+                                        <input
+                                            type="text"
+                                            className={inputClass}
+                                            value={gradeForm.name}
+                                            onChange={e => setGradeForm({ ...gradeForm, name: e.target.value })}
+                                            placeholder="Ej: 1ro Básico"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className={labelClass}>Código</label>
+                                        <input
+                                            type="text"
+                                            className={inputClass}
+                                            value={gradeForm.code}
+                                            onChange={e => setGradeForm({ ...gradeForm, code: e.target.value })}
+                                            placeholder="Ej: 1BAS"
+                                        />
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div>
+                                        <label className={labelClass}>Nombre de Sección</label>
+                                        <input
+                                            type="text"
+                                            className={inputClass}
+                                            value={sectionForm.name}
+                                            onChange={e => setSectionForm({ ...sectionForm, name: e.target.value })}
+                                            placeholder="Ej: A"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className={labelClass}>Capacidad</label>
+                                        <input
+                                            type="number"
+                                            className={inputClass}
+                                            value={sectionForm.capacity}
+                                            onChange={e => setSectionForm({ ...sectionForm, capacity: parseInt(e.target.value) })}
+                                        />
+                                    </div>
+                                </>
+                            )}
                         </div>
+
                         <div className="flex justify-end gap-3 mt-6">
                             <button onClick={() => setShowModal(false)} className={`px-4 py-2 rounded-lg ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}>Cancelar</button>
-                            <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg">Guardar</button>
+                            <button
+                                onClick={modalType === 'grade' ? handleSaveGrade : handleSaveSection}
+                                className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg"
+                            >
+                                Guardar
+                            </button>
                         </div>
                     </div>
                 </div>

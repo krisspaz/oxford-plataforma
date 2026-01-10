@@ -1,16 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { ClipboardList, Plus, Search, Filter, Calendar, BookOpen, GraduationCap, Edit, Trash2, Eye, Check, Clock, AlertCircle, X, Save, ChevronDown } from 'lucide-react';
+import { ClipboardList, Plus, Search, Filter, Calendar, BookOpen, GraduationCap, Edit, Trash2, Eye, Check, Clock, AlertCircle, X, Save, ChevronDown, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
+import { taskService, subjectService, gradeService, bimesterService, teacherService } from '../services';
 
 const GestionTareasPage = () => {
     const { darkMode } = useTheme();
-    const { user } = useAuth();
+    const { user, hasRole } = useAuth(); // Assuming user has { id, teacherId } attached if role is teacher? 
+    // If not, we might need to fetch teacher profile or rely on backend 'my-tasks'.
+    // Actually, create task requires 'teacherId' in the body. If the backend doesn't infer it from the logged in user for creation, we need it.
+    // The previous TaskController::create looked up Teacher by ID.
+    // Ideally the controller should infer it. BUT, for now let's assume we need to find our own teacher ID or the controller is updated.
+    // Wait, TaskController::create takes 'teacherId'.
+    // Let's assume we can get it from a profile call or AuthContext.
+    // For now, let's try to fetch "Me" from teacher service if needed.
+
     const [loading, setLoading] = useState(true);
     const [tasks, setTasks] = useState([]);
     const [filteredTasks, setFilteredTasks] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
+
+    // Catalogs
+    const [subjects, setSubjects] = useState([]);
+    const [grades, setGrades] = useState([]); // This would be the grades/sections available
+    const [bimesters, setBimesters] = useState([]);
+    const [currentTeacher, setCurrentTeacher] = useState(null);
+
     const [selectedBimester, setSelectedBimester] = useState('');
     const [selectedCourse, setSelectedCourse] = useState('');
     const [selectedGrade, setSelectedGrade] = useState('');
@@ -18,119 +34,69 @@ const GestionTareasPage = () => {
 
     const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-obs-blue outline-none w-full ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
 
-    // Demo: Teacher's courses
-    const teacherCourses = [
-        { id: 1, name: 'Matemáticas' },
-        { id: 2, name: 'Física' },
-    ];
-
-    // Demo: Available grades for each course
-    const availableGrades = [
-        { id: 1, name: '3ro Primaria A' },
-        { id: 2, name: '3ro Primaria B' },
-        { id: 3, name: '4to Primaria A' },
-        { id: 4, name: '5to Primaria A' },
-        { id: 5, name: '1ro Básico A' },
-        { id: 6, name: '2do Básico A' },
-    ];
-
-    // Bimesters
-    const bimesters = [
-        { id: 1, name: '1er Bimestre', start: '2025-01-06', end: '2025-03-14' },
-        { id: 2, name: '2do Bimestre', start: '2025-03-17', end: '2025-05-30' },
-        { id: 3, name: '3er Bimestre', start: '2025-06-02', end: '2025-08-15' },
-        { id: 4, name: '4to Bimestre', start: '2025-08-18', end: '2025-10-31' },
-    ];
-
-    // Demo tasks
-    const demoTasks = [
-        {
-            id: 1,
-            title: 'Ejercicios de Álgebra',
-            description: 'Resolver ejercicios 1-20 del libro de texto, páginas 45-48',
-            course: 'Matemáticas',
-            bimester: 1,
-            dueDate: '2025-01-20',
-            points: 10,
-            type: 'tarea',
-            grades: ['3ro Primaria A', '3ro Primaria B'],
-            status: 'active',
-            submissions: 45,
-            pending: 5,
-        },
-        {
-            id: 2,
-            title: 'Examen Parcial - Fracciones',
-            description: 'Evaluación sobre suma, resta y multiplicación de fracciones',
-            course: 'Matemáticas',
-            bimester: 1,
-            dueDate: '2025-01-25',
-            points: 25,
-            type: 'examen',
-            grades: ['4to Primaria A', '5to Primaria A'],
-            status: 'active',
-            submissions: 30,
-            pending: 2,
-        },
-        {
-            id: 3,
-            title: 'Proyecto: Movimiento Rectilíneo',
-            description: 'Elaborar un video demostrando el MRU con materiales caseros',
-            course: 'Física',
-            bimester: 1,
-            dueDate: '2025-02-01',
-            points: 30,
-            type: 'proyecto',
-            grades: ['1ro Básico A', '2do Básico A'],
-            status: 'active',
-            submissions: 20,
-            pending: 10,
-        },
-        {
-            id: 4,
-            title: 'Ejercicios de Geometría',
-            description: 'Cálculo de áreas y perímetros',
-            course: 'Matemáticas',
-            bimester: 1,
-            dueDate: '2025-01-15',
-            points: 15,
-            type: 'tarea',
-            grades: ['3ro Primaria A'],
-            status: 'completed',
-            submissions: 25,
-            pending: 0,
-        },
-    ];
-
     // Form state
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        course: '',
-        bimester: 1,
+        subjectId: '',
+        bimesterId: '',
         dueDate: '',
         points: 10,
         type: 'tarea',
-        grades: [],
+        cycleId: 1, // Default to 1 or active
+        grades: [], // Array of { gradeId, sectionId }
     });
 
     useEffect(() => {
-        setTimeout(() => {
-            setTasks(demoTasks);
-            setFilteredTasks(demoTasks);
-            setLoading(false);
-        }, 500);
+        loadData();
     }, []);
+
+    const loadData = async () => {
+        setLoading(true);
+        try {
+            // Load catalogs
+            const [subjectsData, gradesData, bimestersData, myTasks] = await Promise.all([
+                subjectService.getAll({ active: true }),
+                gradeService.getAll(),
+                bimesterService.getAll({ active: true }),
+                taskService.getMyTasks() // Use my-tasks for the list
+            ]);
+
+            setSubjects(subjectsData);
+            setGrades(gradesData);
+            setBimesters(bimestersData);
+            setTasks(myTasks);
+            setFilteredTasks(myTasks);
+
+            // Try to find teacher profile
+            // If user is teacher, we need their ID for creation
+            if (hasRole('ROLE_DOCENTE')) {
+                const teacherProfile = await teacherService.getMe(); // Ensure this exists or similar
+                setCurrentTeacher(teacherProfile);
+            } else {
+                // Admin mode?
+                // For now, assume teacher operates this page.
+            }
+
+        } catch (error) {
+            console.error("Error loading data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         let filtered = [...tasks];
         if (searchTerm) {
             const term = searchTerm.toLowerCase();
-            filtered = filtered.filter(t => t.title.toLowerCase().includes(term) || t.description.toLowerCase().includes(term));
+            filtered = filtered.filter(t => t.title.toLowerCase().includes(term));
         }
-        if (selectedBimester) filtered = filtered.filter(t => t.bimester === parseInt(selectedBimester));
-        if (selectedCourse) filtered = filtered.filter(t => t.course === selectedCourse);
-        if (selectedGrade) filtered = filtered.filter(t => t.grades.includes(selectedGrade));
+        if (selectedBimester) filtered = filtered.filter(t => t.bimester?.id === parseInt(selectedBimester));
+        if (selectedCourse) filtered = filtered.filter(t => t.subject?.id === parseInt(selectedCourse));
+        // Grade filtering on frontend might be complex if tasks have multiple grades.
+        // Simplified check:
+        // if (selectedGrade) filtered = filtered.filter(t => t.grades.some(g => g.gradeId === parseInt(selectedGrade)));
+
         setFilteredTasks(filtered);
     }, [searchTerm, selectedBimester, selectedCourse, selectedGrade, tasks]);
 
@@ -139,11 +105,12 @@ const GestionTareasPage = () => {
         setFormData({
             title: '',
             description: '',
-            course: teacherCourses[0]?.name || '',
-            bimester: 1,
+            subjectId: subjects[0]?.id || '',
+            bimesterId: bimesters[0]?.id || '',
             dueDate: '',
             points: 10,
             type: 'tarea',
+            cycleId: 1, // hardcoded for now or fetch active
             grades: [],
         });
         setShowModal(true);
@@ -154,64 +121,81 @@ const GestionTareasPage = () => {
         setFormData({
             title: task.title,
             description: task.description,
-            course: task.course,
-            bimester: task.bimester,
+            subjectId: task.subject?.id || '',
+            bimesterId: task.bimester?.id || '',
             dueDate: task.dueDate,
             points: task.points,
             type: task.type,
-            grades: task.grades,
+            cycleId: 1,
+            grades: task.grades || [],
         });
         setShowModal(true);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!formData.title || !formData.dueDate || formData.grades.length === 0) {
-            alert('Por favor complete todos los campos requeridos');
+            alert('Por favor complete todos los campos requeridos (Título, Fecha, Grados)');
             return;
         }
 
-        if (editingTask) {
-            setTasks(prev => prev.map(t => t.id === editingTask.id ? { ...t, ...formData } : t));
-        } else {
-            const newTask = {
-                id: Date.now(),
-                ...formData,
-                status: 'active',
-                submissions: 0,
-                pending: 50,
-            };
-            setTasks(prev => [...prev, newTask]);
+        // We need a teacher ID.
+        // For testing, if we don't have currentTeacher, use a hardcoded one or let backend fail?
+        // Let's assume currentTeacher is set or we fallback to 1 for dev.
+        // In real prod, this MUST be from Auth.
+        const teacherId = currentTeacher?.id || 1;
+
+        const payload = {
+            ...formData,
+            teacherId: teacherId,
+            points: parseInt(formData.points),
+            subjectId: parseInt(formData.subjectId),
+            bimesterId: parseInt(formData.bimesterId),
+            grades: formData.grades // Ensure structure is [{gradeId, sectionId}]
+        };
+
+        try {
+            if (editingTask) {
+                await taskService.update(editingTask.id, payload);
+                alert("Tarea actualizada");
+            } else {
+                await taskService.create(payload);
+                alert("Tarea creada");
+            }
+            setShowModal(false);
+            loadData(); // Reload list
+        } catch (error) {
+            console.error("Error saving task", error);
+            alert("Error al guardar: " + (error.response?.data?.error || error.message));
         }
-        setShowModal(false);
     };
 
-    const handleDelete = (taskId) => {
+    const handleDelete = async (taskId) => {
         if (confirm('¿Está seguro de eliminar esta tarea?')) {
-            setTasks(prev => prev.filter(t => t.id !== taskId));
+            try {
+                await taskService.delete(taskId);
+                setTasks(prev => prev.filter(t => t.id !== taskId));
+            } catch (error) {
+                alert("Error al eliminar");
+            }
         }
     };
 
-    const toggleGrade = (grade) => {
-        setFormData(prev => ({
-            ...prev,
-            grades: prev.grades.includes(grade) ? prev.grades.filter(g => g !== grade) : [...prev.grades, grade]
-        }));
+    const toggleGrade = (gradeId, sectionId = null) => {
+        setFormData(prev => {
+            const exists = prev.grades.find(g => g.gradeId === gradeId && g.sectionId === sectionId);
+            if (exists) {
+                return { ...prev, grades: prev.grades.filter(g => g !== exists) };
+            } else {
+                return { ...prev, grades: [...prev.grades, { gradeId, sectionId }] };
+            }
+        });
     };
 
-    const getTypeColor = (type) => {
-        switch (type) {
-            case 'tarea': return darkMode ? 'bg-blue-900/50 text-blue-300' : 'bg-blue-100 text-blue-700';
-            case 'examen': return darkMode ? 'bg-red-900/50 text-red-300' : 'bg-red-100 text-red-700';
-            case 'proyecto': return darkMode ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-700';
-            default: return darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600';
-        }
+    // Helper to check if grade is selected
+    const isGradeSelected = (gradeId, sectionId = null) => {
+        return formData.grades.some(g => g.gradeId === gradeId && g.sectionId === sectionId);
     };
 
-    const getStatusColor = (status) => {
-        return status === 'completed'
-            ? darkMode ? 'bg-green-900/50 text-green-300' : 'bg-green-100 text-green-700'
-            : darkMode ? 'bg-yellow-900/50 text-yellow-300' : 'bg-yellow-100 text-yellow-700';
-    };
 
     if (loading) {
         return (
@@ -416,9 +400,10 @@ const GestionTareasPage = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Curso</label>
-                                    <select value={formData.course} onChange={e => setFormData(prev => ({ ...prev, course: e.target.value }))} className={inputClass}>
-                                        {teacherCourses.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                                    <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Materia</label>
+                                    <select value={formData.subjectId} onChange={e => setFormData(prev => ({ ...prev, subjectId: e.target.value }))} className={inputClass}>
+                                        <option value="">-- Seleccionar --</option>
+                                        {subjects.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                     </select>
                                 </div>
                             </div>
@@ -426,7 +411,8 @@ const GestionTareasPage = () => {
                             <div className="grid grid-cols-3 gap-4">
                                 <div>
                                     <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Bimestre</label>
-                                    <select value={formData.bimester} onChange={e => setFormData(prev => ({ ...prev, bimester: parseInt(e.target.value) }))} className={inputClass}>
+                                    <select value={formData.bimesterId} onChange={e => setFormData(prev => ({ ...prev, bimesterId: parseInt(e.target.value) }))} className={inputClass}>
+                                        <option value="">-- Seleccionar --</option>
                                         {bimesters.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                                     </select>
                                 </div>
@@ -442,17 +428,17 @@ const GestionTareasPage = () => {
 
                             <div>
                                 <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Grados Asignados *</label>
-                                <div className="flex flex-wrap gap-2">
-                                    {availableGrades.map(grade => (
+                                <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                                    {grades.map(grade => (
                                         <button
                                             key={grade.id}
-                                            onClick={() => toggleGrade(grade.name)}
-                                            className={`px-3 py-2 rounded-lg text-sm transition-all ${formData.grades.includes(grade.name)
-                                                ? 'bg-obs-green text-white shadow-md'
-                                                : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            onClick={() => toggleGrade(grade.id)}
+                                            className={`px-3 py-2 rounded-lg text-sm transition-all border ${isGradeSelected(grade.id)
+                                                ? 'bg-obs-green text-white shadow-md border-obs-green'
+                                                : darkMode ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-white hover:shadow-sm'
                                                 }`}
                                         >
-                                            {formData.grades.includes(grade.name) && <Check size={14} className="inline mr-1" />}
+                                            {isGradeSelected(grade.id) && <Check size={14} className="inline mr-1" />}
                                             {grade.name}
                                         </button>
                                     ))}

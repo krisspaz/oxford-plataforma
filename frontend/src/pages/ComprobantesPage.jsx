@@ -17,6 +17,16 @@ const ComprobantesPage = () => {
 
     const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
 
+    const location = window.location.pathname;
+
+    useEffect(() => {
+        if (location.includes('pendientes')) {
+            setFilterStatus('PENDIENTE');
+        } else {
+            loadInvoices();
+        }
+    }, [location]);
+
     useEffect(() => {
         loadInvoices();
     }, [filterType, filterStatus]);
@@ -39,6 +49,7 @@ const ComprobantesPage = () => {
                 { id: 1, type: 'FACTURA_SAT', series: 'A', number: '001', uuid: 'ABC123', name: 'Juan Pérez', nit: '12345678-9', total: 3500, status: 'EMITIDO', issuedAt: '2025-01-16 10:30' },
                 { id: 2, type: 'RECIBO_SAT', series: 'B', number: '045', uuid: 'DEF456', name: 'María López', nit: 'CF', total: 750, status: 'EMITIDO', issuedAt: '2025-01-16 09:15' },
                 { id: 3, type: 'FACTURA_SAT', series: 'A', number: '002', uuid: 'GHI789', name: 'Carlos García', nit: '98765432-1', total: 1000, status: 'ANULADO', issuedAt: '2025-01-15 16:00', annulledAt: '2025-01-15 17:00', annulmentReason: 'Error en datos del cliente' },
+                { id: 4, type: 'RECIBO_SAT', series: 'B', number: '046', uuid: '', name: 'Pedro Martinez', nit: 'CF', total: 500, status: 'PENDIENTE', issuedAt: '2025-01-17 08:00' },
             ]);
         } finally {
             setLoading(false);
@@ -136,6 +147,7 @@ const ComprobantesPage = () => {
                         <option value="">Todos</option>
                         <option value="EMITIDO">Emitido</option>
                         <option value="ANULADO">Anulado</option>
+                        <option value="PENDIENTE">Pendiente</option>
                     </select>
                 </div>
             </div>
@@ -168,7 +180,10 @@ const ComprobantesPage = () => {
                                     <td className={`px-4 py-3 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{invoice.nit}</td>
                                     <td className={`px-4 py-3 text-right font-medium ${darkMode ? 'text-green-400' : 'text-green-600'}`}>Q {invoice.total?.toLocaleString()}</td>
                                     <td className="px-4 py-3 text-center">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${invoice.status === 'EMITIDO' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium 
+                                            ${invoice.status === 'EMITIDO' ? 'bg-green-100 text-green-700' :
+                                                invoice.status === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-700' :
+                                                    'bg-red-100 text-red-700'
                                             }`}>{invoice.status}</span>
                                     </td>
                                     <td className={`px-4 py-3 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{invoice.issuedAt}</td>

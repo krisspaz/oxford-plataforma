@@ -2,86 +2,103 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, BookOpen, RefreshCw, MapPin, Users } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
+import { scheduleService } from '../services';
 
 const MiHorarioPage = () => {
     const { darkMode } = useTheme();
-    const { user } = useAuth();
+    const { user, hasRole } = useAuth();
     const [loading, setLoading] = useState(true);
     const [schedule, setSchedule] = useState(null);
     const [selectedDay, setSelectedDay] = useState('Lunes');
+    const [error, setError] = useState(null);
 
     const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+    // Map integer day from backend (1=Monday) to string
+    const dayMap = { 1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes' };
 
-    // Demo schedule for STUDENT
-    const studentSchedule = {
-        student: 'Student Name',
-        grade: '5to Bachillerato',
-        section: 'A',
-        periods: [
-            { id: 1, time: '07:30 - 08:15', label: '1er Período' },
-            { id: 2, time: '08:15 - 09:00', label: '2do Período' },
-            { id: 3, time: '09:00 - 09:45', label: '3er Período' },
-            { id: 4, time: '09:45 - 10:15', label: 'Receso', isBreak: true },
-            { id: 5, time: '10:15 - 11:00', label: '4to Período' },
-            { id: 6, time: '11:00 - 11:45', label: '5to Período' },
-            { id: 7, time: '11:45 - 12:30', label: '6to Período' },
-        ],
-        classes: {
-            'Lunes': [
-                { period: 1, subject: 'Matemáticas', teacher: 'Prof. Carlos', room: 'Aula 5' },
-                { period: 2, subject: 'Física Fund.', teacher: 'Lic. Ana', room: 'Lab 1' },
-                { period: 3, subject: 'Literatura', teacher: 'Lic. Mario', room: 'Aula 5' },
-                { period: 5, subject: 'Inglés Avanzado', teacher: 'Teacher John', room: 'Lab Idiomas' },
-                { period: 6, subject: 'Computación', teacher: 'Ing. Sofia', room: 'Lab Comp. 2' },
-            ],
-            'Martes': [
-                { period: 1, subject: 'Química', teacher: 'Lic. Roberto', room: 'Lab 2' },
-                { period: 2, subject: 'Química', teacher: 'Lic. Roberto', room: 'Lab 2' },
-                { period: 3, subject: 'Matemáticas', teacher: 'Prof. Carlos', room: 'Aula 5' },
-                { period: 5, subject: 'Estadística', teacher: 'Lic. Elena', room: 'Aula 5' },
-                { period: 7, subject: 'Seminario', teacher: 'Lic. Patricia', room: 'Audio Visuales' },
-            ],
-            'Miércoles': [
-                { period: 1, subject: 'Biología', teacher: 'Dra. Carmen', room: 'Lab 3' },
-                { period: 2, subject: 'Biología', teacher: 'Dra. Carmen', room: 'Lab 3' },
-                { period: 5, subject: 'Literatura', teacher: 'Lic. Mario', room: 'Aula 5' },
-                { period: 6, subject: 'Inglés Avanzado', teacher: 'Teacher John', room: 'Lab Idiomas' },
-            ],
-            'Jueves': [
-                { period: 1, subject: 'Física Fund.', teacher: 'Lic. Ana', room: 'Lab 1' },
-                { period: 2, subject: 'Física Fund.', teacher: 'Lic. Ana', room: 'Lab 1' },
-                { period: 3, subject: 'Filosofía', teacher: 'Lic. David', room: 'Aula 5' },
-                { period: 5, subject: 'Computación', teacher: 'Ing. Sofia', room: 'Lab Comp. 2' },
-                { period: 6, subject: 'Computación', teacher: 'Ing. Sofia', room: 'Lab Comp. 2' },
-            ],
-            'Viernes': [
-                { period: 1, subject: 'Matemáticas', teacher: 'Prof. Carlos', room: 'Aula 5' },
-                { period: 2, subject: 'Estadística', teacher: 'Lic. Elena', room: 'Aula 5' },
-                { period: 3, subject: 'Deportes', teacher: 'Prof. Luis', room: 'Canchas' },
-                { period: 5, subject: 'Arte y Cultura', teacher: 'Lic. Clara', room: 'Salon Arte' },
-            ],
+    useEffect(() => {
+        fetchSchedule();
+    }, [user]);
+
+    const fetchSchedule = async () => {
+        try {
+            setLoading(true);
+            let response;
+
+            if (hasRole('ROLE_DOCENTE')) {
+                response = await scheduleService.getMySchedule();
+            } else if (hasRole('ROLE_ESTUDIANTE') || hasRole('ROLE_PADRE')) {
+                response = await scheduleService.getMyStudentSchedule();
+            } else {
+                // Admin or other: maybe show nothing or generic message?
+                // For now, let's try to fetch as if they were a teacher or student just in case, or stop.
+                setLoading(false);
+                return;
+            }
+
+            // Backend returns flat array of schedule objects
+            const rawData = response.data || response; // Handle axios vs standard response
+
+            // Transform flat data to structured format expected by UI
+            // Structure needed: { classes: { 'Lunes': [...], ... } }
+
+            const structuredClasses = {
+                'Lunes': [], 'Martes': [], 'Miércoles': [], 'Jueves': [], 'Viernes': []
+            };
+
+            rawData.forEach(item => {
+                const dayName = dayMap[item.dayOfWeek];
+                if (dayName && structuredClasses[dayName]) {
+                    structuredClasses[dayName].push({
+                        period: item.period,
+                        subject: item.subject?.name || 'Materia',
+                        teacher: item.teacher?.name || 'Docente',
+                        room: item.classroom || 'Aula'
+                    });
+                }
+            });
+
+            // Sort periods
+            Object.keys(structuredClasses).forEach(day => {
+                structuredClasses[day].sort((a, b) => a.period - b.period);
+            });
+
+            setSchedule({
+                grade: 'Ciclo 2026', // Placeholder or fetch from first item
+                section: '',
+                classes: structuredClasses,
+                // Static periods for now, or could come from DB if variable
+                periods: [
+                    { id: 1, time: '07:30 - 08:15', label: '1er Período' },
+                    { id: 2, time: '08:15 - 09:00', label: '2do Período' },
+                    { id: 3, time: '09:00 - 09:45', label: '3er Período' },
+                    { id: 4, time: '09:45 - 10:15', label: 'Receso', isBreak: true },
+                    { id: 5, time: '10:15 - 11:00', label: '4to Período' },
+                    { id: 6, time: '11:00 - 11:45', label: '5to Período' },
+                    { id: 7, time: '11:45 - 12:30', label: '6to Período' },
+                ]
+            });
+
+        } catch (err) {
+            console.error("Error loading schedule", err);
+            setError("No se pudo cargar el horario. " + (err.response?.data?.error || err.message));
+        } finally {
+            setLoading(false);
         }
     };
 
-    useEffect(() => {
-        // Simulate loading from API
-        setTimeout(() => {
-            setSchedule(studentSchedule);
-            setLoading(false);
-        }, 500);
-    }, []);
-
     const getClassForPeriod = (day, periodId) => {
-        if (!schedule) return null;
-        const dayClasses = schedule.classes[day] || [];
-        return dayClasses.find(c => c.period === periodId);
+        if (!schedule || !schedule.classes[day]) return null;
+        return schedule.classes[day].find(c => c.period === periodId);
     };
 
     const getTodayClasses = () => {
-        const today = new Date().toLocaleDateString('es', { weekday: 'long' });
-        const dayName = today.charAt(0).toUpperCase() + today.slice(1);
-        const mappedDay = days.find(d => d.toLowerCase().includes(dayName.toLowerCase().substring(0, 3)));
-        return schedule?.classes[mappedDay || 'Lunes'] || [];
+        if (!schedule) return [];
+        const dayIndex = new Date().getDay(); // 0-6
+        if (dayIndex >= 1 && dayIndex <= 5) {
+            return schedule.classes[days[dayIndex - 1]] || [];
+        }
+        return [];
     };
 
     const getTotalClasses = () => {
@@ -94,6 +111,18 @@ const MiHorarioPage = () => {
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-12 text-center`}>
                 <RefreshCw className="animate-spin mx-auto text-teal-500" size={32} />
                 <p className={`mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Cargando horario...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-12 text-center`}>
+                <div className="mx-auto bg-red-100 text-red-500 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                    <Users size={24} />
+                </div>
+                <h3 className="text-lg font-bold text-red-500 mb-2">Error</h3>
+                <p className={`mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{error}</p>
             </div>
         );
     }
@@ -228,16 +257,16 @@ const MiHorarioPage = () => {
                     <table className="w-full text-sm">
                         <thead>
                             <tr>
-                                <th className={`p-2 text-left border ${darkMode ? 'border-gray-700 bg-gray-700/50' : 'border-gray-200 bg-gray-50'}`}>Hora</th>
+                                <th className={`p-2 text-left border ${darkMode ? 'border-gray-700 bg-gray-700/50 text-gray-200' : 'border-gray-200 bg-gray-50 text-gray-700'}`}>Hora</th>
                                 {days.map(day => (
-                                    <th key={day} className={`p-2 text-center border ${darkMode ? 'border-gray-700 bg-gray-700/50' : 'border-gray-200 bg-gray-50'}`}>{day}</th>
+                                    <th key={day} className={`p-2 text-center border ${darkMode ? 'border-gray-700 bg-gray-700/50 text-gray-200' : 'border-gray-200 bg-gray-50 text-gray-700'}`}>{day}</th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody>
                             {schedule?.periods.map(period => (
                                 <tr key={period.id}>
-                                    <td className={`p-2 border text-xs ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                    <td className={`p-2 border text-xs ${darkMode ? 'border-gray-700 text-gray-300' : 'border-gray-200 text-gray-600'}`}>
                                         <div className="font-medium">{period.time}</div>
                                     </td>
                                     {days.map(day => {

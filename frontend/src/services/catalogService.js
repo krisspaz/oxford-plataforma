@@ -1,23 +1,39 @@
 import api from './api';
 
 export const catalogService = {
-    // Get all grades (academic levels structure)
-    getGrades: () => api.get('/catalogs/grades'),
+    // Get all grades (academic levels structure) - DEPRECATED, use getGrades from gradeService
+    getGrades: () => api.get('/grades'),
 
-    // Get all sections
-    getSections: (gradeId) => api.get(`/catalogs/sections${gradeId ? `?grade=${gradeId}` : ''}`),
+    // Get all sections - DEPRECATED, use gradeService
+    getSections: (gradeId) => api.get(`/grades/${gradeId}/sections`),
 
     // Get all subjects
-    getSubjects: () => api.get('/catalogs/subjects'),
+    // Subjects CRUD
+    getSubjects: () => api.get('/subjects'),
+    createSubject: (data) => api.post('/subjects', data, {
+        headers: { 'Content-Type': 'application/ld+json' }
+    }),
+    updateSubject: (id, data) => api.put(`/subjects/${id}`, data, {
+        headers: { 'Content-Type': 'application/ld+json' }
+    }),
 
     // Get all teachers
     getTeachers: () => api.get('/catalogs/teachers'),
 
-    // Get school cycles
-    getSchoolCycles: () => api.get('/catalogs/school-cycles'),
+    // Get all teachers
+    getTeachers: () => api.get('/catalogs/teachers'),
 
-    // Get academic levels
-    getAcademicLevels: () => api.get('/catalogs/academic-levels'),
+    // School Cycles CRUD
+    getSchoolCycles: () => api.get('/cycle'),
+    createSchoolCycle: (data) => api.post('/cycle', data),
+    updateSchoolCycle: (id, data) => api.put(`/cycle/${id}`, data),
+    closeSchoolCycle: () => api.post('/cycle/close'),
+
+    // Academic Levels CRUD
+    getAcademicLevels: () => api.get('/academic-levels'), // Point to new controller
+    createAcademicLevel: (data) => api.post('/academic-levels', data),
+    updateAcademicLevel: (id, data) => api.put(`/academic-levels/${id}`, data),
+    deleteAcademicLevel: (id) => api.delete(`/academic-levels/${id}`),
 
     // Get payment methods
     getPaymentMethods: () => api.get('/catalogs/payment-methods'),

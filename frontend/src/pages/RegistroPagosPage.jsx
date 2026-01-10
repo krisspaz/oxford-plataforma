@@ -140,8 +140,8 @@ const RegistroPagosPage = () => {
                                 key={s.id}
                                 onClick={() => { setSelectedStudent(s); setSelectedQuotas([]); }}
                                 className={`p-3 rounded-lg cursor-pointer transition-all ${selectedStudent?.id === s.id
-                                        ? 'bg-teal-600 text-white'
-                                        : darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+                                    ? 'bg-teal-600 text-white'
+                                    : darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
                                     }`}
                             >
                                 <p className="font-medium">{s.fullName}</p>
@@ -172,8 +172,8 @@ const RegistroPagosPage = () => {
                                     key={quota.id}
                                     onClick={() => toggleQuota(quota.id)}
                                     className={`p-3 rounded-lg cursor-pointer border-2 transition-all ${selectedQuotas.includes(quota.id)
-                                            ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/30'
-                                            : darkMode ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300'
+                                        ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/30'
+                                        : darkMode ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300'
                                         }`}
                                 >
                                     <div className="flex items-center justify-between">
@@ -245,8 +245,29 @@ const RegistroPagosPage = () => {
                             )}
 
                             <div>
-                                <label className={labelClass}>NIT para Facturación</label>
-                                <input type="text" value={nit} onChange={e => setNit(e.target.value)} className={`${inputClass} w-full`} />
+                                <label className={labelClass}>Datos de Facturación</label>
+                                <div className="flex gap-2 mb-2">
+                                    <select
+                                        className={`${inputClass} w-1/3`}
+                                        value={nit === 'CF' ? 'CF' : (nit.length > 9 ? 'CUI' : 'NIT')}
+                                        onChange={(e) => {
+                                            if (e.target.value === 'CF') setNit('CF');
+                                            else setNit('');
+                                        }}
+                                    >
+                                        <option value="NIT">NIT</option>
+                                        <option value="CUI">CUI</option>
+                                        <option value="CF">CF</option>
+                                    </select>
+                                    <input
+                                        type="text"
+                                        value={nit}
+                                        onChange={e => setNit(e.target.value)}
+                                        className={`${inputClass} w-2/3`}
+                                        placeholder="Ingrese NIT o CUI"
+                                        disabled={nit === 'CF'}
+                                    />
+                                </div>
                             </div>
 
                             <button

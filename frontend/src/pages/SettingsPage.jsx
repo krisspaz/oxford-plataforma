@@ -1,20 +1,13 @@
-import { useState } from 'react';
-import {
-    Settings,
-    User,
-    Bell,
-    Shield,
-    Database,
-    Palette,
-    Save,
-    Check
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, User, Bell, Shield, Database, Palette, Save, Check } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { api } from '../services/api';
 
 const SettingsPage = () => {
     const { darkMode, toggleDarkMode } = useTheme();
     const [activeTab, setActiveTab] = useState('general');
     const [saved, setSaved] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [settings, setSettings] = useState({
         schoolName: 'Colegio Oxford',
         schoolEmail: 'admin@oxford.edu',
@@ -27,9 +20,31 @@ const SettingsPage = () => {
         currency: 'GTQ'
     });
 
-    const handleSave = () => {
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
+    useEffect(() => {
+        loadSettings();
+    }, []);
+
+    const loadSettings = async () => {
+        try {
+            const response = await api.get('/settings');
+            if (response && Object.keys(response).length > 0) {
+                setSettings(prev => ({ ...prev, ...response }));
+            }
+        } catch (error) {
+            console.error("Error loading settings", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSave = async () => {
+        try {
+            await api.post('/settings', settings);
+            setSaved(true);
+            setTimeout(() => setSaved(false), 2000);
+        } catch (error) {
+            alert('Error al guardar configuración');
+        }
     };
 
     const tabs = [
@@ -202,7 +217,7 @@ const SettingsPage = () => {
         <div className="space-y-6">
             <div className={`p-4 ${darkMode ? 'bg-green-900/30 border-green-700' : 'bg-green-50 border-green-200'} border rounded-xl`}>
                 <p className={`font-medium ${darkMode ? 'text-green-300' : 'text-green-800'}`}>✅ Base de datos conectada</p>
-                <p className={`text-sm ${darkMode ? 'text-green-200' : 'text-green-700'}`}>PostgreSQL - Última sincronización: hace 5 min</p>
+                <p className={`text-sm ${darkMode ? 'text-green-200' : 'text-green-700'}`}>PostgreSQL - Última sincronización: Hace un momento</p>
             </div>
             <button className={`w-full py-3 px-4 ${darkMode ? 'bg-blue-900/50 text-blue-300 hover:bg-blue-900/70' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'} rounded-xl transition-colors font-medium`}>
                 Exportar Datos (CSV)

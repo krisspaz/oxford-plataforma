@@ -26,6 +26,12 @@ class Subject
     #[Assert\NotBlank]
     private ?string $code = null; // MAT101
 
+    #[ORM\Column(nullable: true)]
+    private ?int $hoursWeek = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    private bool $active = true;
+
     #[ORM\ManyToMany(targetEntity: Course::class, inversedBy: 'subjects')]
     private Collection $courses;
 
@@ -63,6 +69,30 @@ class Subject
     public function setCode(string $code): static
     {
         $this->code = $code;
+
+        return $this;
+    }
+
+    public function getHoursWeek(): ?int
+    {
+        return $this->hoursWeek;
+    }
+
+    public function setHoursWeek(?int $hoursWeek): static
+    {
+        $this->hoursWeek = $hoursWeek;
+
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->active;
+    }
+
+    public function setIsActive(bool $active): static
+    {
+        $this->active = $active;
 
         return $this;
     }

@@ -122,20 +122,32 @@ class TeacherController extends AbstractController
         if (isset($data['hireDate'])) {
             $teacher->setHireDate(new \DateTime($data['hireDate']));
         }
-
-        $this->em->persist($teacher);
+        
+        $teacher->setIsActive($data['isActive'] ?? true);
 
         // Create user account if requested
         if (isset($data['createUser']) && $data['createUser']) {
+            // Check if user exists
+            $existingUser = $this->em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
+            if ($existingUser) {
+                return $this->json(['error' => 'El correo ya está registrado'], 400);
+            }
+
             $user = new User();
             $user->setEmail($data['email']);
-            $user->setUsername($data['email']);
+            // Use local part of email as username
+            $username = explode('@', $data['email'])[0];
+            $user->setUsername($username);
             $user->setPassword($passwordHasher->hashPassword($user, $data['password'] ?? 'docente123'));
             $user->setRoles(['ROLE_DOCENTE']);
             $user->setIsActive(true);
             $this->em->persist($user);
+            
+            // Link User to Person (Teacher)
+            $teacher->setUser($user);
         }
 
+        $this->em->persist($teacher);
         $this->em->flush();
 
         return $this->json([

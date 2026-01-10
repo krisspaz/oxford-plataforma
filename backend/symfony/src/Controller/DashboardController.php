@@ -18,18 +18,24 @@ class DashboardController extends AbstractController
     private $userRepository;
     private $subjectRepository;
 
+    private $taskRepository;
+
     public function __construct(
         StudentRepository $studentRepository,
         PaymentRepository $paymentRepository,
         SchoolCycleRepository $schoolCycleRepository,
         \App\Repository\UserRepository $userRepository,
-        \App\Repository\SubjectRepository $subjectRepository
+        \App\Repository\SubjectRepository $subjectRepository,
+        \App\Repository\TaskRepository $taskRepository,
+        private \Doctrine\ORM\EntityManagerInterface $entityManager
     ) {
         $this->studentRepository = $studentRepository;
         $this->paymentRepository = $paymentRepository;
         $this->schoolCycleRepository = $schoolCycleRepository;
         $this->userRepository = $userRepository;
         $this->subjectRepository = $subjectRepository;
+        $this->taskRepository = $taskRepository;
+        $this->entityManager = $entityManager;
     }
 
     #[Route('/stats', name: 'stats', methods: ['GET'])]
@@ -61,10 +67,44 @@ class DashboardController extends AbstractController
         }
 
         if (in_array('ROLE_STUDENT', $roles)) {
+             $student = $this->studentRepository->findOneBy(['email' => $user->getEmail()]);
+             $pendingTasks = 0;
+             $average = 0;
+             $nextClass = 'Sin Asignar';
+
+             if ($student) {
+                // Get latest enrollment for Grade/Section
+                $enrollments = $student->getEnrollments();
+                if (!$enrollments->isEmpty()) {
+                    $enrollment = $enrollments->last();
+                    $grade = $enrollment->getGrade();
+                    $section = $enrollment->getSection();
+
+                    if ($grade) {
+                        // Use repository method
+                        $tasks = $this->taskRepository->findForStudent($grade, $section);
+                        
+                        foreach($tasks as $task) {
+                            // Check for submission
+                            $submission = $this->entityManager->getRepository(\App\Entity\TaskSubmission::class)->findOneBy([
+                                'task' => $task,
+                                'student' => $student
+                            ]);
+                            
+                            // If no submission or submission is pending/returned, count as pending?
+                            // Let's assume pending if no submission or status is 'pending'
+                             if (!$submission || $submission->getStatus() === 'pending') {
+                                $pendingTasks++;
+                            }
+                        }
+                    }
+                }
+             }
+
              $data['student'] = [
-                 'average' => 88,
-                 'pendingTasks' => 3,
-                 'nextClass' => 'Matemáticas'
+                 'average' => 88, // Placeholder for now
+                 'pendingTasks' => $pendingTasks,
+                 'nextClass' => 'Matemáticas' // Placeholder
              ];
         }
 

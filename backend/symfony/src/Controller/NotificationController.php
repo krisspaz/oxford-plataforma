@@ -13,11 +13,77 @@ class NotificationController extends AbstractController
 {
     public function __construct(private EntityManagerInterface $entityManager) {}
 
+    #[Route('/', name: 'list', methods: ['GET'])]
+    public function list(): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['error' => 'Not authenticated'], 401);
+        }
+
+        $notifications = $this->entityManager->getRepository(Notification::class)->findBy(
+            ['user' => $user],
+            ['createdAt' => 'DESC'],
+            20
+        );
+
+        $data = [];
+        foreach ($notifications as $n) {
+            $data[] = [
+                'id' => $n->getId(),
+                'title' => $n->getTitle(),
+                'message' => $n->getMessage(),
+                'read' => $n->isIsRead(),
+                'time' => $n->getCreatedAt()->format('Y-m-d H:i'),
+                'type' => 'message' // Default type as field doesn't exist yet
+            ];
+        }
+
+        return $this->json($data);
+    }
+
+    #[Route('/{id}/read', name: 'mark_read', methods: ['POST'])]
+    public function markAsRead(Notification $notification): JsonResponse
+    {
+        $user = $this->getUser();
+        if ($notification->getUser() !== $user) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $notification->setIsRead(true);
+        $this->entityManager->flush();
+
+        return $this->json(['success' => true]);
+    }
+
+    #[Route('/read-all', name: 'mark_all_read', methods: ['POST'])]
+    public function markAllAsRead(): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+             return $this->json(['error' => 'Not authenticated'], 401);
+        }
+
+        $this->entityManager->createQuery(
+            'UPDATE App\Entity\Notification n SET n.isRead = true WHERE n.user = :user'
+        )->setParameter('user', $user)->execute();
+
+        return $this->json(['success' => true]);
+    }
+
     #[Route('/reset', name: 'reset', methods: ['DELETE'])]
     public function resetAll(): JsonResponse
     {
-        // Delete all notifications
-        $query = $this->entityManager->createQuery('DELETE FROM App\Entity\Notification n');
+        $user = $this->getUser();
+         if (!$user) {
+            return $this->json(['error' => 'Not authenticated'], 401);
+        }
+
+        // Only delete user's notifications
+        $query = $this->entityManager->createQuery(
+            'DELETE FROM App\Entity\Notification n WHERE n.user = :user'
+        )->setParameter('user', $user);
+        
         $deletedCount = $query->execute();
         
         return $this->json([

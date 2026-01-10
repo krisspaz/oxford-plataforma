@@ -41,6 +41,7 @@ const CrisisModeDashboard = lazy(() => import('../components/CrisisModeDashboard
 const EconomicDashboard = lazy(() => import('../components/EconomicDashboard'));
 const CalendarView = lazy(() => import('../components/CalendarView'));
 const ExportCenter = lazy(() => import('../components/ExportCenter'));
+const StudentTaskDetailPage = lazy(() => import('../pages/StudentTaskDetailPage'));
 
 const NotFoundComponent = () => (
     <div className="p-10 text-center">
@@ -103,6 +104,7 @@ const AppRoutes = () => {
                 <Route path="calendar" element={<CalendarPage />} />
                 <Route path="reports" element={<ReportsPage />} />
                 <Route path="mi-portal/tareas" element={<TareasPage />} />
+                <Route path="mis-tareas/:taskId" element={<StudentTaskDetailPage />} />
                 <Route path="notificaciones" element={<NotificationsPage />} />
 
                 <Route path="*" element={<NotFound />} />

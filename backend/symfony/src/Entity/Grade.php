@@ -22,6 +22,9 @@ class Grade
     #[Assert\NotBlank]
     private ?string $name = null; // e.g. "First Grade", "5to Bachillerato"
 
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $code = null; // e.g. "1PRI", "5BAC"
+
     #[ORM\ManyToOne(targetEntity: AcademicLevel::class, inversedBy: 'grades')]
     #[ORM\JoinColumn(nullable: false)]
     private ?AcademicLevel $level = null;
@@ -50,6 +53,17 @@ class Grade
     public function setName(string $name): static
     {
         $this->name = $name;
+        return $this;
+    }
+
+    public function getCode(): ?string
+    {
+        return $this->code;
+    }
+
+    public function setCode(?string $code): static
+    {
+        $this->code = $code;
         return $this;
     }
 

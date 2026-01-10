@@ -39,7 +39,7 @@ interface AppContainer {
 
 class DefaultAppContainer(private val context: Context) : AppContainer {
     
-    private val baseUrl = "https://api.oxford.edu.gt"
+    private val baseUrl = "https://vexatiously-dextrocular-esteban.ngrok-free.dev"
     
     override val apiClient: OxfordApiClient by lazy {
         OxfordApiClient(baseUrl)

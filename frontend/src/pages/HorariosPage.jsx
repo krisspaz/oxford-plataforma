@@ -275,7 +275,7 @@ const HorariosPage = () => {
                                 </div>
                             </div>
                             <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
+                                <table className={`w-full text-sm ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                                     <thead>
                                         <tr>
                                             <th className={`p-2 text-left border ${darkMode ? 'border-gray-700 bg-gray-700/50' : 'border-gray-200 bg-gray-50'}`}>Hora</th>

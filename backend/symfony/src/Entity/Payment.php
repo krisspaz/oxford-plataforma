@@ -55,6 +55,62 @@ class Payment
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $paidAt = null;
 
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $method = null; // cash, card, deposit, transfer
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $type = null; // INVOICE, RECEIPT
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $billingIdentifier = null; // NIT or CUI
+
+    #[ORM\Column(length: 150, nullable: true)]
+    private ?string $billingName = null;
+
+    public function getMethod(): ?string
+    {
+        return $this->method;
+    }
+
+    public function setMethod(?string $method): static
+    {
+        $this->method = $method;
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): static
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    public function getBillingIdentifier(): ?string
+    {
+        return $this->billingIdentifier;
+    }
+
+    public function setBillingIdentifier(?string $billingIdentifier): static
+    {
+        $this->billingIdentifier = $billingIdentifier;
+        return $this;
+    }
+
+    public function getBillingName(): ?string
+    {
+        return $this->billingName;
+    }
+
+    public function setBillingName(?string $billingName): static
+    {
+        $this->billingName = $billingName;
+        return $this;
+    }
+
     public function getDueDate(): ?\DateTimeInterface
     {
         return $this->dueDate;

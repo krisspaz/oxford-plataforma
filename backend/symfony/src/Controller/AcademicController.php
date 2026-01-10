@@ -41,9 +41,15 @@ class AcademicController extends AbstractController
         $grade = $gradeRepo->find($gradeId);
         if (!$grade) return $this->json(['error' => 'Grade not found'], 404);
 
-        // Assumption: Current active cycle. In real app, this should be dynamic.
-        $cycle = $cycleRepo->findAll()[0] ?? null; 
-        if (!$cycle) return $this->json(['error' => 'No active cycle'], 500);
+        // Find active cycle
+        $cycle = $cycleRepo->findOneBy(['isActive' => true]); 
+        if (!$cycle) {
+            // Fallback to latest if no active
+            $cycles = $cycleRepo->findBy([], ['startDate' => 'DESC'], 1);
+            $cycle = $cycles[0] ?? null;
+        }
+        
+        if (!$cycle) return $this->json(['error' => 'No active cycle found'], 500);
 
         foreach ($assignments as $item) {
             $subjectId = $item['subjectId'] ?? null;
