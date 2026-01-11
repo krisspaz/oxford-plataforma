@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Package, Check, X, RefreshCw, Search, Filter, Download } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePdfExport } from '../hooks/usePdfExport';
+import { packageService } from '../services/packageService';
 
 const PaquetesSeleccionadosPage = () => {
     const { darkMode } = useTheme();
@@ -19,53 +20,18 @@ const PaquetesSeleccionadosPage = () => {
     const loadSelectedPackages = async () => {
         setLoading(true);
         try {
-            // TODO: Replace with actual API call
-            await new Promise(resolve => setTimeout(resolve, 800));
-            // Mock data
-            setSelectedPackages([
-                {
-                    id: 1,
-                    student: 'Juan García López',
-                    carnet: '2025-001',
-                    grade: '1ro Primaria',
-                    package: 'Inscripción + Mensualidades',
-                    total: 8500,
-                    selectedAt: '2025-01-15',
-                    status: 'PENDING'
-                },
-                {
-                    id: 2,
-                    student: 'María Fernández Ruiz',
-                    carnet: '2025-002',
-                    grade: '2do Primaria',
-                    package: 'Graduandos Completo',
-                    total: 12000,
-                    selectedAt: '2025-01-14',
-                    status: 'PENDING'
-                },
-                {
-                    id: 3,
-                    student: 'Carlos Martínez',
-                    carnet: '2025-003',
-                    grade: '3ro Primaria',
-                    package: 'Solo Mensualidad',
-                    total: 5500,
-                    selectedAt: '2025-01-13',
-                    status: 'APPROVED'
-                },
-                {
-                    id: 4,
-                    student: 'Ana López',
-                    carnet: '2025-004',
-                    grade: '4to Primaria',
-                    package: 'Inscripción + Mensualidades',
-                    total: 8500,
-                    selectedAt: '2025-01-12',
-                    status: 'REJECTED'
-                },
-            ]);
+            // Using real service
+            const response = await packageService.getAllSelections();
+            if (response.data && response.data['hydra:member']) {
+                setSelectedPackages(response.data['hydra:member']);
+            } else if (Array.isArray(response.data)) {
+                setSelectedPackages(response.data);
+            } else {
+                setSelectedPackages([]);
+            }
         } catch (error) {
             console.error("Error loading packages:", error);
+            setSelectedPackages([]);
         } finally {
             setLoading(false);
         }

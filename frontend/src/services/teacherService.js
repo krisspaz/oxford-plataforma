@@ -75,6 +75,23 @@ const teacherService = {
         const response = await api.get(`/teachers/${teacherId}/students`);
         return response.data;
     },
+    /**
+     * Get chat history with a student
+     * @param {number} studentId - Student ID
+     */
+    getChatHistory: async (studentId) => {
+        const response = await api.get(`/teachers/chat/${studentId}`); // Adjusted endpoint logic
+        return response.data;
+    },
+
+    /**
+     * Send message to a student
+     * @param {Object} data - { studentId, message }
+     */
+    sendMessage: async (data) => {
+        const response = await api.post('/teachers/chat', data);
+        return response.data;
+    },
 };
 
 export default teacherService;

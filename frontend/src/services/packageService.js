@@ -24,6 +24,19 @@ export const packageService = {
 
     // Get packages by grade
     getByGrade: (gradeId) => api.get(`/packages?grade=${gradeId}`),
+
+    // Get all selected packages (StudentPackage entity)
+    getAllSelections: (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return api.get(`/student_packages${queryString ? `?${queryString}` : ''}`);
+        // If the endpoint is different, it needs to be adjusted here later.
+    },
+
+    // Approve selected package
+    approveSelection: (id) => api.post(`/student_packages/${id}/approve`),
+
+    // Reject selected package
+    rejectSelection: (id, reason) => api.post(`/student_packages/${id}/reject`, { reason }),
 };
 
 export default packageService;

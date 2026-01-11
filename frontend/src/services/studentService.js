@@ -42,6 +42,10 @@ export const studentService = {
 
     // Submit complaint/suggestion
     submitFeedback: (data) => api.post('/student/help-ticket', data),
+
+    // Assign agreement/scholarship
+    assignAgreement: (studentId, agreementId) =>
+        api.post(`/students/${studentId}/agreements`, { agreementId }),
 };
 
 export default studentService;

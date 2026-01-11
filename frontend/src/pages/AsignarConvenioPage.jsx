@@ -56,8 +56,7 @@ const AsignarConvenioPage = () => {
 
         setAssigning(true);
         try {
-            // TODO: Call actual API endpoint
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+            await studentService.assignAgreement(selectedStudent.id, selectedConvenio.id);
             setShowSuccess(true);
             setTimeout(() => {
                 setShowSuccess(false);
@@ -125,8 +124,8 @@ const AsignarConvenioPage = () => {
                                     key={s.id}
                                     onClick={() => { setSelectedStudent(s); setStudents([]); setSearchTerm(''); }}
                                     className={`p-3 rounded-lg cursor-pointer transition-all ${selectedStudent?.id === s.id
-                                            ? 'bg-blue-100 border-blue-500 border-2'
-                                            : (darkMode ? 'hover:bg-gray-700 border border-gray-600' : 'hover:bg-gray-100 border border-gray-200')
+                                        ? 'bg-blue-100 border-blue-500 border-2'
+                                        : (darkMode ? 'hover:bg-gray-700 border border-gray-600' : 'hover:bg-gray-100 border border-gray-200')
                                         }`}
                                 >
                                     <span className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{s.fullName}</span>
@@ -168,8 +167,8 @@ const AsignarConvenioPage = () => {
                                 key={conv.id}
                                 onClick={() => setSelectedConvenio(conv)}
                                 className={`p-4 rounded-lg cursor-pointer transition-all ${selectedConvenio?.id === conv.id
-                                        ? 'bg-purple-100 border-purple-500 border-2'
-                                        : (darkMode ? 'hover:bg-gray-700 border border-gray-600' : 'hover:bg-gray-100 border border-gray-200')
+                                    ? 'bg-purple-100 border-purple-500 border-2'
+                                    : (darkMode ? 'hover:bg-gray-700 border border-gray-600' : 'hover:bg-gray-100 border border-gray-200')
                                     }`}
                             >
                                 <div className="flex justify-between items-start">

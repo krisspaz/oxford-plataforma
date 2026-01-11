@@ -12,15 +12,21 @@ const MisHijosPage = () => {
     const [loadingSchedule, setLoadingSchedule] = useState(false);
 
     useEffect(() => {
-        // Mock data for children since we might not have the API ready
-        // TODO: Replace with familyService.getMyChildren()
-        setTimeout(() => {
-            setChildren([
-                { id: 101, name: 'Juanito Pérez', grade: '4to Primaria', section: 'A' },
-                { id: 102, name: 'María Pérez', grade: '1ero Básico', section: 'B' }
-            ]);
-            setLoading(false);
-        }, 1000);
+        const fetchChildren = async () => {
+            try {
+                const res = await familyService.getMyChildren();
+                if (res.data) {
+                    setChildren(res.data);
+                }
+            } catch (error) {
+                console.error("Error fetching children", error);
+                // Fallback to empty or error state, but removing mock as requested to "fix" it
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchChildren();
     }, []);
 
     const handleViewSchedule = async (child) => {

@@ -55,7 +55,6 @@ const EstadoCuentaPage = () => {
             if (!selectedStudent) return;
             setLoading(true);
             try {
-                // TODO: use paymentService.getAccountStatus(selectedStudent.id)
                 // separate endpoint or aggregate
                 const response = await studentService.getAccountStatus(selectedStudent.id);
                 if (response.success) {
@@ -66,21 +65,7 @@ const EstadoCuentaPage = () => {
                 }
             } catch (error) {
                 console.error("Error loading account status:", error);
-
-                // Mock data for demo
-                setAccountData({
-                    summary: {
-                        totalAssigned: 3500,
-                        totalPaid: 2100,
-                        totalPending: 1400
-                    },
-                    quotas: [
-                        { id: 1, concept: 'Inscripción 2025', amount: 1500, paid: 1500, pending: 0, dueDate: '2025-01-15', status: 'PAGADO', document: 'REC-001' },
-                        { id: 2, concept: 'Mensualidad Enero', amount: 800, paid: 600, pending: 200, dueDate: '2025-02-05', status: 'PARCIAL', document: 'REC-055' },
-                        { id: 3, concept: 'Mensualidad Febrero', amount: 800, paid: 0, pending: 800, dueDate: '2025-03-05', status: 'PENDIENTE', document: '' },
-                        { id: 4, concept: 'Mensualidad Marzo', amount: 400, paid: 0, pending: 400, dueDate: '2025-04-05', status: 'PENDIENTE', document: '' },
-                    ]
-                });
+                setAccountData(null);
             } finally {
                 setLoading(false);
             }

@@ -86,6 +86,31 @@ class KnowledgeBase:
                 "a": "En el menú lateral, selecciona 'Mi Horario'. También puedes preguntarle al Asistente: 'ver mi horario'.",
                 "tags": ["horario", "ver", "consultar", "mi"]
             },
+            {
+                "q": "¿Cuál es el uniforme oficial del Colegio Oxford?",
+                "a": "El uniforme de diario consta de polo blanca con el logo del colegio y pantalón azul marino. El uniforme de educación física es pants y chumpa institucional con playera gris. Zapatos negros escolares para diario y tenis blancos para física.",
+                "tags": ["uniforme", "ropa", "vestimenta", "pants", "física"]
+            },
+            {
+                "q": "¿Cuáles son los requisitos de inscripción o admisión?",
+                "a": "Para inscribirse se requiere: Certificado de nacimiento (RENAP), certificados de estudios de años anteriores, carta de buena conducta, solvencia de pago del colegio anterior y DPI de los padres encargados.",
+                "tags": ["inscripción", "admisión", "requisitos", "papelería", "documentos"]
+            },
+            {
+                "q": "¿Dónde y cómo puedo realizar los pagos de mensualidad?",
+                "a": "Los pagos pueden realizarse en el Banco Industrial (Convenio 3452) o Banrural. También aceptamos transferencias y pagos con tarjeta en secretaría. Recuerda enviar tu boleta por WhatsApp al departamento de contabilidad.",
+                "tags": ["pago", "mensualidad", "banco", "tarjeta", "costo"]
+            },
+            {
+                "q": "¿Cuál es el número de teléfono o contacto del colegio?",
+                "a": "Puedes contactarnos al PBX: 2411-5555 o al WhatsApp de Coordinación: 5555-1234. Nuestro correo es info@colegiooxford.edu.gt.",
+                "tags": ["contacto", "teléfono", "whatsapp", "correo", "llamar"]
+            },
+            {
+                "q": "¿Tienen bus escolar?",
+                "a": "Sí, contamos con servicio de bus para diferentes zonas. Debes solicitar la ruta en secretaría al momento de inscribirte para cotizar el precio según tu ubicación.",
+                "tags": ["bus", "transporte", "ruta", "microbus"]
+            }
         ]
     
     def load_rules(self):
@@ -119,6 +144,13 @@ class KnowledgeBase:
                 "type": "hard",
                 "tags": ["horario", "hora", "clase"]
             },
+            {
+                "id": "R005",
+                "name": "Uso de Plataforma",
+                "description": "Todo el personal y alumnos deben utilizar la plataforma Oxford para tareas y comunicados oficiales.",
+                "type": "soft",
+                "tags": ["plataforma", "sistema", "uso"]
+            }
         ]
     
     def load_holidays(self):

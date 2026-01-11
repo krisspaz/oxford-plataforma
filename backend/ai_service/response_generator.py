@@ -15,9 +15,9 @@ class ResponseGenerator:
     TEMPLATES = {
         'greeting': {
             'responses': [
-                "¡Hola! 👋 Soy tu asistente de horarios. ¿En qué puedo ayudarte?",
-                "¡Buenos días! Estoy aquí para ayudarte con la gestión de horarios. ¿Qué necesitas?",
-                "¡Hola! Puedo ayudarte a generar horarios, configurar restricciones y más. ¿Qué deseas hacer?",
+                "¡Hola! 👋 Soy tu asistente virtual del Colegio Oxford. ¿En qué puedo ayudarte?",
+                "¡Buenos días! Estoy aquí para ayudarte con tus dudas sobre el Colegio Oxford y tus horarios. ¿Qué necesitas?",
+                "¡Hola! Bienvenido a la plataforma Oxford. Puedo ayudarte con horarios, reglamentos y más. ¿Qué deseas hacer?",
             ],
             'suggestions': [
                 "Genera horario para 1ro primaria",

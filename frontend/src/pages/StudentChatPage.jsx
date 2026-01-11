@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { MessageCircle, Send, User, Clock, Check, CheckCheck, Search } from 'lucide-react';
+import { studentService } from '../services/studentService';
+import { MessageCircle, Send, User, Check, CheckCheck, Search } from 'lucide-react';
 
 const StudentChatPage = () => {
     const { darkMode } = useTheme();
@@ -9,31 +10,91 @@ const StudentChatPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const messagesEndRef = useRef(null);
 
-    // Mock teachers
-    const teachers = [
-        { id: 1, name: 'Prof. María García', subject: 'Matemáticas', photo: null, online: true, unread: 2 },
-        { id: 2, name: 'Prof. Carlos Rodríguez', subject: 'Física', photo: null, online: false, unread: 0 },
-        { id: 3, name: 'Prof. Ana Martínez', subject: 'Química', photo: null, online: true, unread: 0 },
-        { id: 4, name: 'Prof. Luis Hernández', subject: 'Historia', photo: null, online: false, unread: 1 },
-        { id: 5, name: 'Prof. Sandra López', subject: 'Inglés', photo: null, online: false, unread: 0 },
-    ];
+    // State for teachers/conversations
+    const [teachers, setTeachers] = useState([]);
+    const [conversations, setConversations] = useState({});
+    const [loading, setLoading] = useState(true);
 
-    // Mock messages
-    const [conversations, setConversations] = useState({
-        1: [
-            { id: 1, from: 'teacher', text: 'Hola, ¿cómo puedo ayudarte?', time: '10:30', read: true },
-            { id: 2, from: 'student', text: 'Profe, tengo una duda sobre la tarea de álgebra', time: '10:32', read: true },
-            { id: 3, from: 'teacher', text: '¿Cuál es tu duda específica?', time: '10:33', read: true },
-            { id: 4, from: 'teacher', text: 'Recuerda que puedes revisar los ejemplos del libro', time: '10:33', read: false },
-        ],
-        4: [
-            { id: 1, from: 'teacher', text: 'Recordatorio: El ensayo debe entregarse el viernes', time: '09:00', read: false },
-        ],
-    });
+    useEffect(() => {
+        loadTeachers();
+    }, []);
+
+    useEffect(() => {
+        if (selectedTeacher) {
+            loadChatHistory(selectedTeacher.id);
+        }
+    }, [selectedTeacher]);
+
+    const loadTeachers = async () => {
+        try {
+            const response = await studentService.getMyTeachers();
+            if (response.data) {
+                // Map API response if necessary, or use directly if matches UI
+                // Assuming API returns: { id, name, subject, photo, online, unreadCount }
+                setTeachers(response.data);
+            }
+        } catch (error) {
+            console.error("Error loading teachers", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadChatHistory = async (teacherId) => {
+        try {
+            const response = await studentService.getChatHistory(null, teacherId);
+            if (response.data) {
+                setConversations(prev => ({
+                    ...prev,
+                    [teacherId]: response.data
+                }));
+            }
+        } catch (error) {
+            console.error("Error loading chat", error);
+        }
+    };
+
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!newMessage.trim() || !selectedTeacher) return;
+
+        const messageText = newMessage.trim();
+        const tempId = Date.now();
+        const now = new Date();
+        const timeString = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+        // Optimistic UI update
+        const tempMsg = {
+            id: tempId,
+            from: 'student',
+            text: messageText,
+            time: timeString,
+            read: false
+        };
+
+        setConversations(prev => ({
+            ...prev,
+            [selectedTeacher.id]: [
+                ...(prev[selectedTeacher.id] || []),
+                tempMsg
+            ]
+        }));
+        setNewMessage('');
+
+        try {
+            await studentService.sendMessage({
+                teacherId: selectedTeacher.id,
+                message: messageText
+            });
+            // Ideally re-fetch or confirm success here
+        } catch (error) {
+            console.error("Error sending message", error);
+        }
+    };
 
     const filteredTeachers = teachers.filter(t =>
-        t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.subject.toLowerCase().includes(searchTerm.toLowerCase())
+        (t.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.subject || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const scrollToBottom = () => {
@@ -44,24 +105,7 @@ const StudentChatPage = () => {
         scrollToBottom();
     }, [selectedTeacher, conversations]);
 
-    const handleSendMessage = (e) => {
-        e.preventDefault();
-        if (!newMessage.trim() || !selectedTeacher) return;
-
-        const now = new Date();
-        const timeString = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-
-        setConversations(prev => ({
-            ...prev,
-            [selectedTeacher.id]: [
-                ...(prev[selectedTeacher.id] || []),
-                { id: Date.now(), from: 'student', text: newMessage.trim(), time: timeString, read: false }
-            ]
-        }));
-        setNewMessage('');
-    };
-
-    const getTotalUnread = () => teachers.reduce((sum, t) => sum + t.unread, 0);
+    const getTotalUnread = () => teachers.reduce((sum, t) => sum + (t.unread || 0), 0);
 
     return (
         <div className="space-y-6">
@@ -101,8 +145,8 @@ const StudentChatPage = () => {
                                     key={teacher.id}
                                     onClick={() => setSelectedTeacher(teacher)}
                                     className={`p-3 cursor-pointer transition-colors flex items-center gap-3 ${selectedTeacher?.id === teacher.id
-                                            ? darkMode ? 'bg-obs-green/10' : 'bg-obs-green/5'
-                                            : darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'
+                                        ? darkMode ? 'bg-obs-green/10' : 'bg-obs-green/5'
+                                        : darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'
                                         }`}
                                 >
                                     <div className="relative">
@@ -165,8 +209,8 @@ const StudentChatPage = () => {
                                             className={`flex ${message.from === 'student' ? 'justify-end' : 'justify-start'}`}
                                         >
                                             <div className={`max-w-[70%] px-4 py-2 rounded-2xl ${message.from === 'student'
-                                                    ? 'bg-obs-green text-white rounded-br-md'
-                                                    : darkMode ? 'bg-gray-700 text-white rounded-bl-md' : 'bg-gray-100 text-gray-800 rounded-bl-md'
+                                                ? 'bg-obs-green text-white rounded-br-md'
+                                                : darkMode ? 'bg-gray-700 text-white rounded-bl-md' : 'bg-gray-100 text-gray-800 rounded-bl-md'
                                                 }`}>
                                                 <p className="text-sm">{message.text}</p>
                                                 <div className={`flex items-center justify-end gap-1 mt-1 ${message.from === 'student' ? 'text-white/60' : darkMode ? 'text-gray-400' : 'text-gray-400'}`}>
@@ -190,16 +234,16 @@ const StudentChatPage = () => {
                                             onChange={e => setNewMessage(e.target.value)}
                                             placeholder="Escribe un mensaje..."
                                             className={`flex-1 px-4 py-2 rounded-full border ${darkMode
-                                                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                                                    : 'bg-white border-gray-300 placeholder-gray-400'
+                                                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                                                : 'bg-white border-gray-300 placeholder-gray-400'
                                                 } focus:ring-2 focus:ring-obs-green focus:border-transparent`}
                                         />
                                         <button
                                             type="submit"
                                             disabled={!newMessage.trim()}
                                             className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${newMessage.trim()
-                                                    ? 'bg-obs-green text-white hover:bg-obs-green/80'
-                                                    : darkMode ? 'bg-gray-700 text-gray-500' : 'bg-gray-100 text-gray-400'
+                                                ? 'bg-obs-green text-white hover:bg-obs-green/80'
+                                                : darkMode ? 'bg-gray-700 text-gray-500' : 'bg-gray-100 text-gray-400'
                                                 }`}
                                         >
                                             <Send size={18} />
