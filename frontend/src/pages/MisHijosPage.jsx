@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, Calendar, Clock, BookOpen, ChevronRight } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import scheduleService from '../services/scheduleService';
+import familyService from '../services/familyService';
 
 const MisHijosPage = () => {
     const { darkMode } = useTheme();
