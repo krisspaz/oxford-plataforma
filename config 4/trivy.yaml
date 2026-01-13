@@ -1,4 +1,0 @@
-scan:
-  security-checks:
-    - vuln
-    - config

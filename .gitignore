@@ -1,7 +1,17 @@
+# Logs
 *.log
+logs/
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Environment (only keep .env.example)
 *.env
+!*.env.example
 !.example.env
+
+# IDE
 .phpactor.json
 .phpunit.result.cache
 /.fleet
@@ -10,19 +20,34 @@
 /.phpunit.cache
 /.vscode
 /.zed
+
+# Auth
 /auth.json
+
+# Node
 /node_modules
-/public/storage
-/public/build
-/public/hot
-/public/storage
-/storage/*.key
-/storage/pail
+/.pnpm-store
+
+# PHP
 **/vendor/
 Homestead.json
 Homestead.yaml
-Thumbs.db
-# new stuff
-/.pnpm-store
-/.direnv
 .php-cs-fixer.cache
+
+# Laravel/Symfony
+/public/storage
+/public/build
+/public/hot
+/storage/*.key
+/storage/pail
+**/var/cache/
+**/var/log/
+
+# Duplicate folders patterns
+config [0-9]/
+movil [0-9]/
+*_backup/
+
+# Build artifacts
+/.direnv
+
