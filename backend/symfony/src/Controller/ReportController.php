@@ -27,23 +27,21 @@ class ReportController extends AbstractController
     }
 
     #[Route('/generate', name: 'generate', methods: ['POST'])]
-    public function generateReport(Request $request): JsonResponse
+    public function generateReport(Request $request, \Symfony\Component\Messenger\MessageBusInterface $bus): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $type = $data['type'] ?? 'BOLETAS'; // BOLETAS, CUADROS
         $scope = $data['scope'] ?? 'INDIVIDUAL'; // INDIVIDUAL, MASSIVE
         
-        // Mocking the generation logic
-        $filename = strtolower($type) . '_' . strtolower($scope) . '_' . date('Ymd_His') . '.pdf';
+        // Dispatch to Queue
+        $bus->dispatch(new \App\Message\GenerateReportMessage($type, $scope, $data));
         
         return $this->json([
             'success' => true,
-            'message' => "Reporte de $type ($scope) generado correctamente.",
+            'message' => "Solicitud enviada a la cola de procesamiento. El reporte de $type ($scope) aparecerá en 'Mis Descargas' pronto.",
             'details' => [
-                'grade' => $data['grade'] ?? 'N/A',
-                'section' => $data['section'] ?? 'N/A',
-                'bimester' => $data['bimester'] ?? 'N/A',
-                'downloadUrl' => '/downloads/reports/' . $filename
+                'status' => 'QUEUED',
+                'queue' => 'redis'
             ]
         ]);
     }

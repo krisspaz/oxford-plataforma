@@ -132,6 +132,8 @@ class DatabaseManager:
         results = [dict(row) for row in rv]
         return results[0] if one else results
 
+    # ... (existing methods remain)
+
     def execute(self, sql: str, params: tuple = ()):
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -140,5 +142,35 @@ class DatabaseManager:
         last_id = cursor.lastrowid
         conn.close()
         return last_id
+
+    # === MongoDB Integration ===
+    def get_mongo_client(self):
+        """Returns a PyMongo client"""
+        from pymongo import MongoClient
+        import os
+        # Mongo Connection String from Env or Default
+        mongo_uri = os.getenv("MONGO_URI", "mongodb://root:password@mongodb:27017/")
+        return MongoClient(mongo_uri)
+
+    def log_interaction(self, input_data: dict, output_data: dict, metadata: dict = None):
+        """Logs AI interaction to MongoDB"""
+        try:
+            client = self.get_mongo_client()
+            db = client["oxford_ai_logs"]
+            collection = db["interactions"]
+            
+            log_entry = {
+                "timestamp": datetime.now(),
+                "input": input_data,
+                "output": output_data,
+                "metadata": metadata or {}
+            }
+            
+            result = collection.insert_one(log_entry)
+            client.close()
+            return str(result.inserted_id)
+        except Exception as e:
+            print(f"MongoDB Error: {e}")
+            return None
 
 db = DatabaseManager()

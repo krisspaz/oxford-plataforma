@@ -3,11 +3,23 @@ parameters:
     corposistemas_api_url: '%env(CORPOSISTEMAS_API_URL)%'
     corposistemas_api_key: '%env(CORPOSISTEMAS_API_KEY)%'
     corposistemas_nit: '%env(CORPOSISTEMAS_NIT)%'
+    env(MONGODB_URI): ''
+    env(MONGODB_DB): ''
 
 services:
     _defaults:
         autowire: true
         autoconfigure: true
+        bind:
+            $oxfordStorage: '@League\Flysystem\FilesystemOperator $oxfordStorage'
+
+    # Redis Client
+    Redis:
+        class: Redis
+        calls:
+            - connect: ['%env(REDIS_HOST)%', '%env(int:REDIS_PORT)%']
+
+    Aws\S3\S3Client: '@minio_s3_client'
 
     App\:
         resource: '../src/'
@@ -26,3 +38,17 @@ services:
     App\Service\AuthenticationService:
         arguments:
             $secureCookies: false
+
+    # MinIO S3 Client
+    minio_s3_client:
+        public: true
+        class: 'Aws\S3\S3Client'
+        arguments:
+            -
+                version: 'latest'
+                region: 'us-east-1'
+                endpoint: '%env(MINIO_ENDPOINT)%'
+                use_path_style_endpoint: true
+                credentials:
+                    key: '%env(MINIO_ROOT_USER)%'
+                    secret: '%env(MINIO_ROOT_PASSWORD)%'

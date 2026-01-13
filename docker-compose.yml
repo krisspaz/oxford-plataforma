@@ -36,6 +36,36 @@ services:
       timeout: 5s
       retries: 5
 
+  # === MINIO (Object Storage) ===
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-password}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - app_net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c " /usr/bin/mc alias set myminio http://minio:9000 ${MINIO_ROOT_USER:-admin} ${MINIO_ROOT_PASSWORD:-password}; /usr/bin/mc mb myminio/oxford-storage; /usr/bin/mc anonymous set public myminio/oxford-storage; exit 0; "
+    networks:
+      - app_net
+
   # === REDIS (Cache) ===
   redis:
     image: redis:7-alpine
@@ -66,12 +96,21 @@ services:
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-%kernel.project_dir%/config/jwt/public.pem}
       JWT_PASSPHRASE: ${JWT_PASSPHRASE:-changeme}
       AI_SERVICE_URL: ${AI_SERVICE_URL:-http://ai_service:8001}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_BUCKET: oxford-storage
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-password}
+      MESSENGER_TRANSPORT_DSN: "redis://redis:6379/messages"
+      MERCURE_URL: http://mercure/.well-known/mercure
+      MERCURE_PUBLIC_URL: http://localhost:3000/.well-known/mercure
+      MERCURE_JWT_SECRET: ${JWT_SECRET_KEY:-!ChangeThisMercureHubJWTSecretKey!}
       TRUSTED_PROXIES: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1"
     depends_on:
       database:
         condition: service_healthy
     volumes:
       - ./backend/symfony:/var/www/symfony
+    working_dir: /var/www/symfony
     networks:
       - app_net
     healthcheck:
@@ -80,6 +119,44 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+
+  # === WORKER (Queue Consumer) ===
+  worker:
+    build:
+      context: ./backend/symfony
+      dockerfile: Dockerfile
+    command: php bin/console messenger:consume async -vv
+    environment:
+      DATABASE_URL: postgresql://oxford_user:${POSTGRES_PASSWORD}@database:5432/oxford_db?serverVersion=16&charset=utf8
+      APP_ENV: ${APP_ENV:-dev}
+      APP_SECRET: ${APP_SECRET:?App secret required}
+      CORPOSISTEMAS_API_URL: ${CORPOSISTEMAS_API_URL:-https://api.corposistemas.gt}
+      CORPOSISTEMAS_API_KEY: ${CORPOSISTEMAS_API_KEY:-demo_key}
+      CORPOSISTEMAS_NIT: ${CORPOSISTEMAS_NIT:-12345678}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-%kernel.project_dir%/config/jwt/private.pem}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-%kernel.project_dir%/config/jwt/public.pem}
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE:-changeme}
+      AI_SERVICE_URL: ${AI_SERVICE_URL:-http://ai_service:8001}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_BUCKET: oxford-storage
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-password}
+      MESSENGER_TRANSPORT_DSN: "redis://redis:6379/messages"
+      MERCURE_URL: http://mercure/.well-known/mercure
+      MERCURE_PUBLIC_URL: http://localhost:3000/.well-known/mercure
+      MERCURE_JWT_SECRET: ${JWT_SECRET_KEY:-!ChangeThisMercureHubJWTSecretKey!}
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./backend/symfony:/var/www/symfony
+    working_dir: /var/www/symfony
+    networks:
+      - app_net
 
   # === FRONTEND (React) ===
   frontend:
@@ -102,10 +179,19 @@ services:
     environment:
       AI_SERVICE_PORT: 8001
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      AI_INTERNAL_KEY: ${AI_INTERNAL_KEY:-corposistemas_secret_key}
+      MONGO_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD:-password}@mongodb:27017/
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-password}
+      MINIO_ENDPOINT: minio:9000
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend/ai_service:/app
     networks:
       - app_net
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -134,6 +220,24 @@ services:
       timeout: 10s
       retries: 3
 
+  # === MERCURE (Real-time Hub) ===
+  mercure:
+    image: dunglas/mercure
+    environment:
+      SERVER_NAME: ':80'
+      MERCURE_PUBLISHER_JWT_KEY: ${JWT_SECRET_KEY:-!ChangeThisMercureHubJWTSecretKey!}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${JWT_SECRET_KEY:-!ChangeThisMercureHubJWTSecretKey!}
+      MERCURE_EXTRA_DIRECTIVES: cors_origins *
+    ports:
+      - "3000:80"
+    networks:
+      - app_net
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/healthz" ]
+      timeout: 5s
+      interval: 10s
+      retries: 5
+
 networks:
   app_net:
     driver: bridge
@@ -142,3 +246,4 @@ volumes:
   db_data:
   redis_data:
   mongodb_data:
+  minio_data:

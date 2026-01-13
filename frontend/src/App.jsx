@@ -6,6 +6,7 @@ import { AIProvider } from './context/AIContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import AppRoutes from './routes/AppRoutes';
 import VoiceChat from './components/VoiceChat';
+import NotificationListener from './components/NotificationListener';
 
 // Client-side version for auto-cache busting
 const APP_VERSION = '2025-01-05-v1.1.0';
@@ -68,6 +69,7 @@ function App() {
               <Suspense fallback={<PageLoader />}>
                 <AppRoutes />
                 <VoiceChat />
+                <NotificationListener />
               </Suspense>
             </AIProvider>
           </BrowserRouter>

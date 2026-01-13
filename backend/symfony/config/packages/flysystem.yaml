@@ -1,0 +1,7 @@
+flysystem:
+    storages:
+        oxford_storage:
+            adapter: 'aws'
+            options:
+                client: 'minio_s3_client'
+                bucket: '%env(MINIO_BUCKET)%'
