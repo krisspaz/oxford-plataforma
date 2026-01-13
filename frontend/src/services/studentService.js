@@ -7,6 +7,9 @@ export const studentService = {
         return api.get(`/students${queryString ? `?${queryString}` : ''}`);
     },
 
+    // Get current logged in student profile
+    getMe: () => api.get('/students/me'),
+
     // Get single student
     getById: (id) => api.get(`/students/${id}`),
 

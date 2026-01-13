@@ -132,9 +132,23 @@ const StudentTaskDetailPage = () => {
 
                             <div>
                                 <label className="block text-sm font-medium mb-1 dark:text-gray-300">Archivo Adjunto</label>
-                                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-700 transition cursor-not-allowed opacity-60">
-                                    <Upload className="mx-auto text-gray-400 mb-2" />
-                                    <p className="text-sm text-gray-500">Subida de archivos temporalmente deshabilitada (Simulación)</p>
+                                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-700 transition cursor-pointer">
+                                    <input
+                                        type="file"
+                                        id="file-upload"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            if (e.target.files[0]) {
+                                                setSubmissionContent(prev => prev + `\n[Archivo: ${e.target.files[0].name}]`);
+                                                alert(`Archivo "${e.target.files[0].name}" seleccionado. Se simulará el envío.`);
+                                            }
+                                        }}
+                                    />
+                                    <label htmlFor="file-upload" className="cursor-pointer">
+                                        <Upload className="mx-auto text-gray-400 mb-2" />
+                                        <p className="text-sm text-blue-500 hover:text-blue-600">Haz clic para subir un archivo</p>
+                                        <p className="text-xs text-gray-400 mt-1">PDF, DOC, o imágenes (máx. 10MB)</p>
+                                    </label>
                                 </div>
                             </div>
 
