@@ -44,7 +44,10 @@ const GestionUsuariosPage = () => {
         setLoading(true);
         try {
             const response = await userService.getAll();
-            if (response && response.member) {
+            // Handle custom backend format: { success: true, data: [] }
+            if (response && response.data && Array.isArray(response.data)) {
+                setUsers(response.data);
+            } else if (response && response.member) {
                 setUsers(response.member);
             } else if (response && response['hydra:member']) {
                 setUsers(response['hydra:member']);
@@ -134,7 +137,7 @@ const GestionUsuariosPage = () => {
             const payload = {
                 name: `${formData.firstName} ${formData.lastName}`.trim(),
                 email: formData.email,
-                roles: [formData.role],
+                role: formData.role, // Backend expects 'role' singular
                 password: formData.password
             };
 

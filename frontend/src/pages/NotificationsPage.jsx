@@ -1,7 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Bell, Filter, Trash2, Check, ChevronLeft, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
+const INITIAL_NOTIFICATIONS = [
+    {
+        id: 1,
+        type: 'grade',
+        title: 'Nueva calificación',
+        message: 'Se registró tu nota en Matemáticas: 85',
+        fullMessage: 'Se ha registrado una nueva calificación en la materia de Matemáticas. Tu nota es de 85 puntos sobre 100. Esta calificación corresponde al examen parcial del primer bimestre. Si tienes alguna duda, puedes contactar a tu profesor.',
+        time: '5 minutos',
+        date: '2025-01-06',
+        read: false,
+        icon: '📊'
+    },
+    {
+        id: 2,
+        type: 'payment',
+        title: 'Pago pendiente',
+        message: 'Tienes una cuota pendiente de Enero',
+        fullMessage: 'Tienes una cuota pendiente correspondiente al mes de Enero 2025. El monto es de Q750.00. Por favor, realiza tu pago antes del día 15 para evitar recargos.',
+        time: '1 hora',
+        date: '2025-01-06',
+        read: false,
+        icon: '💰'
+    },
+    {
+        id: 3,
+        type: 'message',
+        title: 'Nuevo mensaje',
+        message: 'Coordinación te envió un mensaje',
+        fullMessage: 'Mensaje de Coordinación Académica:\n\nEstimado estudiante,\n\nLe recordamos que la próxima semana iniciarán las evaluaciones del primer bimestre.\n\nAtentamente,\nCoordinación Académica',
+        time: '2 horas',
+        date: '2025-01-06',
+        read: false,
+        icon: '💬'
+    },
+    {
+        id: 4,
+        type: 'task',
+        title: 'Tarea asignada',
+        message: 'Nueva tarea: Ejercicios de Física Cap. 5',
+        fullMessage: 'Se te ha asignado una nueva tarea:\n\n📚 Materia: Física\n📝 Descripción: Ejercicios del Capítulo 5\n📅 Fecha de entrega: 20 de Enero 2025\n⭐ Puntos: 15 pts',
+        time: '1 día',
+        date: '2025-01-05',
+        read: true,
+        icon: '📝'
+    },
+    {
+        id: 5,
+        type: 'event',
+        title: 'Evento próximo',
+        message: 'Reunión de padres mañana a las 4:00 PM',
+        fullMessage: 'Recordatorio de evento:\n\n📅 Reunión de Padres de Familia\n🕓 Hora: 4:00 PM\n📍 Lugar: Salón de Usos Múltiples',
+        time: '1 día',
+        date: '2025-01-05',
+        read: true,
+        icon: '📅'
+    },
+    {
+        id: 6,
+        type: 'grade',
+        title: 'Calificación actualizada',
+        message: 'Se actualizó tu nota en Física: 92',
+        fullMessage: 'Tu calificación en Física ha sido actualizada a 92 puntos.',
+        time: '2 días',
+        date: '2025-01-04',
+        read: true,
+        icon: '📊'
+    },
+];
 
 const NotificationsPage = () => {
     const { darkMode } = useTheme();
@@ -9,74 +78,16 @@ const NotificationsPage = () => {
     const [filter, setFilter] = useState('all');
     const [selectedNotification, setSelectedNotification] = useState(null);
 
-    const [notifications, setNotifications] = useState([
-        {
-            id: 1,
-            type: 'grade',
-            title: 'Nueva calificación',
-            message: 'Se registró tu nota en Matemáticas: 85',
-            fullMessage: 'Se ha registrado una nueva calificación en la materia de Matemáticas. Tu nota es de 85 puntos sobre 100. Esta calificación corresponde al examen parcial del primer bimestre. Si tienes alguna duda, puedes contactar a tu profesor.',
-            time: '5 minutos',
-            date: '2025-01-06',
-            read: false,
-            icon: '📊'
-        },
-        {
-            id: 2,
-            type: 'payment',
-            title: 'Pago pendiente',
-            message: 'Tienes una cuota pendiente de Enero',
-            fullMessage: 'Tienes una cuota pendiente correspondiente al mes de Enero 2025. El monto es de Q750.00. Por favor, realiza tu pago antes del día 15 para evitar recargos.',
-            time: '1 hora',
-            date: '2025-01-06',
-            read: false,
-            icon: '💰'
-        },
-        {
-            id: 3,
-            type: 'message',
-            title: 'Nuevo mensaje',
-            message: 'Coordinación te envió un mensaje',
-            fullMessage: 'Mensaje de Coordinación Académica:\n\nEstimado estudiante,\n\nLe recordamos que la próxima semana iniciarán las evaluaciones del primer bimestre.\n\nAtentamente,\nCoordinación Académica',
-            time: '2 horas',
-            date: '2025-01-06',
-            read: false,
-            icon: '💬'
-        },
-        {
-            id: 4,
-            type: 'task',
-            title: 'Tarea asignada',
-            message: 'Nueva tarea: Ejercicios de Física Cap. 5',
-            fullMessage: 'Se te ha asignado una nueva tarea:\n\n📚 Materia: Física\n📝 Descripción: Ejercicios del Capítulo 5\n📅 Fecha de entrega: 20 de Enero 2025\n⭐ Puntos: 15 pts',
-            time: '1 día',
-            date: '2025-01-05',
-            read: true,
-            icon: '📝'
-        },
-        {
-            id: 5,
-            type: 'event',
-            title: 'Evento próximo',
-            message: 'Reunión de padres mañana a las 4:00 PM',
-            fullMessage: 'Recordatorio de evento:\n\n📅 Reunión de Padres de Familia\n🕓 Hora: 4:00 PM\n📍 Lugar: Salón de Usos Múltiples',
-            time: '1 día',
-            date: '2025-01-05',
-            read: true,
-            icon: '📅'
-        },
-        {
-            id: 6,
-            type: 'grade',
-            title: 'Calificación actualizada',
-            message: 'Se actualizó tu nota en Física: 92',
-            fullMessage: 'Tu calificación en Física ha sido actualizada a 92 puntos.',
-            time: '2 días',
-            date: '2025-01-04',
-            read: true,
-            icon: '📊'
-        },
-    ]);
+    // Load notifications from localStorage or use initial data
+    const [notifications, setNotifications] = useState(() => {
+        const saved = localStorage.getItem('oxford_notifications');
+        return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
+    });
+
+    // Persist to localStorage whenever notifications change
+    useEffect(() => {
+        localStorage.setItem('oxford_notifications', JSON.stringify(notifications));
+    }, [notifications]);
 
     const typeColors = {
         grade: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
@@ -172,8 +183,8 @@ const NotificationsPage = () => {
                         key={key}
                         onClick={() => setFilter(key)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${filter === key
-                                ? 'bg-gradient-to-r from-obs-pink to-obs-purple text-white shadow-lg'
-                                : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                            ? 'bg-gradient-to-r from-obs-pink to-obs-purple text-white shadow-lg'
+                            : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
                             }`}
                     >
                         {label}
@@ -202,10 +213,10 @@ const NotificationsPage = () => {
                                         setSelectedNotification(notification);
                                     }}
                                     className={`p-4 cursor-pointer transition-colors ${selectedNotification?.id === notification.id
-                                            ? darkMode ? 'bg-obs-pink/10' : 'bg-obs-pink/5'
-                                            : !notification.read
-                                                ? darkMode ? 'bg-blue-900/10' : 'bg-blue-50'
-                                                : darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'
+                                        ? darkMode ? 'bg-obs-pink/10' : 'bg-obs-pink/5'
+                                        : !notification.read
+                                            ? darkMode ? 'bg-blue-900/10' : 'bg-blue-50'
+                                            : darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'
                                         }`}
                                 >
                                     <div className="flex gap-4">
