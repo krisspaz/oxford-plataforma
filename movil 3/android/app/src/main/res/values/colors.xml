@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Oxford Blue Primary -->
+    <color name="oxford_blue">#1E3A5F</color>
+    <color name="oxford_blue_light">#4A7AB8</color>
+    <color name="oxford_blue_dark">#0D1F33</color>
+    
+    <!-- Oxford Gold -->
+    <color name="oxford_gold">#D4AF37</color>
+    
+    <!-- Status Colors -->
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FF9800</color>
+    <color name="error">#E53935</color>
+    <color name="info">#2196F3</color>
+    
+    <!-- Backgrounds -->
+    <color name="background">#F5F7FA</color>
+    <color name="surface">#FFFFFF</color>
+    
+    <!-- Splash Screen -->
+    <color name="splash_background">#1E3A5F</color>
+</resources>

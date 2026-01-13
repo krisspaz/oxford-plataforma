@@ -1,0 +1,8 @@
+version: "2"
+
+tunnels:
+  oxford-system:
+    proto: http
+    addr: 5173
+    host_header: rewrite
+    domain: vexatiously-dextrocular-esteban.ngrok-free.dev

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Oxford</string>
+    
+    <!-- Auth -->
+    <string name="login_title">Iniciar Sesión</string>
+    <string name="email_label">Correo Electrónico</string>
+    <string name="password_label">Contraseña</string>
+    <string name="login_button">Ingresar</string>
+    <string name="forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="logout">Cerrar Sesión</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_tasks">Tareas</string>
+    <string name="nav_grades">Notas</string>
+    <string name="nav_payments">Pagos</string>
+    <string name="nav_profile">Perfil</string>
+    
+    <!-- Home -->
+    <string name="welcome_message">¡Hola!</string>
+    <string name="quick_access">Acceso Rápido</string>
+    <string name="pending_tasks">Tareas Pendientes</string>
+    <string name="see_all">Ver todo</string>
+    <string name="today_schedule">Horario de Hoy</string>
+    
+    <!-- Tasks -->
+    <string name="my_tasks">Mis Tareas</string>
+    <string name="pending">Pendientes</string>
+    <string name="submitted">Entregadas</string>
+    <string name="all_tasks">Todas</string>
+    <string name="submit_task">Entregar Tarea</string>
+    <string name="task_detail">Detalle de Tarea</string>
+    <string name="due_date">Fecha de entrega</string>
+    <string name="points">Puntos</string>
+    <string name="description">Descripción</string>
+    <string name="attachments">Archivos Adjuntos</string>
+    
+    <!-- Grades -->
+    <string name="my_grades">Mis Notas</string>
+    <string name="general_average">Promedio General</string>
+    <string name="current_bimester">Bimestre Actual</string>
+    
+    <!-- Attendance -->
+    <string name="my_attendance">Mi Asistencia</string>
+    <string name="attendance_rate">Asistencia</string>
+    <string name="tardies">Tardanzas</string>
+    <string name="absences">Faltas</string>
+    <string name="recent_history">Historial Reciente</string>
+    
+    <!-- Payments -->
+    <string name="payments">Pagos</string>
+    <string name="pending_balance">Saldo Pendiente</string>
+    <string name="pending_payments">pagos pendientes</string>
+    <string name="paid">Pagado</string>
+    
+    <!-- Profile -->
+    <string name="my_profile">Mi Perfil</string>
+    <string name="edit_profile">Editar Perfil</string>
+    <string name="change_password">Cambiar Contraseña</string>
+    <string name="notifications">Notificaciones</string>
+    <string name="help">Ayuda</string>
+    
+    <!-- Schedule -->
+    <string name="my_schedule">Mi Horario</string>
+    
+    <!-- Common -->
+    <string name="loading">Cargando...</string>
+    <string name="error">Error</string>
+    <string name="retry">Reintentar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="accept">Aceptar</string>
+    <string name="save">Guardar</string>
+    <string name="back">Volver</string>
+    
+    <!-- Errors -->
+    <string name="error_connection">Error de conexión. Verifica tu internet.</string>
+    <string name="error_auth">Credenciales incorrectas</string>
+    <string name="error_generic">Algo salió mal. Intenta de nuevo.</string>
+    
+    <!-- Empty States -->
+    <string name="no_tasks">No tienes tareas pendientes</string>
+    <string name="no_notifications">No tienes notificaciones</string>
+    <string name="no_grades">Aún no hay notas registradas</string>
+    
+    <!-- Copyright -->
+    <string name="copyright">© 2026 Colegio Oxford\nTodos los derechos reservados</string>
+</resources>
