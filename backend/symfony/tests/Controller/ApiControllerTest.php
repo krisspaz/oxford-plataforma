@@ -31,7 +31,7 @@ class ApiControllerTest extends WebTestCase
             [],
             ['CONTENT_TYPE' => 'application/json'],
             json_encode([
-                'username' => 'admin@oxford.edu',
+                'email' => 'admin@oxford.edu',
                 'password' => 'oxford123'
             ])
         );
@@ -52,7 +52,7 @@ class ApiControllerTest extends WebTestCase
             [],
             ['CONTENT_TYPE' => 'application/json'],
             json_encode([
-                'username' => 'invalid@test.com',
+                'email' => 'invalid@test.com',
                 'password' => 'wrongpassword'
             ])
         );
@@ -103,13 +103,15 @@ class ApiControllerTest extends WebTestCase
             [],
             [
                 'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
-                'CONTENT_TYPE' => 'application/json'
+                'CONTENT_TYPE' => 'application/ld+json',
+                'HTTP_ACCEPT' => 'application/ld+json'
             ],
             json_encode([
                 'firstName' => 'Test',
                 'lastName' => 'Student',
-                'code' => 'TEST-' . time(),
-                'email' => 'test' . time() . '@test.com'
+                'carnet' => 'TEST-' . time(),
+                'email' => 'test' . time() . '@test.com',
+                'birthDate' => '2000-01-01',
             ])
         );
 
@@ -146,7 +148,7 @@ class ApiControllerTest extends WebTestCase
 
     public function testHealthCheck(): void
     {
-        $this->client->request('GET', '/health');
+        $this->client->request('GET', '/api/health');
 
         $response = $this->client->getResponse();
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
@@ -194,7 +196,7 @@ class ApiControllerTest extends WebTestCase
             [],
             ['CONTENT_TYPE' => 'application/json'],
             json_encode([
-                'username' => 'admin@oxford.edu',
+                'email' => 'admin@oxford.edu',
                 'password' => 'oxford123'
             ])
         );

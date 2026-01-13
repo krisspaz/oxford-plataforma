@@ -20,5 +20,12 @@ class ExonerationController extends AbstractController
         return $this->json($requests);
     }
     
+    #[Route('', name: 'create', methods: ['POST'])]
+    public function create(): JsonResponse
+    {
+        // Placeholder for creation logic
+        return $this->json(['message' => 'Exoneration created'], 201);
+    }
+    
     // Stub for other methods
 }

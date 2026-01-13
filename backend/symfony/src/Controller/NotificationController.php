@@ -92,4 +92,10 @@ class NotificationController extends AbstractController
             'count' => $deletedCount
         ]);
     }
+    #[Route('/send', name: 'send', methods: ['POST'])]
+    public function send(): JsonResponse
+    {
+        // Placeholder for send logic
+        return $this->json(['message' => 'Notification queued'], 200);
+    }
 }

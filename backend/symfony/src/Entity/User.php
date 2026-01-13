@@ -55,6 +55,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
     private bool $isActive = true;
 
+    #[ORM\Embedded(class: TwoFactorAuth::class)]
+    private ?TwoFactorAuth $twoFactorAuth = null;
+
+    public function getTwoFactorAuth(): ?TwoFactorAuth
+    {
+        return $this->twoFactorAuth;
+    }
+
+    public function setTwoFactorAuth(?TwoFactorAuth $twoFactorAuth): static
+    {
+        $this->twoFactorAuth = $twoFactorAuth;
+
+        return $this;
+    }
+
     public function isActive(): bool
     {
         return $this->isActive;
@@ -133,6 +148,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->password = $password;
 
         return $this;
+    }
+
+    public function __construct()
+    {
+        $this->twoFactorAuth = new TwoFactorAuth();
     }
 
     /**

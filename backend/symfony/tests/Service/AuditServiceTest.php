@@ -16,11 +16,11 @@ class AuditServiceTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
-        $container = $kernel->getContainer();
+        // Boot kernel if not already booted
+        self::bootKernel();
         
-        // Try to get the service from container
-        $this->auditService = $container->get(AuditService::class);
+        // Use static::getContainer() to access private services in test env
+        $this->auditService = static::getContainer()->get(AuditService::class);
     }
 
     public function testLogSecurityEvent(): void

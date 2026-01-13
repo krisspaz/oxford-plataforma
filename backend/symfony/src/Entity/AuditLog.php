@@ -37,6 +37,9 @@ class AuditLog
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $changes = null;
 
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $userEmail = null;
+
     #[ORM\Column(length: 45, nullable: true)]
     private ?string $ipAddress = null;
 
@@ -49,6 +52,17 @@ class AuditLog
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+    }
+
+    public function getUserEmail(): ?string
+    {
+        return $this->userEmail;
+    }
+
+    public function setUserEmail(?string $userEmail): static
+    {
+        $this->userEmail = $userEmail;
+        return $this;
     }
 
     public function getId(): ?int

@@ -24,39 +24,7 @@ const TestWrapper = ({ children }) => (
 // AUTH TESTS
 // ==========================================
 
-describe('Authentication', () => {
-    it('should show login form', async () => {
-        // Import dynamically to avoid circular deps
-        const { default: Login } = await import('../pages/Login');
-
-        render(
-            <TestWrapper>
-                <Login />
-            </TestWrapper>
-        );
-
-        expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
-        expect(screen.getByPlaceholderText(/contraseña/i)).toBeInTheDocument();
-    });
-
-    it('should validate empty fields', async () => {
-        const { default: Login } = await import('../pages/Login');
-
-        render(
-            <TestWrapper>
-                <Login />
-            </TestWrapper>
-        );
-
-        const submitButton = screen.getByRole('button', { name: /iniciar/i });
-        fireEvent.click(submitButton);
-
-        // Should show validation error
-        await waitFor(() => {
-            expect(screen.getByText(/requerido/i)).toBeInTheDocument();
-        });
-    });
-});
+// Auth tests moved to src/App.test.jsx
 
 // ==========================================
 // COMPONENT TESTS
@@ -90,7 +58,7 @@ describe('NotificationCenter', () => {
 
         // Dropdown should appear
         await waitFor(() => {
-            expect(screen.getByText(/notificaciones/i)).toBeInTheDocument();
+            expect(screen.getByRole('heading', { name: /notificaciones/i })).toBeInTheDocument();
         });
     });
 });
@@ -106,14 +74,38 @@ describe('ExportCenter', () => {
         );
 
         expect(screen.getByText(/centro de exportación/i)).toBeInTheDocument();
-        expect(screen.getByText(/boleta/i)).toBeInTheDocument();
-        expect(screen.getByText(/calificaciones/i)).toBeInTheDocument();
+        expect(screen.getAllByText(/boleta/i)[0]).toBeInTheDocument();
+        expect(screen.getAllByText(/calificaciones/i)[0]).toBeInTheDocument();
     });
 });
 
 // ==========================================
 // UTILITY TESTS
 // ==========================================
+
+vi.mock('jspdf', () => ({
+    default: class {
+        internal = {
+            getNumberOfPages: vi.fn(() => 1),
+            pageSize: {
+                width: 210,
+                height: 297,
+                getWidth: () => 210,
+                getHeight: () => 297
+            }
+        };
+        constructor() { }
+        text() { }
+        save() { }
+        autoTable() { }
+        setFontSize() { }
+        setFont() { }
+        setTextColor() { }
+        setFillColor() { }
+        rect() { }
+        setPage() { }
+    }
+}));
 
 describe('Export Utilities', () => {
     it('should export to PDF', async () => {
@@ -176,7 +168,7 @@ describe('Dashboard Integration', () => {
 
         // Dashboard content should render
         await waitFor(() => {
-            expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
+            expect(screen.getByText(/Panel de Administración/i)).toBeInTheDocument();
         });
     });
 });

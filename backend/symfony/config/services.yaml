@@ -15,6 +15,7 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+            - '../src/DTO/'
 
     App\Service\CorpoSistemasService:
         arguments:

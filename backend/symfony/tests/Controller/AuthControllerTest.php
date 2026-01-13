@@ -80,7 +80,20 @@ class AuthControllerTest extends WebTestCase
     {
         $client = static::createClient();
         
-        $client->request('POST', '/api/auth/logout');
+        // 1. Get Token
+        $client->request('POST', '/api/auth/login', [], [], [
+            'CONTENT_TYPE' => 'application/json'
+        ], json_encode([
+            'email' => 'admin@oxford.edu',
+            'password' => 'oxford123'
+        ]));
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $token = $data['token'] ?? '';
+
+        // 2. Logout with token
+        $client->request('POST', '/api/auth/logout', [], [], [
+             'HTTP_AUTHORIZATION' => 'Bearer ' . $token
+        ]);
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
         

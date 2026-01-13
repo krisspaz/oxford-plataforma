@@ -9,9 +9,12 @@ class GradeServiceTest extends TestCase
 {
     private $gradeService;
 
+    private $gradeRepository;
+
     protected function setUp(): void
     {
-        $this->gradeService = new GradeService();
+        $this->gradeRepository = $this->createMock(\App\Repository\GradeRecordRepository::class);
+        $this->gradeService = new GradeService($this->gradeRepository);
     }
 
     public function testCalculateAverage()

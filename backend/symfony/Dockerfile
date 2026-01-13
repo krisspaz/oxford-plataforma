@@ -1,5 +1,5 @@
 # Backend Symfony Production Dockerfile
-FROM php:8.2-fpm-alpine AS base
+FROM php:8.3-fpm-alpine AS base
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -14,9 +14,11 @@ RUN apk add --no-cache \
 
 # Install Redis extension
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
+    && pecl install redis mongodb \
+    && docker-php-ext-enable redis mongodb \
     && apk del .build-deps
+
+RUN apk add --no-cache --virtual .mongodb-ext-deps openssl-dev
 
 # Set working directory
 WORKDIR /var/www/html

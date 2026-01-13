@@ -16,8 +16,25 @@ services:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-oxford_user} -d ${POSTGRES_DB:-oxford_db}" ]
       interval: 10s
       timeout: 5s
-      retries: 5
       start_period: 30s
+
+  # === MONGODB (NoSQL) ===
+  mongodb:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app_net
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # === REDIS (Cache) ===
   redis:
@@ -124,3 +141,4 @@ networks:
 volumes:
   db_data:
   redis_data:
+  mongodb_data:

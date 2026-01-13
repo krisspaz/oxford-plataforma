@@ -95,19 +95,19 @@ class StudentResponse
     {
         return new self(
             id: $student->getId(),
-            code: $student->getCode(),
-            firstName: $student->getUser()?->getFirstName() ?? '',
-            lastName: $student->getUser()?->getLastName() ?? '',
-            email: $student->getUser()?->getEmail(),
-            grade: $student->getGrade() ? [
-                'id' => $student->getGrade()->getId(),
-                'name' => $student->getGrade()->getName(),
+            code: $student->getStudentCode() ?? '',
+            firstName: $student->getFirstName() ?? '',
+            lastName: $student->getLastName() ?? '',
+            email: $student->getEmail(),
+            grade: $student->getCourse() ? [
+                'id' => $student->getCourse()->getId(),
+                'name' => $student->getCourse()->getName(),
             ] : null,
-            section: $student->getSection() ? [
-                'id' => $student->getSection()->getId(),
-                'name' => $student->getSection()->getName(),
+            section: $student->getCourse() ? [
+                'id' => $student->getCourse()->getId(),
+                'name' => $student->getCourse()->getSection(),
             ] : null,
-            status: $student->getStatus(),
+            status: $student->isActive() ? 'active' : 'inactive',
         );
     }
 }

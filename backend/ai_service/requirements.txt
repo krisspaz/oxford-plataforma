@@ -5,3 +5,4 @@ redis
 python-jose[cryptography]
 pytest
 flask-cors
+pymongo==4.6.1
