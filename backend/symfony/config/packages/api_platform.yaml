@@ -1,6 +1,9 @@
 api_platform:
     title: 'Corpo Oxford API'
     version: '1.0.0'
+    formats:
+        jsonld: ['application/ld+json']
+        json: ['application/json']
     defaults:
         pagination_enabled: true
         pagination_items_per_page: 30
@@ -10,3 +13,4 @@ api_platform:
     enable_re_doc: true
     eager_loading:
         force_eager: false
+
