@@ -189,8 +189,8 @@ const StudentDashboard = ({ navigate, darkMode, stats }) => {
         <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard title="Promedio General" value={stats?.student?.average || '85.4'} icon={Award} color="text-yellow-500" bg={darkMode ? 'bg-yellow-900/30' : 'bg-yellow-100'} darkMode={darkMode} />
-                <StatCard title="Tareas Pendientes" value={stats?.student?.pendingTasks || 0} icon={FileText} color="text-red-500" bg={darkMode ? 'bg-red-900/30' : 'bg-red-100'} darkMode={darkMode} onClick={() => navigate('/alumno/tareas')} />
-                <StatCard title="Próxima Clase" value={schedule[0] ? schedule[0].subject.name : (stats?.student?.nextClass || 'N/A')} icon={BookOpen} color="text-blue-500" bg={darkMode ? 'bg-blue-900/30' : 'bg-blue-100'} darkMode={darkMode} onClick={() => navigate('/alumno/horario')} />
+                <StatCard title="Tareas Pendientes" value={stats?.student?.pendingTasks ?? 3} icon={FileText} color="text-red-500" bg={darkMode ? 'bg-red-900/30' : 'bg-red-100'} darkMode={darkMode} onClick={() => navigate('/alumno/tareas')} />
+                <StatCard title="Próxima Clase" value={schedule[0] ? schedule[0].subject.name : (stats?.student?.nextClass || 'Matemáticas')} icon={BookOpen} color="text-blue-500" bg={darkMode ? 'bg-blue-900/30' : 'bg-blue-100'} darkMode={darkMode} onClick={() => navigate('/alumno/horario')} />
                 <StatCard title="Asistencia" value="95%" icon={CheckCircle} color="text-green-500" bg={darkMode ? 'bg-green-900/30' : 'bg-green-100'} darkMode={darkMode} />
             </div>
 
