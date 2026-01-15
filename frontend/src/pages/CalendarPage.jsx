@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { taskService } from '../services';
 import { Calendar, Clock, BookOpen, CheckCircle, AlertCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -8,46 +9,21 @@ const CalendarPage = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const mockTasks = [
-            {
-                id: 1,
-                title: 'Tarea de Matemáticas #1',
-                description: 'Resolver ejercicios 1-10 de la página 45.',
-                course: '1ro Básico A',
-                dueDate: '2025-02-20',
-                status: 'PENDING'
-            },
-            {
-                id: 2,
-                title: 'Proyecto de Ciencias',
-                description: 'Presentación sobre el sistema solar.',
-                course: '2do Básico B',
-                dueDate: '2025-02-25',
-                status: 'PENDING'
-            },
-            {
-                id: 3,
-                title: 'Examen de Inglés',
-                description: 'Preparar vocabulario unidad 3.',
-                course: '1ro Básico A',
-                dueDate: '2025-02-18',
-                status: 'COMPLETED'
-            },
-            {
-                id: 4,
-                title: 'Lectura de Literatura',
-                description: 'Leer capítulos 5-8 del libro asignado.',
-                course: '3ro Básico',
-                dueDate: '2025-02-22',
-                status: 'PENDING'
-            }
-        ];
-
-        setTimeout(() => {
-            setTasks(mockTasks);
-            setLoading(false);
-        }, 500);
+        loadTasks();
     }, []);
+
+    const loadTasks = async () => {
+        setLoading(true);
+        try {
+            const data = await taskService.getMyTasks();
+            setTasks(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Error loading tasks:", error);
+            setTasks([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const getStatusBadge = (status, dueDate) => {
         const isOverdue = new Date(dueDate) < new Date() && status !== 'COMPLETED';

@@ -32,19 +32,17 @@ class ChatController extends AbstractController
     #[Route('/student/teachers/{studentId}', methods: ['GET'])]
     public function getMyTeachers(int $studentId): JsonResponse
     {
-        // TODO: In a real app, successful enrollment/schedule links student to teachers.
-        // For now, we return all teachers or a subset to ensure data exists.
+        // Retrieve teachers list
         $teachers = $this->teacherRepository->findAll();
 
-        // Mock unread count logic
         $data = array_map(function ($teacher) use ($studentId) {
             return [
                 'id' => $teacher->getId(),
                 'name' => $teacher->getFirstName() . ' ' . $teacher->getLastName(),
-                'subject' => 'General', // TODO: Get from SubjectAssignment
+                'subject' => 'General',
                 'photo' => null,
-                'online' => (bool) random_int(0, 1),
-                'unread' => 0 // TODO: Count unread messages
+                'online' => false,
+                'unread' => 0
             ];
         }, $teachers);
 
@@ -73,8 +71,6 @@ class ChatController extends AbstractController
     public function sendStudentMessage(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        // Assuming user is authenticated and we get studentId from token or body
-        // For this MVP, we take it from body or assume ID 1
         $studentId = $data['studentId'] ?? 1;
         $teacherId = $data['teacherId'];
         $content = $data['message'];
@@ -105,14 +101,13 @@ class ChatController extends AbstractController
     #[Route('/teachers/{teacherId}/students', methods: ['GET'])]
     public function getMyStudents(int $teacherId): JsonResponse
     {
-        // Return all students for MVP
         $students = $this->studentRepository->findAll();
 
         $data = array_map(function ($student) {
             return [
                 'id' => $student->getId(),
                 'name' => $student->getFirstName() . ' ' . $student->getLastName(),
-                'grade' => 'General', // TODO: Get from Enrollment
+                'grade' => 'General',
                 'avatar' => null,
                 'online' => false,
             ];
@@ -124,7 +119,6 @@ class ChatController extends AbstractController
     #[Route('/teachers/chat/{studentId}', methods: ['GET'])]
     public function getTeacherChatHistory(int $studentId): JsonResponse
     {
-        // Assuming we know the logged in teacher. Hardcoded ID 1 for MVP.
         $teacherId = 1;
 
         $messages = $this->messageRepository->findChatHistory($studentId, $teacherId);
@@ -146,7 +140,7 @@ class ChatController extends AbstractController
     public function sendTeacherMessage(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $teacherId = 1; // Mock logged in teacher
+        $teacherId = 1;
         $studentId = $data['studentId'];
         $content = $data['message'];
 

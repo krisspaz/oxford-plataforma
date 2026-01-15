@@ -31,20 +31,8 @@ const CorteDiaPage = () => {
             }
         } catch (error) {
             console.warn("Using mock data due to error:", error);
-            // Mock Data Fallback (Keep this for stability until full deployment)
-            const mockPayments = [
-                { id: 1, name: 'Juan Perez', products: 'Mensualidad Enero', method: 'Efectivo', series: 'A', number: '101', total: 450 },
-                { id: 2, name: 'Juan Perez', products: 'Uniforme', method: 'Efectivo', series: 'A', number: '101', total: 100 },
-                { id: 3, name: 'Maria Lopez', products: 'Inscripción', method: 'Tarjeta', series: 'A', number: '102', total: 800 },
-                { id: 4, name: 'Carlos Ruiz', products: 'Uniforme Deportivo', method: 'Depósito', series: 'B', number: '055', total: 350 },
-            ];
-            setPayments(mockPayments);
-            setTotals({
-                efectivo: 550,
-                tarjeta: 800,
-                deposito: 350,
-                total: 1700
-            });
+            setPayments([]);
+            setTotals({ efectivo: 0, tarjeta: 0, deposito: 0, total: 0 });
         } finally {
             setLoading(false);
         }

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { helpTicketService } from '../services';
 import { useTheme } from '../contexts/ThemeContext';
 import { Lightbulb, Send, CheckCircle, Eye, Filter, Clock, MessageSquare } from 'lucide-react';
 
@@ -18,53 +19,60 @@ const SuggestionsPage = () => {
         { id: 'platform', label: '💻 Plataforma', description: 'Mejoras para el portal estudiantil' },
     ];
 
-    // Mock previous suggestions
-    const mySuggestions = [
-        {
-            id: 1,
-            category: 'platform',
-            title: 'Agregar modo oscuro',
-            description: 'Sería útil tener un modo oscuro para estudiar de noche',
-            status: 'implemented',
-            date: '2025-01-02',
-            response: '¡Implementado! Ya puedes activar el modo oscuro desde el ícono de sol/luna en la barra superior.'
-        },
-        {
-            id: 2,
-            category: 'school',
-            title: 'Más bancas en el patio',
-            description: 'Hay pocos lugares para sentarse durante el recreo',
-            status: 'read',
-            date: '2024-12-15',
-            response: null
-        },
-        {
-            id: 3,
-            category: 'teachers',
-            title: 'Más ejemplos prácticos en Física',
-            description: 'Sería genial que los profesores usaran más ejemplos de la vida real',
-            status: 'sent',
-            date: '2025-01-05',
-            response: null
-        },
-    ];
+    // Real Data State
+    const [mySuggestions, setMySuggestions] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    const statusConfig = {
-        sent: { label: 'Enviada', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', icon: Send },
-        read: { label: 'Leída', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400', icon: Eye },
-        implemented: { label: 'Implementada', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400', icon: CheckCircle },
+    useEffect(() => {
+        if (activeTab === 'history') {
+            loadSuggestions();
+        }
+    }, [activeTab]);
+
+    const loadSuggestions = async () => {
+        setLoading(true);
+        try {
+            // Fetch suggestions (type: sugerencia)
+            const data = await helpTicketService.getAll({ type: 'sugerencia' });
+            setMySuggestions(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Error loading suggestions:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleSubmit = (e) => {
+    const statusConfig = {
+        open: { label: 'Enviada', color: 'bg-blue-100 text-blue-700', icon: Send },
+        closed: { label: 'Revisada', color: 'bg-green-100 text-green-700', icon: CheckCircle },
+        // Mapped statuses
+        sent: { label: 'Enviada', color: 'bg-blue-100 text-blue-700', icon: Send },
+        read: { label: 'Leída', color: 'bg-yellow-100 text-yellow-700', icon: Eye },
+        implemented: { label: 'Implementada', color: 'bg-green-100 text-green-700', icon: CheckCircle },
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.category || !formData.title || !formData.description) {
             alert('Por favor completa todos los campos');
             return;
         }
-        console.log('Submitting suggestion:', formData);
-        setSubmitted(true);
-        setFormData({ category: '', title: '', description: '' });
-        setTimeout(() => setSubmitted(false), 3000);
+
+        try {
+            await helpTicketService.create({
+                ...formData,
+                subject: formData.title, // Map title to subject
+                type: 'sugerencia',
+                status: 'open'
+            });
+
+            setSubmitted(true);
+            setFormData({ category: '', title: '', description: '' });
+            setTimeout(() => setSubmitted(false), 3000);
+        } catch (error) {
+            console.error("Error submitting suggestion:", error);
+            alert("Error al enviar la sugerencia");
+        }
     };
 
     const getCategoryLabel = (id) => categories.find(c => c.id === id)?.label || id;
@@ -86,8 +94,8 @@ const SuggestionsPage = () => {
                 <button
                     onClick={() => setActiveTab('new')}
                     className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${activeTab === 'new'
-                            ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg'
-                            : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg'
+                        : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
                         }`}
                 >
                     <Lightbulb size={16} /> Nueva Sugerencia
@@ -95,8 +103,8 @@ const SuggestionsPage = () => {
                 <button
                     onClick={() => setActiveTab('history')}
                     className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${activeTab === 'history'
-                            ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg'
-                            : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg'
+                        : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
                         }`}
                 >
                     <Clock size={16} /> Mis Sugerencias ({mySuggestions.length})
@@ -132,10 +140,10 @@ const SuggestionsPage = () => {
                                             type="button"
                                             onClick={() => setFormData(prev => ({ ...prev, category: cat.id }))}
                                             className={`p-4 rounded-xl border-2 text-left transition-all ${formData.category === cat.id
-                                                    ? 'border-obs-orange bg-obs-orange/10'
-                                                    : darkMode
-                                                        ? 'border-gray-700 hover:border-gray-600'
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-obs-orange bg-obs-orange/10'
+                                                : darkMode
+                                                    ? 'border-gray-700 hover:border-gray-600'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
                                             <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{cat.label}</p>
@@ -156,8 +164,8 @@ const SuggestionsPage = () => {
                                     onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
                                     placeholder="Ej: Agregar más actividades extracurriculares"
                                     className={`w-full px-4 py-3 rounded-lg border ${darkMode
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                                            : 'bg-white border-gray-300 placeholder-gray-400'
+                                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                                        : 'bg-white border-gray-300 placeholder-gray-400'
                                         } focus:ring-2 focus:ring-obs-orange focus:border-transparent`}
                                 />
                             </div>
@@ -173,8 +181,8 @@ const SuggestionsPage = () => {
                                     onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
                                     placeholder="Explica tu sugerencia con más detalle..."
                                     className={`w-full px-4 py-3 rounded-lg border resize-none ${darkMode
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                                            : 'bg-white border-gray-300 placeholder-gray-400'
+                                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                                        : 'bg-white border-gray-300 placeholder-gray-400'
                                         } focus:ring-2 focus:ring-obs-orange focus:border-transparent`}
                                 />
                             </div>
@@ -224,7 +232,7 @@ const SuggestionsPage = () => {
                                             </span>
                                         </div>
                                         <h3 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                                            {suggestion.title}
+                                            {suggestion.title || suggestion.subject}
                                         </h3>
                                         <p className={`text-sm mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                                             {suggestion.description}

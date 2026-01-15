@@ -26,7 +26,6 @@ export const AIProvider = ({ children }) => {
         setContextState(newContext);
 
         // Here we will eventually send this context to the AI Service
-        console.log('🧠 [AI Omniscience] User moved to:', location.pathname);
 
         // Example: If path is /grades/1, we infer viewingEntity
         // This logic can be expanded or moved to a utility
@@ -34,7 +33,6 @@ export const AIProvider = ({ children }) => {
     }, [location]);
 
     const registerAction = (action, details) => {
-        console.log('🧠 [AI Omniscience] Action detected:', action, details);
         setContextState(prev => ({
             ...prev,
             lastAction: { action, details, time: Date.now() }

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { teacherService, teacherRatingService } from '../services';
 import { useTheme } from '../contexts/ThemeContext';
 import { Star, User, Send, CheckCircle, MessageSquare } from 'lucide-react';
 
@@ -15,36 +16,50 @@ const TeacherRatingPage = () => {
     const [isAnonymous, setIsAnonymous] = useState(true);
     const [submitted, setSubmitted] = useState(false);
 
-    // Mock data - conectar con backend real
-    const teachers = [
-        { id: 1, name: 'Prof. María García', subject: 'Matemáticas', photo: null, rated: false },
-        { id: 2, name: 'Prof. Carlos Rodríguez', subject: 'Física', photo: null, rated: true },
-        { id: 3, name: 'Prof. Ana Martínez', subject: 'Química', photo: null, rated: false },
-        { id: 4, name: 'Prof. Luis Hernández', subject: 'Historia', photo: null, rated: false },
-        { id: 5, name: 'Prof. Sandra López', subject: 'Inglés', photo: null, rated: true },
-    ];
+    // Real Data Hooks
+    const [teachers, setTeachers] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const criteria = [
-        { key: 'clarity', label: 'Claridad al Explicar', description: '¿Explica de forma clara y comprensible?' },
-        { key: 'punctuality', label: 'Puntualidad', description: '¿Llega a tiempo y cumple con el horario?' },
-        { key: 'treatment', label: 'Trato con Estudiantes', description: '¿Es respetuoso y accesible?' },
-        { key: 'expertise', label: 'Dominio del Tema', description: '¿Demuestra conocimiento profundo?' },
-    ];
+    useEffect(() => {
+        loadTeachers();
+    }, []);
 
-    const handleRating = (criteriaKey, value) => {
-        setRatings(prev => ({ ...prev, [criteriaKey]: value }));
+    const loadTeachers = async () => {
+        try {
+            const data = await teacherService.getAll();
+            setTeachers(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Error loading teachers:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleSubmit = () => {
-        // Aquí enviar al backend
-        console.log('Submitting rating:', { teacherId: selectedTeacher.id, ratings, comment, isAnonymous });
-        setSubmitted(true);
-        setTimeout(() => {
-            setSelectedTeacher(null);
-            setRatings({ clarity: 0, punctuality: 0, treatment: 0, expertise: 0 });
-            setComment('');
-            setSubmitted(false);
-        }, 2000);
+    const handleSubmit = async () => {
+        if (!selectedTeacher) return;
+
+        try {
+            const payload = {
+                teacher: `/api/teachers/${selectedTeacher.id}`,
+                rating: parseInt(averageRating),
+                comment: comment,
+                isAnonymous: isAnonymous,
+                // Add individual criteria if backend supports it, otherwise sending avg
+            };
+
+            await teacherRatingService.create(payload);
+
+            setSubmitted(true);
+            setTimeout(() => {
+                setSelectedTeacher(null);
+                setRatings({ clarity: 0, punctuality: 0, treatment: 0, expertise: 0 });
+                setComment('');
+                setSubmitted(false);
+            }, 2000); // UI feedback delay
+        } catch (error) {
+            console.error("Error submitting rating:", error);
+            alert("Error al enviar la evaluación");
+        }
     };
 
     const averageRating = Object.values(ratings).filter(r => r > 0).length > 0
@@ -99,10 +114,10 @@ const TeacherRatingPage = () => {
                                 key={teacher.id}
                                 onClick={() => !teacher.rated && setSelectedTeacher(teacher)}
                                 className={`p-4 cursor-pointer transition-colors ${teacher.rated
-                                        ? 'opacity-60 cursor-not-allowed'
-                                        : selectedTeacher?.id === teacher.id
-                                            ? darkMode ? 'bg-obs-pink/10' : 'bg-obs-pink/5'
-                                            : darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'
+                                    ? 'opacity-60 cursor-not-allowed'
+                                    : selectedTeacher?.id === teacher.id
+                                        ? darkMode ? 'bg-obs-pink/10' : 'bg-obs-pink/5'
+                                        : darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'
                                     }`}
                             >
                                 <div className="flex items-center gap-3">
@@ -180,8 +195,8 @@ const TeacherRatingPage = () => {
                                         placeholder="Escribe aquí tus sugerencias o comentarios..."
                                         rows={3}
                                         className={`w-full px-4 py-3 rounded-lg border resize-none ${darkMode
-                                                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                                                : 'bg-white border-gray-300 placeholder-gray-400'
+                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                                            : 'bg-white border-gray-300 placeholder-gray-400'
                                             } focus:ring-2 focus:ring-obs-pink focus:border-transparent`}
                                     />
                                 </div>
@@ -204,8 +219,8 @@ const TeacherRatingPage = () => {
                                     onClick={handleSubmit}
                                     disabled={Object.values(ratings).some(r => r === 0)}
                                     className={`w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all ${Object.values(ratings).some(r => r === 0)
-                                            ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
-                                            : 'bg-gradient-to-r from-obs-pink to-obs-purple text-white hover:opacity-90'
+                                        ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
+                                        : 'bg-gradient-to-r from-obs-pink to-obs-purple text-white hover:opacity-90'
                                         }`}
                                 >
                                     <Send size={18} /> Enviar Evaluación

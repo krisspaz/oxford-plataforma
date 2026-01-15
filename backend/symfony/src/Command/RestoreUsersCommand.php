@@ -53,7 +53,9 @@ class RestoreUsersCommand extends Command
 
             $user->setRoles([$userData['role']]);
             // Hash password 'oxford123'
-            $hashedPassword = $this->passwordHasher->hashPassword($user, 'oxford123');
+            // SECURITY: Use environment variable or fallback for dev
+            $defaultPass = $_ENV['APP_DEFAULT_PASSWORD'] ?? 'oxford123';
+            $hashedPassword = $this->passwordHasher->hashPassword($user, $defaultPass);
             $user->setPassword($hashedPassword);
 
             $this->entityManager->persist($user);
@@ -61,7 +63,7 @@ class RestoreUsersCommand extends Command
 
         $this->entityManager->flush();
 
-        $io->success('All users have been restored with password "oxford123"!');
+        $io->success('All users have been restored with the default password!');
 
         return Command::SUCCESS;
     }

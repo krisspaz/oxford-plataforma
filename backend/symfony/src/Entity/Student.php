@@ -230,10 +230,11 @@ class Student
         return $this->carnet;
     }
 
+    #[ORM\OneToMany(mappedBy: 'student', targetEntity: Enrollment::class)]
+    private Collection $enrollments;
+
     public function getEnrollments(): Collection
     {
-        // Return empty collection if not mapped, or map it if Entity exists.
-        // For now returning empty to satisfy test interface if relation is not critical yet.
-        return new ArrayCollection();
+        return $this->enrollments;
     }
 }

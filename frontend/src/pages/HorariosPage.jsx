@@ -73,18 +73,40 @@ const HorariosPage = () => {
 
     const loadData = async () => {
         setLoading(true);
-        // Simulation of available classes to schedule
-        setTimeout(() => {
-            setPool([
-                { id: 1, subject: 'Matemáticas', teacher: 'Juan Pérez', color: 'bg-blue-100 dark:bg-blue-900' },
-                { id: 2, subject: 'Ciencias', teacher: 'Maria Lopez', color: 'bg-green-100 dark:bg-green-900' },
-                { id: 3, subject: 'Historia', teacher: 'Carlos Ruiz', color: 'bg-yellow-100 dark:bg-yellow-900' },
-                { id: 4, subject: 'Inglés', teacher: 'Ana Smith', color: 'bg-purple-100 dark:bg-purple-900' },
-                { id: 5, subject: 'Física', teacher: 'Pedro Sola', color: 'bg-red-100 dark:bg-red-900' },
-                { id: 6, subject: 'Arte', teacher: 'Frida K.', color: 'bg-pink-100 dark:bg-pink-900' },
+        try {
+            // Fetch real data from backend
+            const [subjectsRes, teachersRes] = await Promise.all([
+                api.get('/subjects'),
+                api.get('/teachers') // Assuming /teachers endpoint exists or users?role=teacher
             ]);
+
+            // Transform into pool items
+            // This is a temporary mapping. Ideally we fetch "Assignments" or similar.
+            // For now, let's create a pool from Subjects x Teachers (or just Subjects)
+
+            // If API returns Hydra collection:
+            const subjects = subjectsRes['hydra:member'] || subjectsRes;
+
+            const newPool = subjects.map((sub, index) => ({
+                id: sub.id,
+                subject: sub.name,
+                teacher: 'Por Asignar', // Default or fetch assignment
+                color: ['bg-blue-100 dark:bg-blue-900', 'bg-green-100 dark:bg-green-900', 'bg-yellow-100 dark:bg-yellow-900', 'bg-purple-100 dark:bg-purple-900'][index % 4]
+            }));
+
+            // If we have teachers, maybe valid assignments? 
+            // For now, just showing subjects available for scheduling is a good first step.
+
+            setPool(newPool);
+        } catch (error) {
+            console.error("Error loading schedule data:", error);
+            // Fallback for demo if API fails
+            setPool([
+                { id: 1, subject: 'Matemáticas (Demo)', teacher: 'Juan Pérez', color: 'bg-blue-100 dark:bg-blue-900' },
+            ]);
+        } finally {
             setLoading(false);
-        }, 500);
+        }
     };
 
     const handleDrop = (day, period, item) => {

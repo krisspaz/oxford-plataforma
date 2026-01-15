@@ -13,4 +13,6 @@ api_platform:
     enable_re_doc: true
     eager_loading:
         force_eager: false
+    doctrine_mongodb_odm:
+        enabled: false
 

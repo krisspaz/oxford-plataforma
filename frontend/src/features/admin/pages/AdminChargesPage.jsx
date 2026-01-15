@@ -1,62 +1,84 @@
-import React, { useState } from 'react';
-import { Briefcase, Plus, Edit2, Trash2, Search, Users, X, Save } from 'lucide-react';
+import { jobTitleService } from '../../../services';
 
 const AdminChargesPage = () => {
-    // Mock Data
-    const [cargos, setCargos] = useState([
-        { id: 1, nombre: 'Director General', departamento: 'Dirección', personal: 1 },
-        { id: 2, nombre: 'Coordinador Académico', departamento: 'Coordinación', personal: 2 },
-        { id: 3, nombre: 'Docente Titular', departamento: 'Docencia', personal: 45 },
-        { id: 4, nombre: 'Secretaria Ejecutiva', departamento: 'Administración', personal: 3 },
-        { id: 5, nombre: 'Contador', departamento: 'Finanzas', personal: 1 },
-        { id: 6, nombre: 'Auxiliar de Limpieza', departamento: 'Mantenimiento', personal: 5 },
-    ]);
+    // Real Data State
+    const [cargos, setCargos] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCargo, setEditingCargo] = useState(null);
-    const [formData, setFormData] = useState({ nombre: '', departamento: '' });
+    const [formData, setFormData] = useState({ name: '', department: '' });
 
     const departamentos = ['Dirección', 'Coordinación', 'Docencia', 'Administración', 'Finanzas', 'Mantenimiento', 'Tecnología'];
 
+    useEffect(() => {
+        loadCargos();
+    }, []);
+
+    const loadCargos = async () => {
+        setLoading(true);
+        try {
+            const data = await jobTitleService.getAll();
+            // Map API response to component structure if needed, or use directly
+            // API Platform returns @id, name, department. Staff count might need extra logic or be included if defined in entity groups
+            // For now, personal count will be 0 until backend provides it or we fetch it similarly
+            setCargos(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Error loading job titles:", error);
+            // alert("Error al cargar cargos");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const filteredCargos = cargos.filter(c =>
-        c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.departamento.toLowerCase().includes(searchTerm.toLowerCase())
+        c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.department?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const handleOpenNew = () => {
         setEditingCargo(null);
-        setFormData({ nombre: '', departamento: '' });
+        setFormData({ name: '', department: '' });
         setIsModalOpen(true);
     };
 
     const handleOpenEdit = (cargo) => {
         setEditingCargo(cargo);
-        setFormData({ nombre: cargo.nombre, departamento: cargo.departamento });
+        setFormData({ name: cargo.name, department: cargo.department });
         setIsModalOpen(true);
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (confirm('¿Estás seguro de eliminar este cargo?')) {
-            setCargos(prev => prev.filter(c => c.id !== id));
+            try {
+                await jobTitleService.delete(id);
+                loadCargos();
+            } catch (error) {
+                console.error("Error deleting:", error);
+                alert("No se pudo eliminar el cargo. Verifique que no tenga personal asignado.");
+            }
         }
     };
 
-    const handleSave = () => {
-        if (!formData.nombre || !formData.departamento) {
+    const handleSave = async () => {
+        if (!formData.name || !formData.department) {
             alert('Por favor completa todos los campos');
             return;
         }
 
-        if (editingCargo) {
-            setCargos(prev => prev.map(c =>
-                c.id === editingCargo.id ? { ...c, ...formData } : c
-            ));
-        } else {
-            const newId = Math.max(...cargos.map(c => c.id)) + 1;
-            setCargos(prev => [...prev, { id: newId, ...formData, personal: 0 }]);
+        try {
+            if (editingCargo) {
+                await jobTitleService.update(editingCargo.id, formData);
+            } else {
+                await jobTitleService.create(formData);
+            }
+            setIsModalOpen(false);
+            loadCargos();
+        } catch (error) {
+            console.error("Error saving:", error);
+            alert("Error al guardar el cargo");
         }
-        setIsModalOpen(false);
     };
 
     return (
@@ -110,17 +132,17 @@ const AdminChargesPage = () => {
                                     <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
                                         <Briefcase size={16} className="text-gray-500" />
                                     </div>
-                                    {cargo.nombre}
+                                    {cargo.name}
                                 </td>
                                 <td className="p-4 text-gray-600 dark:text-gray-300">
                                     <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm">
-                                        {cargo.departamento}
+                                        {cargo.department}
                                     </span>
                                 </td>
                                 <td className="p-4 text-center">
                                     <div className="flex items-center justify-center gap-1 text-gray-600 dark:text-gray-400">
                                         <Users size={16} />
-                                        <span>{cargo.personal}</span>
+                                        <span>{cargo.staffMembers?.length || 0}</span>
                                     </div>
                                 </td>
                                 <td className="p-4 text-right">
@@ -174,8 +196,8 @@ const AdminChargesPage = () => {
                                 </label>
                                 <input
                                     type="text"
-                                    value={formData.nombre}
-                                    onChange={e => setFormData(prev => ({ ...prev, nombre: e.target.value }))}
+                                    value={formData.name}
+                                    onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
                                     placeholder="Ej: Coordinador de Primaria"
                                     className="w-full px-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
                                 />
@@ -185,8 +207,8 @@ const AdminChargesPage = () => {
                                     Departamento
                                 </label>
                                 <select
-                                    value={formData.departamento}
-                                    onChange={e => setFormData(prev => ({ ...prev, departamento: e.target.value }))}
+                                    value={formData.department}
+                                    onChange={e => setFormData(prev => ({ ...prev, department: e.target.value }))}
                                     className="w-full px-3 py-2 border dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
                                 >
                                     <option value="">Seleccionar...</option>

@@ -21,11 +21,7 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-
-
         // 3. Create Users
-        $password = $this->passwordHasher->hashPassword(new User(), 'oxford123');
-
         $users = [
             ['email' => 'admin@oxford.edu', 'role' => User::ROLE_SUPER_ADMIN, 'name' => 'Super Admin'],
             // ['email' => 'director@oxford.edu', 'role' => User::ROLE_DIRECCION, 'name' => 'Director'],
@@ -35,11 +31,16 @@ class AppFixtures extends Fixture
             // ['email' => 'informatics@oxford.edu', 'role' => User::ROLE_INFORMATICA, 'name' => 'Informática'],
         ];
 
+
         foreach ($users as $userData) {
             $u = new User();
             $u->setEmail($userData['email']);
             $u->setRoles([$userData['role']]);
             $u->setName($userData['name']);
+            // Hash password using the specific user instance
+            // SECURITY: Use environment variable or fallback for dev
+            $defaultPass = $_ENV['APP_DEFAULT_PASSWORD'] ?? 'oxford123';
+            $password = $this->passwordHasher->hashPassword($u, $defaultPass);
             $u->setPassword($password); 
             $manager->persist($u);
 

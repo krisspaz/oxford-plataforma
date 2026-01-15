@@ -1,21 +1,9 @@
-# Frontend Production Dockerfile
-FROM node:18-alpine AS builder
-
-WORKDIR /app
-
-# Install dependencies
-COPY package*.json ./
-RUN npm ci
-
-# Build
-COPY . .
-RUN npm run build
-
-# Production image
+# Frontend Production Dockerfile (Local Build Bypass)
 FROM nginx:alpine
 
-# Copy built assets
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Copy built assets from local dist folder
+# ASSUMES: npm run build has been run locally
+COPY dist /usr/share/nginx/html
 
 # Copy nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf

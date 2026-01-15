@@ -29,15 +29,7 @@ const StudentGradesPage = () => {
             }
         } catch (error) {
             console.error("Error fetching grades:", error);
-            // Fallback for demo if API fails locally without backend running
-            if (process.env.NODE_ENV === 'development') {
-                const mockData = [
-                    { id: 1, subject: 'Matemáticas (Demo)', b1: 85, b2: 90, b3: 88, b4: null },
-                    { id: 2, subject: 'Ciencias (Demo)', b1: 92, b2: 89, b3: 95, b4: null },
-                ];
-                setGrades(mockData);
-                calculateStats(mockData);
-            }
+            setGrades([]);
         } finally {
             setLoading(false);
         }

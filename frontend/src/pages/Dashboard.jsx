@@ -1,5 +1,5 @@
 import { Users, AlertTriangle, GraduationCap, UserPlus, CreditCard, RefreshCw, XCircle, TrendingDown, Brain, ChevronRight, BookOpen, FileText, Calendar, Clock, Receipt, Edit, Package, Layers, Shield, Database, School, Activity, BarChart, TrendingUp, Award, Bell, CheckCircle, Lightbulb, Zap, Rocket, Check, AlertCircle, Sparkles, Filter, Search, MoreVertical, Layout, Grid } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,6 +7,7 @@ import api from '../services/api';
 import activityService from '../services/activityService';
 import scheduleService from '../services/scheduleService';
 import AIInsightsWidget from '../components/AIInsightsWidget';
+import DashboardSkeleton from '../components/ui/DashboardSkeleton';
 
 const StatCard = ({ title, value, icon: Icon, color, bg, onClick, isCustomIcon, darkMode }) => (
     <div
@@ -42,7 +43,7 @@ const AdminDashboard = ({ stats, navigate, darkMode }) => (
         <div className="mb-8">
             <AIInsightsWidget darkMode={darkMode} userRole="ROLE_ADMIN" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <StatCard
                 title="Usuarios Registrados"
                 value={stats?.totalUsers || 0}
@@ -72,12 +73,38 @@ const AdminDashboard = ({ stats, navigate, darkMode }) => (
             />
         </div>
 
+        {/* Accesos Rápidos para Administrador */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <QuickAction title="Gestión de Usuarios" icon={Users} color="text-blue-600" bgColor={darkMode ? 'bg-blue-900/50' : 'bg-blue-100'} onClick={() => navigate('/admin/usuarios')} darkMode={darkMode} />
+            <QuickAction title="Editor de Horarios" icon={Brain} color="text-indigo-600" bgColor={darkMode ? 'bg-indigo-900/50' : 'bg-indigo-100'} onClick={() => navigate('/academico/horarios')} darkMode={darkMode} />
+            <QuickAction title="Carga Académica" icon={BookOpen} color="text-purple-600" bgColor={darkMode ? 'bg-purple-900/50' : 'bg-purple-100'} onClick={() => navigate('/academico/materias')} darkMode={darkMode} />
+            <QuickAction title="Generar PDF" icon={FileText} color="text-red-600" bgColor={darkMode ? 'bg-red-900/50' : 'bg-red-100'}
+                onClick={async () => {
+                    try {
+                        const response = await api.get('/schedule/pdf', { responseType: 'blob' });
+                        const url = window.URL.createObjectURL(new Blob([response]));
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', 'horario_generado.pdf');
+                        document.body.appendChild(link);
+                        link.click();
+                        link.parentNode.removeChild(link);
+                    } catch (error) {
+                        console.error('Error downloading PDF:', error);
+                        alert('Error al descargar el PDF. Verifique permisos.');
+                    }
+                }}
+                darkMode={darkMode}
+            />
+            <QuickAction title="Reportes del Sistema" icon={BarChart} color="text-orange-600" bgColor={darkMode ? 'bg-orange-900/50' : 'bg-orange-100'} onClick={() => navigate('/reports')} darkMode={darkMode} />
+        </div>
+
         {/* Listado Previo de Estudiantes (Requested Feature) */}
         <div className={`mt-8 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} rounded-2xl shadow-lg border p-6`}>
             <div className="flex items-center justify-between mb-6">
                 <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Listado de Estudiantes (Vista Previa)</h3>
                 <button
-                    onClick={() => navigate('/secretaria/inscripciones')} // Navigating to inscriptions/students list
+                    onClick={() => navigate('/secretaria/inscripciones')}
                     className="text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1"
                 >
                     Ver Todos <ChevronRight size={16} />
@@ -188,9 +215,9 @@ const StudentDashboard = ({ navigate, darkMode, stats }) => {
     return (
         <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title="Promedio General" value={stats?.student?.average || '85.4'} icon={Award} color="text-yellow-500" bg={darkMode ? 'bg-yellow-900/30' : 'bg-yellow-100'} darkMode={darkMode} />
-                <StatCard title="Tareas Pendientes" value={stats?.student?.pendingTasks ?? 3} icon={FileText} color="text-red-500" bg={darkMode ? 'bg-red-900/30' : 'bg-red-100'} darkMode={darkMode} onClick={() => navigate('/alumno/tareas')} />
-                <StatCard title="Próxima Clase" value={schedule[0] ? schedule[0].subject.name : (stats?.student?.nextClass || 'Matemáticas')} icon={BookOpen} color="text-blue-500" bg={darkMode ? 'bg-blue-900/30' : 'bg-blue-100'} darkMode={darkMode} onClick={() => navigate('/alumno/horario')} />
+                <StatCard title="Promedio General" value={stats?.student?.average || '0.0'} icon={Award} color="text-yellow-500" bg={darkMode ? 'bg-yellow-900/30' : 'bg-yellow-100'} darkMode={darkMode} />
+                <StatCard title="Tareas Pendientes" value={stats?.student?.pendingTasks ?? 0} icon={FileText} color="text-red-500" bg={darkMode ? 'bg-red-900/30' : 'bg-red-100'} darkMode={darkMode} onClick={() => navigate('/alumno/tareas')} />
+                <StatCard title="Próxima Clase" value={schedule[0] ? schedule[0].subject.name : (stats?.student?.nextClass || 'No asignada')} icon={BookOpen} color="text-blue-500" bg={darkMode ? 'bg-blue-900/30' : 'bg-blue-100'} darkMode={darkMode} onClick={() => navigate('/alumno/horario')} />
                 <StatCard title="Asistencia" value="95%" icon={CheckCircle} color="text-green-500" bg={darkMode ? 'bg-green-900/30' : 'bg-green-100'} darkMode={darkMode} />
             </div>
 
@@ -272,7 +299,7 @@ const ParentDashboard = ({ navigate, darkMode, stats }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <StatCard title="Mis Hijos" value={stats?.parent?.childrenCount || 2} icon={Users} color="text-blue-500" bg={darkMode ? 'bg-blue-900/30' : 'bg-blue-100'} darkMode={darkMode} onClick={() => navigate('/padres/hijos')} />
                 <StatCard title="Pagos Pendientes" value={stats?.parent?.pendingPayments || 0} icon={CreditCard} color="text-red-500" bg={darkMode ? 'bg-red-900/30' : 'bg-red-100'} darkMode={darkMode} onClick={() => navigate('/finanzas/estado-cuenta')} />
-                <StatCard title="Próxima Reunión" value="15 Mar" icon={Calendar} color="text-teal-500" bg={darkMode ? 'bg-teal-900/30' : 'bg-teal-100'} darkMode={darkMode} />
+                <StatCard title="Próxima Reunión" value="-" icon={Calendar} color="text-teal-500" bg={darkMode ? 'bg-teal-900/30' : 'bg-teal-100'} darkMode={darkMode} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
@@ -280,7 +307,7 @@ const ParentDashboard = ({ navigate, darkMode, stats }) => {
                 <div className={`lg:col-span-2 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} p-6 rounded-2xl shadow-lg border`}>
                     <div className="flex justify-between items-center mb-4">
                         <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Actividades Anuales</h3>
-                        <span className="text-xs font-medium px-2 py-1 bg-blue-100 text-blue-700 rounded-full">Ciclo 2025</span>
+                        <span className="text-xs font-medium px-2 py-1 bg-blue-100 text-blue-700 rounded-full">Ciclo Actual</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {activities.length > 0 ? activities.map((activity, index) => (
@@ -367,7 +394,7 @@ const DocenteDashboard = ({ navigate, darkMode, stats }) => (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard
                 title="Clases Asignadas"
-                value={stats?.teacher?.myClassesCount || 5}
+                value={stats?.teacher?.myClassesCount || 0}
                 icon={BookOpen}
                 color="text-blue-500"
                 bg={darkMode ? 'bg-blue-900/30' : 'bg-blue-100'}
@@ -376,7 +403,7 @@ const DocenteDashboard = ({ navigate, darkMode, stats }) => (
             />
             <StatCard
                 title="Total Alumnos"
-                value={stats?.teacher?.myStudentsCount || 120}
+                value={stats?.teacher?.myStudentsCount || 0}
                 icon={Users}
                 color="text-teal-500"
                 bg={darkMode ? 'bg-teal-900/30' : 'bg-teal-100'}
@@ -385,7 +412,7 @@ const DocenteDashboard = ({ navigate, darkMode, stats }) => (
             />
             <StatCard
                 title="Tareas Activas"
-                value={stats?.teacher?.activeTasks || 8}
+                value={stats?.teacher?.activeTasks || 0}
                 icon={FileText}
                 color="text-purple-500"
                 bg={darkMode ? 'bg-purple-900/30' : 'bg-purple-100'}
@@ -394,7 +421,7 @@ const DocenteDashboard = ({ navigate, darkMode, stats }) => (
             />
             <StatCard
                 title="Notas Pendientes"
-                value={stats?.teacher?.pendingGrades || 3}
+                value={stats?.teacher?.pendingGrades || 0}
                 icon={AlertTriangle}
                 color="text-orange-500"
                 bg={darkMode ? 'bg-orange-900/30' : 'bg-orange-100'}
@@ -407,17 +434,10 @@ const DocenteDashboard = ({ navigate, darkMode, stats }) => (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             <div className={`lg:col-span-2 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} p-6 rounded-2xl shadow-lg border`}>
                 <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Mis Materias & Horario</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className={`p-4 rounded-xl ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
-                        <p className="text-sm text-gray-400 font-bold mb-1">AHORA (7:30 - 8:15)</p>
-                        <p className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Matemáticas - 5to Primaria A</p>
-                        <p className="text-sm text-blue-500">Salón 105</p>
-                    </div>
-                    <div className={`p-4 rounded-xl ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
-                        <p className="text-sm text-gray-400 font-bold mb-1">SIGUIENTE (8:15 - 9:00)</p>
-                        <p className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Ciencias Naturales - 4to Primaria B</p>
-                        <p className="text-sm text-blue-500">Laboratorio 1</p>
-                    </div>
+                <div className="flex flex-col items-center justify-center p-8 text-center border rounded-xl border-dashed border-gray-300 dark:border-gray-600">
+                    <Clock size={48} className="text-gray-300 mb-4" />
+                    <p className={`text-lg font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Tu Horario</p>
+                    <p className="text-gray-500 text-sm mb-2">Consulta el detalle completo de tus clases</p>
                 </div>
                 <div className="mt-4 flex justify-end">
                     <button onClick={() => navigate('/mi-horario')} className="text-blue-500 hover:text-blue-400 text-sm font-bold flex items-center gap-1">
@@ -455,7 +475,7 @@ const DirectorDashboard = ({ stats, navigate, darkMode }) => (
             />
             <StatCard
                 title="Docentes"
-                value={stats?.totalTeachers || 15}
+                value={stats?.totalTeachers || 0}
                 icon={Users}
                 color="text-teal-500"
                 bg={darkMode ? 'bg-teal-900/30' : 'bg-teal-100'}
@@ -473,7 +493,7 @@ const DirectorDashboard = ({ stats, navigate, darkMode }) => (
             />
             <StatCard
                 title="Ciclo Escolar"
-                value={stats?.activeCycle || '2025'}
+                value={stats?.activeCycle || 'Actual'}
                 icon={School}
                 color="text-orange-500"
                 bg={darkMode ? 'bg-orange-900/30' : 'bg-orange-100'}
@@ -491,6 +511,20 @@ const DirectorDashboard = ({ stats, navigate, darkMode }) => (
                 <QuickAction title="Supervisión Notas" icon={FileText} color="text-green-600" bgColor={darkMode ? 'bg-green-900/50' : 'bg-green-100'} onClick={() => navigate('/academico/cuadros')} darkMode={darkMode} />
                 <QuickAction title="Gestión Niveles" icon={Layers} color="text-blue-600" bgColor={darkMode ? 'bg-blue-900/50' : 'bg-blue-100'} onClick={() => navigate('/academico/niveles')} darkMode={darkMode} />
                 <QuickAction title="Reportes General" icon={BarChart} color="text-orange-600" bgColor={darkMode ? 'bg-orange-900/50' : 'bg-orange-100'} onClick={() => navigate('/reports')} darkMode={darkMode} />
+                <QuickAction title="Generar PDF" icon={FileText} color="text-red-600" bgColor={darkMode ? 'bg-red-900/50' : 'bg-red-100'}
+                    onClick={async () => {
+                        try {
+                            const response = await api.get('/schedule/pdf', { responseType: 'blob' });
+                            const url = window.URL.createObjectURL(new Blob([response]));
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.setAttribute('download', 'horario_generado.pdf');
+                            document.body.appendChild(link);
+                            link.click();
+                        } catch (e) { alert('Error al descargar'); }
+                    }}
+                    darkMode={darkMode}
+                />
             </div>
 
             {/* Activities Widget for Director */}
@@ -563,7 +597,22 @@ const CoordinationDashboard = ({ stats, navigate, darkMode }) => (
                         <QuickAction title="Horarios" icon={Clock} color="text-indigo-500" bgColor={darkMode ? 'bg-indigo-900/50' : 'bg-indigo-100'} onClick={() => navigate('/academico/horarios')} darkMode={darkMode} />
                         <QuickAction title="Planificaciones" icon={FileText} color="text-green-500" bgColor={darkMode ? 'bg-green-900/50' : 'bg-green-100'} onClick={() => { }} darkMode={darkMode} />
                         <QuickAction title="Observaciones" icon={AlertTriangle} color="text-orange-500" bgColor={darkMode ? 'bg-orange-900/50' : 'bg-orange-100'} onClick={() => { }} darkMode={darkMode} />
+                        <QuickAction title="Observaciones" icon={AlertTriangle} color="text-orange-500" bgColor={darkMode ? 'bg-orange-900/50' : 'bg-orange-100'} onClick={() => { }} darkMode={darkMode} />
                         <QuickAction title="Reportes y Boletas" icon={BarChart} color="text-blue-500" bgColor={darkMode ? 'bg-blue-900/50' : 'bg-blue-100'} onClick={() => navigate('/academico/boletas')} darkMode={darkMode} />
+                        <QuickAction title="Generar PDF" icon={FileText} color="text-red-600" bgColor={darkMode ? 'bg-red-900/50' : 'bg-red-100'}
+                            onClick={async () => {
+                                try {
+                                    const response = await api.get('/schedule/pdf', { responseType: 'blob' });
+                                    const url = window.URL.createObjectURL(new Blob([response]));
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.setAttribute('download', 'horario_generado.pdf');
+                                    document.body.appendChild(link);
+                                    link.click();
+                                } catch (e) { alert('Error al descargar'); }
+                            }}
+                            darkMode={darkMode}
+                        />
                     </div>
                 </div>
             </div>
@@ -576,6 +625,40 @@ const CoordinationDashboard = ({ stats, navigate, darkMode }) => (
 );
 
 // --- MAIN COMPONENT ---
+
+
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null, errorInfo: null };
+    }
+
+    static getDerivedStateFromError(error) {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error, errorInfo) {
+        this.setState({ error, errorInfo });
+        console.error("Dashboard Error:", error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="p-8 text-center">
+                    <h2 className="text-2xl font-bold text-red-600 mb-4">Algo salió mal en el Dashboard</h2>
+                    <pre className="text-left bg-gray-100 p-4 rounded overflow-auto border border-red-200 text-red-800 text-sm">
+                        {this.state.error && this.state.error.toString()}
+                        <br />
+                        {this.state.errorInfo && this.state.errorInfo.componentStack}
+                    </pre>
+                </div>
+            );
+        }
+
+        return this.props.children;
+    }
+}
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -657,24 +740,24 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="space-y-8 p-2">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{getWelcomeMessage()}</h1>
-                    <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>
-                        Hola, {user?.email?.split('@')[0] || 'Usuario'}
-                    </p>
+        <ErrorBoundary>
+            <div className="space-y-8 p-2">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{getWelcomeMessage()}</h1>
+                        <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>
+                            Hola, {user?.email?.split('@')[0] || 'Usuario'}
+                        </p>
+                    </div>
                 </div>
-            </div>
 
-            {loading ? (
-                <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-                </div>
-            ) : (
-                renderDashboard()
-            )}
-        </div>
+                {loading ? (
+                    <DashboardSkeleton />
+                ) : (
+                    renderDashboard()
+                )}
+            </div>
+        </ErrorBoundary>
     );
 };
 

@@ -1,10 +1,17 @@
-/// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    visualizer({
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+    }),
+  ],
   server: {
     port: 5173,
     proxy: {
@@ -32,7 +39,7 @@ export default defineConfig({
     hmr: {
       clientPort: 443, // Forces the client to connect via standard HTTPS port (handled by Ngrok)
       protocol: 'wss', // Use secure websocket
-      host: 'vexatiously-dextrocular-esteban.ngrok-free.dev', // Explicit public host
+      host: process.env.VITE_NGROK_HOST || undefined, // Use env var or dynamic
     },
 
   },
@@ -48,6 +55,16 @@ export default defineConfig({
         'node_modules/',
         'src/__tests__/',
       ],
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['framer-motion', 'sonner'],
+        },
+      },
     },
   },
 })

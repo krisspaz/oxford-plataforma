@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Search, Filter, GraduationCap, BookOpen, RefreshCw, User, Phone, Mail, Calendar, Check, X, Clock, FileText, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { teacherService, attendanceService, scheduleService } from '../services';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -20,57 +21,45 @@ const MisAlumnosPage = () => {
 
     const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
 
-    // Demo: Courses assigned to this teacher
-    const teacherCourses = [
-        { id: 1, name: 'Matemáticas', grades: ['3ro Primaria', '4to Primaria', '5to Primaria'] },
-        { id: 2, name: 'Física', grades: ['1ro Básico', '2do Básico'] },
-    ];
-
-    // Demo: Current class based on schedule
-    const currentClass = {
-        period: '07:30 - 08:15',
-        grade: '3ro Primaria',
-        section: 'A',
-        course: 'Matemáticas'
-    };
-
-    // Demo: Students from teacher's courses
-    const teacherStudents = [
-        { id: 1, code: 'ALU-2025-001', firstName: 'María', lastName: 'García López', grade: '3ro Primaria', section: 'A', course: 'Matemáticas', guardian: 'Juan García', phone: '5555-1234', email: 'juan@email.com' },
-        { id: 2, code: 'ALU-2025-002', firstName: 'Carlos', lastName: 'Martínez Pérez', grade: '3ro Primaria', section: 'A', course: 'Matemáticas', guardian: 'Ana Pérez', phone: '5555-5678', email: 'ana@email.com' },
-        { id: 3, code: 'ALU-2025-003', firstName: 'Ana', lastName: 'López Hernández', grade: '3ro Primaria', section: 'A', course: 'Matemáticas', guardian: 'Pedro López', phone: '5555-9012', email: 'pedro@email.com' },
-        { id: 4, code: 'ALU-2025-010', firstName: 'Luis', lastName: 'Rodríguez Castro', grade: '3ro Primaria', section: 'B', course: 'Matemáticas', guardian: 'María Castro', phone: '5555-3456', email: 'maria@email.com' },
-        { id: 5, code: 'ALU-2025-011', firstName: 'Sofía', lastName: 'Hernández Gómez', grade: '3ro Primaria', section: 'B', course: 'Matemáticas', guardian: 'José Gómez', phone: '5555-7890', email: 'jose@email.com' },
-        { id: 6, code: 'ALU-2025-020', firstName: 'Diego', lastName: 'Morales Ruiz', grade: '4to Primaria', section: 'A', course: 'Matemáticas', guardian: 'Laura Ruiz', phone: '5555-2345', email: 'laura@email.com' },
-        { id: 7, code: 'ALU-2025-021', firstName: 'Valentina', lastName: 'Torres Méndez', grade: '4to Primaria', section: 'A', course: 'Matemáticas', guardian: 'Roberto Torres', phone: '5555-6789', email: 'roberto@email.com' },
-        { id: 8, code: 'ALU-2025-030', firstName: 'Sebastián', lastName: 'Ramírez Díaz', grade: '5to Primaria', section: 'A', course: 'Matemáticas', guardian: 'Carmen Díaz', phone: '5555-0123', email: 'carmen@email.com' },
-    ];
-
-    // Demo: Attendance history for reports
-    const attendanceHistory = {
-        1: { // María
-            '2025-01-06': 'present', '2025-01-07': 'present', '2025-01-08': 'absent', '2025-01-09': 'present', '2025-01-10': 'present',
-            '2025-01-13': 'present', '2025-01-14': 'late', '2025-01-15': 'present', '2025-01-16': 'present', '2025-01-17': 'present',
-        },
-        2: { // Carlos
-            '2025-01-06': 'present', '2025-01-07': 'absent', '2025-01-08': 'present', '2025-01-09': 'present', '2025-01-10': 'late',
-            '2025-01-13': 'present', '2025-01-14': 'present', '2025-01-15': 'present', '2025-01-16': 'absent', '2025-01-17': 'present',
-        },
-    };
-
+    // Real Data Hooks
     useEffect(() => {
-        setTimeout(() => {
-            setStudents(teacherStudents);
-            setFilteredStudents(teacherStudents);
-            // Initialize attendance for today
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        setLoading(true);
+        try {
+            // 1. Get current teacher profile (or derive from user context)
+            // Assuming user.teacherId exists or we have a profile endpoint
+            // const profile = await teacherService.getMyProfile(); 
+            // const teacherId = profile.id;
+
+            // For now, fetching all students as fallback if no specific teacher link found yet
+            // In production, this should be filtered by the logged-in teacher's classes
+            const studentsData = await teacherService.getStudents(user?.id || 1); // Fallback to ID 1 or all
+
+            // If the endpoint returns 404 (not implemented yet), fallback to empty to avoid crash
+            const safeStudents = Array.isArray(studentsData) ? studentsData : [];
+
+            setStudents(safeStudents);
+            setFilteredStudents(safeStudents);
+
+            // Initialize attendance
             const initialAttendance = {};
-            teacherStudents.forEach(s => {
+            safeStudents.forEach(s => {
                 initialAttendance[s.id] = 'present';
             });
             setAttendance(initialAttendance);
+
+        } catch (error) {
+            console.error("Error loading My Students data:", error);
+            // Graceful degradation: empty list
+            setStudents([]);
+            setFilteredStudents([]);
+        } finally {
             setLoading(false);
-        }, 500);
-    }, []);
+        }
+    };
 
     useEffect(() => {
         let filtered = [...students];
@@ -102,9 +91,24 @@ const MisAlumnosPage = () => {
         setAttendance(prev => ({ ...prev, [studentId]: status }));
     };
 
-    const saveAttendance = () => {
-        console.log('Saving attendance:', attendance, 'for date:', attendanceDate);
-        alert('✅ Asistencia guardada correctamente');
+    const saveAttendance = async () => {
+        try {
+            // Convert attendance object to array format
+            const attendances = Object.entries(attendance).map(([studentId, status]) => ({
+                student: `/api/students/${studentId}`, // IRI format
+                status,
+                // notes: '' 
+            }));
+
+            // Mock scheduleId for now if we don't have it
+            const scheduleId = 1;
+
+            await attendanceService.saveBatch(scheduleId, attendanceDate, attendances);
+            alert('✅ Asistencia guardada correctamente en el sistema');
+        } catch (error) {
+            console.error("Error saving attendance:", error);
+            alert("Error al guardar asistencia. Intente nuevamente.");
+        }
     };
 
     const getAttendanceStats = (studentId) => {
@@ -117,9 +121,16 @@ const MisAlumnosPage = () => {
         return { total, present, absent, late, percentage };
     };
 
-    const exportReport = (studentId) => {
-        const student = students.find(s => s.id === studentId);
-        alert(`📄 Exportando reporte de asistencia para ${student?.firstName} ${student?.lastName}`);
+    const exportReport = async (studentId) => {
+        try {
+            const report = await attendanceService.getStudentReport(studentId, selectedBimester);
+            console.log("Report data:", report);
+            alert(`📄 Reporte generado para estudiante ID ${studentId} (Simulación de descarga PDF real)`);
+            // Here implementation would trigger PDF download
+        } catch (error) {
+            console.error("Error exporting report:", error);
+            alert("No se pudo generar el reporte.");
+        }
     };
 
     const sendToParent = (studentId) => {

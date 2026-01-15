@@ -2,156 +2,41 @@
 
 namespace App\Controller;
 
-use App\Repository\PaymentRepository;
-use App\Repository\StudentRepository;
-use App\Repository\SchoolCycleRepository;
+use App\Entity\User;
+use App\Entity\Subject;
+use App\Entity\SchoolCycle;
+use App\Entity\Student;
+use App\Entity\Teacher;
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/api/dashboard', name: 'api_dashboard_')]
+#[Route('/api/dashboard')]
 class DashboardController extends AbstractController
 {
-    private $studentRepository;
-    private $paymentRepository;
-    private $schoolCycleRepository;
-    private $userRepository;
-    private $subjectRepository;
+    public function __construct(private EntityManagerInterface $entityManager) {}
 
-    private $taskRepository;
-
-    public function __construct(
-        StudentRepository $studentRepository,
-        PaymentRepository $paymentRepository,
-        SchoolCycleRepository $schoolCycleRepository,
-        \App\Repository\UserRepository $userRepository,
-        \App\Repository\SubjectRepository $subjectRepository,
-        \App\Repository\TaskRepository $taskRepository,
-        private \Doctrine\ORM\EntityManagerInterface $entityManager
-    ) {
-        $this->studentRepository = $studentRepository;
-        $this->paymentRepository = $paymentRepository;
-        $this->schoolCycleRepository = $schoolCycleRepository;
-        $this->userRepository = $userRepository;
-        $this->subjectRepository = $subjectRepository;
-        $this->taskRepository = $taskRepository;
-        $this->entityManager = $entityManager;
-    }
-
-    #[Route('/stats', name: 'stats', methods: ['GET'])]
-    public function getStats(): JsonResponse
+    #[Route('/stats', name: 'dashboard_stats', methods: ['GET'])]
+    public function index(): JsonResponse
     {
-        $user = $this->getUser();
-        $roles = $user ? $user->getRoles() : [];
+        // General Stats for Admin
+        $totalUsers = $this->entityManager->getRepository(User::class)->count([]);
+        $totalStudents = $this->entityManager->getRepository(Student::class)->count([]); // Assuming Student entity
+        $totalTeachers = $this->entityManager->getRepository(Teacher::class)->count([]); // Assuming Teacher entity
+        $activeSubjects = $this->entityManager->getRepository(Subject::class)->count([]);
+        
+        $activeCycle = $this->entityManager->getRepository(SchoolCycle::class)->findOneBy(['isActive' => true]);
 
-        $data = [
-            'totalStudents' => $this->studentRepository->countActive(),
-            'monthlyIncome' => 0, // Placeholder
-            'atRiskStudents' => $this->studentRepository->countAtRisk(),
-            'averageGrade' => 85,
-            'recentStudents' => [],
-            'activeCycle' => 'Sin Ciclo',
-        ];
-
-        // Basic Global Data
-        $activeCycle = $this->schoolCycleRepository->findOneBy(['isActive' => true]);
-        if ($activeCycle) $data['activeCycle'] = $activeCycle->getName();
-
-        // Role Specific Data
-        if (in_array('ROLE_TEACHER', $roles)) {
-             $data['teacher'] = [
-                 'myClassesCount' => 4, // Replace with actual count
-                 'myStudentsCount' => 120, // Replace with actual count
-                 'pendingGrades' => 5
-             ];
-        }
-
-        if (in_array('ROLE_STUDENT', $roles)) {
-             $student = $this->studentRepository->findOneBy(['email' => $user->getEmail()]);
-             $pendingTasks = 0;
-             $average = 0;
-             $nextClass = 'Sin Asignar';
-
-             if ($student) {
-                // Get latest enrollment for Grade/Section
-                $enrollments = $student->getEnrollments();
-                if (!$enrollments->isEmpty()) {
-                    $enrollment = $enrollments->last();
-                    $grade = $enrollment->getGrade();
-                    $section = $enrollment->getSection();
-
-                    if ($grade) {
-                        // Use repository method
-                        $tasks = $this->taskRepository->findForStudent($grade, $section);
-                        
-                        foreach($tasks as $task) {
-                            // Check for submission
-                            $submission = $this->entityManager->getRepository(\App\Entity\TaskSubmission::class)->findOneBy([
-                                'task' => $task,
-                                'student' => $student
-                            ]);
-                            
-                            // If no submission or submission is pending/returned, count as pending?
-                            // Let's assume pending if no submission or status is 'pending'
-                             if (!$submission || $submission->getStatus() === 'pending') {
-                                $pendingTasks++;
-                            }
-                        }
-                    }
-                }
-             }
-
-             $data['student'] = [
-                 'average' => 88, // Placeholder for now
-                 'pendingTasks' => $pendingTasks,
-                 'nextClass' => 'Matemáticas' // Placeholder
-             ];
-        }
-
-        if (in_array('ROLE_PARENT', $roles)) {
-             $data['parent'] = [
-                 'childrenCount' => 2,
-                 'pendingPayments' => 1,
-                 'nextMeeting' => 'Viernes 10:00 AM'
-             ];
-        }
-
-        if (in_array('ROLE_ACCOUNTANT', $roles) || in_array('ROLE_SECRETARY', $roles)) {
-             $income = 8450; // Placeholder
-             
-             $data['accountant'] = [
-                 'incomeToday' => $income,
-                 'invoicesCount' => 15, // Placeholder
-                 'pendingRequests' => 2,
-                 'exonerations' => 5
-             ];
-             
-             $data['secretary'] = [
-                 'enrollmentsToday' => 3,
-                 'familiesCount' => 89,
-                 'pendingPayments' => 12, // Placeholder
-                 'contractsCount' => 24
-             ];
-        }
-
-        if (in_array('ROLE_SUPER_ADMIN', $roles) || in_array('ROLE_ADMIN', $roles) || in_array('ROLE_DIRECTOR', $roles)) {
-             $recentStudents = $this->studentRepository->findRecent(5);
-             $data['recentStudents'] = array_map(function($student) {
-                return [
-                    'id' => $student->getId(),
-                    'name' => $student->getFirstName() . ' ' . $student->getLastName(),
-                    'email' => $student->getEmail(),
-                    'cycle' => $student->getSchoolCycle() ? $student->getSchoolCycle()->getName() : 'Sin Asignar',
-                    'course' => $student->getCourse() ? $student->getCourse()->getName() : 'Sin Asignar',
-                    'status' => $student->getStatus(),
-                ];
-            }, $recentStudents);
-            $data['totalUsers'] = $this->userRepository->count([]);
-            $data['totalSubjects'] = $this->subjectRepository->count([]);
-            $data['totalStudents'] = $this->studentRepository->countActive();
-            $data['totalTeachers'] = $this->userRepository->countByRole('ROLE_TEACHER'); // Assuming method exists or just fallback
-        }
-
-        return $this->json($data);
+        return $this->json([
+            'totalUsers' => $totalUsers,
+            'totalStudents' => $totalStudents, 
+            'totalTeachers' => $totalTeachers,
+            'activeSubjects' => $activeSubjects,
+            'activeCycle' => $activeCycle ? $activeCycle->getName() : '2026',
+            'recentStudents' => [] // Todo: Fetch recent 5 students
+        ]);
     }
 }

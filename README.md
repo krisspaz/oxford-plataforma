@@ -145,6 +145,12 @@ GET  /ai-api/health           # Estado del servicio
 | BD | MySQL 8 / PostgreSQL |
 | Cache | Redis |
 
+---
+
+## 🤝 Contribuciones
+
+Consulta nuestra [Guía de Contribución](CONTRIBUTING.md) para estándares de código y workflow.
+
 ## 📝 Licencia
 
 Propiedad de Corporación Oxford Guatemala. Todos los derechos reservados.

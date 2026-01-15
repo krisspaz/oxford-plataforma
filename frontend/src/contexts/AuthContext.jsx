@@ -64,15 +64,12 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         try {
             const apiUrl = '/api';
-            console.log('Intentando login a:', `${apiUrl}/login_check`);
-            console.log('Credenciales:', { username: email, password: '***' });
 
             const response = await axios.post(`${apiUrl}/login_check`, {
                 email: email,
                 password: password
             });
 
-            console.log('Respuesta del servidor:', response);
             const token = response.data.token;
 
             if (!token) {
@@ -84,7 +81,6 @@ export const AuthProvider = ({ children }) => {
 
             // Decode token to get user info and roles
             const userData = parseUserFromToken(token);
-            console.log('Usuario decodificado:', userData);
 
             if (userData) {
                 setUser(userData);
@@ -93,7 +89,6 @@ export const AuthProvider = ({ children }) => {
             return false;
         } catch (error) {
             console.error("Login failed:", error);
-            console.error("Error details:", error.response?.data || error.message);
             return false;
         }
     };

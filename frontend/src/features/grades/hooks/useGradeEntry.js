@@ -37,13 +37,6 @@ export const useGradeEntry = () => {
                 }
             } catch (err) {
                 console.error("Error init grade entry", err);
-                // Fallback dev data
-                if (process.env.NODE_ENV === 'development') {
-                    setAssignments([
-                        { id: '101', name: "Matemáticas - 5to Bachillerato (A)" },
-                        { id: '102', name: "Física - 5to Bachillerato (A)" }
-                    ]);
-                }
             }
         };
         init();
@@ -77,11 +70,7 @@ export const useGradeEntry = () => {
             }
         } catch (err) {
             console.error(err);
-            // Demo data
-            setStudents([
-                { id: 1, studentId: 1, name: 'Juan Pérez', carnet: '2025-001', score: 85, isLocked: false },
-                { id: 2, studentId: 2, name: 'María López', carnet: '2025-002', score: 92, isLocked: false },
-            ]);
+            setStudents([]);
         } finally {
             setLoading(false);
         }

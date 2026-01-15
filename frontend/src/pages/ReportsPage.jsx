@@ -67,13 +67,7 @@ const ReportsPage = () => {
 
                 // Mock Table Data
                 const headers = [['#', 'Nombre Estudiante', 'Grado', 'Detalle', 'Estado']];
-                const data = [
-                    ['1', 'Juan Pérez', '5to Primaria', 'Pago Mensualidad', 'Solvente'],
-                    ['2', 'María López', '5to Primaria', 'Pago Mensualidad', 'Pendiente'],
-                    ['3', 'Carlos García', '4to Primaria', 'Colegiatura', 'Solvente'],
-                    ['4', 'Ana Martínez', '6to Primaria', 'Inscripción', 'Solvente'],
-                    ['5', 'Luis Rodríguez', '5to Primaria', 'Libros', 'Pendiente'],
-                ];
+                const data = [];
 
                 doc.autoTable({
                     startY: 70,

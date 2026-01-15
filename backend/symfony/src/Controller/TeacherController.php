@@ -289,6 +289,80 @@ class TeacherController extends AbstractController
         return $this->json($students);
     }
 
+
+    /**
+     * Get chat history with a student
+     */
+    #[Route('/chat/{studentId}', name: 'teacher_chat_history', methods: ['GET'])]
+    public function getChatHistory(int $studentId): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!$user) return $this->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+
+        // Find teacher profile
+        $teacher = $this->teacherRepository->findOneBy(['user' => $user]);
+        if (!$teacher) $teacher = $this->teacherRepository->findOneBy(['email' => $user->getEmail()]);
+        
+        if (!$teacher) return $this->json(['error' => 'Teacher profile not found'], 404);
+
+        $messages = $this->em->getRepository(\App\Entity\StudentMessage::class)->createQueryBuilder('m')
+            ->where('m.student = :studentId AND m.teacher = :teacherId')
+            ->setParameter('studentId', $studentId)
+            ->setParameter('teacherId', $teacher->getId())
+            ->orderBy('m.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        $data = array_map(fn($m) => [
+            'id' => $m->getId(),
+            'text' => $m->getContent(),
+            'sender' => $m->getSenderType() === 'teacher' ? 'me' : 'student',
+            'time' => $m->getCreatedAt(),
+            'status' => $m->isRead() ? 'read' : 'sent'
+        ], $messages);
+
+        return $this->json($data);
+    }
+
+    /**
+     * Send a message to a student
+     */
+    #[Route('/chat', name: 'teacher_chat_send', methods: ['POST'])]
+    public function sendMessage(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!$user) return $this->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+
+        $teacher = $this->teacherRepository->findOneBy(['user' => $user]);
+        if (!$teacher) $teacher = $this->teacherRepository->findOneBy(['email' => $user->getEmail()]);
+        if (!$teacher) return $this->json(['error' => 'Teacher profile not found'], 404);
+
+        $data = json_decode($request->getContent(), true);
+        $studentId = $data['studentId'] ?? null;
+        $content = $data['message'] ?? null;
+
+        if (!$studentId || !$content) {
+            return $this->json(['error' => 'Missing studentId or message'], 400);
+        }
+
+        $student = $this->em->getRepository(\App\Entity\Student::class)->find($studentId);
+        if (!$student) return $this->json(['error' => 'Student not found'], 404);
+
+        $message = new \App\Entity\StudentMessage();
+        $message->setTeacher($teacher);
+        $message->setStudent($student);
+        $message->setContent($content);
+        $message->setSenderType('teacher'); // 'me' from teacher perspective
+        $message->setIsRead(false);
+        
+        $this->em->persist($message);
+        $this->em->flush();
+
+        return $this->json(['success' => true, 'id' => $message->getId()]);
+    }
+
     private function serializeTeacher(Teacher $t, bool $detailed = false): array
     {
         $data = [

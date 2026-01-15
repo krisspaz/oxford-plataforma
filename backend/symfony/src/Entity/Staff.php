@@ -26,6 +26,10 @@ class Staff extends Person
     #[ORM\Column(length: 50)]
     private ?string $contractType = 'Tiempo Completo';
 
+    #[ORM\ManyToOne(inversedBy: 'staffMembers')]
+    #[Groups(['staff:read', 'staff:write'])]
+    private ?JobTitle $jobTitle = null;
+
     public function getEmployeeCode(): ?string
     {
         return $this->employeeCode;
@@ -78,6 +82,18 @@ class Staff extends Person
     public function setContractType(string $contractType): static
     {
         $this->contractType = $contractType;
+        return $this;
+    }
+
+    public function getJobTitle(): ?JobTitle
+    {
+        return $this->jobTitle;
+    }
+
+    public function setJobTitle(?JobTitle $jobTitle): static
+    {
+        $this->jobTitle = $jobTitle;
+
         return $this;
     }
 }

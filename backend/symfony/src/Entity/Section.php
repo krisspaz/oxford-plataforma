@@ -21,7 +21,7 @@ class Section
     #[ORM\Column]
     private ?int $capacity = 30;
 
-    #[ORM\ManyToOne(targetEntity: Grade::class)]
+    #[ORM\ManyToOne(targetEntity: Grade::class, inversedBy: 'sections')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Grade $grade = null;
 

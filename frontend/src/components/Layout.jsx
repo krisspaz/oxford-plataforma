@@ -53,27 +53,27 @@ const ICON_MAP = {
     UserCog, Shield, Menu, Database, Bell, Brain
 };
 
-// Section Color Mapping
+// Section Color Mapping - Unified for Professional Look
 const SECTION_THEMES = {
-    'Principal': 'obs-pink',
-    'Finanzas': 'obs-green',
-    'Gestión Cobros': 'obs-green',
+    'Principal': 'obs-blue',
+    'Finanzas': 'obs-blue',
+    'Gestión Cobros': 'obs-blue',
     'Académico': 'obs-blue',
     'Gestión Académica': 'obs-blue',
     'Organización': 'obs-blue',
     'Reportes': 'obs-blue',
-    'Administración': 'obs-purple',
+    'Administración': 'obs-purple', // Keep distinct for admin
     'Sistema': 'obs-purple',
-    'Inscripciones': 'obs-orange',
-    'Inteligencia Artificial': 'obs-pink',
+    'Inscripciones': 'obs-blue',
+    'Inteligencia Artificial': 'obs-blue',
     'Docente': 'obs-blue',
-    'Estudiante': 'obs-green',
-    'Padres': 'obs-orange',
-    'Configuración': 'gray-400',
+    'Estudiante': 'obs-blue',
+    'Padres': 'obs-blue',
+    'Configuración': 'gray-500',
     // Teacher Specific
     'Mis Clases': 'obs-blue',
-    'Actividades': 'obs-orange',
-    'Calificaciones': 'obs-green'
+    'Actividades': 'obs-blue',
+    'Calificaciones': 'obs-blue'
 };
 
 const Layout = () => {

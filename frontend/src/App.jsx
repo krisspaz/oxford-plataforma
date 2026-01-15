@@ -1,10 +1,12 @@
 import { BrowserRouter } from 'react-router-dom';
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, lazy } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { Toaster } from 'sonner';
 import { AIProvider } from './context/AIContext';
 import ErrorBoundary from './components/ErrorBoundary';
-import AppRoutes from './routes/AppRoutes';
+// lazy already imported at top
+const AppRoutes = lazy(() => import('./routes/AppRoutes'));
 import VoiceChat from './components/VoiceChat';
 import NotificationListener from './components/NotificationListener';
 
@@ -41,7 +43,8 @@ function App() {
       // Nuke everything to be safe if version mismatches
       localStorage.clear();
       localStorage.setItem('oxford_app_version', APP_VERSION);
-      window.location.reload(true);
+      console.log("Version updated. Reload disabled for debugging.");
+      // window.location.reload(true); 
       return;
     }
 
@@ -64,6 +67,7 @@ function App() {
     <ErrorBoundary>
       <AuthProvider>
         <ThemeProvider>
+          <Toaster position="top-right" richColors />
           <BrowserRouter>
             <AIProvider>
               <Suspense fallback={<PageLoader />}>

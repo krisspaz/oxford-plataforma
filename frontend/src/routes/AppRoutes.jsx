@@ -3,6 +3,8 @@ import { lazy } from 'react';
 import ProtectedRoute from '../components/ProtectedRoute';
 import Layout from '../components/Layout';
 import Login from '../pages/Login';
+import LandingPage from '../pages/LandingPage';
+import PageTransition from '../components/ui/PageTransition';
 
 // Import Feature Routes
 import { financialRouteElements, standaloneFinancialRoutes } from '../features/financial/routes';
@@ -54,6 +56,7 @@ const NotFoundComponent = () => (
 const AppRoutes = () => {
     return (
         <Routes>
+            <Route path="/welcome" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
 
             {/* Standalone Routes (Not under Main Layout) */}
@@ -69,7 +72,7 @@ const AppRoutes = () => {
                 </ProtectedRoute>
             }>
                 {/* Dashboard */}
-                <Route index element={<Dashboard />} />
+                <Route index element={<PageTransition><Dashboard /></PageTransition>} />
 
                 {/* Feature Modules */}
                 {secretariaRouteElements}

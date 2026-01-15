@@ -19,6 +19,7 @@ export { default as financialService } from './financialService';
 
 // New services for teacher modules
 export { default as attendanceService } from './attendanceService';
+export { default as jobTitleService } from './jobTitleService';
 export { default as scheduleService } from './scheduleService';
 export { default as taskService } from './taskService';
 export { default as teacherService } from './teacherService';
@@ -31,3 +32,6 @@ export { default as reportService } from './reportService';
 // Scholarship/Convenios service
 export { default as scholarshipService } from './scholarshipService';
 export { default as academicService } from './academicService';
+export { default as teacherRatingService } from './teacherRatingService';
+export { default as helpTicketService } from './helpTicketService';
+export { default as activityService } from './activityService';

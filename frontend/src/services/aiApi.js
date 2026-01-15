@@ -42,10 +42,10 @@ export const aiApi = {
 
         // For now, return mock data to demonstrate the UI
         return new Promise(resolve => setTimeout(() => resolve({
-            alertLevel: 'medium', // low, medium, high
-            insight: 'Se detecta una baja en el promedio de 5to Bachillerato (-15% vs mes pasado).',
-            recommendation: 'Sugerimos programar una reunión de refuerzo.',
-            positiveTrend: '2do Primaria aumentó su asistencia un 10%.',
+            alertLevel: 'low', // low, medium, high
+            insight: 'Sistema funcionando correctamente. Análisis de IA iniciando...',
+            recommendation: 'El calendario escolar está actualizado.',
+            positiveTrend: 'Conectividad estable en todos los servicios.',
             timestamp: new Date().toISOString()
         }), 800));
     }

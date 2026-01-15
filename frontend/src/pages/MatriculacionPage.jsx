@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, RefreshCw, Check, User, Calendar, GraduationCap, CreditCard, FileText, ChevronRight, AlertCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { studentService, catalogService, packageService } from '../services';
+import { studentService, catalogService, packageService, enrollmentService } from '../services';
 
 const MatriculacionPage = () => {
     const { darkMode } = useTheme();
@@ -38,27 +38,9 @@ const MatriculacionPage = () => {
                 packages: packagesRes.success ? packagesRes.data : []
             });
         } catch (error) {
-            // Demo data
-            setCatalogs({
-                grades: [
-                    { id: 1, name: 'Kinder', sections: ['A', 'B'] },
-                    { id: 2, name: 'Preparatoria', sections: ['A', 'B'] },
-                    { id: 3, name: '1ro Primaria', sections: ['A', 'B'] },
-                    { id: 4, name: '2do Primaria', sections: ['A', 'B'] },
-                    { id: 5, name: '3ro Primaria', sections: ['A', 'B'] },
-                    { id: 6, name: '4to Primaria', sections: ['A', 'B'] },
-                    { id: 7, name: '5to Primaria', sections: ['A'] },
-                    { id: 8, name: '6to Primaria', sections: ['A'] },
-                    { id: 9, name: '1ro Básico', sections: ['A', 'B'] },
-                    { id: 10, name: '2do Básico', sections: ['A'] },
-                    { id: 11, name: '3ro Básico', sections: ['A'] },
-                ],
-                packages: [
-                    { id: 1, name: 'Paquete Normal', totalPrice: 9500 },
-                    { id: 2, name: 'Paquete Becado 50%', totalPrice: 4750 },
-                    { id: 3, name: 'Paquete Becado 25%', totalPrice: 7125 },
-                ]
-            });
+            console.error("Error loading catalogs:", error);
+            // Graceful degradation
+            setCatalogs({ grades: [], packages: [] });
         } finally {
             setLoading(false);
         }
@@ -74,46 +56,8 @@ const MatriculacionPage = () => {
                 setStudents(response.data);
             }
         } catch (error) {
-            // Demo data - students from previous year
-            setStudents([
-                {
-                    id: 1,
-                    firstName: 'María',
-                    lastName: 'García López',
-                    code: 'ALU-2024-001',
-                    previousGrade: '2do Primaria',
-                    previousSection: 'A',
-                    guardian: 'Juan García',
-                    guardianPhone: '5555-1234',
-                    status: 'EGRESADO_2024'
-                },
-                {
-                    id: 2,
-                    firstName: 'Carlos',
-                    lastName: 'Martínez Pérez',
-                    code: 'ALU-2024-025',
-                    previousGrade: '3ro Primaria',
-                    previousSection: 'B',
-                    guardian: 'Ana Pérez',
-                    guardianPhone: '5555-5678',
-                    status: 'EGRESADO_2024'
-                },
-                {
-                    id: 3,
-                    firstName: 'Ana',
-                    lastName: 'López Hernández',
-                    code: 'ALU-2024-042',
-                    previousGrade: '5to Primaria',
-                    previousSection: 'A',
-                    guardian: 'Pedro López',
-                    guardianPhone: '5555-9012',
-                    status: 'EGRESADO_2024'
-                },
-            ].filter(s =>
-                s.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                s.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                s.code.toLowerCase().includes(searchTerm.toLowerCase())
-            ));
+            console.error("Error searching students:", error);
+            setStudents([]);
         } finally {
             setSearching(false);
         }
@@ -135,16 +79,25 @@ const MatriculacionPage = () => {
     const handleSubmit = async () => {
         setSubmitting(true);
         try {
-            // In real app, call reinscription API
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            const payload = {
+                student: `/api/students/${selectedStudent.id}`,
+                grade: `/api/grades/${formData.grade}`,
+                section: formData.section,
+                package: `/api/packages/${formData.package}`,
+                status: 'ENROLLED',
+                enrollmentDate: new Date().toISOString()
+            };
+
+            await enrollmentService.create(payload);
+
             alert(`✅ Reinscripción completada para ${selectedStudent.firstName} ${selectedStudent.lastName}`);
             setSelectedStudent(null);
             setStudents([]);
             setSearchTerm('');
             setFormData({ grade: '', section: '', package: '', jornada: 'MATUTINA' });
         } catch (error) {
-            console.error('Error:', error);
-            alert('Error al procesar la reinscripción');
+            console.error('Error in enrollment:', error);
+            alert('Error al procesar la reinscripción. Verifique los datos.');
         } finally {
             setSubmitting(false);
         }
@@ -225,8 +178,8 @@ const MatriculacionPage = () => {
                                 key={student.id}
                                 onClick={() => selectStudent(student)}
                                 className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${darkMode
-                                        ? 'border-gray-600 hover:border-teal-500 bg-gray-700'
-                                        : 'border-gray-200 hover:border-teal-500 bg-gray-50'
+                                    ? 'border-gray-600 hover:border-teal-500 bg-gray-700'
+                                    : 'border-gray-200 hover:border-teal-500 bg-gray-50'
                                     }`}
                             >
                                 <div className="flex items-center justify-between">

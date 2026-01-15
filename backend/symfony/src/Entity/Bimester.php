@@ -40,7 +40,7 @@ class Bimester
     #[ORM\Column]
     private ?bool $isActive = true;
 
-    #[ORM\ManyToOne(targetEntity: SchoolCycle::class)]
+    #[ORM\ManyToOne(targetEntity: SchoolCycle::class, inversedBy: 'bimesters')]
     #[ORM\JoinColumn(nullable: false)]
     private ?SchoolCycle $schoolCycle = null;
 

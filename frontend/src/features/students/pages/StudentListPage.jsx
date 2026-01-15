@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useStudents } from '../hooks/useStudents';
 import { StudentCard } from '../components/StudentCard';
-import { Button, Spinner, Input } from '../../../components/ui';
+import { Button, Spinner, Input, EmptyState } from '../../../components/ui';
 import { useDebounce } from '../../../utils/performanceUtils';
 
 /**
@@ -70,8 +70,18 @@ const StudentListPage = () => {
                     ))}
 
                     {students.length === 0 && (
-                        <div className="col-span-full text-center py-12 text-gray-500">
-                            No se encontraron estudiantes
+                        <div className="col-span-full">
+                            <EmptyState
+                                title="No se encontraron estudiantes"
+                                description={searchTerm ? `No hay resultados para "${searchTerm}"` : "Comienza registrando un nuevo estudiante en el sistema."}
+                                action={
+                                    !searchTerm && (
+                                        <Button variant="primary" icon={<span>+</span>}>
+                                            Nuevo Estudiante
+                                        </Button>
+                                    )
+                                }
+                            />
                         </div>
                     )}
                 </div>

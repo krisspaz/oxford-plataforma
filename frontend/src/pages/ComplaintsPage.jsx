@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { helpTicketService } from '../services';
 import { useTheme } from '../contexts/ThemeContext';
 import { AlertTriangle, Send, CheckCircle, Shield, Eye, Clock, MessageSquare, Lock } from 'lucide-react';
 
@@ -21,56 +22,59 @@ const ComplaintsPage = () => {
         { id: 'other', label: '📋 Otros', description: 'Otros problemas no listados' },
     ];
 
-    const myComplaints = [
-        {
-            id: 1,
-            category: 'infrastructure',
-            subject: 'Aire acondicionado no funciona en Aula 5',
-            description: 'Desde hace 2 semanas el aire acondicionado del aula 5 no funciona y hace mucho calor',
-            status: 'resolved',
-            date: '2024-12-20',
-            isAnonymous: false,
-            response: 'El equipo de mantenimiento reparó el aire acondicionado el 23 de diciembre. Gracias por reportar.',
-            resolvedDate: '2024-12-23'
-        },
-        {
-            id: 2,
-            category: 'academic',
-            subject: 'Falta de material para laboratorio',
-            description: 'En la clase de Química no hay suficientes equipos de laboratorio para todos',
-            status: 'in_review',
-            date: '2025-01-03',
-            isAnonymous: true,
-            response: null
-        },
-        {
-            id: 3,
-            category: 'other',
-            subject: 'Horario del transporte escolar',
-            description: 'El bus llega muy tarde por las mañanas',
-            status: 'sent',
-            date: '2025-01-05',
-            isAnonymous: true,
-            response: null
-        },
-    ];
-
     const statusConfig = {
-        sent: { label: 'Enviada', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', icon: Send },
-        in_review: { label: 'En Revisión', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400', icon: Eye },
-        resolved: { label: 'Resuelta', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400', icon: CheckCircle },
+        open: { label: 'Abierta', color: 'bg-blue-100 text-blue-700', icon: Send },
+        closed: { label: 'Cerrada', color: 'bg-green-100 text-green-700', icon: CheckCircle },
+        // Map backend statuses to UI
+        sent: { label: 'Enviada', color: 'bg-blue-100 text-blue-700', icon: Send },
+        in_review: { label: 'En Revisión', color: 'bg-yellow-100 text-yellow-700', icon: Eye },
+        resolved: { label: 'Resuelta', color: 'bg-green-100 text-green-700', icon: CheckCircle },
     };
 
-    const handleSubmit = (e) => {
+    // Real Data State
+    const [myComplaints, setMyComplaints] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (activeTab === 'history') {
+            loadComplaints();
+        }
+    }, [activeTab]);
+
+    const loadComplaints = async () => {
+        setLoading(true);
+        try {
+            // Assuming current user context or generic fetch for now
+            const data = await helpTicketService.getAll({ type: 'queja' });
+            setMyComplaints(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Error loading complaints:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.category || !formData.subject || !formData.description) {
             alert('Por favor completa todos los campos');
             return;
         }
-        console.log('Submitting complaint:', formData);
-        setSubmitted(true);
-        setFormData({ category: '', subject: '', description: '', isAnonymous: true });
-        setTimeout(() => setSubmitted(false), 3000);
+
+        try {
+            await helpTicketService.create({
+                ...formData,
+                type: 'queja',
+                status: 'open'
+            });
+
+            setSubmitted(true);
+            setFormData({ category: '', subject: '', description: '', isAnonymous: true });
+            setTimeout(() => setSubmitted(false), 3000); // Keep UI feedback
+        } catch (error) {
+            console.error("Error submitting complaint:", error);
+            alert("Error al enviar el reporte. Intente nuevamente.");
+        }
     };
 
     const getCategoryLabel = (id) => categories.find(c => c.id === id)?.label || id;
@@ -105,8 +109,8 @@ const ComplaintsPage = () => {
                 <button
                     onClick={() => setActiveTab('new')}
                     className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${activeTab === 'new'
-                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
-                            : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+                        : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
                         }`}
                 >
                     <AlertTriangle size={16} /> Nuevo Reporte
@@ -114,8 +118,8 @@ const ComplaintsPage = () => {
                 <button
                     onClick={() => setActiveTab('history')}
                     className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${activeTab === 'history'
-                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
-                            : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+                        : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
                         }`}
                 >
                     <Clock size={16} /> Mis Reportes ({myComplaints.length})
@@ -151,10 +155,10 @@ const ComplaintsPage = () => {
                                             type="button"
                                             onClick={() => setFormData(prev => ({ ...prev, category: cat.id }))}
                                             className={`p-3 rounded-xl border-2 text-left transition-all ${formData.category === cat.id
-                                                    ? 'border-orange-500 bg-orange-500/10'
-                                                    : darkMode
-                                                        ? 'border-gray-700 hover:border-gray-600'
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-orange-500 bg-orange-500/10'
+                                                : darkMode
+                                                    ? 'border-gray-700 hover:border-gray-600'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
                                             <p className={`font-medium text-sm ${darkMode ? 'text-white' : 'text-gray-800'}`}>{cat.label}</p>
@@ -175,8 +179,8 @@ const ComplaintsPage = () => {
                                     onChange={e => setFormData(prev => ({ ...prev, subject: e.target.value }))}
                                     placeholder="Resumen breve del problema"
                                     className={`w-full px-4 py-3 rounded-lg border ${darkMode
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                                            : 'bg-white border-gray-300 placeholder-gray-400'
+                                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                                        : 'bg-white border-gray-300 placeholder-gray-400'
                                         } focus:ring-2 focus:ring-orange-500 focus:border-transparent`}
                                 />
                             </div>
@@ -192,8 +196,8 @@ const ComplaintsPage = () => {
                                     onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
                                     placeholder="Describe el problema con todos los detalles posibles: cuándo ocurrió, dónde, personas involucradas, etc."
                                     className={`w-full px-4 py-3 rounded-lg border resize-none ${darkMode
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                                            : 'bg-white border-gray-300 placeholder-gray-400'
+                                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                                        : 'bg-white border-gray-300 placeholder-gray-400'
                                         } focus:ring-2 focus:ring-orange-500 focus:border-transparent`}
                                 />
                             </div>
