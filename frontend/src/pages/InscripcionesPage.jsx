@@ -48,30 +48,9 @@ const InscripcionesPage = () => {
                 levels: levelsRes.success ? levelsRes.data : []
             });
         } catch (error) {
-            // Error - show empty state
-            setCatalogs({
-                grades: [
-                    { id: 1, name: 'Kinder', sections: ['A', 'B'] },
-                    { id: 2, name: 'Preparatoria', sections: ['A', 'B'] },
-                    { id: 3, name: '1ro Primaria', sections: ['A', 'B'] },
-                    { id: 4, name: '2do Primaria', sections: ['A', 'B'] },
-                    { id: 5, name: '3ro Primaria', sections: ['A', 'B'] },
-                    { id: 6, name: '1ro Básico', sections: ['A', 'B'] },
-                    { id: 7, name: '2do Básico', sections: ['A', 'B'] },
-                    { id: 8, name: '3ro Básico', sections: ['A'] },
-                ],
-                packages: [
-                    { id: 1, name: 'Paquete Normal', totalPrice: 9500 },
-                    { id: 2, name: 'Paquete Becado 50%', totalPrice: 4750 },
-                    { id: 3, name: 'Paquete Becado 25%', totalPrice: 7125 },
-                ],
-                relationships: [
-                    { id: 1, code: 'ABUELO', name: 'Abuelo/a' },
-                    { id: 2, code: 'TIO', name: 'Tío/a' },
-                    { id: 3, code: 'HERMANO', name: 'Hermano/a mayor' },
-                    { id: 4, code: 'OTRO', name: 'Otro familiar' },
-                ]
-            });
+            console.error('Error loading catalogs:', error);
+            alert('Error al cargar catálogos: ' + error.message);
+            setCatalogs({ grades: [], packages: [], relationships: [], levels: [] });
         } finally {
             setLoading(false);
         }
@@ -133,11 +112,12 @@ const InscripcionesPage = () => {
             if (response.success) {
                 alert('✅ Inscripción completada exitosamente');
                 resetForm();
+            } else {
+                alert('Error al crear inscripción: ' + (response.message || 'Error desconocido'));
             }
         } catch (error) {
             console.error('Error submitting enrollment:', error);
-            alert('✅ Inscripción completada (demo mode)');
-            resetForm();
+            alert('Error al crear inscripción: ' + error.message);
         } finally {
             setSubmitting(false);
         }

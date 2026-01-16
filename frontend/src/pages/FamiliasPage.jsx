@@ -23,38 +23,13 @@ const FamiliasPage = () => {
             const response = await api.get('/families');
             if (response.success) {
                 setFamilies(response.data);
+            } else {
+                setFamilies([]);
             }
         } catch (error) {
             console.error('Error loading families:', error);
-            // Error - show empty state
-            setFamilies([
-                {
-                    id: 1,
-                    father: { name: 'Roberto Pérez', phone: '5512-3456', email: 'rperez@email.com' },
-                    mother: { name: 'María García de Pérez', phone: '5534-5678', email: 'mgarcia@email.com' },
-                    students: [
-                        { id: 1, name: 'Juan Pérez García', carnet: '2025-001', grade: '1ro Básico A', status: 'ACTIVO' },
-                        { id: 2, name: 'Ana Pérez García', carnet: '2025-015', grade: 'Kinder 5 B', status: 'ACTIVO' },
-                    ]
-                },
-                {
-                    id: 2,
-                    father: { name: 'Carlos López', phone: '5556-7890', email: 'clopez@email.com' },
-                    mother: { name: 'Laura Martínez de López', phone: '5578-9012', email: 'lmartinez@email.com' },
-                    students: [
-                        { id: 3, name: 'María López Martínez', carnet: '2025-002', grade: '2do Básico B', status: 'ACTIVO' },
-                    ]
-                },
-                {
-                    id: 3,
-                    father: { name: 'Fernando Hernández', phone: '5590-1234', email: 'fhernandez@email.com' },
-                    mother: null,
-                    guardian: { name: 'Elena Hernández', relationship: 'Hermana', phone: '5501-2345' },
-                    students: [
-                        { id: 4, name: 'Carlos Hernández', carnet: '2025-003', grade: '3ro Básico A', status: 'ACTIVO' },
-                    ]
-                },
-            ]);
+            alert('Error al cargar familias: ' + error.message);
+            setFamilies([]);
         } finally {
             setLoading(false);
         }
@@ -174,8 +149,8 @@ const FamiliasPage = () => {
                                         <span
                                             key={student.id}
                                             className={`px-3 py-1 rounded-full text-sm ${student.status === 'ACTIVO'
-                                                    ? 'bg-teal-100 text-teal-700'
-                                                    : 'bg-gray-100 text-gray-600'
+                                                ? 'bg-teal-100 text-teal-700'
+                                                : 'bg-gray-100 text-gray-600'
                                                 }`}
                                         >
                                             {student.name} ({student.carnet})

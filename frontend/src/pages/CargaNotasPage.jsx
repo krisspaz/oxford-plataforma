@@ -84,16 +84,15 @@ const CargaNotasPage = () => {
                     score: r.score,
                     isLocked: r.isLocked
                 })));
+            } else {
+                setCurrentBimesterData(bimesters.find(b => b.id === parseInt(selectedBimester)));
+                setStudents([]);
             }
         } catch (error) {
             console.error('Error loading grades:', error);
-            // Error - show empty state
+            alert('Error al cargar notas: ' + error.message);
             setCurrentBimesterData(bimesters.find(b => b.id === parseInt(selectedBimester)));
-            setStudents([
-                { id: 1, studentId: 1, name: 'Juan Pérez', carnet: '2025-001', score: 85, isLocked: false },
-                { id: 2, studentId: 2, name: 'María López', carnet: '2025-002', score: 92, isLocked: false },
-                { id: 3, studentId: 3, name: 'Carlos García', carnet: '2025-003', score: null, isLocked: false },
-            ]);
+            setStudents([]);
         } finally {
             setLoading(false);
         }

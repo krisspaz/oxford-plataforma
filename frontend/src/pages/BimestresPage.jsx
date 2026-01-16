@@ -24,16 +24,13 @@ const BimestresPage = () => {
             const response = await bimesterService.getAll();
             if (response.success) {
                 setBimesters(response.data);
+            } else {
+                setBimesters([]);
             }
         } catch (error) {
             console.error('Error loading bimesters:', error);
-            // Error - show empty state
-            setBimesters([
-                { id: 1, number: 1, name: 'Primer Bimestre', startDate: '2025-01-15', endDate: '2025-03-15', maxScore: 100, percentage: 25, isClosed: true, isActive: true },
-                { id: 2, number: 2, name: 'Segundo Bimestre', startDate: '2025-03-16', endDate: '2025-05-31', maxScore: 100, percentage: 25, isClosed: false, isActive: true },
-                { id: 3, number: 3, name: 'Tercer Bimestre', startDate: '2025-06-01', endDate: '2025-08-15', maxScore: 100, percentage: 25, isClosed: false, isActive: true },
-                { id: 4, number: 4, name: 'Cuarto Bimestre', startDate: '2025-08-16', endDate: '2025-10-31', maxScore: 100, percentage: 25, isClosed: false, isActive: true },
-            ]);
+            alert('Error al cargar bimestres: ' + error.message);
+            setBimesters([]);
         } finally {
             setLoading(false);
         }
@@ -49,11 +46,12 @@ const BimestresPage = () => {
 
             if (response.success) {
                 setBimesters(bimesters.map(b => b.id === id ? { ...b, isClosed: !b.isClosed } : b));
+            } else {
+                alert('Error al cambiar estado del bimestre');
             }
         } catch (error) {
             console.error('Error toggling bimester:', error);
-            // Demo mode
-            setBimesters(bimesters.map(b => b.id === id ? { ...b, isClosed: !b.isClosed } : b));
+            alert('Error: ' + error.message);
         } finally {
             setActionLoading(null);
         }
@@ -174,8 +172,8 @@ const BimestresPage = () => {
                                     onClick={() => toggleClosed(bimester.id)}
                                     disabled={actionLoading === bimester.id}
                                     className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm ${bimester.isClosed
-                                            ? 'bg-green-100 hover:bg-green-200 text-green-700'
-                                            : 'bg-red-100 hover:bg-red-200 text-red-700'
+                                        ? 'bg-green-100 hover:bg-green-200 text-green-700'
+                                        : 'bg-red-100 hover:bg-red-200 text-red-700'
                                         }`}
                                 >
                                     {actionLoading === bimester.id ? (

@@ -28,13 +28,12 @@ const RegistroPagosPage = () => {
                     const response = await studentService.search(searchTerm);
                     if (response.success) {
                         setStudents(response.data);
+                    } else {
+                        setStudents([]);
                     }
                 } catch (error) {
-                    // Error - show empty state
-                    setStudents([
-                        { id: 1, fullName: 'Juan Pérez', carnet: '2025-001', grade: '1ro Básico A', nit: '12345678-9' },
-                        { id: 2, fullName: 'María López', carnet: '2025-002', grade: '2do Básico B', nit: 'CF' },
-                    ].filter(s => s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || s.carnet.includes(searchTerm)));
+                    console.error('Error searching students:', error);
+                    setStudents([]);
                 }
             };
             searchStudents();
@@ -57,14 +56,13 @@ const RegistroPagosPage = () => {
             const response = await paymentService.getPendingQuotas(selectedStudent.id);
             if (response.success) {
                 setQuotas(response.data);
+            } else {
+                setQuotas([]);
             }
         } catch (error) {
-            // Error - show empty state
-            setQuotas([
-                { id: 1, concept: 'Mensualidad Marzo', amount: 750, type: 'RECIBO_SAT' },
-                { id: 2, concept: 'Mensualidad Abril', amount: 750, type: 'RECIBO_SAT' },
-                { id: 3, concept: 'Paquete Escolar (Cuota 2)', amount: 750, type: 'FACTURA_SAT', pending: 750 },
-            ]);
+            console.error('Error loading quotas:', error);
+            alert('Error al cargar cuotas: ' + error.message);
+            setQuotas([]);
         } finally {
             setLoading(false);
         }
@@ -92,17 +90,15 @@ const RegistroPagosPage = () => {
 
             if (response.success) {
                 setLastReceipt(response.data);
+            } else {
+                alert('Error al procesar pago: ' + (response.message || 'Error desconocido'));
             }
         } catch (error) {
             console.error('Error processing payment:', error);
-            setLastReceipt({
-                series: 'B',
-                number: Math.floor(Math.random() * 1000),
-                total: totalSelected
-            });
+            alert('Error al procesar pago: ' + error.message);
         } finally {
             setProcessing(false);
-            setShowReceiptModal(true);
+            if (lastReceipt) setShowReceiptModal(true);
         }
     };
 

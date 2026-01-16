@@ -48,37 +48,8 @@ const CatalogosPage = () => {
             });
         } catch (error) {
             console.error('Error loading catalogs:', error);
-            // Error - show empty state
-            setCatalogs({
-                statuses: [
-                    { id: 1, code: 'ACTIVO', name: 'Activo' },
-                    { id: 2, code: 'INACTIVO', name: 'Inactivo' },
-                    { id: 3, code: 'PENDIENTE', name: 'Pendiente' },
-                    { id: 4, code: 'CANCELADO', name: 'Cancelado' },
-                    { id: 5, code: 'CERRADO', name: 'Cerrado' },
-                ],
-                relationships: [
-                    { id: 1, code: 'PADRE', name: 'Padre' },
-                    { id: 2, code: 'MADRE', name: 'Madre' },
-                    { id: 3, code: 'ABUELO', name: 'Abuelo/a' },
-                    { id: 4, code: 'TIO', name: 'Tío/a' },
-                    { id: 5, code: 'HERMANO', name: 'Hermano/a' },
-                    { id: 6, code: 'OTRO', name: 'Otro' },
-                ],
-                documentTypes: [
-                    { id: 1, code: 'DPI', name: 'DPI' },
-                    { id: 2, code: 'CUI', name: 'CUI Menor' },
-                    { id: 3, code: 'PASAPORTE', name: 'Pasaporte' },
-                    { id: 4, code: 'CERT_NAC', name: 'Certificado de Nacimiento' },
-                ],
-                paymentMethods: [
-                    { id: 1, code: 'EFECTIVO', name: 'Efectivo' },
-                    { id: 2, code: 'TARJETA_CREDITO', name: 'Tarjeta de Crédito' },
-                    { id: 3, code: 'TARJETA_DEBITO', name: 'Tarjeta de Débito' },
-                    { id: 4, code: 'DEPOSITO', name: 'Depósito Bancario' },
-                    { id: 5, code: 'TRANSFERENCIA', name: 'Transferencia' },
-                ],
-            });
+            alert('Error al cargar catálogos: ' + error.message);
+            setCatalogs({ statuses: [], relationships: [], documentTypes: [], paymentMethods: [] });
         } finally {
             setLoading(false);
         }
@@ -112,8 +83,8 @@ const CatalogosPage = () => {
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
                         className={`px-4 py-2 rounded-lg font-medium text-sm ${activeTab === tab.key
-                                ? 'bg-teal-600 text-white'
-                                : darkMode ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'
+                            ? 'bg-teal-600 text-white'
+                            : darkMode ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'
                             }`}
                     >
                         {tab.label}

@@ -41,16 +41,13 @@ const ComprobantesPage = () => {
             const response = await invoiceService.getAll(params);
             if (response.success) {
                 setInvoices(response.data);
+            } else {
+                setInvoices([]);
             }
         } catch (error) {
             console.error('Error loading invoices:', error);
-            // Error - show empty state
-            setInvoices([
-                { id: 1, type: 'FACTURA_SAT', series: 'A', number: '001', uuid: 'ABC123', name: 'Juan Pérez', nit: '12345678-9', total: 3500, status: 'EMITIDO', issuedAt: '2025-01-16 10:30' },
-                { id: 2, type: 'RECIBO_SAT', series: 'B', number: '045', uuid: 'DEF456', name: 'María López', nit: 'CF', total: 750, status: 'EMITIDO', issuedAt: '2025-01-16 09:15' },
-                { id: 3, type: 'FACTURA_SAT', series: 'A', number: '002', uuid: 'GHI789', name: 'Carlos García', nit: '98765432-1', total: 1000, status: 'ANULADO', issuedAt: '2025-01-15 16:00', annulledAt: '2025-01-15 17:00', annulmentReason: 'Error en datos del cliente' },
-                { id: 4, type: 'RECIBO_SAT', series: 'B', number: '046', uuid: '', name: 'Pedro Martinez', nit: 'CF', total: 500, status: 'PENDIENTE', issuedAt: '2025-01-17 08:00' },
-            ]);
+            alert('Error al cargar comprobantes: ' + error.message);
+            setInvoices([]);
         } finally {
             setLoading(false);
         }
@@ -71,15 +68,12 @@ const ComprobantesPage = () => {
                         ? { ...inv, status: 'ANULADO', annulmentReason: annulReason }
                         : inv
                 ));
+            } else {
+                alert('Error al anular comprobante: ' + (response.message || 'Error desconocido'));
             }
         } catch (error) {
             console.error('Error annulling invoice:', error);
-            // Demo mode
-            setInvoices(invoices.map(inv =>
-                inv.id === selectedInvoice.id
-                    ? { ...inv, status: 'ANULADO', annulmentReason: annulReason }
-                    : inv
-            ));
+            alert('Error al anular: ' + error.message);
         } finally {
             setActionLoading(null);
             setShowAnnulModal(false);
