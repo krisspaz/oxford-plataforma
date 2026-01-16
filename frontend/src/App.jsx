@@ -3,7 +3,7 @@ import { Suspense, useEffect, lazy } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Toaster } from 'sonner';
-import { AIProvider } from './context/AIContext';
+import { AIProvider } from './contexts/AIContext';
 import ErrorBoundary from './components/ErrorBoundary';
 // lazy already imported at top
 const AppRoutes = lazy(() => import('./routes/AppRoutes'));
