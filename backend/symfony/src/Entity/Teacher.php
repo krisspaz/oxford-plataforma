@@ -10,7 +10,9 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TeacherRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    processor: \App\State\TeacherProcessor::class
+)]
 class Teacher extends Person
 {
     #[ORM\Column(length: 50, unique: true, nullable: true)]

@@ -29,12 +29,12 @@ class GradeController extends AbstractController
         $levelId = $request->query->get('levelId');
 
         $qb = $this->gradeRepository->createQueryBuilder('g')
-            ->leftJoin('g.academicLevel', 'l')
+            ->leftJoin('g.level', 'l')
             ->addSelect('l')
             ->orderBy('g.sortOrder', 'ASC');
 
         if ($levelId) {
-            $qb->andWhere('g.academicLevel = :levelId')
+            $qb->andWhere('g.level = :levelId')
                ->setParameter('levelId', $levelId);
         }
 
@@ -63,25 +63,32 @@ class GradeController extends AbstractController
     #[Route('', name: 'grade_create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        try {
+            $data = json_decode($request->getContent(), true);
 
-        $grade = new Grade();
-        $grade->setName($data['name']);
-        $grade->setCode($data['code'] ?? null);
-        $grade->setSortOrder($data['sortOrder'] ?? 0);
-        
-        if (isset($data['levelId'])) {
-            $grade->setAcademicLevel($this->em->getReference('App\Entity\AcademicLevel', $data['levelId']));
+            $grade = new Grade();
+            $grade->setName($data['name']);
+            $grade->setCode($data['code'] ?? null);
+            $grade->setSortOrder($data['sortOrder'] ?? 0);
+            
+            if (isset($data['levelId'])) {
+                $grade->setLevel($this->em->getReference('App\Entity\AcademicLevel', $data['levelId']));
+            }
+
+            $this->em->persist($grade);
+            $this->em->flush();
+
+            return $this->json([
+                'success' => true,
+                'id' => $grade->getId(),
+                'message' => 'Grado creado correctamente'
+            ], Response::HTTP_CREATED);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'error' => 'Server Error: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
         }
-
-        $this->em->persist($grade);
-        $this->em->flush();
-
-        return $this->json([
-            'success' => true,
-            'id' => $grade->getId(),
-            'message' => 'Grado creado correctamente'
-        ], Response::HTTP_CREATED);
     }
 
     /**
@@ -101,7 +108,7 @@ class GradeController extends AbstractController
         if (isset($data['code'])) $grade->setCode($data['code']);
         if (isset($data['sortOrder'])) $grade->setSortOrder($data['sortOrder']);
         if (isset($data['levelId'])) {
-            $grade->setAcademicLevel($this->em->getReference('App\Entity\AcademicLevel', $data['levelId']));
+            $grade->setLevel($this->em->getReference('App\Entity\AcademicLevel', $data['levelId']));
         }
 
         $this->em->flush();
@@ -153,27 +160,33 @@ class GradeController extends AbstractController
     #[Route('/{id}/sections', name: 'grade_create_section', methods: ['POST'])]
     public function createSection(int $id, Request $request): JsonResponse
     {
-        $grade = $this->gradeRepository->find($id);
-        if (!$grade) {
-            return $this->json(['error' => 'Grade not found'], Response::HTTP_NOT_FOUND);
+        try {
+            $grade = $this->gradeRepository->find($id);
+            if (!$grade) {
+                return $this->json(['error' => 'Grade not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            $data = json_decode($request->getContent(), true);
+
+            $section = new Section();
+            $section->setName($data['name']);
+            $section->setGrade($grade);
+            $section->setCapacity($data['capacity'] ?? 30);
+            $section->setIsActive(true);
+
+            $this->em->persist($section);
+            $this->em->flush();
+
+            return $this->json([
+                'success' => true,
+                'id' => $section->getId(),
+                'message' => 'Sección creada correctamente'
+            ], Response::HTTP_CREATED);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'error' => 'Error al crear sección: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        $data = json_decode($request->getContent(), true);
-
-        $section = new Section();
-        $section->setName($data['name']);
-        $section->setCode($data['code'] ?? $data['name']);
-        $section->setGrade($grade);
-        $section->setCapacity($data['capacity'] ?? 30);
-
-        $this->em->persist($section);
-        $this->em->flush();
-
-        return $this->json([
-            'success' => true,
-            'id' => $section->getId(),
-            'message' => 'Sección creada correctamente'
-        ], Response::HTTP_CREATED);
     }
 
     /**
@@ -221,9 +234,9 @@ class GradeController extends AbstractController
             'name' => $g->getName(),
             'code' => $g->getCode(),
             'sortOrder' => $g->getSortOrder(),
-            'level' => $g->getAcademicLevel() ? [
-                'id' => $g->getAcademicLevel()->getId(),
-                'name' => $g->getAcademicLevel()->getName(),
+            'level' => $g->getLevel() ? [
+                'id' => $g->getLevel()->getId(),
+                'name' => $g->getLevel()->getName(),
             ] : null,
         ];
 

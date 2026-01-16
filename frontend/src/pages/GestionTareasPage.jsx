@@ -196,6 +196,22 @@ const GestionTareasPage = () => {
         return formData.grades.some(g => g.gradeId === gradeId && g.sectionId === sectionId);
     };
 
+    const getTypeColor = (type) => {
+        switch (type) {
+            case 'examen': return 'bg-red-100 text-red-700';
+            case 'proyecto': return 'bg-purple-100 text-purple-700';
+            default: return 'bg-blue-100 text-blue-700';
+        }
+    };
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'completed': return 'bg-green-100 text-green-700';
+            case 'active': return 'bg-yellow-100 text-yellow-700';
+            default: return 'bg-gray-100 text-gray-700';
+        }
+    };
+
 
     if (loading) {
         return (
@@ -288,14 +304,14 @@ const GestionTareasPage = () => {
                         <label className={`block text-xs font-medium mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Curso</label>
                         <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} className={inputClass}>
                             <option value="">Todos</option>
-                            {teacherCourses.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                            {subjects.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                         </select>
                     </div>
                     <div className="w-48">
                         <label className={`block text-xs font-medium mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Grado</label>
                         <select value={selectedGrade} onChange={e => setSelectedGrade(e.target.value)} className={inputClass}>
                             <option value="">Todos</option>
-                            {availableGrades.map(g => <option key={g.id} value={g.name}>{g.name}</option>)}
+                            {grades.map(g => <option key={g.id} value={g.name}>{g.name}</option>)}
                         </select>
                     </div>
                 </div>

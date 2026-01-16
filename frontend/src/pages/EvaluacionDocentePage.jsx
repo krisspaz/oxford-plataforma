@@ -10,9 +10,23 @@ const EvaluacionDocentePage = () => {
 
     useEffect(() => {
         const load = async () => {
-            const data = await studentService.getMyTeachers(1);
-            // Add local state for review
-            setTeachers(data.map(t => ({ ...t, rating: 0, comment: '', submitted: false })));
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const studentId = user.id || user.sub; // Fallback depending on auth structure
+
+                if (!studentId) {
+                    console.error("No student ID found");
+                    return;
+                }
+
+                const data = await studentService.getMyTeachers(studentId);
+                // Add local state for review
+                if (Array.isArray(data)) {
+                    setTeachers(data.map(t => ({ ...t, rating: 0, comment: '', submitted: false })));
+                }
+            } catch (e) {
+                console.error("Error loading teachers", e);
+            }
         };
         load();
     }, []);

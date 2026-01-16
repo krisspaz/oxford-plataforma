@@ -2,8 +2,8 @@ import { Routes, Route } from 'react-router-dom';
 import { lazy } from 'react';
 import ProtectedRoute from '../components/ProtectedRoute';
 import Layout from '../components/Layout';
-import Login from '../pages/Login';
-import LandingPage from '../pages/LandingPage';
+const Login = lazy(() => import('../pages/Login'));
+const LandingPage = lazy(() => import('../pages/LandingPage'));
 import PageTransition from '../components/ui/PageTransition';
 
 // Import Feature Routes

@@ -20,39 +20,81 @@ def ask(data: dict, x_internal_key: str = Header(..., alias="X-INTERNAL-KEY")):
     check_key(x_internal_key)
     
     prompt = data.get("prompt", "")
+    user_id = data.get("user_id", "unknown_user")
+    user_role = data.get("user_role", "ROLE_STUDENT")
     
-    # RAG Retrieval
-    import chromadb
-    from sentence_transformers import SentenceTransformer
+    # Imports
+    from nlp_engine import nlp_engine
+    from knowledge_base import knowledge_base
+    from response_generator import response_generator
+    from learning_engine import learning_engine
     
-    context_text = "No relevant documents found."
-    try:
-        chroma_client = chromadb.PersistentClient(path="./chroma_db")
-        collection = chroma_client.get_collection(name="knowledge_base")
-        model = SentenceTransformer('all-MiniLM-L6-v2')
-        
-        query_embedding = model.encode([prompt]).tolist()
-        results = collection.query(
-            query_embeddings=query_embedding,
-            n_results=3
-        )
-        
-        if results['documents']:
-            context_text = "\n\n".join(results['documents'][0])
-    except Exception as e:
-        context_text = f"Error retrieving context: {str(e)}"
+    # === 1. CHECK FOR TEACHING COMMAND (!aprende) ===
+    if prompt.lower().startswith("!aprende"):
+        try:
+            # Format: !aprende Q | A
+            _, content = prompt.split("!aprende", 1)
+            parts = content.split("|")
+            if len(parts) == 2:
+                q = parts[0].strip()
+                a = parts[1].strip()
+                
+                # Store as rule
+                rule_id = learning_engine.add_rule(
+                    description=q,
+                    condition="query_match",
+                    action=a,
+                    source=f"user instruction ({user_role})"
+                )
+                
+                response_text = f"✅ ¡Entendido! He aprendido que cuando pregunten '**{q}**', debo responder '**{a}**'."
+                
+                # Log this training event
+                learning_engine.log_interaction(user_id, user_role, prompt, response_text, "training")
+                
+                return {"response": response_text, "original_input": data}
+            else:
+                return {"response": "⚠️ Formato incorrecto. Usa: !aprende Pregunta | Respuesta", "original_input": data}
+        except Exception as e:
+            return {"response": f"❌ Error al aprender: {str(e)}", "original_input": data}
 
-    # Construct Response (Simulated LLM)
-    final_response = f"Here is the information I found in your documents:\n\n{context_text}\n\n(Generated based on: '{prompt}')"
+    # === 2. STANDARD NLP PROCESSING ===
+    # A. Detect Language
+    lang = nlp_engine.detect_language(prompt)
     
-    response_data = {"response": final_response, "original_input": data}
+    # B. Intent Classification
+    nlp_result = nlp_engine.process(prompt)
+    intent = nlp_result.intent.name
+    entities = nlp_result.entities
     
-    # Log to MongoDB
-    from database import db
-    db.log_interaction(
-        input_data=data, 
-        output_data=response_data, 
-        metadata={"source": "rag_fastapi", "retrieved_context": context_text}
+    # C. Knowledge Base Retrieval (Static + Learned)
+    kb_context = {}
+    kb_answer = knowledge_base.get_answer(prompt)
+    
+    # Priority Logic: KB only overrides NLP if confidence is low
+    if kb_answer and nlp_result.intent.confidence < 0.8:
+        response_text = kb_answer
+        intent = "knowledge_retrieval"
+    else:
+        # D. Generate Response based on Intent
+        context = {"config": {"startTime": "07:30", "endTime": "13:30"}} # Dummy context for now
+        response_obj = response_generator.generate(
+            intent=intent, 
+            context=context, 
+            entities=entities, 
+            success=True, 
+            lang=lang
+        )
+        response_text = response_obj['message']
+
+    # === 3. LOG INTERACTION (SELF-LEARNING) ===
+    learning_engine.log_interaction(
+        user_id=user_id,
+        user_role=user_role,
+        question=prompt,
+        response=response_text,
+        intent=intent,
+        metadata={"lang": lang}
     )
     
-    return response_data
+    return {"response": response_text, "intent": intent, "lang": lang, "original_input": data}

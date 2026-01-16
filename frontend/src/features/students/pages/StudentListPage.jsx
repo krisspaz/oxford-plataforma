@@ -64,8 +64,8 @@ const StudentListPage = () => {
                         <StudentCard
                             key={student.id}
                             student={student}
-                            onView={(id) => console.log('View', id)}
-                            onEdit={(id) => console.log('Edit', id)}
+                            onView={(id) => { }}
+                            onEdit={(id) => { }}
                         />
                     ))}
 

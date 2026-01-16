@@ -16,6 +16,17 @@ const TeacherRatingPage = () => {
     const [isAnonymous, setIsAnonymous] = useState(true);
     const [submitted, setSubmitted] = useState(false);
 
+    const criteria = [
+        { key: 'clarity', label: 'Claridad', description: 'Explica los temas de forma clara y comprensible' },
+        { key: 'punctuality', label: 'Puntualidad', description: 'Inicia las clases a tiempo' },
+        { key: 'treatment', label: 'Trato', description: 'Es respetuoso y amable con los estudiantes' },
+        { key: 'expertise', label: 'Dominio', description: 'Demuestra conocimiento profundo de la materia' },
+    ];
+
+    const handleRating = (key, value) => {
+        setRatings(prev => ({ ...prev, [key]: value }));
+    };
+
     // Real Data Hooks
     const [teachers, setTeachers] = useState([]);
     const [loading, setLoading] = useState(true);

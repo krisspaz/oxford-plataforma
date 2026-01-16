@@ -7,6 +7,7 @@ use App\Repository\AcademicLevelRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AcademicLevelRepository::class)]
 #[ApiResource]
@@ -15,12 +16,15 @@ class AcademicLevel
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['grade:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
+    #[Groups(['grade:read'])]
     private ?string $name = null; // Preprimaria, Primaria, Básico, Bachillerato
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(['grade:read'])]
     private ?string $code = null;
 
     #[ORM\Column(type: 'text', nullable: true)]

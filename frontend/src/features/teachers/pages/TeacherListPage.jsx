@@ -28,7 +28,7 @@ const TeacherListPage = () => {
     };
 
     const handleView = (teacher) => {
-        console.log('View teacher', teacher);
+        // View logic
     };
 
     const handleAddNew = () => {

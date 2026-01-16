@@ -11,8 +11,7 @@ const attendanceService = {
      */
     getBySchedule: async (scheduleId, date = null) => {
         const params = date ? { date } : {};
-        const response = await api.get(`/attendance/by-schedule/${scheduleId}`, { params });
-        return response.data;
+        return api.get(`/attendance/by-schedule/${scheduleId}`, { params });
     },
 
     /**
@@ -22,12 +21,7 @@ const attendanceService = {
      * @param {Array} attendances - Array of { studentId, status, notes? }
      */
     saveBatch: async (scheduleId, date, attendances) => {
-        const response = await api.post('/attendance/batch', {
-            scheduleId,
-            date,
-            attendances
-        });
-        return response.data;
+        return api.post('/attendance/batch', { scheduleId, date, attendances });
     },
 
     /**
@@ -36,8 +30,7 @@ const attendanceService = {
      * @param {number} bimesterId - Bimester ID
      */
     getStudentReport: async (studentId, bimesterId) => {
-        const response = await api.get(`/attendance/report/${studentId}/bimester/${bimesterId}`);
-        return response.data;
+        return api.get(`/attendance/report/${studentId}/bimester/${bimesterId}`);
     },
 
     /**
@@ -46,9 +39,9 @@ const attendanceService = {
      * @param {number} bimesterId - Bimester ID
      */
     getTeacherReport: async (teacherId, bimesterId) => {
-        const response = await api.get(`/attendance/teacher-report/${teacherId}/bimester/${bimesterId}`);
-        return response.data;
+        return api.get(`/attendance/teacher-report/${teacherId}/bimester/${bimesterId}`);
     },
 };
 
 export default attendanceService;
+

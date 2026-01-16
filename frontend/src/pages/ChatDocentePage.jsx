@@ -17,11 +17,12 @@ const ChatDocentePage = () => {
 
     const loadStudents = async () => {
         try {
-            // Use teacherService to get students
-            const data = await teacherService.getStudents(1); // Mock ID or use 'me' if API supports it
-            // Or use teacherService.getMyProfile then getStudents. 
-            // For now, assume getStudents(id) works.
-            setStudents(data);
+            // Get current teacher profile first
+            const profile = await teacherService.getMyProfile();
+            if (profile && profile.id) {
+                const data = await teacherService.getStudents(profile.id);
+                setStudents(data);
+            }
         } catch (error) {
             console.error("Error loading students", error);
         }

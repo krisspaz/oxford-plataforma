@@ -9,8 +9,7 @@ const teacherService = {
      * @param {Object} filters - Filter options { active, search }
      */
     getAll: async (filters = {}) => {
-        const response = await api.get('/teachers', { params: filters });
-        return response.data;
+        return api.get('/teachers', { params: filters });
     },
 
     /**
@@ -18,16 +17,14 @@ const teacherService = {
      * @param {number} id - Teacher ID
      */
     getById: async (id) => {
-        const response = await api.get(`/teachers/${id}`);
-        return response.data;
+        return api.get(`/teachers/${id}`);
     },
 
     /**
      * Get current logged-in teacher's profile
      */
     getMyProfile: async () => {
-        const response = await api.get('/teachers/me');
-        return response.data;
+        return api.get('/teachers/me');
     },
 
     /**
@@ -35,8 +32,7 @@ const teacherService = {
      * @param {Object} data - Teacher data
      */
     create: async (data) => {
-        const response = await api.post('/teachers', data);
-        return response.data;
+        return api.post('/teachers', data);
     },
 
     /**
@@ -45,8 +41,7 @@ const teacherService = {
      * @param {Object} data - Updated data
      */
     update: async (id, data) => {
-        const response = await api.put(`/teachers/${id}`, data);
-        return response.data;
+        return api.put(`/teachers/${id}`, data);
     },
 
     /**
@@ -54,8 +49,7 @@ const teacherService = {
      * @param {number} id - Teacher ID
      */
     delete: async (id) => {
-        const response = await api.delete(`/teachers/${id}`);
-        return response.data;
+        return api.delete(`/teachers/${id}`);
     },
 
     /**
@@ -63,8 +57,7 @@ const teacherService = {
      * @param {number} teacherId - Teacher ID
      */
     getSubjects: async (teacherId) => {
-        const response = await api.get(`/teachers/${teacherId}/subjects`);
-        return response.data;
+        return api.get(`/teachers/${teacherId}/subjects`);
     },
 
     /**
@@ -72,16 +65,15 @@ const teacherService = {
      * @param {number} teacherId - Teacher ID
      */
     getStudents: async (teacherId) => {
-        const response = await api.get(`/teachers/${teacherId}/students`);
-        return response.data;
+        return api.get(`/teachers/${teacherId}/students`);
     },
+
     /**
      * Get chat history with a student
      * @param {number} studentId - Student ID
      */
     getChatHistory: async (studentId) => {
-        const response = await api.get(`/teachers/chat/${studentId}`); // Adjusted endpoint logic
-        return response.data;
+        return api.get(`/teachers/chat/${studentId}`);
     },
 
     /**
@@ -89,9 +81,9 @@ const teacherService = {
      * @param {Object} data - { studentId, message }
      */
     sendMessage: async (data) => {
-        const response = await api.post('/teachers/chat', data);
-        return response.data;
+        return api.post('/teachers/chat', data);
     },
 };
 
 export default teacherService;
+

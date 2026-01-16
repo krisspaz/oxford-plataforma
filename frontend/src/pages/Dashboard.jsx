@@ -218,7 +218,7 @@ const StudentDashboard = ({ navigate, darkMode, stats }) => {
                 <StatCard title="Promedio General" value={stats?.student?.average || '0.0'} icon={Award} color="text-yellow-500" bg={darkMode ? 'bg-yellow-900/30' : 'bg-yellow-100'} darkMode={darkMode} />
                 <StatCard title="Tareas Pendientes" value={stats?.student?.pendingTasks ?? 0} icon={FileText} color="text-red-500" bg={darkMode ? 'bg-red-900/30' : 'bg-red-100'} darkMode={darkMode} onClick={() => navigate('/alumno/tareas')} />
                 <StatCard title="Próxima Clase" value={schedule[0] ? schedule[0].subject.name : (stats?.student?.nextClass || 'No asignada')} icon={BookOpen} color="text-blue-500" bg={darkMode ? 'bg-blue-900/30' : 'bg-blue-100'} darkMode={darkMode} onClick={() => navigate('/alumno/horario')} />
-                <StatCard title="Asistencia" value="95%" icon={CheckCircle} color="text-green-500" bg={darkMode ? 'bg-green-900/30' : 'bg-green-100'} darkMode={darkMode} />
+                <StatCard title="Asistencia" value={stats?.student?.attendance || "N/A"} icon={CheckCircle} color="text-green-500" bg={darkMode ? 'bg-green-900/30' : 'bg-green-100'} darkMode={darkMode} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
@@ -718,8 +718,16 @@ const Dashboard = () => {
             case 'ROLE_DIRECTOR':
             case 'ROLE_DIRECCION':
                 return <DirectorDashboard stats={stats} navigate={navigate} darkMode={darkMode} />;
+            case 'ROLE_USER': // Fallback for basic users
+                // If they only have ROLE_USER, show Student Dashboard or a specific one?
+                // For now, let's show StudentDashboard as it's the most common base role.
+                return <StudentDashboard navigate={navigate} darkMode={darkMode} stats={stats} />;
             default:
-                return <div className="p-10 text-center text-gray-500">Dashboard en construcción para {userRole}</div>;
+                // Try to infer from name if role is missing (HACK for legacy users)
+                if (user?.email?.includes('docente') || user?.email?.includes('maestro')) return <DocenteDashboard navigate={navigate} darkMode={darkMode} stats={stats} />;
+                if (user?.email?.includes('admin')) return <AdminDashboard stats={stats} navigate={navigate} darkMode={darkMode} />;
+
+                return <StudentDashboard navigate={navigate} darkMode={darkMode} stats={stats} />; // Universal Fallback instead of "Construction"
         }
     };
 

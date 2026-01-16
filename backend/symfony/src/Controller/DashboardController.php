@@ -24,11 +24,27 @@ class DashboardController extends AbstractController
     {
         // General Stats for Admin
         $totalUsers = $this->entityManager->getRepository(User::class)->count([]);
-        $totalStudents = $this->entityManager->getRepository(Student::class)->count([]); // Assuming Student entity
-        $totalTeachers = $this->entityManager->getRepository(Teacher::class)->count([]); // Assuming Teacher entity
+        $totalStudents = $this->entityManager->getRepository(Student::class)->count([]);
+        $totalTeachers = $this->entityManager->getRepository(Teacher::class)->count([]);
         $activeSubjects = $this->entityManager->getRepository(Subject::class)->count([]);
         
         $activeCycle = $this->entityManager->getRepository(SchoolCycle::class)->findOneBy(['isActive' => true]);
+
+        // Real Recent Students
+        $recentStudentsEntities = $this->entityManager->getRepository(Student::class)->findBy([], ['id' => 'DESC'], 5);
+        $recentStudents = [];
+
+        foreach ($recentStudentsEntities as $student) {
+            $courseName = $student->getCourse() ? $student->getCourse()->getName() : 'N/A';
+            $cycleName = $student->getSchoolCycle() ? $student->getSchoolCycle()->getName() : 'N/A';
+            
+            $recentStudents[] = [
+                'name' => $student->getFullName(),
+                'cycle' => $cycleName,
+                'course' => $courseName,
+                'status' => $student->isActive() ? 'ACTIVE' : 'INACTIVE'
+            ];
+        }
 
         return $this->json([
             'totalUsers' => $totalUsers,
@@ -36,7 +52,7 @@ class DashboardController extends AbstractController
             'totalTeachers' => $totalTeachers,
             'activeSubjects' => $activeSubjects,
             'activeCycle' => $activeCycle ? $activeCycle->getName() : '2026',
-            'recentStudents' => [] // Todo: Fetch recent 5 students
+            'recentStudents' => $recentStudents
         ]);
     }
 }

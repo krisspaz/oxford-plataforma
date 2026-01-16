@@ -11,7 +11,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: StudentRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    processor: \App\State\StudentProcessor::class
+)]
 class Student
 {
     #[ORM\Id]

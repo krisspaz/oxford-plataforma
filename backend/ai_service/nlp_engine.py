@@ -52,7 +52,8 @@ class SpanishNLPEngine:
         'que', 'y', 'o', 'pero', 'si', 'no', 'como', 'más',
         'este', 'esta', 'estos', 'estas', 'ese', 'esa',
         'mi', 'tu', 'su', 'me', 'te', 'se', 'le', 'lo',
-        'muy', 'también', 'ya', 'ahora', 'aquí', 'allí'
+        'muy', 'también', 'ya', 'ahora', 'aquí', 'allí',
+        'pues', 'bueno', 'mira', 'oye', 'fijate', 'entonces', 'asi' 
     }
     
     # Character normalization for accent handling
@@ -63,6 +64,40 @@ class SpanishNLPEngine:
     
     # Intent patterns with weighted scoring
     INTENT_PATTERNS = {
+        'small_talk': {
+            'weight': 0.85,
+            'patterns': [
+                r'\b(gracias|agradecido|muy amable)\b',
+                r'\b(quien eres|como te llamas|que eres)\b',
+                r'\b(eres (genial|listo|bueno|inteligente))\b',
+                r'\b(que haces|que sabes hacer)\b',
+                r'\b(jajaja|jejeje|lol)\b',
+            ],
+            'patterns_en': [
+                r'\b(thanks|thank you|grateful)\b',
+                r'\b(who are you|what is your name)\b',
+                r'\b(you are (great|smart|cool|good))\b',
+                r'\b(what can you do|what do you do)\b',
+                r'\b(haha|lol|rofl)\b',
+            ],
+            'keywords': ['gracias', 'eres', 'llamas'],
+            'keywords_en': ['thanks', 'who', 'name', 'smart'],
+        },
+        'insult_handling': {
+            'weight': 0.95,
+            'patterns': [
+                r'\b(tonto|estupido|idiota|imbecil|inutil|mierda|basura)\b',
+                r'\b(no sirves|no sabes nada|callate)\b',
+                r'\b(odio esto|te odio)\b',
+            ],
+            'patterns_en': [
+                r'\b(stupid|idiot|imbecile|useless|shit|trash|dumb)\b',
+                r'\b(shut up|you suck|useless)\b',
+                r'\b(hate you|hate this)\b',
+            ],
+            'keywords': ['tonto', 'estupido', 'odio', 'inutil'],
+            'keywords_en': ['stupid', 'idiot', 'hate', 'useless'],
+        },
         'generate_schedule': {
             'weight': 1.0,
             'patterns': [
@@ -72,7 +107,15 @@ class SpanishNLPEngine:
                 r'^genera\b',
                 r'^crea\b.*\bhorario',
             ],
+            'patterns_en': [
+                r'\b(generate|create|make|build)\b.*\b(schedule|timetable|calendar)\b',
+                r'\b(schedule|timetable)\b.*\b(for|of)\b',
+                r'\b(need|want|give)\b.*\b(schedule)\b',
+                r'^generate\b',
+                r'^create\b.*\bschedule',
+            ],
             'keywords': ['genera', 'crear', 'horario', 'agenda', 'armar'],
+            'keywords_en': ['generate', 'create', 'schedule', 'timetable'],
         },
         'modify_schedule': {
             'weight': 0.9,
@@ -80,7 +123,12 @@ class SpanishNLPEngine:
                 r'\b(modifica|modificar|cambia|cambiar|edita|editar|ajusta|ajustar)\b.*\b(horario|clase|periodo)\b',
                 r'\b(mueve|mover|pon|poner)\b.*\b(clase|materia)\b',
             ],
+            'patterns_en': [
+                r'\b(modify|change|edit|adjust)\b.*\b(schedule|class|period)\b',
+                r'\b(move|shift|put)\b.*\b(class|subject)\b',
+            ],
             'keywords': ['modificar', 'cambiar', 'editar', 'mover', 'ajustar'],
+            'keywords_en': ['modify', 'change', 'edit', 'move'],
         },
         'add_constraint': {
             'weight': 0.85,
@@ -89,7 +137,13 @@ class SpanishNLPEngine:
                 r'\b(restriccion|restricción)\b',
                 r'\b(no puede|no quiero|evitar)\b.*\b(lunes|martes|miércoles|jueves|viernes)\b',
             ],
+            'patterns_en': [
+                r'\b(teacher|prof)\b.*\b(cannot|can\'t|not available|only can)\b',
+                r'\b(restriction|constraint)\b',
+                r'\b(cannot|avoid|no)\b.*\b(monday|tuesday|wednesday|thursday|friday)\b',
+            ],
             'keywords': ['restriccion', 'no puede', 'solo puede', 'disponible'],
+            'keywords_en': ['restriction', 'cannot', 'available'],
         },
         'set_time': {
             'weight': 0.8,
@@ -99,7 +153,14 @@ class SpanishNLPEngine:
                 r'\b(termina|terminar|acaba|acabar)\b.*\d+',
                 r'\b\d{1,2}:\d{2}\b.*\b(a|hasta)\b.*\b\d{1,2}:\d{2}\b',
             ],
+            'patterns_en': [
+                r'\b(schedule|classes)\b.*\b(from|start)\b.*\d+.*\b(to|until|end)\b.*\d+',
+                r'\b(stars|begin)\b.*\d+',
+                r'\b(ends|finish)\b.*\d+',
+                r'\b\d{1,2}:\d{2}\b.*\b(to|until)\b.*\b\d{1,2}:\d{2}\b',
+            ],
             'keywords': ['empieza', 'termina', 'hora', 'inicio', 'fin'],
+            'keywords_en': ['start', 'end', 'time', 'begin', 'finish'],
         },
         'set_duration': {
             'weight': 0.75,
@@ -107,31 +168,56 @@ class SpanishNLPEngine:
                 r'\b(clases|periodos)\b.*\b(de|duran)\b.*\b(\d+)\b.*\b(minutos|min|hora)\b',
                 r'\b(duracion|duración)\b.*\b(\d+)\b',
             ],
+            'patterns_en': [
+                r'\b(classes|periods)\b.*\b(last|duration)\b.*\b(\d+)\b.*\b(minutes|mins|hour)\b',
+                r'\b(duration|length)\b.*\b(\d+)\b',
+            ],
             'keywords': ['duracion', 'minutos', 'horas', 'tiempo'],
+            'keywords_en': ['duration', 'minutes', 'hours', 'long'],
+        },
+        'check_recess': {
+             'weight': 0.7,
+             'patterns': [],
+             'keywords': [],
         },
         'remove_recess': {
             'weight': 0.7,
             'patterns': [
                 r'\b(quita|quitar|elimina|eliminar|sin|saca|sacar)\b.*\b(receso|recreo|descanso)\b',
             ],
+             'patterns_en': [
+                r'\b(remove|delete|without|no)\b.*\b(recess|break)\b',
+            ],
             'keywords': ['quitar', 'eliminar', 'sin', 'receso', 'recreo'],
+            'keywords_en': ['remove', 'delete', 'no', 'recess', 'break'],
         },
         'add_recess': {
             'weight': 0.7,
             'patterns': [
                 r'\b(agrega|agregar|pon|poner|con|añade|añadir)\b.*\b(receso|recreo|descanso)\b',
             ],
+             'patterns_en': [
+                r'\b(add|put|with|include)\b.*\b(recess|break)\b',
+            ],
             'keywords': ['agregar', 'añadir', 'con', 'receso', 'recreo'],
+            'keywords_en': ['add', 'include', 'with', 'recess', 'break'],
         },
         'help': {
-            'weight': 0.6,
+            'weight': 0.95,
             'patterns': [
                 r'^ayuda$',
                 r'\b(ayuda|help|auxilio)\b',
                 r'\b(que puedo|qué puedo|como funciona|cómo funciona)\b',
                 r'\b(comandos|opciones|instrucciones)\b',
             ],
+            'patterns_en': [
+                r'^help$',
+                r'\b(help|assist|support)\b',
+                r'\b(what can|how does|how to)\b',
+                r'\b(commands|options|instructions)\b',
+            ],
             'keywords': ['ayuda', 'help', 'comandos', 'opciones'],
+            'keywords_en': ['help', 'commands', 'options'],
         },
         'greeting': {
             'weight': 0.5,
@@ -139,7 +225,12 @@ class SpanishNLPEngine:
                 r'^(hola|hi|hey|buenos dias|buenos días|buenas tardes|buenas noches|saludos)[\s!.]*$',
                 r'^(hola|hey)[\s,]+',
             ],
+            'patterns_en': [
+                r'^(hello|hi|hey|good morning|good afternoon|good evening|greetings)[\s!.]*$',
+                r'^(hello|hey)[\s,]+',
+            ],
             'keywords': ['hola', 'buenos', 'saludos'],
+            'keywords_en': ['hello', 'hi', 'morning', 'afternoon'],
         },
         'show_status': {
             'weight': 0.65,
@@ -147,7 +238,12 @@ class SpanishNLPEngine:
                 r'\b(muestra|mostrar|ver|dame)\b.*\b(configuracion|config|estado|actual)\b',
                 r'\b(que tengo|qué tengo|restricciones actuales)\b',
             ],
+            'patterns_en': [
+                r'\b(show|view|get|display)\b.*\b(config|configuration|status|current)\b',
+                r'\b(what do i have|current settings)\b',
+            ],
             'keywords': ['mostrar', 'ver', 'configuracion', 'estado'],
+            'keywords_en': ['show', 'status', 'config'],
         },
         'clear': {
             'weight': 0.6,
@@ -219,6 +315,34 @@ class SpanishNLPEngine:
             ],
             'keywords': ['estres', 'nervioso', 'ansiedad', 'miedo'],
         },
+        'request_meeting': {
+            'weight': 0.9,
+            'patterns': [
+                r'\b(cita|reunion|reunión)\b.*\b(director|directora|coordinador|profe)\b',
+                r'\b(hablar con)\b.*\b(el director|la directora)\b',
+                r'\b(quiero ver)\b.*\b(al director)\b',
+            ],
+            'keywords': ['cita', 'reunion', 'director', 'hablar'],
+        },
+        'report_issue': {
+            'weight': 0.9,
+            'patterns': [
+                r'\b(reportar|queja|denuncia)\b',
+                r'\b(bullying|acoso|molestando)\b',
+                r'\b(algo roto|no sirve|sucio)\b',
+                r'\b(baño|luz|agua)\b.*\b(mal|feo)\b',
+            ],
+            'keywords': ['reportar', 'queja', 'bullying', 'roto'],
+        },
+        'financial_query': {
+            'weight': 0.9,
+            'patterns': [
+                r'\b(cuanto debo|saldo|deuda|pago)\b',
+                r'\b(mensualidad|colegiatura)\b',
+                r'\b(estado de cuenta|solvencia)\b',
+            ],
+            'keywords': ['saldo', 'debo', 'pago', 'mensualidad'],
+        },
     }
     
     # Entity extractors configuration
@@ -239,6 +363,13 @@ class SpanishNLPEngine:
                 (r'\b(3ro?|tercero?)\s*(bas?i?co?|básico?)\b', '3ro Básico'),
                 (r'\b(4to?|cuarto?)\s*(bachillerato)\b', '4to Bachillerato'),
                 (r'\b(5to?|quinto?)\s*(bachillerato)\b', '5to Bachillerato'),
+                # English Patterns
+                (r'\b(1st|first)\s*(grade)\b', '1ro Primaria'),
+                (r'\b(2nd|second)\s*(grade)\b', '2do Primaria'),
+                (r'\b(3rd|third)\s*(grade)\b', '3ro Primaria'),
+                (r'\b(4th|fourth)\s*(grade)\b', '4to Primaria'),
+                (r'\b(5th|fifth)\s*(grade)\b', '5to Primaria'),
+                (r'\b(6th|sixth)\s*(grade)\b', '6to Primaria'),
             ]
         },
         'subject': {
@@ -249,6 +380,12 @@ class SpanishNLPEngine:
                 (r'\b(ingl[eé]s|english)\b', 'Inglés'),
                 (r'\b(historia|estudios?\s*sociales?|sociales?)\b', 'Historia'),
                 (r'\b(educaci[oó]n?\s*f[ií]sica|ed\.?\s*f[ií]sica|deportes?)\b', 'Ed. Física'),
+                # English Patterns
+                (r'\b(math|mathematics)\b', 'Matemáticas'),
+                (r'\b(spanish)\b', 'Español'),
+                (r'\b(science)\b', 'Ciencias'),
+                (r'\b(history|social studies)\b', 'Historia'),
+                (r'\b(pe|physical education|gym)\b', 'Ed. Física'),
                 (r'\b(artes?|dibujo)\b', 'Arte'),
                 (r'\b(m[uú]sica)\b', 'Música'),
                 (r'\b(computaci[oó]n|inform[aá]tica|compu)\b', 'Computación'),
@@ -312,6 +449,24 @@ class SpanishNLPEngine:
             
         self._compile_patterns()
 
+    def detect_language(self, text: str) -> str:
+        """Detect if text is likely Spanish or English"""
+        text_lower = text.lower()
+        
+        # English unique words
+        en_markers = {'the', 'assignment', 'schedule', 'teacher', 'recess', 'create', 'what', 'how', 'when', 'who', 'help', 'is'}
+        
+        # Spanish unique words
+        es_markers = {'el', 'la', 'horario', 'profesor', 'recreo', 'crear', 'que', 'como', 'cuando', 'quien', 'ayuda', 'es'}
+        
+        words = set(text_lower.split())
+        en_count = len(words.intersection(en_markers))
+        es_count = len(words.intersection(es_markers))
+        
+        if en_count > es_count:
+            return 'en'
+        return 'es' # Default to Spanish
+
     def _compile_patterns(self):
         self._compiled_intents = {}
         for intent_name, config in self.INTENT_PATTERNS.items():
@@ -319,10 +474,15 @@ class SpanishNLPEngine:
             for pattern_str in config['patterns']:
                 compiled_patterns.append(re.compile(pattern_str, re.IGNORECASE))
             
+            # Add English patterns if defined
+            if 'patterns_en' in config:
+                for pattern_str in config['patterns_en']:
+                    compiled_patterns.append(re.compile(pattern_str, re.IGNORECASE))
+
             self._compiled_intents[intent_name] = {
                 'patterns': compiled_patterns,
                 'weight': config['weight'],
-                'keywords': config['keywords']
+                'keywords': config['keywords'] + config.get('keywords_en', [])
             }
 
     def normalize(self, text: str, remove_accents: bool = False) -> str:
@@ -461,16 +621,28 @@ class SpanishNLPEngine:
                     'teacher': target_teacher,
                     'weight': 20.0 
                 })
-
         return constraints
 
     def process(self, text: str) -> NLPResult:
         intent = self.classify_intent(text)
-        entities = self.extract_entities(text)
+        # 1. Entity Extraction
+        raw_entities = self.extract_entities(text)
+        
+        # Convert List[Entity] to Dict[str, Any] for downstream compatibility
+        entities_dict = {}
+        for ent in raw_entities:
+            # For now, last entity of a type wins. 
+            # Ideally we might want a list, but ResponseGenerator expects single dict per type currently.
+            entities_dict[ent.type] = {
+                'value': ent.value,
+                'original': ent.raw_text,
+                'span': (ent.start, ent.end)
+            }
+        
         normalized = self.normalize(text)
         
-        # NEW: Extract Constraints
-        constraints = self.extract_constraints(text, entities)
+        # NEW: Extract Constraints (Using raw list)
+        constraints = self.extract_constraints(text, raw_entities)
         
         suggestions = []
         if intent.name == 'unknown':
@@ -478,7 +650,7 @@ class SpanishNLPEngine:
             
         return NLPResult(
             intent=intent,
-            entities=entities,
+            entities=entities_dict,
             normalized_text=normalized,
             suggestions=suggestions
         )

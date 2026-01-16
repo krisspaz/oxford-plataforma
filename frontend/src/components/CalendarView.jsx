@@ -77,7 +77,7 @@ const CalendarView = () => {
     };
 
     const handleDateClick = (info) => {
-        console.log('Date clicked:', info.dateStr);
+        // Date click handler
         // Aquí se puede abrir modal para crear evento
     };
 

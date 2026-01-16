@@ -60,18 +60,18 @@ const aiService = {
         }
 
         try {
-            const response = await api.post('/ai/chat', {
+            const data = await api.post('/ai/chat', {
                 message,
                 context,
             }, { timeout: AI_CONFIG.timeout });
 
             // Cache successful responses
             responseCache.set(cacheKey, {
-                data: response.data,
+                data: data,
                 timestamp: Date.now(),
             });
 
-            return response.data;
+            return data;
         } catch (error) {
             console.error('AI Chat error:', error);
             return this.getFallbackResponse(message);
@@ -127,7 +127,7 @@ const aiService = {
 
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                const response = await api.post('/ai/generate-schedule', {
+                const data = await api.post('/ai/generate-schedule', {
                     config,
                     teachers,
                     subjects,
@@ -136,7 +136,7 @@ const aiService = {
 
                 return {
                     success: true,
-                    ...response.data,
+                    ...data,
                 };
             } catch (error) {
                 lastError = error;
@@ -163,8 +163,7 @@ const aiService = {
      */
     async validateSchedule(schedule) {
         try {
-            const response = await api.post('/ai/validate-schedule', { schedule });
-            return response.data;
+            return api.post('/ai/validate-schedule', { schedule });
         } catch (error) {
             console.error('Schedule validation error:', error);
             return {
@@ -182,8 +181,8 @@ const aiService = {
      */
     async getSuggestions(schedule) {
         try {
-            const response = await api.post('/ai/suggestions', { schedule });
-            return response.data.suggestions || [];
+            const data = await api.post('/ai/suggestions', { schedule });
+            return data?.suggestions || [];
         } catch (error) {
             console.error('Suggestions error:', error);
             return [];
@@ -196,8 +195,8 @@ const aiService = {
      */
     async healthCheck() {
         try {
-            const response = await api.get('/ai/health', { timeout: 5000 });
-            return response.data?.status === 'healthy';
+            const data = await api.get('/ai/health', { timeout: 5000 });
+            return data?.status === 'healthy';
         } catch (error) {
             console.error('AI health check failed:', error);
             return false;
@@ -206,8 +205,7 @@ const aiService = {
 
     async predictRisk(studentData) {
         try {
-            const response = await api.post('/ai/predict-risk', studentData);
-            return response.data;
+            return api.post('/ai/predict-risk', studentData);
         } catch (error) {
             console.error('Risk prediction error:', error);
             return { error: 'Failed to predict risk' };
@@ -219,8 +217,7 @@ const aiService = {
      */
     async analyzeTeacherBurnout(teacherId, schedule) {
         try {
-            const response = await api.post('/ai/analyze-burnout', { teacher_id: teacherId, schedule });
-            return response.data;
+            return api.post('/ai/analyze-burnout', { teacher_id: teacherId, schedule });
         } catch (error) {
             console.error('Burnout analysis error:', error);
             return null;
@@ -232,18 +229,7 @@ const aiService = {
      */
     async getInstitutionalHealth() {
         try {
-            const response = await api.get('/ai/institutional-health');
-            return response.data;
-        } catch (error) {
-            console.error('ISA error:', error);
-            return null;
-        }
-    },
-
-    async getInstitutionalHealth() {
-        try {
-            const response = await api.get('/ai/institutional-health');
-            return response.data;
+            return api.get('/ai/institutional-health');
         } catch (error) {
             console.error('ISA error:', error);
             return null;
@@ -251,11 +237,11 @@ const aiService = {
     },
 
     // --- Enterprise Extensions (Phases 11-14) ---
-    async getAuditLog() { return (await api.get('/ai/audit/log')).data; },
-    async getLegalDefense(data) { return (await api.post('/ai/legal/defense', data)).data; },
-    async validateEthics(command) { return (await api.post('/ai/ethics/validate', { command })).data; },
-    async getFutureSimulation() { return (await api.get('/ai/simulation/future')).data; },
-    async getMaturityIndex() { return (await api.get('/ai/context/maturity')).data; },
+    async getAuditLog() { return api.get('/ai/audit/log'); },
+    async getLegalDefense(data) { return api.post('/ai/legal/defense', data); },
+    async validateEthics(command) { return api.post('/ai/ethics/validate', { command }); },
+    async getFutureSimulation() { return api.get('/ai/simulation/future'); },
+    async getMaturityIndex() { return api.get('/ai/context/maturity'); },
 
     /**
      * Get fallback response when AI is unavailable

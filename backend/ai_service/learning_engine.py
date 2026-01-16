@@ -165,10 +165,15 @@ class LearningEngine:
     # =========================================
     
     def log_interaction(self, user_id: str, user_role: str, question: str, 
-                       response: str, intent: str = None, context: Dict = None) -> int:
+                       response: str, intent: str = None, context: Dict = None, metadata: Dict = None) -> int:
         """Log every AI interaction"""
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
+        
+        # Merge metadata into context if present, to avoid schema change
+        if metadata:
+            context = context or {}
+            context.update(metadata)
         
         c.execute('''
             INSERT INTO ai_interactions 

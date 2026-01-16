@@ -137,7 +137,7 @@ const GestionUsuariosPage = () => {
             const payload = {
                 name: `${formData.firstName} ${formData.lastName}`.trim(),
                 email: formData.email,
-                role: formData.role, // Backend expects 'role' singular
+                roles: [formData.role], // Backend expects 'roles' array, matches User entity properties
                 password: formData.password
             };
 

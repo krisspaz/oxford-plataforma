@@ -9,8 +9,7 @@ const subjectService = {
      * @param {Object} filters - Filter options { active }
      */
     getAll: async (filters = {}) => {
-        const response = await api.get('/subjects', { params: filters });
-        return response.data;
+        return api.get('/subjects', { params: filters });
     },
 
     /**
@@ -18,8 +17,7 @@ const subjectService = {
      * @param {number} id - Subject ID
      */
     getById: async (id) => {
-        const response = await api.get(`/subjects/${id}`);
-        return response.data;
+        return api.get(`/subjects/${id}`);
     },
 
     /**
@@ -27,8 +25,7 @@ const subjectService = {
      * @param {Object} data - Subject data { name, code, description }
      */
     create: async (data) => {
-        const response = await api.post('/subjects', data);
-        return response.data;
+        return api.post('/subjects', data);
     },
 
     /**
@@ -37,8 +34,7 @@ const subjectService = {
      * @param {Object} data - Updated data
      */
     update: async (id, data) => {
-        const response = await api.put(`/subjects/${id}`, data);
-        return response.data;
+        return api.put(`/subjects/${id}`, data);
     },
 
     /**
@@ -46,8 +42,7 @@ const subjectService = {
      * @param {number} id - Subject ID
      */
     delete: async (id) => {
-        const response = await api.delete(`/subjects/${id}`);
-        return response.data;
+        return api.delete(`/subjects/${id}`);
     },
 
     /**
@@ -55,9 +50,9 @@ const subjectService = {
      * @param {Object} data - Assignment data { subjectId, teacherId, gradeId, sectionId?, cycleId, hoursPerWeek? }
      */
     assign: async (data) => {
-        const response = await api.post('/subjects/assign', data);
-        return response.data;
+        return api.post('/subjects/assign', data);
     },
 };
 
 export default subjectService;
+

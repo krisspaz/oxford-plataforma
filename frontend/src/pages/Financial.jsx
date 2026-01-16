@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { DollarSign, FileText, Plus } from 'lucide-react';
+import { DollarSign, FileText, Plus, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import paymentService from '../services/paymentService'; // direct import or from index
+import studentService from '../services/studentService';
 
 const Financial = () => {
     const { darkMode } = useTheme();
@@ -11,47 +12,64 @@ const Financial = () => {
     const [newPayment, setNewPayment] = useState({ student: '', amount: '', concept: '', date: new Date().toISOString().split('T')[0] });
     const [students, setStudents] = useState([]);
 
-    const token = localStorage.getItem('token');
-
     const fetchPayments = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/api/payments', {
-                headers: { Authorization: `Bearer ${token}`, Accept: 'application/ld+json' }
-            });
-            setPayments(response.data['hydra:member']);
+            // Service handles auth and base URL
+            const response = await paymentService.getAll();
+            // Handle different response structures
+            if (response && response['hydra:member']) {
+                setPayments(response['hydra:member']);
+            } else if (response && response.member) {
+                setPayments(response.member);
+            } else if (Array.isArray(response)) {
+                setPayments(response);
+            } else {
+                setPayments([]);
+            }
         } catch (error) {
             console.error('Error fetching payments', error);
+            setPayments([]);
         }
-        setLoading(false);
     };
 
     const fetchStudents = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/api/students', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setStudents(response.data['hydra:member']);
+            const response = await studentService.getAll(); // Assuming getAll exists or similar
+            // Handle different response structures
+            if (response && response['hydra:member']) {
+                setStudents(response['hydra:member']);
+            } else if (response && response.member) {
+                setStudents(response.member);
+            } else if (Array.isArray(response)) {
+                setStudents(response);
+            } else {
+                setStudents([]);
+            }
         } catch (error) {
             console.error('Error fetching students', error);
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchPayments();
-        fetchStudents();
+        const init = async () => {
+            await fetchPayments();
+            await fetchStudents();
+        };
+        init();
     }, []);
 
     const handleCreatePayment = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:8000/api/payments', {
+            await paymentService.create({
                 ...newPayment,
+                // If API expects IRI
                 student: `/api/students/${newPayment.student}`,
                 amount: parseFloat(newPayment.amount),
                 status: 'PAID',
                 paymentDate: newPayment.date
-            }, {
-                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/ld+json' }
             });
             setShowModal(false);
             fetchPayments();
@@ -61,8 +79,9 @@ const Financial = () => {
         }
     };
 
-    const downloadReceipt = async (paymentId) => {
-        window.open(`http://localhost:8000/api/payments/${paymentId}/receipt`, '_blank');
+    const downloadReceipt = (paymentId) => {
+        // Use relative path matching API proxy
+        window.open(`/api/payments/${paymentId}/receipt`, '_blank');
     };
 
     return (
@@ -96,7 +115,7 @@ const Financial = () => {
                                 </tr>
                             </thead>
                             <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-100'}`}>
-                                {loading ? <tr><td colSpan="6" className={`text-center p-4 ${darkMode ? 'text-gray-400' : ''}`}>Cargando...</td></tr> :
+                                {loading ? <tr><td colSpan="6" className={`text-center p-4 ${darkMode ? 'text-gray-400' : ''}`}><RefreshCw className="animate-spin inline mr-2" />Cargando...</td></tr> :
                                     payments.length === 0 ? <tr><td colSpan="6" className={`text-center p-4 ${darkMode ? 'text-gray-400' : ''}`}>No hay pagos registrados.</td></tr> :
                                         payments.map(payment => (
                                             <tr key={payment.id} className={`${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}>
@@ -132,7 +151,7 @@ const Financial = () => {
                             <div>
                                 <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Ingresos Totales</p>
                                 <p className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                                    Q {payments.reduce((acc, curr) => acc + parseFloat(curr.amount), 0).toFixed(2)}
+                                    Q {payments.reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0).toFixed(2)}
                                 </p>
                             </div>
                         </div>

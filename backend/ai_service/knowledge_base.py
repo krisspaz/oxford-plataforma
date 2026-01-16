@@ -82,34 +82,64 @@ class KnowledgeBase:
                 "tags": ["padres", "familia", "contactar", "comunicado"]
             },
             {
+                "q": "¿Qué hago si pierdo mi carné?",
+                "a": "Debes reportarlo inmediatamente a Secretaría y pagar Q25.00 por la reposición.",
+                "tags": ["carné", "carne", "perdi", "perdí", "reposición", "identificación"]
+            },
+            {
                 "q": "¿Cómo veo mi horario?",
                 "a": "En el menú lateral, selecciona 'Mi Horario'. También puedes preguntarle al Asistente: 'ver mi horario'.",
-                "tags": ["horario", "ver", "consultar", "mi"]
+                "tags": ["horario", "ver", "consultar"]
             },
             {
-                "q": "¿Cuál es el uniforme oficial del Colegio Oxford?",
-                "a": "El uniforme de diario consta de polo blanca con el logo del colegio y pantalón azul marino. El uniforme de educación física es pants y chumpa institucional con playera gris. Zapatos negros escolares para diario y tenis blancos para física.",
-                "tags": ["uniforme", "ropa", "vestimenta", "pants", "física"]
+                "q": "¿Existe un código de vestimenta para padres?",
+                "a": "Sí. Para ingresar al colegio se solicita vestimenta decorosa. No se permite el ingreso en ropa de dormir, trajes de baño o ropa extremadamente corta.",
+                "tags": ["vestimenta", "padres", "ropa", "ingreso", "normas"]
             },
             {
-                "q": "¿Cuáles son los requisitos de inscripción o admisión?",
-                "a": "Para inscribirse se requiere: Certificado de nacimiento (RENAP), certificados de estudios de años anteriores, carta de buena conducta, solvencia de pago del colegio anterior y DPI de los padres encargados.",
-                "tags": ["inscripción", "admisión", "requisitos", "papelería", "documentos"]
+                "q": "¿Cuál es el protocolo ante un caso de Bullying?",
+                "a": "El colegio tiene TOLERANCIA CERO. 1) Reportar al tutor o director. 2) Se investiga en 24h. 3) Se cita a padres. 4) Sanciones desde suspensión hasta expulsión.",
+                "tags": ["bullying", "acoso", "molestar", "agresión", "reportar"]
             },
             {
-                "q": "¿Dónde y cómo puedo realizar los pagos de mensualidad?",
-                "a": "Los pagos pueden realizarse en el Banco Industrial (Convenio 3452) o Banrural. También aceptamos transferencias y pagos con tarjeta en secretaría. Recuerda enviar tu boleta por WhatsApp al departamento de contabilidad.",
-                "tags": ["pago", "mensualidad", "banco", "tarjeta", "costo"]
+                "q": "¿Puedo llevar celular al colegio?",
+                "a": "El uso de celular está prohibido durante las clases salvo autorización expresa del docente para actividad pedagógica. Si se usa sin permiso, será decomisado.",
+                "tags": ["celular", "teléfono", "móvil", "prohibido", "traer"]
             },
             {
-                "q": "¿Cuál es el número de teléfono o contacto del colegio?",
-                "a": "Puedes contactarnos al PBX: 2411-5555 o al WhatsApp de Coordinación: 5555-1234. Nuestro correo es info@colegiooxford.edu.gt.",
-                "tags": ["contacto", "teléfono", "whatsapp", "correo", "llamar"]
+                "q": "¿Tienen enfermería o servicio médico?",
+                "a": "Sí, contamos con enfermería para primeros auxilios. En caso de emergencia mayor, trasladamos al estudiante al centro médico seguro y avisamos a los padres.",
+                "tags": ["enfermería", "médico", "salud", "enfermo", "accidente"]
             },
             {
-                "q": "¿Tienen bus escolar?",
-                "a": "Sí, contamos con servicio de bus para diferentes zonas. Debes solicitar la ruta en secretaría al momento de inscribirte para cotizar el precio según tu ubicación.",
-                "tags": ["bus", "transporte", "ruta", "microbus"]
+                "q": "¿Qué comida venden en la cafetería?",
+                "a": "Ofrecemos refacciones saludables, almuerzos balanceados, frutas y bebidas naturales. No vendemos bebidas energéticas ni comida chatarra en exceso.",
+                "tags": ["cafetería", "comida", "almuerzo", "tienda", "venden"]
+            },
+            {
+                "q": "¿Cómo justifico una inasistencia?",
+                "a": "Debes enviar una carta firmada por los padres o certificado médico a Coordinación dentro de las 48 horas siguientes a la inasistencia.",
+                "tags": ["inasistencia", "faltar", "justificar", "enfermedad", "excusa"]
+            },
+            {
+                "q": "¿Qué pasa si repruebo una materia?",
+                "a": "Si repruebas una materia con menos de 60 puntos, tendrás derecho a una (1) recuperación a final de año. Si repruebas más de 3 materias, deberás repetir el grado.",
+                "tags": ["reprobar", "perder", "recuperación", "clase", "materia"]
+            },
+            {
+                "q": "¿Cuál es la nota mínima para aprobar?",
+                "a": "La nota mínima de aprobación es de 60 puntos sobre 100.",
+                "tags": ["nota", "minima", "aprobar", "ganar", "punteo"]
+            },
+            {
+                "q": "¿Cómo solicito una certificación de estudios?",
+                "a": "Debes solicitarla en Secretaría. Tiene un costo de Q50.00 y se entrega en 3 días hábiles.",
+                "tags": ["certificación", "estudios", "papeles", "documento", "solicitar"]
+            },
+            {
+                "q": "¿Qué hago si pierdo mi carné?",
+                "a": "Debes reportarlo inmediatamente a Secretaría y pagar Q25.00 por la reposición.",
+                "tags": ["carné", "carne", "perdi", "perdí", "reposición", "identificación"]
             }
         ]
     
@@ -150,6 +180,27 @@ class KnowledgeBase:
                 "description": "Todo el personal y alumnos deben utilizar la plataforma Oxford para tareas y comunicados oficiales.",
                 "type": "soft",
                 "tags": ["plataforma", "sistema", "uso"]
+            },
+            {
+                "id": "R006",
+                "name": "Uniforme Completo",
+                "description": "Es obligatorio el uso del uniforme completo correspondiente al día. 3 faltas = reporte.",
+                "type": "hard",
+                "tags": ["uniforme", "ropa", "disciplina"]
+            },
+            {
+                "id": "R007",
+                "name": "Puntualidad Docente",
+                "description": "El docente debe estar en el aula 5 minutos antes del inicio de la primera clase.",
+                "type": "soft",
+                "tags": ["puntualidad", "docente", "horario"]
+            },
+            {
+                "id": "R008",
+                "name": "Prohibición de Ventas",
+                "description": "Está prohibida la venta de productos entre alumnos dentro de las instalaciones.",
+                "type": "hard",
+                "tags": ["ventas", "negocio", "prohibido"]
             }
         ]
     
@@ -176,6 +227,7 @@ class KnowledgeBase:
         query_lower = query.lower()
         scored_faqs = []
         
+        # 1. Search Static FAQs
         for faq in self.faqs:
             score = 0
             # Check tags
@@ -188,6 +240,36 @@ class KnowledgeBase:
             
             if score > 0:
                 scored_faqs.append((score, faq))
+                
+        # 2. Search Learned Rules (Dynamic Memory)
+        try:
+            from learning_engine import learning_engine
+            active_rules = learning_engine.get_active_rules()
+            
+            for rule in active_rules:
+                # Rule format: id, desc, condition, action, source, priority
+                # We treat description as Q and action as A
+                r_desc = rule['description'].lower()
+                r_action = rule['action']
+                score = 0
+                
+                # Simple containment match
+                if any(word in r_desc for word in query_lower.split() if len(word) > 3):
+                    score += 3 # Learned rules have high priority
+                    
+                if score > 0:
+                    # Adapt to FAQ format
+                    learned_faq = {
+                        "q": rule['description'],
+                        "a": rule['action'],
+                        "tags": ["aprendido", "memoria"]
+                    }
+                    scored_faqs.append((score, learned_faq))
+                    
+        except ImportError:
+            pass
+        except Exception as e:
+            logger.error(f"Error reading learned rules: {e}")
         
         # Sort by score descending
         scored_faqs.sort(key=lambda x: x[0], reverse=True)

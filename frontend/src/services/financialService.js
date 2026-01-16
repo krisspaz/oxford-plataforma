@@ -15,13 +15,14 @@ const financialService = {
     // Assign package to student
     assignPackage: async (data) => {
         try {
-            const response = await api.post('/financial/assign-package', data);
-            return { success: true, data: response.data };
+            const result = await api.post('/financial/assign-package', data);
+            return { success: true, data: result };
         } catch (error) {
             console.error('Error assigning package:', error);
-            return { success: false, message: error.response?.data?.error || error.message };
+            return { success: false, message: error.message };
         }
     }
 };
 
 export default financialService;
+

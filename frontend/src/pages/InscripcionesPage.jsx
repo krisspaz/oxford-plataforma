@@ -396,7 +396,7 @@ const InscripcionesPage = () => {
                                     updateField('enrollment', 'grade', ''); // Reset grade when level changes
                                 }}>
                                     <option value="">Seleccionar...</option>
-                                    {catalogs.levels.map(l => <option key={l.id} value={l.name}>{l.name}</option>)}
+                                    {catalogs.levels.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                                 </select>
                             </div>
                             <div>
@@ -409,7 +409,14 @@ const InscripcionesPage = () => {
                                 >
                                     <option value="">Seleccionar...</option>
                                     {catalogs.grades
-                                        .filter(g => !formData.enrollment.level || g.level === formData.enrollment.level)
+                                        .filter(g => {
+                                            if (!formData.enrollment.level) return true;
+                                            // Handle various potential formats of g.level (ID, object, or IRI)
+                                            const levelId = formData.enrollment.level;
+                                            if (g.level?.id) return g.level.id.toString() === levelId.toString();
+                                            if (typeof g.level === 'object') return false; // If object but no ID, mismatch
+                                            return g.level?.toString() === levelId.toString();
+                                        })
                                         .map(g => <option key={g.id} value={g.id}>{g.name}</option>)
                                     }
                                 </select>

@@ -13,7 +13,9 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-#[ApiResource]
+#[ApiResource(
+    processor: \App\State\UserPasswordHasher::class
+)]
 #[UniqueEntity(fields: ['email'], message: 'Este correo electrónico ya está registrado.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {

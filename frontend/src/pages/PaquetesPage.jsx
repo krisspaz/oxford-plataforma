@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, ChevronDown, ChevronRight, Edit, X, DollarSign, RefreshCw, Trash2, Save } from 'lucide-react';
+import { Package, Plus, ChevronDown, ChevronRight, Edit, X, RefreshCw, Trash2, Save } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { packageService } from '../services';
+import { packageService, catalogService } from '../services';
 
 const PaquetesPage = () => {
     const { darkMode } = useTheme();
@@ -9,70 +9,57 @@ const PaquetesPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [loading, setLoading] = useState(true);
     const [packages, setPackages] = useState([]);
-    const [selectedCycle, setSelectedCycle] = useState('2025');
+
+    const [grades, setGrades] = useState([]);
+    const [cycleOptions] = useState(() => {
+        const currentYear = new Date().getFullYear();
+        return [currentYear, currentYear + 1, currentYear + 2];
+    });
+    const [selectedCycle, setSelectedCycle] = useState(new Date().getFullYear().toString());
 
     // Form state
     const [formData, setFormData] = useState({
         id: null,
         name: '',
         description: '',
-        cycle: '2025',
+        cycle: new Date().getFullYear().toString(),
         isActive: true,
         applicableGrades: [],
         details: []
     });
 
-    const grades = ['Prekinder', 'Kinder', 'Preparatoria', '1ro Primaria', '2do Primaria', '3ro Primaria', '4to Primaria', '5to Primaria', '6to Primaria', '1ro Básico', '2do Básico', '3ro Básico', '4to Bachillerato', '5to Bachillerato'];
     const documentTypes = ['FACTURA_SAT', 'RECIBO_SAT', 'NOTA_DEBITO'];
-    const productTypes = ['Servicio', 'Bien', 'Mensualidad'];
 
     const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
     const labelClass = `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`;
 
     useEffect(() => {
-        loadPackages();
+        loadData();
     }, []);
 
-    const loadPackages = async () => {
+    const loadData = async () => {
         setLoading(true);
         try {
-            const response = await packageService.getAll();
-            if (response.success) {
-                setPackages(response.data);
-            }
-        } catch (error) {
-            console.error('Error loading packages:', error);
-            // Demo data
-            setPackages([
-                {
-                    id: 1,
-                    name: 'Paquete Normal 2025',
-                    cycle: '2025',
-                    totalPrice: 9500,
-                    description: 'Paquete estándar para estudiantes regulares 2025',
-                    isActive: true,
-                    applicableGrades: ['1ro Básico', '2do Básico', '3ro Básico'],
-                    details: [
-                        { id: 1, productName: 'Inscripción', price: 1000, documentType: 'FACTURA_SAT', productType: 'Servicio', quantity: 1 },
-                        { id: 2, productName: 'Mensualidad', price: 750, documentType: 'RECIBO_SAT', productType: 'Mensualidad', quantity: 10 },
-                        { id: 3, productName: 'Paquete de Libros', price: 1500, documentType: 'FACTURA_SAT', productType: 'Bien', quantity: 1 },
-                    ]
-                },
-                {
-                    id: 2,
-                    name: 'Paquete Becado 50% 2025',
-                    cycle: '2025',
-                    totalPrice: 4750,
-                    description: 'Paquete con 50% de descuento para becados',
-                    isActive: true,
-                    applicableGrades: ['1ro Básico', '2do Básico'],
-                    details: [
-                        { id: 4, productName: 'Inscripción (50%)', price: 500, documentType: 'FACTURA_SAT', productType: 'Servicio', quantity: 1 },
-                        { id: 5, productName: 'Mensualidad', price: 375, documentType: 'RECIBO_SAT', productType: 'Mensualidad', quantity: 10 },
-                        { id: 6, productName: 'Paquete de Libros', price: 1500, documentType: 'FACTURA_SAT', productType: 'Bien', quantity: 1 },
-                    ]
-                }
+            // Load packages and grades in parallel
+            const [packagesRes, gradesRes] = await Promise.all([
+                packageService.getAll(),
+                catalogService.getGrades()
             ]);
+
+            if (packagesRes.success || Array.isArray(packagesRes.data)) {
+                setPackages(packagesRes.data || []);
+            }
+
+            if (gradesRes.success || Array.isArray(gradesRes.data)) {
+                // Flatten grades if they come in levels, or just use the list
+                const gradeList = Array.isArray(gradesRes.data) ? gradesRes.data : [];
+                setGrades(gradeList.map(g => g.name)); // Store names for the UI toggle match
+            }
+
+        } catch (error) {
+            console.error('Error loading data:', error);
+            // Fallback for grades if API fails
+            setGrades(['Prekinder', 'Kinder', 'Preparatoria', '1ro Primaria', '2do Primaria', '3ro Primaria', '4to Primaria', '5to Primaria', '6to Primaria', '1ro Básico', '2do Básico', '3ro Básico', '4to Bachillerato', '5to Bachillerato']);
         } finally {
             setLoading(false);
         }
@@ -193,8 +180,9 @@ const PaquetesPage = () => {
                         onChange={(e) => setSelectedCycle(e.target.value)}
                         className={`px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-teal-500 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
                     >
-                        <option value="2025">Ciclo 2025</option>
-                        <option value="2024">Ciclo 2024</option>
+                        {cycleOptions.map(year => (
+                            <option key={year} value={year}>Ciclo {year}</option>
+                        ))}
                     </select>
 
                     <button onClick={openNewPackage} className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg shadow-lg shadow-teal-900/20">
@@ -325,8 +313,9 @@ const PaquetesPage = () => {
                                         value={formData.cycle}
                                         onChange={e => setFormData(prev => ({ ...prev, cycle: e.target.value }))}
                                     >
-                                        <option value="2025">2025</option>
-                                        <option value="2024">2024</option>
+                                        {cycleOptions.map(year => (
+                                            <option key={year} value={year}>{year}</option>
+                                        ))}
                                     </select>
                                 </div>
                             </div>
@@ -351,8 +340,8 @@ const PaquetesPage = () => {
                                             type="button"
                                             onClick={() => toggleGrade(grade)}
                                             className={`px-3 py-1 rounded-full text-sm transition-colors ${formData.applicableGrades.includes(grade)
-                                                    ? 'bg-teal-500 text-white'
-                                                    : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                ? 'bg-teal-500 text-white'
+                                                : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                                 }`}
                                         >
                                             {grade}
@@ -468,4 +457,3 @@ const PaquetesPage = () => {
 };
 
 export default PaquetesPage;
-

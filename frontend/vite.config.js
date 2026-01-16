@@ -62,7 +62,12 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['framer-motion', 'sonner'],
+          // Separation of concerns: Dashboard heavy libs
+          'pdf-worker': ['jspdf', 'jspdf-autotable'],
+          'excel-worker': ['xlsx'],
+          'calendar-vendor': ['@fullcalendar/core', '@fullcalendar/daygrid', '@fullcalendar/interaction', '@fullcalendar/react', '@fullcalendar/timegrid'],
+          // UI Libs shared but isolated
+          ui: ['framer-motion', 'sonner', 'lucide-react'],
         },
       },
     },

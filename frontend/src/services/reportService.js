@@ -3,8 +3,8 @@ import api from './api';
 const reportService = {
     generate: async (params) => {
         try {
-            const response = await api.post('/reports/generate', params);
-            return { success: true, data: response.data };
+            const data = await api.post('/reports/generate', params);
+            return { success: true, data };
         } catch (error) {
             console.error('Error generating report:', error);
             return { success: false, message: error.message };
@@ -13,8 +13,8 @@ const reportService = {
 
     getGrades: async (studentId) => {
         try {
-            const response = await api.get(`/reports/grades/${studentId}`);
-            return { success: true, data: response.data };
+            const data = await api.get(`/reports/grades/${studentId}`);
+            return { success: true, data };
         } catch (error) {
             return { success: false, error };
         }
@@ -22,3 +22,4 @@ const reportService = {
 };
 
 export default reportService;
+

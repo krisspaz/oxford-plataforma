@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { jobTitleService } from '../../../services';
+import { Briefcase, Plus, Search, Users, Edit2, Trash2, X, Save } from 'lucide-react';
 
 const AdminChargesPage = () => {
     // Real Data State

@@ -75,7 +75,7 @@ const ReportsDashboard = () => {
         setSelectedReport(null);
 
         // In real implementation, call API and handle file
-        console.log(`${action} report:`, report.name);
+        // Logging removed
     };
 
     return (
@@ -98,10 +98,10 @@ const ReportsDashboard = () => {
                             key={cat.id}
                             onClick={() => setActiveCategory(cat.id)}
                             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${isActive
-                                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
-                                    : darkMode
-                                        ? 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
-                                        : 'bg-white text-gray-600 hover:text-gray-900 hover:bg-gray-50 shadow'
+                                ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
+                                : darkMode
+                                    ? 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+                                    : 'bg-white text-gray-600 hover:text-gray-900 hover:bg-gray-50 shadow'
                                 }`}
                         >
                             <Icon size={16} />
@@ -124,8 +124,8 @@ const ReportsDashboard = () => {
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                         className={`w-full pl-12 pr-4 py-3 rounded-lg border ${darkMode
-                                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500'
-                                : 'bg-gray-50 border-gray-200 placeholder-gray-400'
+                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500'
+                            : 'bg-gray-50 border-gray-200 placeholder-gray-400'
                             } focus:ring-2 focus:ring-indigo-500 outline-none`}
                     />
                 </div>
@@ -163,8 +163,8 @@ const ReportsDashboard = () => {
 
                                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${report.format === 'PDF'
-                                            ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                            : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                        ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                        : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                         }`}>
                                         {report.format}
                                     </span>
@@ -190,8 +190,8 @@ const ReportsDashboard = () => {
                                             onClick={() => handleGenerate(report, 'download')}
                                             disabled={isGenerating}
                                             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all ${isGenerating
-                                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                                    : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:shadow-lg'
+                                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:shadow-lg'
                                                 }`}
                                         >
                                             {isGenerating ? (

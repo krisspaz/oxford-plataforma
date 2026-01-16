@@ -124,7 +124,7 @@ const MisAlumnosPage = () => {
     const exportReport = async (studentId) => {
         try {
             const report = await attendanceService.getStudentReport(studentId, selectedBimester);
-            console.log("Report data:", report);
+            // Report data loaded
             alert(`📄 Reporte generado para estudiante ID ${studentId} (Simulación de descarga PDF real)`);
             // Here implementation would trigger PDF download
         } catch (error) {
@@ -136,6 +136,16 @@ const MisAlumnosPage = () => {
     const sendToParent = (studentId) => {
         const student = students.find(s => s.id === studentId);
         alert(`📧 Enviando reporte al encargado de ${student?.firstName} ${student?.lastName}`);
+    };
+
+    const attendanceHistory = {}; // Mock or load from API in future
+
+    // Derived state for current class view - just taking the first one for now or allowing selection
+    const currentClass = {
+        course: selectedCourse || 'Seleccione Curso',
+        grade: selectedGrade || 'Seleccione Grado',
+        section: selectedSection || 'A',
+        period: '1 (07:30 - 08:15)'
     };
 
     if (loading) {
@@ -198,10 +208,9 @@ const MisAlumnosPage = () => {
                                 </div>
                             </div>
                             <div className="w-40">
-                                <label className={`block text-xs font-medium mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Nivel</label>
                                 <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} className={`${inputClass} w-full`}>
                                     <option value="">Todos</option>
-                                    {teacherCourses.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                                    {[...new Set(students.map(s => s.course))].map(c => <option key={c} value={c}>{c}</option>)}
                                 </select>
                             </div>
                             <div className="w-40">

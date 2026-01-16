@@ -26,41 +26,50 @@ const GradosPage = () => {
     const loadData = async () => {
         setLoading(true);
         try {
-            const [levelsRes, gradesRes] = await Promise.all([
+            const [levelsResponse, gradesResponse] = await Promise.all([
                 catalogService.getAcademicLevels(),
-                gradeService.getAll() // Use gradeService instead of catalogService
+                gradeService.getAll()
             ]);
 
-            // Helper to extract data from API Platform response
-            const extractData = (res) => {
-                if (!res) return [];
-                if (res.member) return res.member;
-                if (res['hydra:member']) return res['hydra:member'];
-                if (Array.isArray(res)) return res;
-                if (res.data) return res.data;
-                return [];
-            };
+            // Extract data from axios responses
+            // catalogService returns axios response: {data: [...]}
+            // gradeService.getAll returns response.data directly: [...] or {member/hydra:member}
+            const levelsData = levelsResponse?.data || levelsResponse || [];
 
-            const levelsData = extractData(levelsRes);
-            const gradesData = extractData(gradesRes);
+            // gradeService.getAll() already returns response.data
+            let gradesData = gradesResponse;
+            if (gradesResponse?.['hydra:member']) gradesData = gradesResponse['hydra:member'];
+            else if (gradesResponse?.member) gradesData = gradesResponse.member;
+            else if (!Array.isArray(gradesResponse)) gradesData = [];
 
-            if (levelsData) {
-                // Organize grades by level
+            console.log('=== DEBUG ===');
+            console.log('levelsData:', levelsData);
+            console.log('gradesData:', gradesData);
+
+            if (Array.isArray(levelsData) && levelsData.length > 0) {
                 const organizedLevels = levelsData.map(level => {
-                    // Match grades to level. Grade.level is an object {id, name}
-                    const levelGrades = gradesData.filter(g => g.level && g.level.id === level.id);
-                    return {
-                        ...level,
-                        grades: levelGrades
-                    };
+                    const levelGrades = gradesData.filter(g => {
+                        if (!g.level) return false;
+                        if (typeof g.level === 'object' && g.level.id) return g.level.id === level.id;
+                        if (typeof g.level === 'string') {
+                            const match = g.level.match(/\/(\d+)$/);
+                            return match && parseInt(match[1]) === level.id;
+                        }
+                        if (typeof g.level === 'number') return g.level === level.id;
+                        return false;
+                    });
+                    return { ...level, grades: levelGrades };
                 });
                 setLevels(organizedLevels);
+            } else {
+                console.error('No levels data received:', levelsData);
+                setLevels([]);
             }
         } catch (error) {
             console.error('Error loading data:', error);
-            // Fallback handled by empty state in UI
+            alert('Error cargando datos: ' + error.message);
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
     };
 
