@@ -16,7 +16,7 @@ class Enrollment
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Student::class)]
+    #[ORM\ManyToOne(targetEntity: Student::class, inversedBy: 'enrollments')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Student $student = null;
 
