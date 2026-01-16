@@ -1,49 +1,51 @@
-# Sistema Oxford - Credenciales de Acceso
+# 🔐 Credenciales de Acceso - Oxford Plataforma
 
-**URL:** http://localhost:8000
+## Contraseña Universal
+**Password:** `oxford123`
+
+---
 
 ## Usuarios del Sistema
 
-| Rol | Email | Contraseña | Funciones |
-|-----|-------|------------|-----------|
-| **Administrador** | admin@oxford.edu | oxford123 | Acceso total al sistema |
-| **Director** | director@oxford.edu | oxford123 | Gestión académica, reportes, usuarios |
-| **Coordinación** | coordination@oxford.edu | oxford123 | Gestión académica, materias, docentes, horarios |
-| **Docente** | teacher@oxford.edu | oxford123 | Carga de notas, tareas, mis alumnos, mi horario |
-| **Secretaría** | secretary@oxford.edu | oxford123 | Inscripciones, matriculación, familias, pagos |
-| **Contabilidad** | accountant@oxford.edu | oxford123 | Finanzas, corte del día, comprobantes |
-| **Informática** | informatics@oxford.edu | oxford123 | Usuarios, roles, configuración del sistema |
-| **Estudiante** | student@oxford.edu | oxford123 | Mis notas, mi horario, estado de cuenta |
-| **Padre de Familia** | parent@oxford.edu | oxford123 | Ver notas y estado de cuenta de sus hijos |
+| # | Email | Rol | Permisos |
+|---|-------|-----|----------|
+| 1 | `admin@oxford.edu` | Super Admin | Acceso total |
+| 2 | `director@oxford.edu` | Dirección | Reportes, aprobaciones |
+| 3 | `secretary@oxford.edu` | Secretaría | Inscripciones, documentos |
+| 4 | `accountant@oxford.edu` | Contabilidad | Pagos, finanzas |
+| 5 | `coordination@oxford.edu` | Coordinación | Horarios, docentes |
+| 6 | `informatics@oxford.edu` | Informática | Sistema, soporte |
+| 7 | `teacher@oxford.edu` | Docente | Notas, tareas, asistencia |
+| 8 | `student@oxford.edu` | Estudiante | Ver notas, tareas, pagos |
+| 9 | `parent@oxford.edu` | Padre | Ver info de hijos |
 
 ---
 
-## Variables de Entorno (Docker)
+## URLs de Acceso
 
-```bash
-POSTGRES_PASSWORD=oxford2024
-APP_SECRET=oxford_secret_key_2024
+### Web
+- **Local:** http://localhost:5173
+- **Producción:** https://oxford-frontend.onrender.com
+
+### API
+- **Local:** http://localhost:8000/api
+- **Producción:** https://oxford-gateway.onrender.com/api
+
+### Apps Móviles
+- **iOS:** Xcode → Run
+- **Android:** Android Studio → Run
+
+---
+
+## Login Endpoint
 ```
-
-## Comandos Útiles
-
-```bash
-# Iniciar servidor
-POSTGRES_PASSWORD=oxford2024 APP_SECRET=oxford_secret_key_2024 docker-compose up -d
-
-# Ver logs
-docker-compose logs -f
-
-# Ejecutar migraciones
-docker-compose exec backend php bin/console doctrine:migrations:migrate
-
-# Cargar datos de prueba
-docker-compose exec backend php bin/console doctrine:fixtures:load
-
-# Reiniciar servicios
-docker-compose restart
+POST /api/login_check
+{
+  "email": "student@oxford.edu",
+  "password": "oxford123"
+}
 ```
 
 ---
 
-> ⚠️ **Importante:** Cambiar estas credenciales en producción.
+*Generado: Enero 2026*
