@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { RefreshCw, ArrowLeft, Upload, FileText, CheckCircle, Clock, AlertCircle } from 'lucide-react';
@@ -140,7 +141,7 @@ const StudentTaskDetailPage = () => {
                                         onChange={(e) => {
                                             if (e.target.files[0]) {
                                                 setSubmissionContent(prev => prev + `\n[Archivo: ${e.target.files[0].name}]`);
-                                                alert(`Archivo "${e.target.files[0].name}" seleccionado. Se simulará el envío.`);
+                                                toast.info(`Archivo "${e.target.files[0].name}" seleccionado. Se simulará el envío.`);
                                             }
                                         }}
                                     />

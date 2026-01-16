@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { Book, User, Search, Save, CheckCircle, AlertCircle, ChevronRight, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -86,10 +87,10 @@ const AsignacionMateriasPage = () => {
             };
 
             await academicService.assignSubjects(payload);
-            alert('Asignaciones guardadas correctamente');
+            toast.info('Asignaciones guardadas correctamente');
         } catch (error) {
             console.error("Error saving", error);
-            alert('Error al guardar asignaciones');
+            toast.info('Error al guardar asignaciones');
         } finally {
             setSaving(false);
         }

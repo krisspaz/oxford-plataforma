@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import { useState, useEffect } from 'react';
 import { Settings, User, Bell, Shield, Database, Palette, Save, Check } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -43,7 +44,7 @@ const SettingsPage = () => {
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
         } catch (error) {
-            alert('Error al guardar configuración');
+            toast.info('Error al guardar configuración');
         }
     };
 

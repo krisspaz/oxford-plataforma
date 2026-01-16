@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import { Users, AlertTriangle, GraduationCap, UserPlus, CreditCard, RefreshCw, XCircle, TrendingDown, Brain, ChevronRight, BookOpen, FileText, Calendar, Clock, Receipt, Edit, Package, Layers, Shield, Database, School, Activity, BarChart, TrendingUp, Award, Bell, CheckCircle, Lightbulb, Zap, Rocket, Check, AlertCircle, Sparkles, Filter, Search, MoreVertical, Layout, Grid } from 'lucide-react';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -91,7 +92,7 @@ const AdminDashboard = ({ stats, navigate, darkMode }) => (
                         link.parentNode.removeChild(link);
                     } catch (error) {
                         console.error('Error downloading PDF:', error);
-                        alert('Error al descargar el PDF. Verifique permisos.');
+                        toast.info('Error al descargar el PDF. Verifique permisos.');
                     }
                 }}
                 darkMode={darkMode}
@@ -521,7 +522,7 @@ const DirectorDashboard = ({ stats, navigate, darkMode }) => (
                             link.setAttribute('download', 'horario_generado.pdf');
                             document.body.appendChild(link);
                             link.click();
-                        } catch (e) { alert('Error al descargar'); }
+                        } catch (e) { toast.info('Error al descargar'); }
                     }}
                     darkMode={darkMode}
                 />
@@ -609,7 +610,7 @@ const CoordinationDashboard = ({ stats, navigate, darkMode }) => (
                                     link.setAttribute('download', 'horario_generado.pdf');
                                     document.body.appendChild(link);
                                     link.click();
-                                } catch (e) { alert('Error al descargar'); }
+                                } catch (e) { toast.info('Error al descargar'); }
                             }}
                             darkMode={darkMode}
                         />

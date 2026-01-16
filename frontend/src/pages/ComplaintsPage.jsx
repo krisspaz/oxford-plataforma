@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { helpTicketService } from '../services';
 import { useTheme } from '../contexts/ThemeContext';
@@ -57,7 +58,7 @@ const ComplaintsPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.category || !formData.subject || !formData.description) {
-            alert('Por favor completa todos los campos');
+            toast.info('Por favor completa todos los campos');
             return;
         }
 

@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layers, Plus, Edit, Trash, Check, X, BookOpen, ChevronRight, Users, GraduationCap, RefreshCw } from 'lucide-react';
@@ -58,7 +59,7 @@ const CursosNivelesPage = () => {
 
     const handleSave = async () => {
         try {
-            if (!formData.name) return alert('El nombre es obligatorio');
+            if (!formData.name) return toast.info('El nombre es obligatorio');
 
             if (selectedLevel) {
                 await catalogService.updateAcademicLevel(selectedLevel.id, formData);
@@ -69,7 +70,7 @@ const CursosNivelesPage = () => {
             loadData();
         } catch (error) {
             console.error(error);
-            alert('Error al guardar el nivel');
+            toast.info('Error al guardar el nivel');
         }
     };
 
@@ -80,7 +81,7 @@ const CursosNivelesPage = () => {
             loadData();
         } catch (error) {
             console.error(error);
-            alert('No se puede eliminar el nivel (posiblemente tiene grados asociados)');
+            toast.info('No se puede eliminar el nivel (posiblemente tiene grados asociados)');
         }
     };
 

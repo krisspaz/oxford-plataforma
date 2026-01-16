@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { Settings, Plus, Edit, X, RefreshCw, Trash2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -48,7 +49,7 @@ const CatalogosPage = () => {
             });
         } catch (error) {
             console.error('Error loading catalogs:', error);
-            alert('Error al cargar catálogos: ' + error.message);
+            toast.error('Error al cargar catálogos: ' + error.message);
             setCatalogs({ statuses: [], relationships: [], documentTypes: [], paymentMethods: [] });
         } finally {
             setLoading(false);

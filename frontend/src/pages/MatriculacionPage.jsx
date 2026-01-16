@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { Search, RefreshCw, Check, User, Calendar, GraduationCap, CreditCard, FileText, ChevronRight, AlertCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -90,14 +91,14 @@ const MatriculacionPage = () => {
 
             await enrollmentService.create(payload);
 
-            alert(`✅ Reinscripción completada para ${selectedStudent.firstName} ${selectedStudent.lastName}`);
+            toast.info(`✅ Reinscripción completada para ${selectedStudent.firstName} ${selectedStudent.lastName}`);
             setSelectedStudent(null);
             setStudents([]);
             setSearchTerm('');
             setFormData({ grade: '', section: '', package: '', jornada: 'MATUTINA' });
         } catch (error) {
             console.error('Error in enrollment:', error);
-            alert('Error al procesar la reinscripción. Verifique los datos.');
+            toast.info('Error al procesar la reinscripción. Verifique los datos.');
         } finally {
             setSubmitting(false);
         }

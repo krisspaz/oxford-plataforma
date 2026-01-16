@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { Save, Lock, Unlock, Check, AlertCircle, RefreshCw, CheckCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -90,7 +91,7 @@ const CargaNotasPage = () => {
             }
         } catch (error) {
             console.error('Error loading grades:', error);
-            alert('Error al cargar notas: ' + error.message);
+            toast.error('Error al cargar notas: ' + error.message);
             setCurrentBimesterData(bimesters.find(b => b.id === parseInt(selectedBimester)));
             setStudents([]);
         } finally {
@@ -117,13 +118,13 @@ const CargaNotasPage = () => {
             const response = await gradeRecordService.saveBatch(records, parseInt(selectedBimester));
 
             if (response.success) {
-                alert(`✅ ${response.saved} notas guardadas correctamente`);
+                toast.info(`✅ ${response.saved} notas guardadas correctamente`);
             } else {
-                alert(`❌ Error: ${response.error}`);
+                toast.info(`❌ Error: ${response.error}`);
             }
         } catch (error) {
             console.error('Error saving grades:', error);
-            alert('Notas guardadas (demo mode)');
+            toast.info('Notas guardadas (demo mode)');
         } finally {
             setSaving(false);
         }

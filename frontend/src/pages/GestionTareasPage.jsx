@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { ClipboardList, Plus, Search, Filter, Calendar, BookOpen, GraduationCap, Edit, Trash2, Eye, Check, Clock, AlertCircle, X, Save, ChevronDown, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -134,7 +135,7 @@ const GestionTareasPage = () => {
 
     const handleSave = async () => {
         if (!formData.title || !formData.dueDate || formData.grades.length === 0) {
-            alert('Por favor complete todos los campos requeridos (Título, Fecha, Grados)');
+            toast.info('Por favor complete todos los campos requeridos (Título, Fecha, Grados)');
             return;
         }
 

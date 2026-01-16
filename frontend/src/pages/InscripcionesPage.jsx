@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { UserPlus, ChevronRight, ChevronLeft, Check, User, Users, FileText, RefreshCw, UserCheck } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -49,7 +50,7 @@ const InscripcionesPage = () => {
             });
         } catch (error) {
             console.error('Error loading catalogs:', error);
-            alert('Error al cargar catálogos: ' + error.message);
+            toast.error('Error al cargar catálogos: ' + error.message);
             setCatalogs({ grades: [], packages: [], relationships: [], levels: [] });
         } finally {
             setLoading(false);
@@ -110,14 +111,14 @@ const InscripcionesPage = () => {
             });
 
             if (response.success) {
-                alert('✅ Inscripción completada exitosamente');
+                toast.info('✅ Inscripción completada exitosamente');
                 resetForm();
             } else {
-                alert('Error al crear inscripción: ' + (response.message || 'Error desconocido'));
+                toast.error('Error al crear inscripción: ' + (response.message || 'Error desconocido'));
             }
         } catch (error) {
             console.error('Error submitting enrollment:', error);
-            alert('Error al crear inscripción: ' + error.message);
+            toast.error('Error al crear inscripción: ' + error.message);
         } finally {
             setSubmitting(false);
         }

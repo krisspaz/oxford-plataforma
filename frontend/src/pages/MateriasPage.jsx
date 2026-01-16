@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { Book, Plus, Search, Edit, X, Users, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -94,7 +95,7 @@ const MateriasPage = () => {
             loadData();
         } catch (error) {
             console.error('Error saving:', error);
-            alert('Error al guardar: ' + (error.message || 'Error desconocido'));
+            toast.error('Error al guardar: ' + (error.message || 'Error desconocido'));
         }
     };
 

@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { Calendar, Users, BookOpen, Save, AlertCircle, RefreshCw, Wand2, Info } from 'lucide-react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
@@ -137,7 +138,7 @@ const HorariosPage = () => {
             // Call the new backend controller
             // await api.post('/schedule-generation/generate/1'); 
             await new Promise(r => setTimeout(r, 2000));
-            alert('¡Horario generado con éxito! Optimizando restricciones...');
+            toast.info('¡Horario generado con éxito! Optimizando restricciones...');
 
             // Populate grid with some generated data
             setSchedule({

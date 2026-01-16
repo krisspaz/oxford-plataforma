@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { Users, Search, Filter, GraduationCap, BookOpen, RefreshCw, User, Phone, Mail, Calendar, Check, X, Clock, FileText, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { teacherService, attendanceService, scheduleService } from '../services';
@@ -104,7 +105,7 @@ const MisAlumnosPage = () => {
             const scheduleId = 1;
 
             await attendanceService.saveBatch(scheduleId, attendanceDate, attendances);
-            alert('✅ Asistencia guardada correctamente en el sistema');
+            toast.info('✅ Asistencia guardada correctamente en el sistema');
         } catch (error) {
             console.error("Error saving attendance:", error);
             alert("Error al guardar asistencia. Intente nuevamente.");
@@ -125,7 +126,7 @@ const MisAlumnosPage = () => {
         try {
             const report = await attendanceService.getStudentReport(studentId, selectedBimester);
             // Report data loaded
-            alert(`📄 Reporte generado para estudiante ID ${studentId} (Simulación de descarga PDF real)`);
+            toast.info(`📄 Reporte generado para estudiante ID ${studentId} (Simulación de descarga PDF real)`);
             // Here implementation would trigger PDF download
         } catch (error) {
             console.error("Error exporting report:", error);
@@ -135,7 +136,7 @@ const MisAlumnosPage = () => {
 
     const sendToParent = (studentId) => {
         const student = students.find(s => s.id === studentId);
-        alert(`📧 Enviando reporte al encargado de ${student?.firstName} ${student?.lastName}`);
+        toast.info(`📧 Enviando reporte al encargado de ${student?.firstName} ${student?.lastName}`);
     };
 
     const attendanceHistory = {}; // Mock or load from API in future

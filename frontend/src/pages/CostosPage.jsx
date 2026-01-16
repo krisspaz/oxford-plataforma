@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { DollarSign, Save, Edit2, Plus, Check, X, RefreshCw, Trash2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -59,7 +60,7 @@ const CostosPage = () => {
     // New Cost Handlers
     const handleAddCost = async () => {
         if (!newCost.gradeLevel || !newCost.enrollmentFee || !newCost.monthlyFee) {
-            alert('Por favor complete todos los campos');
+            toast.info('Por favor complete todos los campos');
             return;
         }
 

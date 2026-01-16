@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { Users, Plus, Search, Edit, Eye, Book, RefreshCw, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -30,7 +31,7 @@ const DocentesPage = () => {
             }
         } catch (error) {
             console.error('Error loading teachers:', error);
-            alert('Error al cargar docentes: ' + error.message);
+            toast.error('Error al cargar docentes: ' + error.message);
             setTeachers([]);
         } finally {
             setLoading(false);

@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, Check, X, Eye, Clock, FileText, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -70,7 +71,7 @@ const SolicitudesPage = () => {
             }
         } catch (error) {
             console.error('Error processing request:', error);
-            alert('Error al procesar la solicitud');
+            toast.info('Error al procesar la solicitud');
         } finally {
             setActionLoading(null);
         }

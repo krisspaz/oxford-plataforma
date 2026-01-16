@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -10,7 +11,7 @@ const ExonerationPage = () => {
 
     const handleApprove = (id) => {
         setRequests(requests.map(r => r.id === id ? { ...r, status: 'APPROVED' } : r));
-        alert('Solicitud Aprobada');
+        toast.info('Solicitud Aprobada');
     };
 
     return (

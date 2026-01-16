@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { Package, Plus, ChevronDown, ChevronRight, Edit, X, RefreshCw, Trash2, Save } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -88,11 +89,11 @@ const PaquetesPage = () => {
 
     const handleSave = async () => {
         if (!formData.name) {
-            alert('Por favor ingresa un nombre para el paquete');
+            toast.info('Por favor ingresa un nombre para el paquete');
             return;
         }
         if (formData.details.some(d => !d.productName || d.price <= 0)) {
-            alert('Por favor completa todos los productos con nombre y precio válido');
+            toast.info('Por favor completa todos los productos con nombre y precio válido');
             return;
         }
 

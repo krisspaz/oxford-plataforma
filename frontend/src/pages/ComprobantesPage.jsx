@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { FileText, Search, Download, X, Eye, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -46,7 +47,7 @@ const ComprobantesPage = () => {
             }
         } catch (error) {
             console.error('Error loading invoices:', error);
-            alert('Error al cargar comprobantes: ' + error.message);
+            toast.error('Error al cargar comprobantes: ' + error.message);
             setInvoices([]);
         } finally {
             setLoading(false);
@@ -55,7 +56,7 @@ const ComprobantesPage = () => {
 
     const handleRequestAnnul = async () => {
         if (!annulReason.trim()) {
-            alert('Debe ingresar un motivo para la anulación');
+            toast.info('Debe ingresar un motivo para la anulación');
             return;
         }
 
@@ -69,11 +70,11 @@ const ComprobantesPage = () => {
                         : inv
                 ));
             } else {
-                alert('Error al anular comprobante: ' + (response.message || 'Error desconocido'));
+                toast.error('Error al anular comprobante: ' + (response.message || 'Error desconocido'));
             }
         } catch (error) {
             console.error('Error annulling invoice:', error);
-            alert('Error al anular: ' + error.message);
+            toast.error('Error al anular: ' + error.message);
         } finally {
             setActionLoading(null);
             setShowAnnulModal(false);

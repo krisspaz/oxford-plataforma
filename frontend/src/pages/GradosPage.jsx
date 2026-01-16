@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { GraduationCap, Plus, Edit, ChevronDown, ChevronRight, X, RefreshCw, Trash } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -67,7 +68,7 @@ const GradosPage = () => {
             }
         } catch (error) {
             console.error('Error loading data:', error);
-            alert('Error cargando datos: ' + error.message);
+            toast.error('Error cargando datos: ' + error.message);
         } finally {
             setLoading(false)
         }
@@ -112,7 +113,7 @@ const GradosPage = () => {
             loadData();
         } catch (error) {
             console.error(error);
-            alert('Error al guardar grado: ' + (error.response?.data?.error || error.message));
+            toast.error('Error al guardar grado: ' + (error.response?.data?.error || error.message));
         }
     };
 
@@ -124,7 +125,7 @@ const GradosPage = () => {
             loadData();
         } catch (error) {
             console.error(error);
-            alert('Error al guardar sección: ' + (error.response?.data?.error || error.message));
+            toast.error('Error al guardar sección: ' + (error.response?.data?.error || error.message));
         }
     };
 
@@ -134,7 +135,7 @@ const GradosPage = () => {
             await gradeService.delete(id);
             loadData();
         } catch (error) {
-            alert('No se pudo eliminar el grado');
+            toast.info('No se pudo eliminar el grado');
         }
     };
 

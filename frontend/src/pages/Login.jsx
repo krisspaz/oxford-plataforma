@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -26,10 +27,10 @@ const Login = () => {
             if (success) {
                 navigate('/');
             } else {
-                alert('Credenciales inválidas');
+                toast.info('Credenciales inválidas');
             }
         } catch (error) {
-            alert('Error iniciando sesión');
+            toast.info('Error iniciando sesión');
         }
     };
 

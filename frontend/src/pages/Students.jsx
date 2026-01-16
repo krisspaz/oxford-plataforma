@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Search, Trash2, Edit, X } from 'lucide-react';
@@ -56,7 +57,7 @@ const Students = () => {
             fetchStudents();
         } catch (error) {
             console.error('Error creating student:', error);
-            alert('Error al crear estudiante. Verifica los datos.');
+            toast.info('Error al crear estudiante. Verifica los datos.');
         } finally {
             setSaving(false);
         }

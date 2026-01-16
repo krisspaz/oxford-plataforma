@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { CreditCard, DollarSign, Receipt, Check, User, Search, RefreshCw, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -61,7 +62,7 @@ const RegistroPagosPage = () => {
             }
         } catch (error) {
             console.error('Error loading quotas:', error);
-            alert('Error al cargar cuotas: ' + error.message);
+            toast.error('Error al cargar cuotas: ' + error.message);
             setQuotas([]);
         } finally {
             setLoading(false);
@@ -91,11 +92,11 @@ const RegistroPagosPage = () => {
             if (response.success) {
                 setLastReceipt(response.data);
             } else {
-                alert('Error al procesar pago: ' + (response.message || 'Error desconocido'));
+                toast.error('Error al procesar pago: ' + (response.message || 'Error desconocido'));
             }
         } catch (error) {
             console.error('Error processing payment:', error);
-            alert('Error al procesar pago: ' + error.message);
+            toast.error('Error al procesar pago: ' + error.message);
         } finally {
             setProcessing(false);
             if (lastReceipt) setShowReceiptModal(true);

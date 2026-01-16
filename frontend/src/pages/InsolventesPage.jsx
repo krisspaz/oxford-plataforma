@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import { useState, useEffect } from 'react';
 import { AlertCircle, Search, DollarSign, Calendar, User, FileText, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -41,7 +42,7 @@ const InsolventesPage = () => {
     // Export Handler
     const handleExportPDF = () => {
         if (filteredStudents.length === 0) {
-            alert('No hay datos para exportar');
+            toast.info('No hay datos para exportar');
             return;
         }
 

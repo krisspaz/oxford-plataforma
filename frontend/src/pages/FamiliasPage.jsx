@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { Users, Search, Eye, Plus, X, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -28,7 +29,7 @@ const FamiliasPage = () => {
             }
         } catch (error) {
             console.error('Error loading families:', error);
-            alert('Error al cargar familias: ' + error.message);
+            toast.error('Error al cargar familias: ' + error.message);
             setFamilies([]);
         } finally {
             setLoading(false);

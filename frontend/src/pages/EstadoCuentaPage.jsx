@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { User, Search, DollarSign, Check, Clock, AlertCircle, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -86,7 +87,7 @@ const EstadoCuentaPage = () => {
     // Export Handler
     const handleExportPDF = () => {
         if (!selectedStudent || !accountData) {
-            alert('Selecciona un estudiante primero');
+            toast.info('Selecciona un estudiante primero');
             return;
         }
 

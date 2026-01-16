@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { FileSpreadsheet, Download, Calendar, DollarSign, CreditCard, Printer, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -44,7 +45,7 @@ const CorteDiaPage = () => {
 
     const handleExportPDF = () => {
         if (payments.length === 0) {
-            alert('No hay datos para exportar');
+            toast.info('No hay datos para exportar');
             return;
         }
 

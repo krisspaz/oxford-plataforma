@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Search, Handshake, Check, X, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';

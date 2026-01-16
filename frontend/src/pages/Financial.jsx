@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import { useState, useEffect } from 'react';
 import { DollarSign, FileText, Plus, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -74,7 +75,7 @@ const Financial = () => {
             setShowModal(false);
             fetchPayments();
         } catch (error) {
-            alert('Error registrando pago');
+            toast.info('Error registrando pago');
             console.error(error);
         }
     };

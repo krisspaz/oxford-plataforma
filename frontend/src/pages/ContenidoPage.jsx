@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { Book, Plus, Trash2, Link as LinkIcon, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -43,7 +44,7 @@ const ContenidoPage = () => {
         localStorage.setItem('oxford_content_resources', JSON.stringify(updated));
 
         setNewResource({ title: '', description: '', link: '' });
-        alert('Recurso añadido correctamente');
+        toast.info('Recurso añadido correctamente');
     };
 
     const handleDelete = (id) => {

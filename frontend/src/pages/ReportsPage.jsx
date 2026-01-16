@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState } from 'react';
 import { FileText, Download, Filter, Search, FileSpreadsheet, File, Calendar, Users, DollarSign, BookOpen, TrendingUp, Clock } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -90,11 +91,11 @@ const ReportsPage = () => {
                 doc.save(`${report.name.replace(/ /g, '_')}.pdf`);
             }).catch(err => {
                 console.error("Error loading jspdf-autotable:", err);
-                alert('Error al generar PDF: No se pudo cargar el plugin de tablas.');
+                toast.info('Error al generar PDF: No se pudo cargar el plugin de tablas.');
             });
         }).catch(err => {
             console.error("Error loading jsPDF:", err);
-            alert('Error al generar PDF: No se pudo cargar la librería.');
+            toast.info('Error al generar PDF: No se pudo cargar la librería.');
         });
     };
 

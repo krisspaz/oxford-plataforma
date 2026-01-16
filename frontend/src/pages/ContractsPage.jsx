@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { FileText, Download, RefreshCw, Plus, Upload, Eye, X, User, GraduationCap, Phone, Mail, MapPin, Calendar } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -272,7 +273,7 @@ const ContractsPage = () => {
                                             if (contract.signedFile) {
                                                 window.open(contract.signedFile, '_blank');
                                             } else {
-                                                alert('El archivo del contrato no está disponible.');
+                                                toast.info('El archivo del contrato no está disponible.');
                                             }
                                         }}
                                         className={`p-2 rounded-lg transition-colors ${darkMode ? 'text-purple-400 hover:bg-gray-700' : 'text-purple-600 hover:bg-purple-50'} ${!contract.signedFile ? 'opacity-50 cursor-not-allowed' : ''}`}

@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { Calendar, Lock, Unlock, Edit, Plus, AlertTriangle, X, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -29,7 +30,7 @@ const BimestresPage = () => {
             }
         } catch (error) {
             console.error('Error loading bimesters:', error);
-            alert('Error al cargar bimestres: ' + error.message);
+            toast.error('Error al cargar bimestres: ' + error.message);
             setBimesters([]);
         } finally {
             setLoading(false);
@@ -47,11 +48,11 @@ const BimestresPage = () => {
             if (response.success) {
                 setBimesters(bimesters.map(b => b.id === id ? { ...b, isClosed: !b.isClosed } : b));
             } else {
-                alert('Error al cambiar estado del bimestre');
+                toast.info('Error al cambiar estado del bimestre');
             }
         } catch (error) {
             console.error('Error toggling bimester:', error);
-            alert('Error: ' + error.message);
+            toast.error('Error: ' + error.message);
         } finally {
             setActionLoading(null);
         }

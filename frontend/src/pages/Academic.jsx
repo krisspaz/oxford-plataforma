@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import {
@@ -289,7 +290,7 @@ const Academic = () => {
     };
 
     const downloadPDF = (type) => {
-        alert(`Descargando PDF: ${type === 'grade' ? selectedGrade : 'Todos'}`);
+        toast.info(`Descargando PDF: ${type === 'grade' ? selectedGrade : 'Todos'}`);
     };
 
     const ConfigModal = () => (

@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect, useRef } from 'react';
 import {
     Send, Bot, User, Sparkles, Brain, Zap, AlertCircle, Check,

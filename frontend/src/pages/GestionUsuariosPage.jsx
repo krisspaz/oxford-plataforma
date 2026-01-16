@@ -1,3 +1,4 @@
+import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
 import { Users, Plus, Edit, Lock, Unlock, Key, Search, X, RefreshCw, Check, AlertCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -126,11 +127,11 @@ const GestionUsuariosPage = () => {
         try {
             // Validation
             if (!formData.firstName || !formData.lastName || !formData.email) {
-                alert('Nombre, Apellido y Email son obligatorios');
+                toast.info('Nombre, Apellido y Email son obligatorios');
                 return;
             }
             if (!selectedUser && !formData.password) {
-                alert('La contraseña es obligatoria para nuevos usuarios');
+                toast.info('La contraseña es obligatoria para nuevos usuarios');
                 return;
             }
 
@@ -151,7 +152,7 @@ const GestionUsuariosPage = () => {
             loadUsers();
         } catch (error) {
             console.error('Error saving user:', error);
-            alert('Error al guardar usuario: ' + error.message);
+            toast.error('Error al guardar usuario: ' + error.message);
         }
     };
 
