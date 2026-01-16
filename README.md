@@ -1,24 +1,30 @@
 # Oxford Plataforma - Sistema de Gestión Escolar
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/version-2.2-blue" alt="Version">
   <img src="https://img.shields.io/badge/PHP-8.2-777BB4" alt="PHP">
-  <img src="https://img.shields.io/badge/React-18-61DAFB" alt="React">
+  <img src="https://img.shields.io/badge/React-19-61DAFB" alt="React">
   <img src="https://img.shields.io/badge/Python-3.11-3776AB" alt="Python">
+  <img src="https://img.shields.io/badge/Kotlin-1.9-7F52FF" alt="Kotlin">
+  <img src="https://img.shields.io/badge/Swift-5.9-F05138" alt="Swift">
 </p>
 
 ## 🎯 Descripción
 
-Plataforma integral de gestión escolar con IA empresarial para el Colegio Oxford. Incluye gestión académica, financiera, de horarios y asistentes inteligentes.
+Plataforma integral de gestión escolar con IA empresarial para el Colegio Oxford. Incluye gestión académica, financiera, de horarios, asistentes inteligentes y apps móviles nativas.
 
 ## 🏗️ Arquitectura
 
 ```
-├── frontend/          # React 18 + Vite + TailwindCSS
+├── frontend/          # React 19 + Vite + TailwindCSS + React Query
 ├── backend/
-│   ├── symfony/       # PHP 8.2 + Symfony 7
-│   └── ai_service/    # Python 3.11 + Flask + NLP
-└── docker-compose.yml
+│   ├── symfony/       # PHP 8.2 + Symfony 7 + PostgreSQL
+│   └── ai_service/    # Python 3.11 + FastAPI + ChromaDB
+├── movil/             # Kotlin Multiplatform (Android + iOS)
+│   ├── shared/        # Lógica compartida
+│   ├── android/       # Jetpack Compose (Material 3)
+│   └── ios/           # SwiftUI (iOS 16+)
+└── docker-compose.yml # 10+ servicios containerizados
 ```
 
 ## 🚀 Instalación Rápida
@@ -134,6 +140,33 @@ GET  /ai-api/health           # Estado del servicio
 - Roles y permisos granulares
 - Detección de anomalías
 - Logs de auditoría
+
+## 📱 Aplicaciones Móviles
+
+El sistema incluye apps nativas usando **Kotlin Multiplatform** para código compartido.
+
+### Características
+- ✅ **Android**: Jetpack Compose + Material 3
+- ✅ **iOS**: SwiftUI + iOS 16+
+- ✅ **Shared**: Lógica de negocio, API client, modelos de datos
+
+### Build Android
+```bash
+cd movil
+./gradlew :android:assembleDebug
+# APK: android/build/outputs/apk/debug/
+```
+
+### Build iOS
+```bash
+cd movil/ios
+open OxfordApp.xcodeproj
+# Usar Xcode para build & run
+```
+
+### Requisitos
+- Android: SDK 24+, Android Studio Arctic Fox+
+- iOS: Xcode 15+, macOS Ventura+
 
 ## 📊 Tecnologías
 
