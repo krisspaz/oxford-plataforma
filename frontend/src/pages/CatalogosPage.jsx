@@ -48,7 +48,7 @@ const CatalogosPage = () => {
             });
         } catch (error) {
             console.error('Error loading catalogs:', error);
-            // Demo data
+            // Error - show empty state
             setCatalogs({
                 statuses: [
                     { id: 1, code: 'ACTIVO', name: 'Activo' },

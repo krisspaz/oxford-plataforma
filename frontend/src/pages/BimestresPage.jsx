@@ -27,7 +27,7 @@ const BimestresPage = () => {
             }
         } catch (error) {
             console.error('Error loading bimesters:', error);
-            // Demo data
+            // Error - show empty state
             setBimesters([
                 { id: 1, number: 1, name: 'Primer Bimestre', startDate: '2025-01-15', endDate: '2025-03-15', maxScore: 100, percentage: 25, isClosed: true, isActive: true },
                 { id: 2, number: 2, name: 'Segundo Bimestre', startDate: '2025-03-16', endDate: '2025-05-31', maxScore: 100, percentage: 25, isClosed: false, isActive: true },

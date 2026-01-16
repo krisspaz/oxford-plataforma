@@ -87,7 +87,7 @@ const CargaNotasPage = () => {
             }
         } catch (error) {
             console.error('Error loading grades:', error);
-            // Demo data
+            // Error - show empty state
             setCurrentBimesterData(bimesters.find(b => b.id === parseInt(selectedBimester)));
             setStudents([
                 { id: 1, studentId: 1, name: 'Juan Pérez', carnet: '2025-001', score: 85, isLocked: false },

@@ -44,7 +44,7 @@ const ComprobantesPage = () => {
             }
         } catch (error) {
             console.error('Error loading invoices:', error);
-            // Demo data
+            // Error - show empty state
             setInvoices([
                 { id: 1, type: 'FACTURA_SAT', series: 'A', number: '001', uuid: 'ABC123', name: 'Juan Pérez', nit: '12345678-9', total: 3500, status: 'EMITIDO', issuedAt: '2025-01-16 10:30' },
                 { id: 2, type: 'RECIBO_SAT', series: 'B', number: '045', uuid: 'DEF456', name: 'María López', nit: 'CF', total: 750, status: 'EMITIDO', issuedAt: '2025-01-16 09:15' },

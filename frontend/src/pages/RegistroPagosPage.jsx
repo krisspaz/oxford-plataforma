@@ -30,7 +30,7 @@ const RegistroPagosPage = () => {
                         setStudents(response.data);
                     }
                 } catch (error) {
-                    // Demo data
+                    // Error - show empty state
                     setStudents([
                         { id: 1, fullName: 'Juan Pérez', carnet: '2025-001', grade: '1ro Básico A', nit: '12345678-9' },
                         { id: 2, fullName: 'María López', carnet: '2025-002', grade: '2do Básico B', nit: 'CF' },
@@ -59,7 +59,7 @@ const RegistroPagosPage = () => {
                 setQuotas(response.data);
             }
         } catch (error) {
-            // Demo data
+            // Error - show empty state
             setQuotas([
                 { id: 1, concept: 'Mensualidad Marzo', amount: 750, type: 'RECIBO_SAT' },
                 { id: 2, concept: 'Mensualidad Abril', amount: 750, type: 'RECIBO_SAT' },

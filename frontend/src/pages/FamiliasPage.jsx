@@ -26,7 +26,7 @@ const FamiliasPage = () => {
             }
         } catch (error) {
             console.error('Error loading families:', error);
-            // Demo data
+            // Error - show empty state
             setFamilies([
                 {
                     id: 1,

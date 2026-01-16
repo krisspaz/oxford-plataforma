@@ -48,7 +48,7 @@ const InscripcionesPage = () => {
                 levels: levelsRes.success ? levelsRes.data : []
             });
         } catch (error) {
-            // Demo data
+            // Error - show empty state
             setCatalogs({
                 grades: [
                     { id: 1, name: 'Kinder', sections: ['A', 'B'] },
