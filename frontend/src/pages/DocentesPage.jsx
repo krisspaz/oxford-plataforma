@@ -38,11 +38,11 @@ const DocentesPage = () => {
         }
     };
 
-    const filteredTeachers = teachers.filter(t =>
-        t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.specialization.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredTeachers = Array.isArray(teachers) ? teachers.filter(t =>
+        (t.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.code || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.specialization || '').toLowerCase().includes(searchTerm.toLowerCase())
+    ) : [];
 
     if (loading) {
         return (

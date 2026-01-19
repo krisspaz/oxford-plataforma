@@ -92,10 +92,10 @@ const StudentChatPage = () => {
         }
     };
 
-    const filteredTeachers = teachers.filter(t =>
+    const filteredTeachers = Array.isArray(teachers) ? teachers.filter(t =>
         (t.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (t.subject || '').toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    ) : [];
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

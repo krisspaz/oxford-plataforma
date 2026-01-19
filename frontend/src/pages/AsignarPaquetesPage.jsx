@@ -77,10 +77,10 @@ const AsignarPaquetesPage = () => {
     };
 
     // Filter students for the dropdown/search
-    const filteredStudents = students.filter(s =>
-        (s.name + ' ' + s.lastname).toLowerCase().includes(studentSearch.toLowerCase()) ||
+    const filteredStudents = Array.isArray(students) ? students.filter(s =>
+        ((s.name || '') + ' ' + (s.lastname || '')).toLowerCase().includes(studentSearch.toLowerCase()) ||
         (s.studentId || '').includes(studentSearch)
-    );
+    ) : [];
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
@@ -182,8 +182,8 @@ const AsignarPaquetesPage = () => {
                                 onClick={handleAssign}
                                 disabled={loading || !selectedStudent || !selectedPackage}
                                 className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all ${loading
-                                        ? 'bg-gray-400 cursor-not-allowed opacity-70'
-                                        : 'bg-teal-600 hover:bg-teal-700 hover:shadow-teal-500/30 text-white transform hover:-translate-y-1'
+                                    ? 'bg-gray-400 cursor-not-allowed opacity-70'
+                                    : 'bg-teal-600 hover:bg-teal-700 hover:shadow-teal-500/30 text-white transform hover:-translate-y-1'
                                     }`}
                             >
                                 {loading ? (

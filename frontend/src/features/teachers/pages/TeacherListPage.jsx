@@ -15,11 +15,11 @@ const TeacherListPage = () => {
 
     const debouncedSearch = useDebounce(searchTerm, 300);
 
-    const filteredTeachers = teachers.filter(t =>
-        t.fullName?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        t.employeeCode?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        t.specialization?.toLowerCase().includes(debouncedSearch.toLowerCase())
-    );
+    const filteredTeachers = Array.isArray(teachers) ? teachers.filter(t =>
+        (t.fullName || '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (t.employeeCode || '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (t.specialization || '').toLowerCase().includes(debouncedSearch.toLowerCase())
+    ) : [];
 
     const handleEdit = (teacher) => {
         setSelectedTeacher(teacher);
