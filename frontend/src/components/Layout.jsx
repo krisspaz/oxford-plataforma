@@ -37,7 +37,8 @@ import {
     Shield,
     Menu,
     Database,
-    Brain
+    Brain,
+    MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -50,7 +51,7 @@ const ICON_MAP = {
     FileText, UserPlus, User, CreditCard, FileCheck, FileSpreadsheet,
     Receipt, AlertCircle, Package, MinusCircle, Layers, LayoutGrid,
     Book, Link: LinkIcon, Lock, BarChart, Edit, Clock, Bookmark,
-    UserCog, Shield, Menu, Database, Bell, Brain
+    UserCog, Shield, Menu, Database, Bell, Brain, MessageSquare
 };
 
 // Section Color Mapping
