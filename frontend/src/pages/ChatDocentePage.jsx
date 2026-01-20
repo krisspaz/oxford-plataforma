@@ -74,13 +74,15 @@ const ChatDocentePage = () => {
         }
     };
 
+    const [isTyping, setIsTyping] = useState(false);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages, selectedTeacher]);
+    }, [messages, selectedStudent]);
 
     return (
         <div className={`flex h-[calc(100vh-100px)] rounded-3xl overflow-hidden shadow-2xl ${darkMode ? 'bg-[#0f111a] border border-gray-800' : 'bg-white border border-gray-200'}`}>
