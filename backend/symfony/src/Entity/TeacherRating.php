@@ -7,9 +7,20 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Delete;
 
 #[ORM\Entity(repositoryClass: TeacherRatingRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Delete()
+    ],
+    order: ['createdAt' => 'DESC'],
+    security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_DIRECTOR')"
+)]
 class TeacherRating
 {
     #[ORM\Id]

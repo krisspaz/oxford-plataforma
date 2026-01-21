@@ -7,29 +7,38 @@ use App\Repository\SubjectRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SubjectRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['subject:read']],
+    denormalizationContext: ['groups' => ['subject:write']]
+)]
 class Subject
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['subject:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
+    #[Groups(['subject:read', 'subject:write'])]
     private ?string $name = null; // Matemáticas, Historia
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank]
+    #[Groups(['subject:read', 'subject:write'])]
     private ?string $code = null; // MAT101
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['subject:read', 'subject:write'])]
     private ?int $hoursWeek = null;
 
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[Groups(['subject:read', 'subject:write'])]
     private bool $active = true;
 
     #[ORM\ManyToMany(targetEntity: Course::class, inversedBy: 'subjects')]

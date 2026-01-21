@@ -6,9 +6,13 @@ use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ScholarshipRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ScholarshipRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['scholarship:read']],
+    denormalizationContext: ['groups' => ['scholarship:write']]
+)]
 class Scholarship
 {
     public const TYPE_PERCENTAGE = 'PERCENTAGE';
@@ -17,28 +21,36 @@ class Scholarship
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['scholarship:read', 'scholarship:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
+    #[Groups(['scholarship:read', 'scholarship:write'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 20)]
+    #[Groups(['scholarship:read', 'scholarship:write'])]
     private ?string $type = self::TYPE_PERCENTAGE; // PERCENTAGE or FIXED
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[Groups(['scholarship:read', 'scholarship:write'])]
     private ?string $value = null; // e.g. 25.00 for 25% or 500.00 for Q500
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['scholarship:read', 'scholarship:write'])]
     private ?string $description = null;
 
     #[ORM\ManyToOne(targetEntity: SchoolCycle::class)]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['scholarship:read', 'scholarship:write'])]
     private ?SchoolCycle $schoolCycle = null;
 
     #[ORM\Column]
+    #[Groups(['scholarship:read', 'scholarship:write'])]
     private ?bool $isActive = true;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['scholarship:read'])]
     private ?\DateTimeInterface $createdAt = null;
 
     public function __construct()

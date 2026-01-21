@@ -16,6 +16,9 @@ const VoiceChat = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
 
+    // Hide if not logged in
+    if (!user) return null;
+
     // Speech Recognition Setup
     const recognitionRef = useRef(null);
 
@@ -216,10 +219,10 @@ const VoiceChat = () => {
                                 <div className={`flex items-start gap-2 max-w-[85%] ${msg.type === 'user' ? 'flex-row-reverse' : ''}`}>
                                     {/* Avatar */}
                                     <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.type === 'user'
-                                            ? 'bg-indigo-100 dark:bg-indigo-900'
-                                            : msg.type === 'error'
-                                                ? 'bg-red-100 dark:bg-red-900'
-                                                : 'bg-gradient-to-br from-indigo-500 to-purple-500'
+                                        ? 'bg-indigo-100 dark:bg-indigo-900'
+                                        : msg.type === 'error'
+                                            ? 'bg-red-100 dark:bg-red-900'
+                                            : 'bg-gradient-to-br from-indigo-500 to-purple-500'
                                         }`}>
                                         {msg.type === 'user'
                                             ? <User size={14} className="text-indigo-600 dark:text-indigo-400" />
@@ -229,10 +232,10 @@ const VoiceChat = () => {
 
                                     {/* Message Bubble */}
                                     <div className={`rounded-2xl px-4 py-3 text-sm shadow-sm ${msg.type === 'user'
-                                            ? 'bg-indigo-600 text-white rounded-tr-md'
-                                            : msg.type === 'error'
-                                                ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 rounded-tl-md border border-red-200 dark:border-red-800'
-                                                : 'bg-white dark:bg-gray-700 dark:text-white text-gray-800 rounded-tl-md border border-gray-100 dark:border-gray-600'
+                                        ? 'bg-indigo-600 text-white rounded-tr-md'
+                                        : msg.type === 'error'
+                                            ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 rounded-tl-md border border-red-200 dark:border-red-800'
+                                            : 'bg-white dark:bg-gray-700 dark:text-white text-gray-800 rounded-tl-md border border-gray-100 dark:border-gray-600'
                                         }`}>
                                         <div className="whitespace-pre-wrap leading-relaxed" dangerouslySetInnerHTML={{
                                             __html: msg.text
@@ -331,8 +334,8 @@ const VoiceChat = () => {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={`pointer-events-auto p-4 rounded-2xl shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-2 ${isOpen
-                        ? 'bg-indigo-500 hover:bg-indigo-600'
-                        : 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 hover:shadow-2xl hover:shadow-indigo-500/30'
+                    ? 'bg-indigo-500 hover:bg-indigo-600'
+                    : 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 hover:shadow-2xl hover:shadow-indigo-500/30'
                     } text-white`}
             >
                 {isOpen ? <X size={24} /> : (

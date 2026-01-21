@@ -50,8 +50,50 @@ class PaymentController extends AbstractController
     public function create(\Symfony\Component\HttpFoundation\Request $request, \Doctrine\ORM\EntityManagerInterface $em): \Symfony\Component\HttpFoundation\JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        // Basic stub implementation for now - just to prevent 404/500
-        return $this->json(['success' => true, 'message' => 'Payment registered (Simulation)'], 201);
+        
+        $studentId = $data['studentId'] ?? $data['student'] ?? null;
+        if (!$studentId) {
+             return $this->json(['error' => 'Student ID is required'], Response::HTTP_BAD_REQUEST);
+        }
+        
+        $student = $em->getRepository(\App\Entity\Student::class)->find($studentId);
+        if (!$student) {
+             return $this->json(['error' => 'Student not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $payment = new Payment();
+        $payment->setStudent($student);
+        $payment->setAmount((string)($data['amount'] ?? 0));
+        
+        // Handle date
+        try {
+            $date = isset($data['date']) ? new \DateTime($data['date']) : new \DateTime();
+            $payment->setPaymentDate($date);
+        } catch (\Exception $e) {
+            $payment->setPaymentDate(new \DateTime());
+        }
+
+        $payment->setStatus($data['status'] ?? 'PAID');
+        $payment->setConcept($data['concept'] ?? 'Pago General');
+        $payment->setMethod($data['method'] ?? 'cash');
+        $payment->setType('RECEIPT'); // Default
+
+        // Billing Info
+        $payment->setBillingIdentifier($data['nit'] ?? 'CF');
+        $payment->setBillingName($data['billingName'] ?? 'Consumidor Final');
+
+        $em->persist($payment);
+        $em->flush();
+
+        return $this->json([
+            'success' => true, 
+            'message' => 'Payment registered successfully',
+            'data' => [
+                'id' => $payment->getId(),
+                'series' => 'A',
+                'number' => $payment->getId()
+            ]
+        ], 201);
     }
 
     #[Route('/totals', name: 'api_payments_totals', methods: ['GET'])]

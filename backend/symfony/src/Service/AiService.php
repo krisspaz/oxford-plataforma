@@ -110,4 +110,12 @@ class AiService
             'circuit_broken' => true
         ];
     }
+    public function getRiskAnalysis(int $studentId, array $grades): array
+    {
+        return $this->ask([
+            'id' => $studentId,
+            'grades' => $grades,
+            'attendance' => 80 // Mock attendance for now if not passed
+        ], '/risk-analysis');
+    }
 }

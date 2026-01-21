@@ -86,10 +86,12 @@ export const useGradeEntry = () => {
         setSaving(true);
         try {
             const payload = {
-                assignmentId: parseInt(selectedAssignmentId),
+                assignmentId: parseInt(selectedAssignmentId), // Top level for ref
                 bimesterId: parseInt(selectedBimesterId),
-                grades: students.map(s => ({
+                records: students.map(s => ({
+                    id: s.id || null, // Existing ID or null
                     studentId: s.studentId,
+                    subjectAssignmentId: parseInt(selectedAssignmentId),
                     score: s.score
                 }))
             };

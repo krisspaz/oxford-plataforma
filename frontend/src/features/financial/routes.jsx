@@ -18,6 +18,7 @@ const AsignarPaquetesPage = lazy(() => import('../../pages/AsignarPaquetesPage')
 const ConveniosPage = lazy(() => import('../../pages/ConveniosPage'));
 const AsignarConvenioPage = lazy(() => import('../../pages/AsignarConvenioPage'));
 const PaquetesSeleccionadosPage = lazy(() => import('../../pages/PaquetesSeleccionadosPage'));
+const ScholarshipsPage = lazy(() => import('./pages/ScholarshipsPage'));
 
 const FinancialRoutes = () => {
     return (
@@ -39,6 +40,9 @@ const FinancialRoutes = () => {
             <Route path="finanzas/solicitudes" element={<SolicitudesPage />} />
             <Route path="finanzas/insolventes" element={<InsolventesPage />} />
             <Route path="finanzas/paquetes-seleccionados" element={<PaquetesSeleccionadosPage />} />
+
+            <Route path="finanzas/paquetes-seleccionados" element={<PaquetesSeleccionadosPage />} />
+            <Route path="finanzas/becas" element={<ScholarshipsPage />} />
 
             {/* Top Level Protected Financial Routes (if accessed directly not under layout, need check) */}
             {/* Note: The original AppRoutes had some under layout and some outside. 
@@ -65,6 +69,7 @@ export const financialRouteElements = <>
     <Route path="finanzas/solicitudes" element={<SolicitudesPage />} />
     <Route path="finanzas/insolventes" element={<InsolventesPage />} />
     <Route path="finanzas/paquetes-seleccionados" element={<PaquetesSeleccionadosPage />} />
+    <Route path="finanzas/becas" element={<ScholarshipsPage />} />
 </>;
 
 export const standaloneFinancialRoutes = <>

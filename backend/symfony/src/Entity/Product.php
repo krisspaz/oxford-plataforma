@@ -5,9 +5,13 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['product:read']],
+    denormalizationContext: ['groups' => ['product:write']]
+)]
 class Product
 {
     public const TYPE_INSCRIPCION = 'INSCRIPCION';
@@ -22,36 +26,47 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['product:read', 'product:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['product:read', 'product:write'])]
     private ?string $code = null;
 
     #[ORM\Column(length: 150)]
+    #[Groups(['product:read', 'product:write'])]
     private ?string $name = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Groups(['product:read', 'product:write'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['product:read', 'product:write'])]
     private ?string $type = self::TYPE_OTRO;
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    #[Groups(['product:read', 'product:write'])]
     private ?string $basePrice = '0.00';
 
     #[ORM\Column(length: 20)]
+    #[Groups(['product:read', 'product:write'])]
     private ?string $documentType = 'FACTURA_SAT'; // FACTURA_SAT, RECIBO_SAT, RECIBO_INTERNO
 
     #[ORM\Column]
+    #[Groups(['product:read', 'product:write'])]
     private ?bool $isTaxable = true;
 
     #[ORM\Column]
+    #[Groups(['product:read', 'product:write'])]
     private ?bool $isRecurring = false; // For monthly fees
 
     #[ORM\Column]
+    #[Groups(['product:read', 'product:write'])]
     private ?int $recurringMonths = 0; // Number of months if recurring
 
     #[ORM\Column]
+    #[Groups(['product:read', 'product:write'])]
     private ?bool $isActive = true;
 
     public function getId(): ?int

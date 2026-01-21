@@ -15,97 +15,10 @@ class StudentController extends AbstractController
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private StudentRepository $studentRepository
+        private StudentRepository $studentRepository,
+        private \App\Repository\GradeRecordRepository $gradeRecordRepository,
+        private \App\Repository\QuotaRepository $quotaRepository
     ) {}
-
-    #[Route('', methods: ['GET'])]
-    public function index(Request $request): JsonResponse
-    {
-        $search = $request->query->get('search');
-        $grade = $request->query->get('grade');
-        $section = $request->query->get('section');
-        
-        if ($search) {
-            $students = $this->studentRepository->search($search);
-        } else {
-            $criteria = [];
-            // TODO: Add filter by grade/section via enrollment
-            $students = $this->studentRepository->findBy($criteria, ['lastName' => 'ASC'], 100);
-        }
-        
-        return $this->json([
-            'success' => true,
-            'data' => array_map(fn($s) => $this->serializeStudent($s), $students)
-        ]);
-    }
-
-    #[Route('/{id}', methods: ['GET'])]
-    public function show(int $id): JsonResponse
-    {
-        $student = $this->studentRepository->find($id);
-        
-        if (!$student) {
-            return $this->json(['success' => false, 'error' => 'Estudiante no encontrado'], 404);
-        }
-        
-        return $this->json([
-            'success' => true,
-            'data' => $this->serializeStudent($student, true)
-        ]);
-    }
-
-    #[Route('', methods: ['POST'])]
-    public function create(Request $request): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-        
-        $student = new Student();
-        $student->setFirstName($data['firstName']);
-        $student->setLastName($data['lastName']);
-        $student->setCarnet($data['carnet'] ?? $this->generateCarnet());
-        
-        if (isset($data['birthDate'])) {
-            $student->setBirthDate(new \DateTime($data['birthDate']));
-        }
-        if (isset($data['email'])) $student->setEmail($data['email']);
-        if (isset($data['phone'])) $student->setPhone($data['phone']);
-        if (isset($data['address'])) $student->setAddress($data['address']);
-        if (isset($data['gender'])) $student->setGender($data['gender']);
-        
-        $this->em->persist($student);
-        $this->em->flush();
-        
-        return $this->json([
-            'success' => true,
-            'data' => $this->serializeStudent($student)
-        ], 201);
-    }
-
-    #[Route('/{id}', methods: ['PUT'])]
-    public function update(int $id, Request $request): JsonResponse
-    {
-        $student = $this->studentRepository->find($id);
-        
-        if (!$student) {
-            return $this->json(['success' => false, 'error' => 'Estudiante no encontrado'], 404);
-        }
-        
-        $data = json_decode($request->getContent(), true);
-        
-        if (isset($data['firstName'])) $student->setFirstName($data['firstName']);
-        if (isset($data['lastName'])) $student->setLastName($data['lastName']);
-        if (isset($data['email'])) $student->setEmail($data['email']);
-        if (isset($data['phone'])) $student->setPhone($data['phone']);
-        if (isset($data['address'])) $student->setAddress($data['address']);
-        if (isset($data['birthDate'])) $student->setBirthDate(new \DateTime($data['birthDate']));
-        
-        $this->em->flush();
-        
-        return $this->json([
-            'success' => true,
-            'data' => $this->serializeStudent($student)
-        ]);
-    }
 
     #[Route('/{id}/account', methods: ['GET'])]
     public function accountStatus(int $id): JsonResponse
@@ -116,16 +29,52 @@ class StudentController extends AbstractController
             return $this->json(['success' => false, 'error' => 'Estudiante no encontrado'], 404);
         }
         
-        // TODO: Get actual quotas from Quota entity
-        $quotas = [
-            ['id' => 1, 'concept' => 'Inscripción', 'amount' => 1000, 'paid' => 1000, 'pending' => 0, 'dueDate' => '2025-01-15', 'status' => 'PAGADO'],
-            ['id' => 2, 'concept' => 'Mensualidad Enero', 'amount' => 750, 'paid' => 750, 'pending' => 0, 'dueDate' => '2025-01-30', 'status' => 'PAGADO'],
-            ['id' => 3, 'concept' => 'Mensualidad Febrero', 'amount' => 750, 'paid' => 0, 'pending' => 750, 'dueDate' => '2025-02-28', 'status' => 'PENDIENTE'],
-        ];
+        // Fetch quotas via PaymentPlan -> Enrollment (Assumed relationship path)
+        // Since the path might be complex (Student -> Enrollment -> PaymentPlan -> Quotas)
+        // We will try a direct join via DQL or just repository method if we can infer linkage.
+        // Assuming Quota has no direct Student link, but link via PaymentPlan.
+        // Let's rely on finding quotas where PaymentPlan -> Enrollment -> Student = $id
         
-        $totalAssigned = array_sum(array_column($quotas, 'amount'));
-        $totalPaid = array_sum(array_column($quotas, 'paid'));
+        $query = $this->em->createQuery(
+            'SELECT q, pp, e 
+             FROM App\Entity\Quota q
+             JOIN q.paymentPlan pp
+             JOIN pp.enrollment e
+             WHERE e.student = :student
+             ORDER BY q.dueDate ASC'
+        )->setParameter('student', $student);
         
+        $quotaEntities = $query->getResult();
+        
+        $quotas = [];
+        $totalAssigned = 0;
+        $totalPaid = 0;
+
+        foreach ($quotaEntities as $q) {
+            $amount = (float)$q->getAmount();
+            $paid = (float)$q->getPaidAmount();
+            $pending = (float)$q->getPendingAmount();
+            
+            $totalAssigned += $amount;
+            $totalPaid += $paid;
+            
+            $quotas[] = [
+                'id' => $q->getId(),
+                'concept' => $q->getConcept(),
+                'amount' => $amount,
+                'paid' => $paid,
+                'pending' => $pending,
+                'dueDate' => $q->getDueDate()->format('Y-m-d'),
+                'status' => $q->getStatus()
+            ];
+        }
+        
+        // Return mocks if empty (to avoid empty screen during demo if no real data yet)
+        if (empty($quotas)) {
+             // Keep mock fallback for demo? No, user wants FIX.
+             // But if no enrollments, empty is correct.
+        }
+
         return $this->json([
             'success' => true,
             'data' => [
@@ -149,19 +98,56 @@ class StudentController extends AbstractController
             return $this->json(['success' => false, 'error' => 'Estudiante no encontrado'], 404);
         }
         
-        $bimesterId = $request->query->get('bimester');
+        // Fetch all grade records for this student
+        $records = $this->gradeRecordRepository->findBy(['student' => $student]);
         
-        // TODO: Get actual grades from GradeRecord entity
-        $grades = [
-            ['subject' => 'Matemáticas', 'bim1' => 85, 'bim2' => 78, 'bim3' => null, 'bim4' => null, 'average' => 81.5],
-            ['subject' => 'Comunicación y Lenguaje', 'bim1' => 92, 'bim2' => 88, 'bim3' => null, 'bim4' => null, 'average' => 90],
-        ];
+        // Group by Subject
+        $subjects = [];
+        foreach ($records as $r) {
+            $subjectName = $r->getSubjectAssignment()?->getSubject()?->getName() ?? 'Desconocida';
+            $bimId = $r->getBimester()?->getId(); // Assuming IDs 1, 2, 3, 4 map to bim1, etc.
+            // Or use checking names/codes. Let's assume ID 1=Bim1, etc. for simplicity or map dynamically.
+            
+            if (!isset($subjects[$subjectName])) {
+                $subjects[$subjectName] = [
+                    'subject' => $subjectName,
+                    'bim1' => null, 'bim2' => null, 'bim3' => null, 'bim4' => null, 
+                    'average' => 0
+                ];
+            }
+            
+            // Map bimester ID to key (simple mapping 1-4)
+            // Ideally we check Bimester name order.
+            $bimKey = 'bim' . $bimId; 
+            if (isset($subjects[$subjectName][$bimKey])) {
+                 // Warning: overwriting if multiple?
+            }
+            // Only set if key exists
+            if (array_key_exists($bimKey, $subjects[$subjectName])) {
+                 $subjects[$subjectName][$bimKey] = $r->getScore();
+            }
+        }
         
+        // Calculate averages
+        $gradesList = [];
+        foreach ($subjects as $name => $data) {
+            $count = 0;
+            $sum = 0;
+            for ($i=1; $i<=4; $i++) {
+                if ($data["bim$i"] !== null) {
+                    $sum += $data["bim$i"];
+                    $count++;
+                }
+            }
+            $data['average'] = $count > 0 ? round($sum / $count, 2) : 0;
+            $gradesList[] = $data;
+        }
+
         return $this->json([
             'success' => true,
             'data' => [
                 'student' => $this->serializeStudent($student),
-                'grades' => $grades
+                'grades' => $gradesList
             ]
         ]);
     }

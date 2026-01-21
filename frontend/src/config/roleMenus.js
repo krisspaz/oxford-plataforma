@@ -46,6 +46,9 @@ export const MENU_ITEMS = {
     registroPagos: { id: 'registroPagos', label: 'Registro de Pagos', path: '/finanzas/pagos', icon: 'PlusCircle' },
     paquetesSeleccionados: { id: 'paquetesSeleccionados', label: 'Paq. Seleccionados', path: '/finanzas/paquetes-seleccionados', icon: 'CheckSquare' },
 
+    paquetesSeleccionados: { id: 'paquetesSeleccionados', label: 'Paq. Seleccionados', path: '/finanzas/paquetes-seleccionados', icon: 'CheckSquare' },
+    scholarships: { id: 'scholarships', label: 'Becas y Convenios', path: '/finanzas/becas', icon: 'Award' },
+
     // === SECRETARÍA / INSCRIPCIONES ===
     inscripciones: { id: 'inscripciones', label: 'Inscripciones', path: '/secretaria/inscripciones', icon: 'UserPlus' },
     matricular: { id: 'matricular', label: 'Matricular', path: '/secretaria/matricular', icon: 'GraduationCap' },
@@ -107,6 +110,10 @@ export const MENU_ITEMS = {
     ajustes: { id: 'ajustes', label: 'Ajustes', path: '/admin/ajustes', icon: 'Settings' },
     estadisticas: { id: 'estadisticas', label: 'Estadísticas', path: '/admin/estadisticas', icon: 'TrendingUp' },
     logs: { id: 'logs', label: 'Logs Acceso', path: '/admin/logs', icon: 'Activity' },
+    security: { id: 'security', label: 'Centro de Seguridad', path: '/admin/security', icon: 'Shield' },
+    aiPredictor: { id: 'aiPredictor', label: 'Oxford AI Predictor', path: '/admin/ai-insights', icon: 'Brain' },
+    helpTickets: { id: 'helpTickets', label: 'Buzón de Soporte', path: '/admin/support', icon: 'Mail' },
+    teacherRatings: { id: 'teacherRatings', label: 'Evaluación Docente', path: '/admin/teacher-ratings', icon: 'Star' },
     // Consolidated adjustments
     ajusteGeneral: { id: 'ajusteGeneral', label: 'Mantenimiento Datos', path: '/admin/ajustes-generales', icon: 'Sliders' },
     catalogos: { id: 'catalogos', label: 'Catálogos', path: '/admin/catalogos', icon: 'Database' },
@@ -117,8 +124,8 @@ export const MENU_ITEMS = {
 export const ROLE_MENUS = {
     [ROLES.SUPER_ADMIN]: [
         { section: 'Principal', items: ['dashboard'] },
-        { section: 'Administración', items: ['cierreEscolar', 'usuarios', 'cargosAdmin', 'ajusteGeneral'] },
-        { section: 'Finanzas', items: ['insolventes', 'corteDia', 'solicitudes', 'paquetes', 'costosNivel'] },
+        { section: 'Administración', items: ['cierreEscolar', 'usuarios', 'cargosAdmin', 'ajusteGeneral', 'security', 'aiPredictor', 'helpTickets', 'teacherRatings'] },
+        { section: 'Finanzas', items: ['insolventes', 'corteDia', 'solicitudes', 'paquetes', 'costosNivel', 'scholarships'] },
         { section: 'Académico', items: ['cierreNotas'] },
     ],
 
@@ -135,15 +142,15 @@ export const ROLE_MENUS = {
         { section: 'Inscripciones', items: ['inscripciones', 'matricular', 'familias', 'documentosInscripcion', 'contratos'] },
         { section: 'Cobros', items: ['registroPagos', 'estadoCuenta', 'insolventes', 'comprobantesEmitidos', 'corteDia'] },
         { section: 'Gestión', items: ['asignarPaquetes', 'convenios', 'asignarConvenio', 'paquetesSeleccionados'] },
-        { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
+        { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos', 'helpTickets'] },
         { section: 'Inteligencia Artificial', items: ['iaHorarios'] },
     ],
 
     [ROLES.INFORMATICS]: [
         { section: 'Principal', items: ['dashboard'] },
-        { section: 'Sistema', items: ['notificacionesReset', 'cierreEscolar', 'usuarios', 'privilegios', 'menus'] },
+        { section: 'Sistema', items: ['notificacionesReset', 'cierreEscolar', 'usuarios', 'privilegios', 'menus', 'helpTickets'] },
         { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
-        { section: 'Monitoreo', items: ['estadisticas', 'logs'] },
+        { section: 'Monitoreo', items: ['estadisticas', 'logs', 'security'] },
         { section: 'Inteligencia Artificial', items: ['iaHorarios'] },
     ],
 
@@ -157,8 +164,8 @@ export const ROLE_MENUS = {
 
     [ROLES.DIRECTOR]: [
         { section: 'Principal', items: ['dashboard'] },
-        { section: 'Inteligencia Artificial', items: ['iaHorarios'] },
-        { section: 'Supervisión', items: ['cronograma', 'cierreNotas', 'reportesAcademicos'] },
+        { section: 'Inteligencia Artificial', items: ['iaHorarios', 'aiPredictor'] },
+        { section: 'Supervisión', items: ['cronograma', 'cierreNotas', 'reportesAcademicos', 'teacherRatings'] },
         { section: 'Académico', items: ['niveles', 'secciones', 'docentes', 'materias', 'grados', 'gestionCursos'] },
         { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
     ],
@@ -216,8 +223,8 @@ export const ROLE_MENUS = {
     ],
     'ROLE_DIRECCION': [
         { section: 'Principal', items: ['dashboard'] },
-        { section: 'Inteligencia Artificial', items: ['iaHorarios'] },
-        { section: 'Supervisión', items: ['cronograma', 'cierreNotas', 'reportesAcademicos'] },
+        { section: 'Inteligencia Artificial', items: ['iaHorarios', 'aiPredictor'] },
+        { section: 'Supervisión', items: ['cronograma', 'cierreNotas', 'reportesAcademicos', 'teacherRatings'] },
         { section: 'Académico', items: ['niveles', 'secciones', 'docentes', 'materias', 'grados', 'gestionCursos'] },
         { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
     ],
@@ -242,7 +249,7 @@ export const ROLE_MENUS = {
         { section: 'Principal', items: ['dashboard'] },
         { section: 'Sistema', items: ['notificacionesReset', 'cierreEscolar', 'usuarios', 'privilegios', 'menus'] },
         { section: 'Configuración', items: ['ajustes', 'ajusteGeneral', 'catalogos'] },
-        { section: 'Monitoreo', items: ['estadisticas', 'logs'] },
+        { section: 'Monitoreo', items: ['estadisticas', 'logs', 'security'] },
     ],
 };
 

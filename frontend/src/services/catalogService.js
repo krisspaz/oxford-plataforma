@@ -30,10 +30,14 @@ export const catalogService = {
     closeSchoolCycle: () => api.post('/cycle/close'),
 
     // Academic Levels CRUD
-    getAcademicLevels: () => api.get('/academic-levels'), // Point to new controller
-    createAcademicLevel: (data) => api.post('/academic-levels', data),
-    updateAcademicLevel: (id, data) => api.put(`/academic-levels/${id}`, data),
-    deleteAcademicLevel: (id) => api.delete(`/academic-levels/${id}`),
+    getAcademicLevels: () => api.get('/academic_levels'),
+    createAcademicLevel: (data) => api.post('/academic_levels', data, {
+        headers: { 'Content-Type': 'application/ld+json' }
+    }),
+    updateAcademicLevel: (id, data) => api.put(`/academic_levels/${id}`, data, {
+        headers: { 'Content-Type': 'application/ld+json' }
+    }),
+    deleteAcademicLevel: (id) => api.delete(`/academic_levels/${id}`),
 
     // Get payment methods
     getPaymentMethods: () => api.get('/catalogs/payment-methods'),

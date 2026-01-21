@@ -44,7 +44,6 @@ createRoot(document.getElementById('root')).render(
       <ErrorBoundary>
         <App />
       </ErrorBoundary>
-      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   </StrictMode>,
 )

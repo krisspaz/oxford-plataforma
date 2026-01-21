@@ -28,6 +28,7 @@ def ask(data: dict, x_internal_key: str = Header(..., alias="X-INTERNAL-KEY")):
     from knowledge_base import knowledge_base
     from response_generator import response_generator
     from learning_engine import learning_engine
+    from risk_analyzer import RiskAnalyzer
     
     # === 1. CHECK FOR TEACHING COMMAND (!aprende) ===
     if prompt.lower().startswith("!aprende"):
@@ -98,3 +99,14 @@ def ask(data: dict, x_internal_key: str = Header(..., alias="X-INTERNAL-KEY")):
     )
     
     return {"response": response_text, "intent": intent, "lang": lang, "original_input": data}
+
+@app.post("/risk-analysis")
+def risk_analysis(data: dict, x_internal_key: str = Header(..., alias="X-INTERNAL-KEY")):
+    check_key(x_internal_key)
+
+    analyzer = RiskAnalyzer()
+    
+    # Analyze
+    result = analyzer.analyze(data)
+    
+    return result

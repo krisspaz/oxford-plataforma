@@ -15,6 +15,11 @@ const teacherRatingService = {
         const response = await api.post('/teacher_ratings', data);
         return response;
     },
+
+    delete: async (id) => {
+        const response = await api.delete(`/teacher_ratings/${id}`);
+        return response;
+    },
 };
 
 export default teacherRatingService;
