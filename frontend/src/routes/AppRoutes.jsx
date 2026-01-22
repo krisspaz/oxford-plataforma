@@ -30,6 +30,22 @@ const ChatDocentePage = lazy(() => import('../pages/ChatDocentePage'));
 const SugerenciasPage = lazy(() => import('../pages/SugerenciasPage'));
 const EvaluacionDocentePage = lazy(() => import('../pages/EvaluacionDocentePage'));
 const CalendarioGlobalPage = lazy(() => import('../pages/CalendarioGlobalPage'));
+const CargaNotasPage = lazy(() => import('../pages/CargaNotasPage'));
+const HorariosPage = lazy(() => import('../pages/HorariosPage'));
+const MiHorarioPage = lazy(() => import('../pages/MiHorarioPage'));
+const MisAlumnosPage = lazy(() => import('../pages/MisAlumnosPage'));
+const GestionTareasPage = lazy(() => import('../pages/GestionTareasPage'));
+const CalendarPage = lazy(() => import('../pages/CalendarPage'));
+const TareasPage = lazy(() => import('../pages/TareasPage'));
+const NotificationsPage = lazy(() => import('../pages/NotificationsPage'));
+
+// Enterprise Components
+const CrisisModeDashboard = lazy(() => import('../components/CrisisModeDashboard'));
+const EconomicDashboard = lazy(() => import('../components/EconomicDashboard'));
+const CalendarView = lazy(() => import('../components/CalendarView'));
+const ExportCenter = lazy(() => import('../components/ExportCenter'));
+const StudentTaskDetailPage = lazy(() => import('../pages/StudentTaskDetailPage'));
+const SystemStatusPage = lazy(() => import('../pages/SystemStatusPage'));
 // ... imports continue ...
 
 const AppRoutes = () => {
