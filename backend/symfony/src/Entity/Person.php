@@ -16,6 +16,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource]
 class Person
 {
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['person:read', 'person:write'])]
     private ?int $id = null;

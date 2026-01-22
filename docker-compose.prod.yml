@@ -1,0 +1,31 @@
+services:
+  backend:
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: 0
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+
+  worker:
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: 0
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  nginx:
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M

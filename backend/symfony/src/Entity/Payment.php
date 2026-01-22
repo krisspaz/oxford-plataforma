@@ -61,11 +61,8 @@ class Payment
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $type = null; // INVOICE, RECEIPT
 
-    #[ORM\Column(length: 20, nullable: true)]
-    private ?string $billingIdentifier = null; // NIT or CUI
-
-    #[ORM\Column(length: 150, nullable: true)]
-    private ?string $billingName = null;
+    #[ORM\Column(length: 45, nullable: true)]
+    private ?string $ipAddress = null;
 
     public function getMethod(): ?string
     {
@@ -108,6 +105,18 @@ class Payment
     public function setBillingName(?string $billingName): static
     {
         $this->billingName = $billingName;
+        return $this;
+    }
+
+    public function getIpAddress(): ?string
+    {
+        return $this->ipAddress;
+    }
+
+    public function setIpAddress(?string $ipAddress): static
+    {
+        $this->ipAddress = $ipAddress;
+
         return $this;
     }
 

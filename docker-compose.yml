@@ -260,9 +260,6 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
     networks:
       - app_net
-networks:
-  app_net:
-    driver: bridge
 
   # === MONITORING STACK ===
   prometheus:
@@ -309,6 +306,10 @@ networks:
       - "9100:9100"
     networks:
       - app_net
+
+networks:
+  app_net:
+    driver: bridge
 
 volumes:
   db_data:

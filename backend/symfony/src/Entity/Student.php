@@ -62,6 +62,11 @@ class Student
     #[ORM\Column(nullable: true)]
     private ?float $academicRiskScore = null;
 
+    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\Version]
+    #[Groups(['student:read'])]
+    private ?int $version = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -249,5 +254,10 @@ class Student
     public function getEnrollments(): Collection
     {
         return $this->enrollments;
+    }
+
+    public function getVersion(): ?int
+    {
+        return $this->version;
     }
 }

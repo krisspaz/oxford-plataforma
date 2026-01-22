@@ -123,3 +123,61 @@ deploy-staging: build ## Deploy to staging
 deploy-prod: build ## Deploy to production
 	@echo "🚀 Deploying to production..."
 	# Add your production deployment commands here
+
+## === MONITORING ===
+health-check: ## Verify all services are healthy
+	@echo "🏥 Checking service health..."
+	@curl -sf http://localhost:8000/health > /dev/null && echo "✅ Backend OK" || echo "❌ Backend DOWN"
+	@curl -sf http://localhost:8001/health > /dev/null && echo "✅ AI Service OK" || echo "❌ AI Service DOWN"
+	@docker-compose ps | grep -E "(Up|running)" || echo "❌ Some containers are down"
+
+logs-tail: ## Tail all service logs
+	docker-compose logs -f --tail=100
+
+logs-backend: ## View backend logs
+	docker-compose logs -f backend
+
+logs-ai: ## View AI service logs
+	docker-compose logs -f ai_service
+
+## === BACKUP & RESTORE ===
+db-backup: ## Backup database to /backups
+	@./scripts/backup/backup_db.sh
+
+db-restore: ## Restore database (usage: make db-restore FILE=backup.sql.gz)
+	@if [ -z "$(FILE)" ]; then \
+		echo "❌ Error: FILE parameter required"; \
+		echo "Usage: make db-restore FILE=backup.sql.gz"; \
+		exit 1; \
+	fi
+	@echo "⚠️  WARNING: This will OVERWRITE the current database!"
+	@read -p "Type 'RESTORE' to continue: " confirm && [ "$$confirm" = "RESTORE" ]
+	gunzip -c $(FILE) | docker exec -i postgres psql -U oxford_user oxford_db
+	@echo "✅ Database restored from $(FILE)"
+
+## === SECURITY ===
+
+security-scan: ## Run comprehensive security audit
+	@echo "🔒 Running security scans..."
+	cd frontend && npm audit --audit-level=moderate
+	cd backend/symfony && composer audit
+	# docker run --rm -v $(PWD):/scan aquasec/trivy fs --severity HIGH,CRITICAL /scan
+
+rotate-secrets: ## Rotate production secrets
+	@echo "🔐 Rotating secrets..."
+	@mkdir -p secrets
+	@openssl rand -base64 32 > secrets/app_secret.txt
+	@openssl rand -base64 24 > secrets/db_password.txt
+	@echo "✅ New secrets generated in /secrets"
+	@echo "⚠️  Action required:"
+	@echo "   1. Update .env with new values"
+	@echo "   2. Restart all services: docker-compose restart"
+
+## === PERFORMANCE ===
+load-test: ## Run k6 load tests
+	@command -v k6 >/dev/null 2>&1 || { echo "❌ k6 not installed. Install: brew install k6"; exit 1; }
+	k6 run infrastructure/load-tests/main.js
+
+benchmark: ## Quick HTTP benchmark
+	ab -n 1000 -c 10 -H "Authorization: Bearer test" http://localhost:8000/api/health
+
