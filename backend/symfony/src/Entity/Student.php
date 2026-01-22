@@ -8,43 +8,54 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: StudentRepository::class)]
 #[ApiResource(
-    processor: \App\State\StudentProcessor::class
+    processor: \App\State\StudentProcessor::class,
+    normalizationContext: ['groups' => ['student:read', 'person:read']],
+    denormalizationContext: ['groups' => ['student:write', 'person:write']]
 )]
 class Student
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['student:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2)]
+    #[Groups(['student:read', 'student:write'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2)]
+    #[Groups(['student:read', 'student:write'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 20, unique: true)]
     #[Assert\NotBlank]
+    #[Groups(['student:read', 'student:write'])]
     private ?string $carnet = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['student:read', 'student:write'])]
     private ?\DateTimeInterface $birthDate = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['student:read', 'student:write'])]
     private ?string $email = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['student:read', 'student:write'])]
     private ?string $address = null;
 
     #[ORM\Column]
+    #[Groups(['student:read', 'student:write'])]
     private ?bool $isActive = true;
 
     // Risks calculated by AI

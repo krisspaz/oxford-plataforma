@@ -8,23 +8,30 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: TeacherRepository::class)]
 #[ApiResource(
-    processor: \App\State\TeacherProcessor::class
+    processor: \App\State\TeacherProcessor::class,
+    normalizationContext: ['groups' => ['teacher:read', 'person:read']],
+    denormalizationContext: ['groups' => ['teacher:write', 'person:write']]
 )]
 class Teacher extends Person
 {
     #[ORM\Column(length: 50, unique: true, nullable: true)]
+    #[Groups(['teacher:read', 'teacher:write'])]
     private ?string $employeeCode = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(['teacher:read', 'teacher:write'])]
     private ?string $specialization = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(['teacher:read', 'teacher:write'])]
     private ?\DateTimeInterface $hireDate = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['teacher:read', 'teacher:write'])]
     private ?string $contractType = 'Tiempo Completo'; // Tiempo Completo, Medio Tiempo, Por Horas
 
     #[ORM\OneToMany(mappedBy: 'teacher', targetEntity: SubjectAssignment::class)]

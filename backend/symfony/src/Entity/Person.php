@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\ApiResource;
 use App\Repository\PersonRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PersonRepository::class)]
@@ -15,47 +16,58 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource]
 class Person
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['person:read', 'person:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
+    #[Groups(['person:read', 'person:write'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
+    #[Groups(['person:read', 'person:write'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['person:read', 'person:write'])]
     private ?string $dpi = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['person:read', 'person:write'])]
     private ?string $phone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['person:read', 'person:write'])]
     private ?string $email = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['person:read', 'person:write'])]
     private ?string $address = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(['person:read', 'person:write'])]
     private ?\DateTimeInterface $birthDate = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['person:read', 'person:write'])]
     private ?string $gender = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['person:read', 'person:write'])]
     private ?string $photo = null;
 
     #[ORM\Column]
+    #[Groups(['person:read', 'person:write'])]
     private ?bool $isActive = true;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['person:read'])]
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['person:read'])]
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\OneToOne(targetEntity: User::class)]

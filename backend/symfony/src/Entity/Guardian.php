@@ -7,24 +7,33 @@ use App\Repository\GuardianRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: GuardianRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['guardian:read', 'person:read']],
+    denormalizationContext: ['groups' => ['guardian:write', 'person:write']]
+)]
 class Guardian extends Person
 {
     #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(['guardian:read', 'guardian:write'])]
     private ?string $occupation = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(['guardian:read', 'guardian:write'])]
     private ?string $workplace = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['guardian:read', 'guardian:write'])]
     private ?string $workPhone = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(['guardian:read', 'guardian:write'])]
     private ?string $nit = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['guardian:read', 'guardian:write'])]
     private ?string $relationship = 'Padre'; // Padre, Madre, Encargado
 
     #[ORM\ManyToMany(targetEntity: Student::class, inversedBy: 'guardians')]

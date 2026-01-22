@@ -17,10 +17,14 @@ export const studentService = {
     search: (query) => api.get(`/students?search=${encodeURIComponent(query)}`),
 
     // Create new student
-    create: (data) => api.post('/students', data),
+    create: (data) => api.post('/students', data, {
+        headers: { 'Content-Type': 'application/ld+json' }
+    }),
 
     // Update student
-    update: (id, data) => api.put(`/students/${id}`, data),
+    update: (id, data) => api.patch(`/students/${id}`, data, {
+        headers: { 'Content-Type': 'application/merge-patch+json' }
+    }),
 
     // Get student account status
     getAccountStatus: (id) => api.get(`/students/${id}/account`),

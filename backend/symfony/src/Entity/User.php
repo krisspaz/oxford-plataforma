@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -14,7 +15,9 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ApiResource(
-    processor: \App\State\UserPasswordHasher::class
+    processor: \App\State\UserPasswordHasher::class,
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']]
 )]
 #[UniqueEntity(fields: ['email'], message: 'Este correo electrónico ya está registrado.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -33,17 +36,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\NotBlank(message: "El email es obligatorio")]
     #[Assert\Email(message: "El email no es válido")]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $email = null;
 
     #[ORM\Column]
+    #[Groups(['user:read', 'user:write'])]
     private array $roles = [];
 
     /**
@@ -52,9 +59,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     #[Assert\NotBlank(message: "La contraseña es obligatoria")]
     #[Assert\Length(min: 8, minMessage: "La contraseña debe tener al menos 8 caracteres")]
+    #[Groups(['user:write'])]
     private ?string $password = null;
 
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[Groups(['user:read', 'user:write'])]
     private bool $isActive = true;
 
     #[ORM\Embedded(class: TwoFactorAuth::class)]

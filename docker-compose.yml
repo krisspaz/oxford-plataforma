@@ -5,7 +5,9 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-oxford_db}
       POSTGRES_USER: ${POSTGRES_USER:-oxford_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Database password required}
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
     ports:
       - "5433:5432"
     volumes:
@@ -86,9 +88,11 @@ services:
       context: ./backend/symfony
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://oxford_user:${POSTGRES_PASSWORD}@database:5432/oxford_db?serverVersion=16&charset=utf8
+      DATABASE_URL: postgresql://oxford_user:%env(file:DB_PASSWORD_FILE)%@database:5432/oxford_db?serverVersion=16&charset=utf8
+      DB_PASSWORD_FILE: /run/secrets/db_password
       APP_ENV: ${APP_ENV:-dev}
-      APP_SECRET: ${APP_SECRET:?App secret required}
+      APP_SECRET_FILE: /run/secrets/app_secret
+      # APP_SECRET is now handled via APP_SECRET_FILE in config
       CORPOSISTEMAS_API_URL: ${CORPOSISTEMAS_API_URL:-https://api.corposistemas.gt}
       CORPOSISTEMAS_API_KEY: ${CORPOSISTEMAS_API_KEY:-demo_key}
       CORPOSISTEMAS_NIT: ${CORPOSISTEMAS_NIT:-12345678}
@@ -111,6 +115,9 @@ services:
     volumes:
       - ./backend/symfony:/var/www/symfony
     working_dir: /var/www/symfony
+    secrets:
+      - db_password
+      - app_secret
     networks:
       - app_net
     healthcheck:
@@ -127,9 +134,10 @@ services:
       dockerfile: Dockerfile
     command: php bin/console messenger:consume async -vv
     environment:
-      DATABASE_URL: postgresql://oxford_user:${POSTGRES_PASSWORD}@database:5432/oxford_db?serverVersion=16&charset=utf8
+      DATABASE_URL: postgresql://oxford_user:%env(file:DB_PASSWORD_FILE)%@database:5432/oxford_db?serverVersion=16&charset=utf8
+      DB_PASSWORD_FILE: /run/secrets/db_password
       APP_ENV: ${APP_ENV:-dev}
-      APP_SECRET: ${APP_SECRET:?App secret required}
+      APP_SECRET_FILE: /run/secrets/app_secret
       CORPOSISTEMAS_API_URL: ${CORPOSISTEMAS_API_URL:-https://api.corposistemas.gt}
       CORPOSISTEMAS_API_KEY: ${CORPOSISTEMAS_API_KEY:-demo_key}
       CORPOSISTEMAS_NIT: ${CORPOSISTEMAS_NIT:-12345678}
@@ -155,6 +163,9 @@ services:
     volumes:
       - ./backend/symfony:/var/www/symfony
     working_dir: /var/www/symfony
+    secrets:
+      - db_password
+      - app_secret
     networks:
       - app_net
 
@@ -204,6 +215,9 @@ services:
       - "8000:80"
     volumes:
       - ./backend/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./backend/nginx/ssl.conf:/etc/nginx/conf.d/ssl.conf.template
+      - ./backend/nginx/certs:/etc/letsencrypt
+      - ./backend/nginx/www:/var/www/certbot
       - ./backend/symfony/public:/var/www/symfony/public
     depends_on:
       backend:
@@ -234,16 +248,79 @@ services:
       - app_net
     healthcheck:
       test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/healthz" ]
-      timeout: 5s
       interval: 10s
       retries: 5
 
+  # === CERTBOT (SSL/TLS) ===
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./backend/nginx/certs:/etc/letsencrypt
+      - ./backend/nginx/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - app_net
 networks:
   app_net:
     driver: bridge
+
+  # === MONITORING STACK ===
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    networks:
+      - app_net
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    networks:
+      - app_net
+    depends_on:
+      - prometheus
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points'
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    ports:
+      - "9100:9100"
+    networks:
+      - app_net
 
 volumes:
   db_data:
   redis_data:
   mongodb_data:
   minio_data:
+  prometheus_data:
+  grafana_data:
+
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  app_secret:
+    file: ./secrets/app_secret.txt

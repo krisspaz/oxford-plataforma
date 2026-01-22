@@ -31,8 +31,14 @@ const teacherService = {
      * Create a new teacher
      * @param {Object} data - Teacher data
      */
+    /**
+     * Create a new teacher
+     * @param {Object} data - Teacher data
+     */
     create: async (data) => {
-        return api.post('/teachers', data);
+        return api.post('/teachers', data, {
+            headers: { 'Content-Type': 'application/ld+json' }
+        });
     },
 
     /**
@@ -41,7 +47,9 @@ const teacherService = {
      * @param {Object} data - Updated data
      */
     update: async (id, data) => {
-        return api.put(`/teachers/${id}`, data);
+        return api.patch(`/teachers/${id}`, data, {
+            headers: { 'Content-Type': 'application/merge-patch+json' }
+        });
     },
 
     /**

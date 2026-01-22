@@ -9,10 +9,14 @@ export const familyService = {
     getById: (id) => api.get(`/families/${id}`),
 
     // Create family
-    create: (data) => api.post('/families', data),
+    create: (data) => api.post('/families', data, {
+        headers: { 'Content-Type': 'application/ld+json' }
+    }),
 
     // Update family
-    update: (id, data) => api.put(`/families/${id}`, data),
+    update: (id, data) => api.patch(`/families/${id}`, data, {
+        headers: { 'Content-Type': 'application/merge-patch+json' }
+    }),
 
     // Get siblings of a student
     getSiblings: (familyId, studentId) =>

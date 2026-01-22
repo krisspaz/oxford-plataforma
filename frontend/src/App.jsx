@@ -5,6 +5,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { Toaster } from 'sonner';
 import { AIProvider } from './contexts/AIContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import { Helmet } from 'react-helmet-async';
 // lazy already imported at top
 const AppRoutes = lazy(() => import('./routes/AppRoutes'));
 import VoiceChat from './components/VoiceChat';
@@ -65,6 +66,12 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <Helmet>
+        <title>Sistema Oxford</title>
+        <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+        <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+        <meta name="referrer" content="strict-origin-when-cross-origin" />
+      </Helmet>
       <AuthProvider>
         <ThemeProvider>
           <Toaster position="top-right" richColors />

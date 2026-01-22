@@ -11,20 +11,10 @@ export const userService = {
     getById: (id) => api.get(`/users/${id}`),
 
     // Create new user
-    create: (data) => api.post('/users', data, {
-        headers: {
-            'Content-Type': 'application/ld+json',
-            'Accept': 'application/ld+json'
-        }
-    }),
+    create: (data) => api.post('/users', data),
 
     // Update user
-    update: (id, data) => api.put(`/users/${id}`, data, {
-        headers: {
-            'Content-Type': 'application/ld+json',
-            'Accept': 'application/ld+json'
-        }
-    }),
+    update: (id, data) => api.patch(`/users/${id}`, data),
 
     // Toggle user status
     toggleStatus: (id) => api.patch(`/users/${id}/status`),

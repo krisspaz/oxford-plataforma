@@ -39,7 +39,10 @@ class NotificationController extends AbstractController
             ];
         }
 
-        return $this->json($data);
+        return $this->json([
+            'success' => true,
+            'data' => $data
+        ]);
     }
 
     #[Route('/{id}/read', name: 'mark_read', methods: ['POST'])]

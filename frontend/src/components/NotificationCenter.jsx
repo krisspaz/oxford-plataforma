@@ -31,12 +31,8 @@ const NotificationCenter = () => {
             }
         } catch (error) {
             console.error("Error loading notifications", error);
-            // Fallback for demo if API fails
-            setNotifications([
-                { id: 1, type: 'grade', title: 'Nueva Calificación', message: 'Se ha publicado la nota de Matemáticas', time: 'Hace 5 min', read: false, icon: '📝' },
-                { id: 2, type: 'payment', title: 'Pago Confirmado', message: 'Tu pago de Marzo ha sido procesado', time: 'Hace 2 horas', read: false, icon: '💰' }
-            ]);
-            setUnreadCount(2);
+            setNotifications([]);
+            setUnreadCount(0);
         }
     };
 
