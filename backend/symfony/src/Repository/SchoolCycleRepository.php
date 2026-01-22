@@ -15,4 +15,9 @@ class SchoolCycleRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, SchoolCycle::class);
     }
+
+    public function findActiveCycle(): ?SchoolCycle
+    {
+        return $this->findOneBy(['isActive' => true]);
+    }
 }

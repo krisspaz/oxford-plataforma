@@ -219,6 +219,7 @@ services:
       - ./backend/nginx/certs:/etc/letsencrypt
       - ./backend/nginx/www:/var/www/certbot
       - ./backend/symfony/public:/var/www/symfony/public
+      - ./frontend/dist:/var/www/frontend
     depends_on:
       backend:
         condition: service_healthy

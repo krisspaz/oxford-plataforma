@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Star, User, AlertCircle, Trash2, Award, TrendingUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { teacherRatingService, teacherService } from '@/services';
-import { toast } from 'react-hot-toast';
+import { toast } from '@/utils/toast';
 
 const TeacherRatingsPage = () => {
     const [ratings, setRatings] = useState([]);

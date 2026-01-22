@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Award, Plus, Trash2, Edit2, UserPlus, CheckCircle, Search, DollarSign, Percent } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { scholarshipService, studentService } from '@/services';
-import { toast } from 'react-hot-toast';
+import { toast } from '@/utils/toast';
 
 const ScholarshipsPage = () => {
     const [scholarships, setScholarships] = useState([]);

@@ -42,23 +42,46 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        // Check if user is logged in
-        const token = localStorage.getItem('token');
-        if (token) {
-            const userData = parseUserFromToken(token);
-            if (userData) {
-                // Check if token is expired
-                const now = Math.floor(Date.now() / 1000);
-                if (userData.exp && userData.exp < now) {
-                    // Token expired, logout
-                    localStorage.removeItem('token');
-                    setUser(null);
-                } else {
-                    setUser(userData);
+        console.log("AuthContext V2: Initializing...");
+
+        const initAuth = () => {
+            try {
+                // Check if user is logged in
+                const token = localStorage.getItem('token');
+                if (token) {
+                    const userData = parseUserFromToken(token);
+                    if (userData) {
+                        // Check if token is expired
+                        const now = Math.floor(Date.now() / 1000);
+                        if (userData.exp && userData.exp < now) {
+                            localStorage.removeItem('token');
+                            setUser(null);
+                        } else {
+                            setUser(userData);
+                        }
+                    } else {
+                        localStorage.removeItem('token');
+                        setUser(null);
+                    }
                 }
+            } catch (error) {
+                console.error("AuthContext Error:", error);
+                localStorage.removeItem('token');
+                setUser(null);
+            } finally {
+                console.log("AuthContext: Loading set to false");
+                setLoading(false);
             }
-        }
-        setLoading(false);
+        };
+
+        initAuth();
+
+        // Safety valve: ensure loading is false explicitly after 1s
+        const timer = setTimeout(() => {
+            console.log("AuthContext: Safety timeout triggered");
+            setLoading(false);
+        }, 1000);
+        return () => clearTimeout(timer);
     }, []);
 
     const login = async (email, password) => {

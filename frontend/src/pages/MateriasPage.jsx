@@ -17,7 +17,7 @@ const MateriasPage = () => {
 
     // Data States
     const [subjects, setSubjects] = useState([]);
-    const [assignments, setAssignments] = useState([]);
+    const [assignments] = useState([]);
     const [teachers, setTeachers] = useState([]);
     const [grades, setGrades] = useState([]);
     const [sections, setSections] = useState([]); // Filtered sections based on selected grade

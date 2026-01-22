@@ -11,6 +11,14 @@ import api from '../services/api';
 // GENERIC HOOKS
 // ===================================
 
+export const useApi = () => {
+    return {
+        ...api,
+        fetch: api.get, // Alias for legacy/demo usage
+    };
+};
+
+
 /**
  * Generic GET hook with caching
  * @param {string|string[]} queryKey - Unique key for this query

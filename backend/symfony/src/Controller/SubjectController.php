@@ -39,7 +39,19 @@ class SubjectController extends AbstractController
             $assignment->setSection($this->em->getReference('App\Entity\Section', $data['sectionId']));
         }
         
-        $assignment->setSchoolCycle($this->em->getReference('App\Entity\SchoolCycle', $data['cycleId']));
+        // Handle School Cycle
+        $schoolCycle = null;
+        if (isset($data['cycleId'])) {
+            $schoolCycle = $this->em->getReference('App\Entity\SchoolCycle', $data['cycleId']);
+        } else {
+            // Auto-fetch active cycle
+            $schoolCycle = $this->em->getRepository('App\Entity\SchoolCycle')->findOneBy(['isActive' => true]);
+            if (!$schoolCycle) {
+                return $this->json(['error' => 'No hay un ciclo escolar activo. Configure uno primero.'], 400);
+            }
+        }
+        $assignment->setSchoolCycle($schoolCycle);
+
         $assignment->setHoursPerWeek($data['hoursPerWeek'] ?? 5);
 
         $this->em->persist($assignment);

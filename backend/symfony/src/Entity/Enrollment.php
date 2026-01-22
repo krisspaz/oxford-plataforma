@@ -8,7 +8,25 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: EnrollmentRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new \ApiPlatform\Metadata\Get(),
+        new \ApiPlatform\Metadata\GetCollection(),
+        new \ApiPlatform\Metadata\Post(
+            name: 'enrollment_create', 
+            uriTemplate: '/enrollments', 
+            controller: \App\Controller\EnrollmentController::class . '::create',
+            deserialize: false, 
+            validate: false // Validation handled manually in controller
+        ),
+        new \ApiPlatform\Metadata\Patch(
+            name: 'enrollment_status',
+            uriTemplate: '/enrollments/{id}/status',
+            controller: \App\Controller\EnrollmentController::class . '::updateStatus',
+            deserialize: false
+        )
+    ]
+)]
 class Enrollment
 {
     #[ORM\Id]

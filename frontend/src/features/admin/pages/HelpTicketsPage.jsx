@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Mail, CheckCircle, Clock, AlertCircle, Filter, Search, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { helpTicketService } from '@/services';
-import { toast } from 'react-hot-toast';
+import { toast } from '@/utils/toast';
 
 const HelpTicketsPage = () => {
     const [tickets, setTickets] = useState([]);

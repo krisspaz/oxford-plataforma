@@ -67,8 +67,8 @@ const GradosPage = () => {
                 setLevels([]);
             }
         } catch (error) {
-            console.error('Error loading data:', error);
-            toast.error('Error cargando datos: ' + error.message);
+            console.error(error);
+            toast.error('Error al cargar datos');
         } finally {
             setLoading(false)
         }

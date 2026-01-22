@@ -93,6 +93,11 @@ const apiFetch = async (endpoint, options = {}, retry = true) => {
     // Add Authorization header if token exists
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+        // Redundant header to bypass stripping issues
+        headers['X-Auth-Token'] = token;
+        console.log(`[API] Attaching Token to ${options.method} ${endpoint}`);
+    } else {
+        console.warn(`[API] NO TOKEN for ${options.method} ${endpoint}`);
     }
 
     try {
