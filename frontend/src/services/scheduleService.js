@@ -16,6 +16,9 @@ const scheduleService = {
     // Get schedule by course/grade (Admin/Coordinator)
     getByCourse: (courseId, cycleId) => api.get(`/schedule/course/${courseId}`, { params: { cycleId } }),
 
+    // Get specific student schedule (for Parents/Admin)
+    getStudentSchedule: (studentId, cycleId) => api.get(`/schedule/student/${studentId}`, { params: { cycleId } }),
+
     // CRUD
     create: (data) => api.post('/schedule', data),
     update: (id, data) => api.put(`/schedule/${id}`, data),

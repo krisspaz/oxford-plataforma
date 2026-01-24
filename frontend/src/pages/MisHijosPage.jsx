@@ -34,15 +34,15 @@ const MisHijosPage = () => {
         setSelectedChild(child);
         setLoadingSchedule(true);
         try {
-            // Mock schedule fetch or real one if backend supports "get schedule by student ID"
-            // const data = await scheduleService.getStudentSchedule(child.id);
-            // using mock for now to prevent crash
-            const mockSchedule = [
-                { id: 1, dayOfWeek: 1, startTime: '07:30', endTime: '08:15', subject: { name: 'Matemáticas' }, classroom: '101' },
-                { id: 2, dayOfWeek: 1, startTime: '08:15', endTime: '09:00', subject: { name: 'Ciencias' }, classroom: 'Lab 1' },
-                { id: 3, dayOfWeek: 2, startTime: '09:00', endTime: '09:45', subject: { name: 'Idioma Español' }, classroom: '101' },
-            ];
-            setSchedule(mockSchedule);
+
+            // Fetch real schedule from backend
+            const data = await scheduleService.getStudentSchedule(child.id);
+            if (Array.isArray(data)) {
+                setSchedule(data);
+            } else {
+                console.warn("Schedule data is not an array", data);
+                setSchedule([]);
+            }
         } catch (error) {
             console.error("Error loading schedule", error);
         } finally {

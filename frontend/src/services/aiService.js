@@ -6,7 +6,7 @@
  */
 
 import api from './api';
-import axios from 'axios';
+
 
 // Cache for AI responses to avoid redundant calls
 const responseCache = new Map();
@@ -87,19 +87,14 @@ const aiService = {
     async processCommand(text, currentConfig = {}) {
         try {
             // Use proxied endpoint to avoid Mixed Content / CORS issues
-            // This goes to /ai-api which Vite proxies to http://127.0.0.1:8001
-            const token = localStorage.getItem('token');
-            const response = await axios.post('/ai-api/process-command', {
+            const data = await api.post('/ai-api/process-command', {
                 text,
                 current_config: currentConfig,
             }, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
                 timeout: AI_CONFIG.timeout
             });
 
-            return response.data;
+            return data;
         } catch (error) {
             console.error('AI Process error:', error);
             const errorMessage = error.response?.data?.message || error.message;

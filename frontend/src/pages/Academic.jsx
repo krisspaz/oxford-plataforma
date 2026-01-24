@@ -1,6 +1,6 @@
 import { toast } from '../utils/toast';
 import { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
+import { api } from '../services/api';
 import {
     Sparkles,
     Send,
@@ -135,12 +135,10 @@ const Academic = () => {
 
         try {
             // Call Python AI backend
-            const response = await axios.post(`${AI_API_URL}/process-command`, {
+            const result = await api.post(`${AI_API_URL}/process-command`, {
                 text: userMessage,
                 current_config: config
             });
-
-            const result = response.data;
 
             // Apply configuration changes
             if (result.config_changes) {
@@ -215,18 +213,18 @@ const Academic = () => {
         setLoading(true);
 
         try {
-            const response = await axios.post(`${AI_API_URL}/generate-schedule`, {
+            const data = await api.post(`${AI_API_URL}/generate-schedule`, {
                 config: config,
                 grade_groups: gradeGroups,
                 day_rules: dayRules,
                 teacher_restrictions: teacherRestrictions
             });
 
-            if (response.data.success) {
-                setSchedule(response.data.schedule);
+            if (data.success) {
+                setSchedule(data.schedule);
                 setMessages(prev => [...prev, {
                     type: 'bot',
-                    text: `🎉 **¡Horario generado!**\n\n${response.data.message}\n\n⏰ ${config.startTime} - ${config.endTime}\n📚 ${timeSlots.filter(s => !s.isRecess).length} clases de ${config.classDuration} min\n${config.hasRecess ? `☕ Receso: ${config.recessStart} - ${config.recessEnd}` : '🚫 Sin receso'}`
+                    text: `🎉 **¡Horario generado!**\n\n${data.message}\n\n⏰ ${config.startTime} - ${config.endTime}\n📚 ${timeSlots.filter(s => !s.isRecess).length} clases de ${config.classDuration} min\n${config.hasRecess ? `☕ Receso: ${config.recessStart} - ${config.recessEnd}` : '🚫 Sin receso'}`
                 }]);
             }
         } catch (error) {

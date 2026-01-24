@@ -22,6 +22,8 @@ class DashboardController extends AbstractController
     #[Route('/stats', name: 'dashboard_stats', methods: ['GET'])]
     public function index(): JsonResponse
     {
+        $user = $this->getUser();
+        
         // General Stats for Admin
         $totalUsers = $this->entityManager->getRepository(User::class)->count([]);
         $totalStudents = $this->entityManager->getRepository(Student::class)->count([]);
@@ -29,6 +31,37 @@ class DashboardController extends AbstractController
         $activeSubjects = $this->entityManager->getRepository(Subject::class)->count([]);
         
         $activeCycle = $this->entityManager->getRepository(SchoolCycle::class)->findOneBy(['isActive' => true]);
+
+        // Specific Role Stats
+        $parentStats = null;
+        $teacherStats = null;
+
+        if ($this->isGranted('ROLE_PADRE')) {
+            $guardian = $user->getPerson(); // Assuming User -> Person (Guardian)
+            if ($guardian instanceof \App\Entity\Guardian) {
+                $childrenCount = $guardian->getStudents()->count();
+                // Mock pending payments for now
+                $pendingPayments = 1; 
+                
+                $parentStats = [
+                    'childrenCount' => $childrenCount,
+                    'pendingPayments' => $pendingPayments
+                ];
+            }
+        }
+
+        if ($this->isGranted('ROLE_DOCENTE')) {
+             $teacher = $user->getPerson();
+             if ($teacher instanceof \App\Entity\Teacher) {
+                 // Mock teacher stats or implement real logic
+                 $teacherStats = [
+                     'myClassesCount' => 0, // Implement real count
+                     'myStudentsCount' => 0,
+                     'activeTasks' => 0,
+                     'pendingGrades' => 0
+                 ];
+             }
+        }
 
         // Real Recent Students
         $recentStudentsEntities = $this->entityManager->getRepository(Student::class)->findBy([], ['id' => 'DESC'], 5);
@@ -52,7 +85,9 @@ class DashboardController extends AbstractController
             'totalTeachers' => $totalTeachers,
             'activeSubjects' => $activeSubjects,
             'activeCycle' => $activeCycle ? $activeCycle->getName() : '2026',
-            'recentStudents' => $recentStudents
+            'recentStudents' => $recentStudents,
+            'parent' => $parentStats,
+            'teacher' => $teacherStats
         ]);
     }
 }

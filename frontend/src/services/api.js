@@ -26,16 +26,18 @@ const onTokenRefreshed = (token) => {
     refreshSubscribers = [];
 };
 
-/**
- * Get stored JWT token
- */
-export const getToken = () => localStorage.getItem('token');
+// Sanitize token retrieval
+export const getToken = () => {
+    const token = localStorage.getItem('token');
+    if (!token || token === 'undefined' || token === 'null') return null;
+    return token.replace(/^"(.*)"$/, '$1'); // Remove surrounding quotes if present
+};
 
 /**
  * Set JWT token
  */
 export const setToken = (token) => {
-    if (token) {
+    if (token && typeof token === 'string') {
         localStorage.setItem('token', token);
     } else {
         localStorage.removeItem('token');
@@ -84,6 +86,18 @@ const refreshToken = async () => {
 const apiFetch = async (endpoint, options = {}, retry = true) => {
     const token = getToken();
 
+    // Check if we have a token before even trying, unless it's a login/public endpoint
+    const isPublicEndpoint = endpoint === '/login_check' || endpoint.includes('/public');
+
+    if (!token && !isPublicEndpoint) {
+        console.warn(`[API] Aborting request to ${endpoint}: No token found.`);
+        // Force redirect if trying to access protected resource without token
+        if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+        }
+        throw new Error('Sesión no válida. Redirigiendo...');
+    }
+
     const headers = {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
@@ -95,9 +109,9 @@ const apiFetch = async (endpoint, options = {}, retry = true) => {
         headers['Authorization'] = `Bearer ${token}`;
         // Redundant header to bypass stripping issues
         headers['X-Auth-Token'] = token;
-        console.log(`[API] Attaching Token to ${options.method} ${endpoint}`);
-    } else {
-        console.warn(`[API] NO TOKEN for ${options.method} ${endpoint}`);
+        if (import.meta.env.DEV) {
+            console.log(`[API] 🔐 Attaching Token to ${options.method || 'GET'} ${endpoint}`);
+        }
     }
 
     try {
@@ -107,30 +121,55 @@ const apiFetch = async (endpoint, options = {}, retry = true) => {
             credentials: 'include',
         });
 
-        // Handle 401 - Token expired, try to refresh
-        if (response.status === 401 && retry && token) {
-            if (!isRefreshing) {
-                isRefreshing = true;
-                try {
-                    const newToken = await refreshToken();
-                    isRefreshing = false;
-                    onTokenRefreshed(newToken);
-                    // Retry original request with new token
-                    return apiFetch(endpoint, options, false);
-                } catch (refreshError) {
-                    isRefreshing = false;
-                    throw refreshError;
+        // Parse response body primarily for error checking
+        let data;
+        const contentType = response.headers.get('content-type');
+        if (contentType && (contentType.includes('application/json') || contentType.includes('application/ld+json'))) {
+            data = await response.json();
+        } else {
+            data = await response.text();
+        }
+
+        // Handle 401 OR Specific Backend Auth Errors that might return as 500/400
+        const isAuthError = response.status === 401 ||
+            (typeof data === 'object' && data.message === 'JWT Token not found') ||
+            (typeof data === 'object' && data.message === 'Expired JWT Token') ||
+            (typeof data === 'string' && data.includes('JWT Token not found'));
+
+        if (isAuthError) {
+            console.warn(`[API] Auth Error for ${endpoint}: ${response.status} - ${typeof data === 'object' ? data.message : data}`);
+
+            if (retry && token) {
+                if (!isRefreshing) {
+                    isRefreshing = true;
+                    try {
+                        const newToken = await refreshToken();
+                        isRefreshing = false;
+                        onTokenRefreshed(newToken);
+                        // Retry original request with new token
+                        return apiFetch(endpoint, options, false);
+                    } catch (refreshError) {
+                        isRefreshing = false;
+                        throw refreshError;
+                    }
+                } else {
+                    // Wait for token refresh and retry
+                    return new Promise((resolve, reject) => {
+                        subscribeTokenRefresh((newToken) => {
+                            headers['Authorization'] = `Bearer ${newToken}`;
+                            apiFetch(endpoint, options, false)
+                                .then(resolve)
+                                .catch(reject);
+                        });
+                    });
                 }
             } else {
-                // Wait for token refresh and retry
-                return new Promise((resolve, reject) => {
-                    subscribeTokenRefresh((newToken) => {
-                        headers['Authorization'] = `Bearer ${newToken}`;
-                        apiFetch(endpoint, options, false)
-                            .then(resolve)
-                            .catch(reject);
-                    });
-                });
+                // If 401/AuthError and no retry allowed (or no token), force logout
+                setToken(null);
+                if (!window.location.pathname.includes('/login')) {
+                    window.location.href = '/login';
+                }
+                throw new Error('Sesión expirada. Por favor inicia sesión nuevamente.');
             }
         }
 
@@ -147,15 +186,6 @@ const apiFetch = async (endpoint, options = {}, retry = true) => {
         // Handle 404
         if (response.status === 404) {
             throw new Error('Recurso no encontrado.');
-        }
-
-        // Parse response
-        let data;
-        const contentType = response.headers.get('content-type');
-        if (contentType && (contentType.includes('application/json') || contentType.includes('application/ld+json'))) {
-            data = await response.json();
-        } else {
-            data = await response.text();
         }
 
         if (!response.ok) {

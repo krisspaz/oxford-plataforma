@@ -89,7 +89,11 @@ const AdminDashboard = ({ stats, navigate, darkMode }) => (
                         link.setAttribute('download', 'horario_generado.pdf');
                         document.body.appendChild(link);
                         link.click();
-                        link.parentNode.removeChild(link);
+                        // Safe removal
+                        if (link.parentNode) {
+                            link.parentNode.removeChild(link);
+                        }
+                        window.URL.revokeObjectURL(url);
                     } catch (error) {
                         console.error('Error downloading PDF:', error);
                         toast.info('Error al descargar el PDF. Verifique permisos.');

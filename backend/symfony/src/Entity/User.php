@@ -32,6 +32,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public const ROLE_INFORMATICA = 'ROLE_INFORMATICA';
     public const ROLE_DOCENTE = 'ROLE_DOCENTE';
     public const ROLE_ALUMNO = 'ROLE_ALUMNO';
+    public const ROLE_PADRE = 'ROLE_PADRE';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -210,6 +211,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             self::ROLE_INFORMATICA => 'Informática',
             self::ROLE_DOCENTE => 'Docente',
             self::ROLE_ALUMNO => 'Alumno',
+            self::ROLE_PADRE => 'Padre de Familia',
         ];
     }
 }

@@ -6,7 +6,15 @@ const AuthContext = createContext(null);
 // Decode JWT token without external library
 const decodeJWT = (token) => {
     try {
-        const base64Url = token.split('.')[1];
+        if (!token || typeof token !== 'string') return null;
+
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+            console.error('Invalid token format');
+            return null;
+        }
+
+        const base64Url = parts[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const jsonPayload = decodeURIComponent(
             atob(base64)
@@ -41,6 +49,14 @@ export const AuthProvider = ({ children }) => {
         return null;
     };
 
+    const logout = () => {
+        console.log("AuthContext: Logging out...");
+        localStorage.removeItem('token');
+        setUser(null);
+        // Optional: Redirect to login or handled by protected routes
+        window.location.href = '/login';
+    };
+
     useEffect(() => {
         console.log("AuthContext V2: Initializing...");
 
@@ -54,34 +70,31 @@ export const AuthProvider = ({ children }) => {
                         // Check if token is expired
                         const now = Math.floor(Date.now() / 1000);
                         if (userData.exp && userData.exp < now) {
-                            localStorage.removeItem('token');
-                            setUser(null);
+                            console.warn("AuthContext: Token expired during init");
+                            logout();
                         } else {
+                            console.log("AuthContext: User restored from token", userData.email);
                             setUser(userData);
                         }
                     } else {
-                        localStorage.removeItem('token');
-                        setUser(null);
+                        console.warn("AuthContext: Invalid token data");
+                        logout();
                     }
+                } else {
+                    console.log("AuthContext: No token found");
                 }
             } catch (error) {
                 console.error("AuthContext Error:", error);
-                localStorage.removeItem('token');
-                setUser(null);
+                logout();
             } finally {
-                console.log("AuthContext: Loading set to false");
-                setLoading(false);
+                // Short delay to ensure state updates propagate if needed
+                setTimeout(() => {
+                    setLoading(false);
+                }, 100);
             }
         };
 
         initAuth();
-
-        // Safety valve: ensure loading is false explicitly after 1s
-        const timer = setTimeout(() => {
-            console.log("AuthContext: Safety timeout triggered");
-            setLoading(false);
-        }, 1000);
-        return () => clearTimeout(timer);
     }, []);
 
     const login = async (email, password) => {
@@ -114,11 +127,6 @@ export const AuthProvider = ({ children }) => {
             console.error("Login failed:", error);
             return false;
         }
-    };
-
-    const logout = () => {
-        localStorage.removeItem('token');
-        setUser(null);
     };
 
     // Check if user has a specific role

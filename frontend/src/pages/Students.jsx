@@ -1,6 +1,6 @@
 import { toast } from '../utils/toast';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { api } from '../services/api';
 import { Plus, Search, Trash2, Edit, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -20,16 +20,13 @@ const Students = () => {
         grade: ''
     });
 
-    const token = localStorage.getItem('token');
-
     const fetchStudents = async () => {
         try {
-            const res = await axios.get('http://localhost:8000/api/students', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setStudents(res.data['hydra:member'] || []);
+            const res = await api.get('/students');
+            setStudents(res['hydra:member'] || res.member || res || []);
         } catch (err) {
             console.error('Error fetching students:', err);
+            toast.error('Error al cargar lista de estudiantes');
         } finally {
             setLoading(false);
         }
@@ -43,18 +40,18 @@ const Students = () => {
         e.preventDefault();
         setSaving(true);
         try {
-            await axios.post('http://localhost:8000/api/students', {
+            await api.post('/students', {
                 ...newStudent,
                 isActive: true
             }, {
                 headers: {
-                    Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/ld+json'
                 }
             });
             setShowModal(false);
             setNewStudent({ firstName: '', lastName: '', carnet: '', email: '', birthDate: '', grade: '' });
             fetchStudents();
+            toast.success('Estudiante creado exitosamente');
         } catch (error) {
             console.error('Error creating student:', error);
             toast.info('Error al crear estudiante. Verifica los datos.');

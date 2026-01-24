@@ -161,7 +161,7 @@ const AsignacionMateriasPage = () => {
                                                     onChange={(e) => handleAssignTeacher(assignment.subjectId, e.target.value)}
                                                     className={`w-full md:w-64 pl-4 pr-8 py-2 rounded-lg border appearance-none cursor-pointer transition-colors ${darkMode
                                                         ? 'bg-gray-700 border-gray-600 text-white hover:border-gray-500 focus:border-blue-500'
-                                                        : 'bg-gray-50 border-gray-200 text-gray-900 hover:border-gray-300 focus:border-blue-500'} focus:ring-1 focus:ring-blue-500 outline-none`}
+                                                        : 'bg-white border-gray-200 text-gray-900 hover:border-gray-300 focus:border-blue-500'} focus:ring-1 focus:ring-blue-500 outline-none`}
                                                 >
                                                     <option value="">-- Seleccionar Docente --</option>
                                                     {teachers.map(t => (

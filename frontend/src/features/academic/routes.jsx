@@ -15,6 +15,7 @@ const AsignacionMateriasPage = lazy(() => import('../../pages/AsignacionMaterias
 const HorariosPage = lazy(() => import('../../pages/HorariosPage'));
 const GestionCursosPage = lazy(() => import('../../pages/GestionCursosPage'));
 const IAHorariosPage = lazy(() => import('../../pages/IAHorariosPage'));
+const DailyOperationsDashboard = lazy(() => import('./operations/pages/DailyOperationsDashboard'));
 
 export const academicRouteElements = <>
     <Route path="academico" element={<Academic />} />
@@ -31,6 +32,7 @@ export const academicRouteElements = <>
     <Route path="academico/asignacion-materias" element={<AsignacionMateriasPage />} />
     <Route path="academico/horarios" element={<HorariosPage />} />
     <Route path="academico/gestion-cursos" element={<GestionCursosPage />} />
+    <Route path="academico/operaciones" element={<DailyOperationsDashboard />} />
     <Route path="academico/oxford-ai" element={<IAHorariosPage />} />
 </>;
 

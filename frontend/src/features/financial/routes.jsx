@@ -19,6 +19,9 @@ const ConveniosPage = lazy(() => import('../../pages/ConveniosPage'));
 const AsignarConvenioPage = lazy(() => import('../../pages/AsignarConvenioPage'));
 const PaquetesSeleccionadosPage = lazy(() => import('../../pages/PaquetesSeleccionadosPage'));
 const ScholarshipsPage = lazy(() => import('./pages/ScholarshipsPage'));
+const PlansManager = lazy(() => import('./components/PlansManager'));
+const InvoiceAuditor = lazy(() => import('./components/InvoiceAuditor'));
+const BankingMonitor = lazy(() => import('./components/BankingMonitor'));
 
 const FinancialRoutes = () => {
     return (
@@ -70,6 +73,11 @@ export const financialRouteElements = <>
     <Route path="finanzas/insolventes" element={<InsolventesPage />} />
     <Route path="finanzas/paquetes-seleccionados" element={<PaquetesSeleccionadosPage />} />
     <Route path="finanzas/becas" element={<ScholarshipsPage />} />
+
+    {/* Enterprise Modules */}
+    <Route path="finanzas/planes" element={<PlansManager />} />
+    <Route path="finanzas/auditoria" element={<InvoiceAuditor />} />
+    <Route path="finanzas/seguridad" element={<BankingMonitor />} />
 </>;
 
 export const standaloneFinancialRoutes = <>

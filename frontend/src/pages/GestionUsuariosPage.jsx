@@ -22,6 +22,7 @@ const GestionUsuariosPage = () => {
         { value: 'ROLE_INFORMATICA', label: 'Informática' },
         { value: 'ROLE_DOCENTE', label: 'Docente' },
         { value: 'ROLE_ALUMNO', label: 'Alumno' },
+        { value: 'ROLE_PADRE', label: 'Padre de Familia' },
     ];
 
     const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-gray-900 bg-white'}`;
