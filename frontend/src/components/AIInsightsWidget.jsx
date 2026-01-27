@@ -21,46 +21,49 @@ const AIInsightsWidget = ({ darkMode, userRole }) => {
     }, [userRole]);
 
     if (loading) return (
-        <div className={`p-6 rounded-2xl shadow-lg border ${darkMode ? 'bg-indigo-900/20 border-indigo-700/50' : 'bg-indigo-50 border-indigo-100'} animate-pulse`}>
+        <div className={`p-6 rounded-2xl border animate-pulse ${darkMode ? 'bg-slate-800/50 border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
             <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-full bg-indigo-200/50"></div>
-                <div className="h-4 bg-indigo-200/50 rounded w-1/3"></div>
+                <div className={`w-8 h-8 rounded-full ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
+                <div className={`h-4 rounded w-1/3 ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
             </div>
-            <div className="h-16 bg-indigo-200/50 rounded w-full"></div>
+            <div className={`h-16 rounded w-full ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}></div>
         </div>
     );
 
     if (!insight) return null;
 
     return (
-        <div className={`relative overflow-hidden p-6 rounded-2xl shadow-lg border transition-all hover:shadow-xl ${darkMode ? 'bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border-indigo-500/30' : 'bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-100'}`}>
+        <div className={`relative overflow-hidden p-6 rounded-2xl border transition-all hover:shadow-lg group ${darkMode
+            ? 'bg-gradient-to-br from-indigo-900/40 to-slate-900/90 border-indigo-500/30 backdrop-blur-md'
+            : 'bg-white border-indigo-100 shadow-sm hover:shadow-md'
+            }`}>
 
             {/* Background Decor */}
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-                <Brain size={100} />
+            <div className="absolute -top-6 -right-6 opacity-10 transition-transform duration-700 group-hover:rotate-12 group-hover:scale-110">
+                <Brain size={140} className={darkMode ? 'text-indigo-400' : 'text-indigo-600'} />
             </div>
 
             {/* Header */}
             <div className="flex items-center gap-2 mb-4 relative z-10">
-                <div className={`p-2 rounded-lg ${darkMode ? 'bg-indigo-500/20 text-indigo-300' : 'bg-indigo-100 text-indigo-600'}`}>
-                    <Sparkles size={20} />
+                <div className={`p-2 rounded-xl shadow-sm ${darkMode ? 'bg-indigo-500/20 text-indigo-300 ring-1 ring-inset ring-indigo-500/20' : 'bg-indigo-50 text-indigo-600 ring-1 ring-inset ring-indigo-100'}`}>
+                    <Sparkles size={18} />
                 </div>
-                <h3 className={`font-bold text-lg ${darkMode ? 'text-indigo-100' : 'text-indigo-900'}`}>
+                <h3 className={`font-bold text-lg tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
                     Análisis de IA
                 </h3>
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">BETA</span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${darkMode ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/20' : 'bg-indigo-50 text-indigo-600 border border-indigo-100'}`}>Beta</span>
             </div>
 
             {/* Content */}
             <div className="space-y-4 relative z-10">
                 <div className="flex gap-3 items-start">
-                    <AlertTriangle className={`mt-1 shrink-0 ${insight.alertLevel === 'high' ? 'text-red-500' : 'text-orange-500'}`} size={18} />
-                    <div>
-                        <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                    <AlertTriangle className={`mt-0.5 shrink-0 ${insight.alertLevel === 'high' ? 'text-red-500' : 'text-amber-500'}`} size={18} />
+                    <div className="flex-1">
+                        <p className={`text-sm font-medium leading-relaxed ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>
                             {insight.insight}
                         </p>
-                        <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                            Sugerencia: {insight.recommendation}
+                        <p className={`text-xs mt-1.5 font-medium ${darkMode ? 'text-indigo-300/80' : 'text-indigo-600/80'}`}>
+                            💡 Sugerencia: {insight.recommendation}
                         </p>
                     </div>
                 </div>

@@ -117,7 +117,7 @@ const TeacherRatingPage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Teachers List */}
                 <div className={`lg:col-span-1 ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm overflow-hidden`}>
-                    <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'}`}>
                         <h2 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Mis Profesores</h2>
                     </div>
                     <div className="divide-y divide-gray-200 dark:divide-gray-700">

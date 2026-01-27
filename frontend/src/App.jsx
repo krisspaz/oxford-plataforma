@@ -12,7 +12,7 @@ import NotificationListener from './components/NotificationListener';
 // lazy imports
 const AppRoutes = lazy(() => import('./routes/AppRoutes'));
 
-const APP_VERSION = '2025-01-05-v1.1.3-FIX';
+const APP_VERSION = '2026-01-26-v2.3.0';
 
 // Simple, Robust PageLoader
 const PageLoader = () => (
@@ -24,10 +24,15 @@ const PageLoader = () => (
 function App() {
 
   useEffect(() => {
-    // 1. Version Check & Cache Busting
+    // 1. Version Check & Cache Busting - BUT PRESERVE AUTH TOKEN!
     const currentVersion = localStorage.getItem('oxford_app_version');
     if (currentVersion !== APP_VERSION) {
-      console.log(`New version detected: ${APP_VERSION}. Clearing cache...`);
+      console.log(`New version detected: ${APP_VERSION}. Clearing cache (preserving auth)...`);
+
+      // Save the token BEFORE clearing
+      const savedToken = localStorage.getItem('token');
+      const savedTheme = localStorage.getItem('darkMode');
+
       if ('caches' in window) {
         caches.keys().then((names) => {
           names.forEach((name) => {
@@ -35,11 +40,20 @@ function App() {
           });
         });
       }
-      localStorage.clear();
+
+      // Only clear non-essential items, NOT the token
       localStorage.setItem('oxford_app_version', APP_VERSION);
+
+      // Restore auth token if it existed
+      if (savedToken && savedToken !== 'undefined' && savedToken !== 'null') {
+        localStorage.setItem('token', savedToken);
+      }
+      if (savedTheme) {
+        localStorage.setItem('darkMode', savedTheme);
+      }
     }
 
-    // 2. Safety Check for Corrupt Data
+    // 2. Safety Check for Corrupt Data - DON'T clear everything on error
     try {
       const theme = localStorage.getItem('darkMode');
       if (theme && theme !== 'true' && theme !== 'false') localStorage.removeItem('darkMode');
@@ -49,7 +63,8 @@ function App() {
         localStorage.removeItem('token');
       }
     } catch (e) {
-      localStorage.clear();
+      console.error('Error checking localStorage:', e);
+      // DON'T clear everything - just log the error
     }
   }, []);
 

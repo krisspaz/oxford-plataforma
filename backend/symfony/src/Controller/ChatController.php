@@ -98,7 +98,7 @@ class ChatController extends AbstractController
     // TEACHER ENDPOINTS
     // ==========================================
 
-    #[Route('/teachers/{teacherId}/students', methods: ['GET'])]
+    #[Route('/chat/students/{teacherId}', methods: ['GET'])]
     public function getMyStudents(int $teacherId): JsonResponse
     {
         $students = $this->studentRepository->findAll();

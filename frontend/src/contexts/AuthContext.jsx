@@ -101,7 +101,7 @@ export const AuthProvider = ({ children }) => {
         try {
             const apiUrl = '/api';
 
-            const response = await axios.post(`${apiUrl}/login_check`, {
+            const response = await axios.post(`${apiUrl}/auth/login`, {
                 email: email,
                 password: password
             });

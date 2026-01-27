@@ -48,13 +48,24 @@ class AuthenticationService
     {
         $user = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
 
-        if (!$user || !$this->passwordHasher->isPasswordValid($user, $password)) {
+        // Check password using Symfony hasher OR native fallback (debug mode)
+        $isValid = $this->passwordHasher->isPasswordValid($user, $password);
+        
+        // Fallback for direct bcrypt hashes confirming debug_user.php findings
+        if (!$isValid) {
+             $isValid = password_verify($password, $user->getPassword());
+             if ($isValid) {
+                 // Re-hash automatically with Symfony's preferred algo if needed (future todo)
+             }
+        }
+
+        if (!$user || !$isValid) {
             // Use consistent response time
             usleep(random_int(100000, 300000));
             throw new \Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException('Credenciales inválidas');
         }
 
-        if (!$user->isActive()) {
+        if (!$user->getIsActive()) {
             throw new \Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException('Cuenta desactivada');
         }
 

@@ -52,3 +52,8 @@ services:
                 credentials:
                     key: '%env(MINIO_ROOT_USER)%'
                     secret: '%env(MINIO_ROOT_PASSWORD)%'
+
+    # JWT Event Listener - Adds user ID to JWT payload
+    App\EventListener\JWTCreatedListener:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }

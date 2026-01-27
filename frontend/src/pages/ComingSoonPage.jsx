@@ -8,7 +8,7 @@ const ComingSoonPage = ({ title = "Módulo en Desarrollo" }) => {
     const navigate = useNavigate();
 
     return (
-        <div className={`min-h-[70vh] flex flex-col items-center justify-center p-8 text-center rounded-2xl ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div className={`min-h-[70vh] flex flex-col items-center justify-center p-8 text-center rounded-2xl ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg border ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'}`}>
             {/* Animated Background Pattern */}
             <div className="relative">
                 <div className={`absolute -inset-4 rounded-full blur-2xl opacity-30 ${darkMode ? 'bg-gradient-to-r from-teal-600 to-blue-600' : 'bg-gradient-to-r from-teal-400 to-blue-400'}`}></div>
@@ -36,7 +36,7 @@ const ComingSoonPage = ({ title = "Módulo en Desarrollo" }) => {
                 </p>
 
                 {/* Progress indicator */}
-                <div className={`mt-6 p-4 rounded-xl ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+                <div className={`mt-6 p-4 rounded-xl ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'} border ${darkMode ? 'border-gray-600' : 'bg-white border-gray-200 text-gray-900'}`}>
                     <div className="flex items-center justify-between mb-2">
                         <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Progreso estimado</span>
                         <span className="text-sm font-bold text-teal-500">75%</span>

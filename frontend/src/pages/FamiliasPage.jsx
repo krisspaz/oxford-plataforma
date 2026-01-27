@@ -12,7 +12,7 @@ const FamiliasPage = () => {
     const [loading, setLoading] = useState(true);
     const [families, setFamilies] = useState([]);
 
-    const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
+    const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
 
     useEffect(() => {
         loadFamilies();
@@ -143,7 +143,7 @@ const FamiliasPage = () => {
                                 </div>
                             )}
 
-                            <div className={`mt-4 pt-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                            <div className={`mt-4 pt-4 border-t ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'}`}>
                                 <p className={`text-xs mb-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>Estudiantes:</p>
                                 <div className="flex flex-wrap gap-2">
                                     {family.students.map(student => (

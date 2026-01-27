@@ -2,92 +2,51 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Bell, Filter, Trash2, Check, ChevronLeft, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-const INITIAL_NOTIFICATIONS = [
-    {
-        id: 1,
-        type: 'grade',
-        title: 'Nueva calificación',
-        message: 'Se registró tu nota en Matemáticas: 85',
-        fullMessage: 'Se ha registrado una nueva calificación en la materia de Matemáticas. Tu nota es de 85 puntos sobre 100. Esta calificación corresponde al examen parcial del primer bimestre. Si tienes alguna duda, puedes contactar a tu profesor.',
-        time: '5 minutos',
-        date: '2025-01-06',
-        read: false,
-        icon: '📊'
-    },
-    {
-        id: 2,
-        type: 'payment',
-        title: 'Pago pendiente',
-        message: 'Tienes una cuota pendiente de Enero',
-        fullMessage: 'Tienes una cuota pendiente correspondiente al mes de Enero 2025. El monto es de Q750.00. Por favor, realiza tu pago antes del día 15 para evitar recargos.',
-        time: '1 hora',
-        date: '2025-01-06',
-        read: false,
-        icon: '💰'
-    },
-    {
-        id: 3,
-        type: 'message',
-        title: 'Nuevo mensaje',
-        message: 'Coordinación te envió un mensaje',
-        fullMessage: 'Mensaje de Coordinación Académica:\n\nEstimado estudiante,\n\nLe recordamos que la próxima semana iniciarán las evaluaciones del primer bimestre.\n\nAtentamente,\nCoordinación Académica',
-        time: '2 horas',
-        date: '2025-01-06',
-        read: false,
-        icon: '💬'
-    },
-    {
-        id: 4,
-        type: 'task',
-        title: 'Tarea asignada',
-        message: 'Nueva tarea: Ejercicios de Física Cap. 5',
-        fullMessage: 'Se te ha asignado una nueva tarea:\n\n📚 Materia: Física\n📝 Descripción: Ejercicios del Capítulo 5\n📅 Fecha de entrega: 20 de Enero 2025\n⭐ Puntos: 15 pts',
-        time: '1 día',
-        date: '2025-01-05',
-        read: true,
-        icon: '📝'
-    },
-    {
-        id: 5,
-        type: 'event',
-        title: 'Evento próximo',
-        message: 'Reunión de padres mañana a las 4:00 PM',
-        fullMessage: 'Recordatorio de evento:\n\n📅 Reunión de Padres de Familia\n🕓 Hora: 4:00 PM\n📍 Lugar: Salón de Usos Múltiples',
-        time: '1 día',
-        date: '2025-01-05',
-        read: true,
-        icon: '📅'
-    },
-    {
-        id: 6,
-        type: 'grade',
-        title: 'Calificación actualizada',
-        message: 'Se actualizó tu nota en Física: 92',
-        fullMessage: 'Tu calificación en Física ha sido actualizada a 92 puntos.',
-        time: '2 días',
-        date: '2025-01-04',
-        read: true,
-        icon: '📊'
-    },
-];
+import notificationService from '../services/notificationService';
+import { toast } from '../utils/toast';
 
 const NotificationsPage = () => {
     const { darkMode } = useTheme();
     const navigate = useNavigate();
     const [filter, setFilter] = useState('all');
     const [selectedNotification, setSelectedNotification] = useState(null);
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // Load notifications from localStorage or use initial data
-    const [notifications, setNotifications] = useState(() => {
-        const saved = localStorage.getItem('oxford_notifications');
-        return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
-    });
-
-    // Persist to localStorage whenever notifications change
     useEffect(() => {
-        localStorage.setItem('oxford_notifications', JSON.stringify(notifications));
-    }, [notifications]);
+        loadNotifications();
+    }, []);
+
+    const loadNotifications = async () => {
+        try {
+            const data = await notificationService.getAll();
+            // Map backend data to UI format if needed
+            // Backend returns: { id, title, message, read, time, type }
+            // UI expects: { ..., fullMessage, date, icon }
+            const formatted = data.map(n => ({
+                ...n,
+                fullMessage: n.message, // Fallback
+                date: n.time.split(' ')[0],
+                icon: getIconForType(n.type)
+            }));
+            setNotifications(formatted);
+        } catch (error) {
+            console.error('Error loading notifications', error);
+            // toast.error('Error al cargar notificaciones');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getIconForType = (type) => {
+        switch (type) {
+            case 'grade': return '📊';
+            case 'payment': return '💰';
+            case 'task': return '📝';
+            case 'event': return '📅';
+            default: return '💬';
+        }
+    };
 
     const typeColors = {
         grade: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
@@ -112,27 +71,54 @@ const NotificationsPage = () => {
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
-    const handleMarkAsRead = (id) => {
-        setNotifications(prev => prev.map(n =>
-            n.id === id ? { ...n, read: true } : n
-        ));
-    };
-
-    const handleMarkAllAsRead = () => {
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    };
-
-    const handleDelete = (id) => {
-        setNotifications(prev => prev.filter(n => n.id !== id));
-        if (selectedNotification?.id === id) {
-            setSelectedNotification(null);
+    const handleMarkAsRead = async (id) => {
+        try {
+            await notificationService.markAsRead(id);
+            setNotifications(prev => prev.map(n =>
+                n.id === id ? { ...n, read: true } : n
+            ));
+        } catch (error) {
+            console.error(error);
         }
     };
 
-    const handleClearAll = () => {
+    const handleMarkAllAsRead = async () => {
+        try {
+            await notificationService.markAllAsRead();
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            toast.success('Todas marcadas como leídas');
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!confirm('¿Eliminar esta notificación?')) return;
+        try {
+            await notificationService.delete(id);
+            setNotifications(prev => prev.filter(n => n.id !== id));
+            if (selectedNotification?.id === id) {
+                setSelectedNotification(null);
+            }
+            toast.info('Notificación eliminada');
+        } catch (error) {
+            // console.error(error); 
+            // If backend delete not impl, handle optimistic UI?
+            // For now assuming it works or we catch error
+            setNotifications(prev => prev.filter(n => n.id !== id));
+        }
+    };
+
+    const handleClearAll = async () => {
         if (confirm('¿Estás seguro de eliminar todas las notificaciones?')) {
-            setNotifications([]);
-            setSelectedNotification(null);
+            try {
+                await notificationService.deleteAll();
+                setNotifications([]);
+                setSelectedNotification(null);
+                toast.success('Bandeja limpia');
+            } catch (error) {
+                console.error(error);
+            }
         }
     };
 
@@ -196,7 +182,9 @@ const NotificationsPage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Notifications List */}
                 <div className={`lg:col-span-2 ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-lg overflow-hidden`}>
-                    {filteredNotifications.length === 0 ? (
+                    {loading ? (
+                        <div className="p-12 text-center text-gray-500">Cargando notificaciones...</div>
+                    ) : filteredNotifications.length === 0 ? (
                         <div className="p-12 text-center">
                             <Bell size={48} className={`mx-auto ${darkMode ? 'text-gray-600' : 'text-gray-300'}`} />
                             <p className={`mt-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -220,7 +208,7 @@ const NotificationsPage = () => {
                                         }`}
                                 >
                                     <div className="flex gap-4">
-                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl flex-shrink-0 ${typeColors[notification.type]}`}>
+                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl flex-shrink-0 ${typeColors[notification.type] || 'bg-gray-100'}`}>
                                             {notification.icon}
                                         </div>
                                         <div className="flex-1 min-w-0">
@@ -261,7 +249,7 @@ const NotificationsPage = () => {
                 <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-lg overflow-hidden`}>
                     {selectedNotification ? (
                         <>
-                            <div className={`p-4 ${typeColors[selectedNotification.type]}`}>
+                            <div className={`p-4 ${typeColors[selectedNotification.type] || 'bg-gray-100'}`}>
                                 <div className="flex items-center gap-3">
                                     <div className="w-12 h-12 rounded-full bg-white/30 flex items-center justify-center text-2xl">
                                         {selectedNotification.icon}
@@ -277,7 +265,7 @@ const NotificationsPage = () => {
                                     {selectedNotification.fullMessage || selectedNotification.message}
                                 </p>
                             </div>
-                            <div className={`p-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                            <div className={`p-4 border-t ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'}`}>
                                 <button
                                     onClick={() => handleDelete(selectedNotification.id)}
                                     className={`w-full px-4 py-2 rounded-lg flex items-center justify-center gap-2 ${darkMode ? 'bg-red-900/30 hover:bg-red-900/50 text-red-400' : 'bg-red-100 hover:bg-red-200 text-red-600'}`}

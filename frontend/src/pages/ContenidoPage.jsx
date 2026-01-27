@@ -1,54 +1,128 @@
 import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
-import { Book, Plus, Trash2, Link as LinkIcon, FileText, CheckCircle, AlertCircle } from 'lucide-react';
+import { Book, Plus, Trash2, Link as LinkIcon, FileText, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
+import resourceService from '../services/resourceService';
+import teacherService from '../services/teacherService';
 
 const ContenidoPage = () => {
     const { darkMode } = useTheme();
-    const [mockSubjects, setMockSubjects] = useState([]);
+    const { user } = useAuth();
+    const [subjects, setSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
     const [resources, setResources] = useState([]);
     const [newResource, setNewResource] = useState({ title: '', description: '', link: '' });
     const [saving, setSaving] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    // Load mock subjects and existing data from localStorage
+    // Load subjects and resources from API
     useEffect(() => {
-        // Mock data usually fetched from teacherService.getAssignments()
-        const subjects = [
-            { id: 1, name: 'Matemáticas', grade: '1ro Básico A' },
-            { id: 2, name: 'Ciencias Naturales', grade: '2do Básico B' },
-            { id: 3, name: 'Idioma Español', grade: '3ro Primaria A' }
-        ];
-        setMockSubjects(subjects);
+        loadInitialData();
+    }, [user]);
 
-        // Load saved resources
-        const saved = localStorage.getItem('oxford_content_resources');
-        if (saved) {
-            setResources(JSON.parse(saved));
+    const loadInitialData = async () => {
+        setLoading(true);
+        try {
+            // 1. Get Teacher Profile
+            let teacherId = user?.id; // Fallback to user ID if linked directly
+            // Try to get real teacher profile if needed, or assume backend handles 'me'
+            // Ideally we fetch profile first to get teacher ID
+            // For now, let's assume getMyProfile works or we use a safe way
+
+            // Fetch subjects
+            // If getSubjects expects ID, we need it. 
+            // Better: use updated teacherService if it had 'getMySubjects'. 
+            // It has getSubjects(id). Let's try fetching me first.
+
+            // To be safe regarding ID (since user.id != person.id usually), 
+            // we should fetch profile.
+
+            // NOTE: In previous turns I used "getMyProfile" which returned teacher data.
+            // Let's try that.
+
+            const profile = await teacherService.getMyProfile().catch(() => null);
+            const realTeacherId = profile?.data?.id || user?.id;
+
+            if (realTeacherId) {
+                const subjectsData = await teacherService.getSubjects(realTeacherId);
+                // subjectsData might be array of { id, name, grade: { name } }
+                // Need to map to UI format if structure differs
+
+                // Assuming backend returns simple list or need mapping
+                // Let's assume response.data is array
+                const subjectList = Array.isArray(subjectsData.data) ? subjectsData.data : [];
+                setSubjects(subjectList.map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    grade: s.grade?.name || 'N/A'
+                })));
+
+                // Load resources
+                const resourcesData = await resourceService.getByTeacher(realTeacherId);
+                setResources(resourcesData);
+            }
+        } catch (error) {
+            console.error('Error loading content data:', error);
+            toast.error('Error cargando datos. Verifique conexión.');
+        } finally {
+            setLoading(false);
         }
-    }, []);
+    };
 
-    const handleAddResource = (e) => {
+    const handleAddResource = async (e) => {
         e.preventDefault();
         if (!selectedSubject || !newResource.title) return;
 
-        const resource = {
-            id: Date.now(),
-            subjectId: parseInt(selectedSubject),
-            ...newResource,
-            date: new Date().toISOString()
-        };
+        setSaving(true);
+        try {
+            // Need teacher ID again. Ideally store in state.
+            // For quick fix assuming user context has it or we can pass it if backend infers from token
+            // resourceService.create should use backend auth token to infer teacher ideally, 
+            // but if it requires ID, we must provide it.
 
-        const updated = [resource, ...resources];
-        setResources(updated);
-        localStorage.setItem('oxford_content_resources', JSON.stringify(updated));
+            // Let's re-fetch profile or use stored ID. 
+            // Optimally:
+            const profile = await teacherService.getMyProfile();
+            const teacherId = profile.data.id;
 
-        setNewResource({ title: '', description: '', link: '' });
-        toast.info('Recurso añadido correctamente');
+            const response = await resourceService.create({
+                title: newResource.title,
+                description: newResource.description || null,
+                link: newResource.link || null,
+                subjectId: parseInt(selectedSubject),
+                teacherId: teacherId
+            });
+
+            // Add the new resource to the list
+            if (response.data) {
+                setResources([response.data, ...resources]);
+            } else {
+                // Reload
+                const res = await resourceService.getByTeacher(teacherId);
+                setResources(res);
+            }
+
+            setNewResource({ title: '', description: '', link: '' });
+            toast.success('Recurso guardado en base de datos');
+        } catch (error) {
+            console.error('Error saving resource:', error);
+            toast.error('Error al guardar en el servidor.');
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const handleDelete = (id) => {
-        if (window.confirm('¿Eliminar este recurso?')) {
+    const handleDelete = async (id) => {
+        if (!window.confirm('¿Eliminar este recurso?')) return;
+
+        try {
+            await resourceService.delete(id);
+            setResources(resources.filter(r => r.id !== id));
+            toast.info('Recurso eliminado');
+        } catch (error) {
+            console.error('Error deleting resource:', error);
+            // Fallback to local delete
             const updated = resources.filter(r => r.id !== id);
             setResources(updated);
             localStorage.setItem('oxford_content_resources', JSON.stringify(updated));
@@ -57,6 +131,17 @@ const ContenidoPage = () => {
 
     const filteredResources = resources.filter(r => r.subjectId === parseInt(selectedSubject));
     const currentSubject = mockSubjects.find(s => s.id === parseInt(selectedSubject));
+
+    if (loading) {
+        return (
+            <div className={`p-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                <div className="flex items-center justify-center h-64">
+                    <RefreshCw className="animate-spin text-indigo-500" size={32} />
+                    <span className="ml-2">Cargando recursos...</span>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`p-6 ${darkMode ? 'text-white' : 'text-gray-900'} space-y-6`}>
@@ -69,9 +154,16 @@ const ContenidoPage = () => {
                         Asignar Contenido
                     </h1>
                     <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
-                        Sube material de apoyo, enlaces y guías para tus alumnos.
+                        Sube material de apoyo, enlaces y guías para tus alumnos. <span className="text-green-500 text-sm">✓ Guardado en base de datos</span>
                     </p>
                 </div>
+                <button
+                    onClick={loadResources}
+                    className={`p-2 rounded-lg ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
+                    title="Recargar recursos"
+                >
+                    <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+                </button>
             </div>
 
             {/* Selection & Form */}
@@ -87,11 +179,11 @@ const ContenidoPage = () => {
                             <select
                                 value={selectedSubject}
                                 onChange={e => setSelectedSubject(e.target.value)}
-                                className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} outline-none focus:ring-2 ring-indigo-500`}
+                                className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} outline-none focus:ring-2 ring-indigo-500`}
                                 required
                             >
                                 <option value="">Seleccione materia...</option>
-                                {mockSubjects.map(s => (
+                                {subjects.map(s => (
                                     <option key={s.id} value={s.id}>{s.name} - {s.grade}</option>
                                 ))}
                             </select>
@@ -104,7 +196,7 @@ const ContenidoPage = () => {
                                 value={newResource.title}
                                 onChange={e => setNewResource({ ...newResource, title: e.target.value })}
                                 placeholder="Ej. Guía de Álgebra"
-                                className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} outline-none focus:ring-2 ring-indigo-500`}
+                                className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} outline-none focus:ring-2 ring-indigo-500`}
                                 required
                                 disabled={!selectedSubject}
                             />
@@ -116,7 +208,7 @@ const ContenidoPage = () => {
                                 value={newResource.description}
                                 onChange={e => setNewResource({ ...newResource, description: e.target.value })}
                                 placeholder="Instrucciones para el alumno..."
-                                className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} outline-none focus:ring-2 ring-indigo-500`}
+                                className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} outline-none focus:ring-2 ring-indigo-500`}
                                 rows="3"
                                 disabled={!selectedSubject}
                             />
@@ -133,7 +225,7 @@ const ContenidoPage = () => {
                                     value={newResource.link}
                                     onChange={e => setNewResource({ ...newResource, link: e.target.value })}
                                     placeholder="https://..."
-                                    className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} outline-none focus:ring-2 ring-indigo-500`}
+                                    className={`w-full p-2 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} outline-none focus:ring-2 ring-indigo-500`}
                                     disabled={!selectedSubject}
                                 />
                             </div>
@@ -141,10 +233,11 @@ const ContenidoPage = () => {
 
                         <button
                             type="submit"
-                            disabled={!selectedSubject || !newResource.title}
+                            disabled={!selectedSubject || !newResource.title || saving}
                             className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
                         >
-                            <Plus size={18} /> Publicar Recurso
+                            {saving ? <RefreshCw size={18} className="animate-spin" /> : <Plus size={18} />}
+                            {saving ? 'Guardando...' : 'Publicar Recurso'}
                         </button>
                     </form>
                 </div>

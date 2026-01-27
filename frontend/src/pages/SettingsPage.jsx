@@ -57,7 +57,7 @@ const SettingsPage = () => {
         { id: 'appearance', label: 'Apariencia', icon: Palette },
     ];
 
-    const inputClass = `w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-200'}`;
+    const inputClass = `w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-200 text-gray-900'}`;
     const labelClass = `block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`;
 
     const GeneralSettings = () => (

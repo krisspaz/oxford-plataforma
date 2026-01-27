@@ -215,7 +215,7 @@ const EstadoCuentaPage = () => {
 
                     {/* Quotas Table */}
                     <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm overflow-hidden`}>
-                        <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                        <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'}`}>
                             <h3 className={`font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Detalle de Cuotas</h3>
                         </div>
                         <div className="overflow-x-auto">

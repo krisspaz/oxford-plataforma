@@ -17,7 +17,7 @@ const CatalogosPage = () => {
         paymentMethods: []
     });
 
-    const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
+    const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
     const labelClass = `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`;
 
     const tabs = [
@@ -95,7 +95,7 @@ const CatalogosPage = () => {
 
             {/* Table */}
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm overflow-hidden`}>
-                <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'}`}>
                     <h2 className={`font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
                         <Settings size={18} className="inline mr-2" />{currentTabLabel}
                     </h2>

@@ -123,9 +123,9 @@ const StudentChatPage = () => {
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm overflow-hidden`} style={{ height: 'calc(100vh - 220px)', minHeight: '500px' }}>
                 <div className="flex h-full">
                     {/* Teachers List */}
-                    <div className={`w-80 border-r ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex flex-col`}>
+                    <div className={`w-80 border-r ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'} flex flex-col`}>
                         {/* Search */}
-                        <div className={`p-3 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                        <div className={`p-3 border-b ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'}`}>
                             <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
                                 <Search size={16} className={darkMode ? 'text-gray-400' : 'text-gray-500'} />
                                 <input
@@ -182,7 +182,7 @@ const StudentChatPage = () => {
                         {selectedTeacher ? (
                             <>
                                 {/* Chat Header */}
-                                <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex items-center gap-3`}>
+                                <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'} flex items-center gap-3`}>
                                     <div className="relative">
                                         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
                                             <User size={20} className={darkMode ? 'text-gray-400' : 'text-gray-500'} />
@@ -226,7 +226,7 @@ const StudentChatPage = () => {
                                 </div>
 
                                 {/* Message Input */}
-                                <form onSubmit={handleSendMessage} className={`p-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                <form onSubmit={handleSendMessage} className={`p-4 border-t ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'}`}>
                                     <div className="flex items-center gap-2">
                                         <input
                                             type="text"

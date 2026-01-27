@@ -33,7 +33,7 @@ const GestionTareasPage = () => {
     const [selectedGrade, setSelectedGrade] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
-    const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-obs-blue outline-none w-full ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
+    const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-obs-blue outline-none w-full ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
 
     // Form state
     const [formData, setFormData] = useState({
@@ -387,7 +387,7 @@ const GestionTareasPage = () => {
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto`}>
-                        <div className={`p-6 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex items-center justify-between`}>
+                        <div className={`p-6 border-b ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'} flex items-center justify-between`}>
                             <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
                                 {editingTask ? 'Editar Tarea' : 'Nueva Tarea'}
                             </h2>
@@ -463,7 +463,7 @@ const GestionTareasPage = () => {
                             </div>
                         </div>
 
-                        <div className={`p-6 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex justify-end gap-3`}>
+                        <div className={`p-6 border-t ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'} flex justify-end gap-3`}>
                             <button onClick={() => setShowModal(false)} className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
                                 Cancelar
                             </button>

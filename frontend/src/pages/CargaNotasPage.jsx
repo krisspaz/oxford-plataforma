@@ -29,15 +29,22 @@ const CargaNotasPage = () => {
                 }
 
                 // 2. Load Subjects (Real)
-                const profile = await teacherService.getMyProfile();
+                const profileRes = await teacherService.getMyProfile();
+                const profile = profileRes.data;
+
                 if (profile && profile.id) {
                     const assignments = await teacherService.getSubjects(profile.id);
                     // Format for dropdown
-                    const formatted = assignments.map(a => ({
+                    // assignments.data is likely the array if using axios response directly or helper
+                    // Checking teacherService.getSubjects implementation: returns api.get(...)
+                    // So we expect response.data
+                    const data = assignments.data || [];
+
+                    const formatted = data.map(a => ({
                         id: a.id, // SubjectAssignment ID
-                        name: a.subject.name,
-                        grade: a.grade.name,
-                        full_name: `${a.subject.name} - ${a.grade.name} ${a.section ? `(${a.section.name})` : ''}`
+                        name: a.subject?.name || 'Materia',
+                        grade: a.grade?.name || 'Grado',
+                        full_name: `${a.subject?.name} - ${a.grade?.name} ${a.section ? `(${a.section.name})` : ''}`
                     }));
                     setSubjects(formatted);
                 }
@@ -199,7 +206,7 @@ const CargaNotasPage = () => {
             {/* Grades Table */}
             {selectedSubject && !loading && students.length > 0 && (
                 <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm overflow-hidden`}>
-                    <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex items-center justify-between`}>
+                    <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'} flex items-center justify-between`}>
                         <h2 className={`font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
                             {subjects.find(s => s.id === parseInt(selectedSubject))?.name} - {currentBimesterData?.name}
                         </h2>

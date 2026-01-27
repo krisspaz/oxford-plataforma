@@ -16,7 +16,7 @@ const ComprobantesPage = () => {
     const [invoices, setInvoices] = useState([]);
     const [annulReason, setAnnulReason] = useState('');
 
-    const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
+    const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
 
     const location = window.location.pathname;
 

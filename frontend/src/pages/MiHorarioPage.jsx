@@ -272,7 +272,7 @@ const MiHorarioPage = () => {
                                     {days.map(day => {
                                         const classInfo = getClassForPeriod(day, period.id);
                                         return (
-                                            <td key={`${day}-${period.id}`} className={`p-1 border text-center ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                            <td key={`${day}-${period.id}`} className={`p-1 border text-center ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'}`}>
                                                 {period.isBreak ? (
                                                     <span className="text-yellow-500 text-xs">Receso</span>
                                                 ) : classInfo ? (

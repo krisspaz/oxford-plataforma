@@ -5,6 +5,7 @@ import aiApi from '../services/aiApi';
 import { useAuth } from '../contexts/AuthContext';
 
 const VoiceChat = () => {
+    // ========== ALL HOOKS MUST BE AT THE TOP ==========
     const [isOpen, setIsOpen] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
@@ -13,16 +14,13 @@ const VoiceChat = () => {
     const [quickSuggestions, setQuickSuggestions] = useState([]);
     const [contextSuggestions, setContextSuggestions] = useState([]);
     const messagesEndRef = useRef(null);
+    const recognitionRef = useRef(null);
     const navigate = useNavigate();
     const { user } = useAuth();
 
-    // Hide if not logged in
-    if (!user) return null;
-
     // Speech Recognition Setup
-    const recognitionRef = useRef(null);
-
     useEffect(() => {
+        if (!user) return; // Guard inside effect
         if ('webkitSpeechRecognition' in window) {
             const recognition = new window.webkitSpeechRecognition();
             recognition.continuous = false;
@@ -32,18 +30,35 @@ const VoiceChat = () => {
             recognition.onresult = (event) => {
                 const text = event.results[0][0].transcript;
                 setInputText(text);
-                handleSend(text);
             };
 
             recognition.onend = () => setIsListening(false);
             recognitionRef.current = recognition;
         }
-    }, []);
+    }, [user]);
 
     // Load quick suggestions on mount
     useEffect(() => {
+        if (!user) return; // Guard inside effect
         if (isOpen) {
-            loadQuickSuggestions();
+            const loadSuggestions = async () => {
+                try {
+                    const role = user?.roles?.[0]?.replace('ROLE_', '').toLowerCase() || 'student';
+                    const response = await aiApi.get(`/chat/suggestions?role=${role}`);
+                    if (response.suggestions) {
+                        setQuickSuggestions(response.suggestions);
+                    }
+                } catch (error) {
+                    console.error('Error loading suggestions:', error);
+                    setQuickSuggestions([
+                        { text: "📊 Mis notas", value: "¿Cuáles son mis notas?" },
+                        { text: "📅 Mi horario", value: "Ver mi horario del día" },
+                        { text: "📝 Tareas", value: "Ver mis tareas pendientes" },
+                    ]);
+                }
+            };
+            loadSuggestions();
+
             if (messages.length === 0) {
                 setMessages([{
                     type: 'ai',
@@ -51,31 +66,17 @@ const VoiceChat = () => {
                 }]);
             }
         }
-    }, [isOpen]);
+    }, [isOpen, user]);
 
-    const loadQuickSuggestions = async () => {
-        try {
-            const role = user?.roles?.[0]?.replace('ROLE_', '').toLowerCase() || 'student';
-            const response = await aiApi.get(`/chat/suggestions?role=${role}`);
-            if (response.suggestions) {
-                setQuickSuggestions(response.suggestions);
-            }
-        } catch (error) {
-            console.error('Error loading suggestions:', error);
-            // Fallback suggestions
-            setQuickSuggestions([
-                { text: "📊 Mis notas", value: "¿Cuáles son mis notas?" },
-                { text: "📅 Mi horario", value: "Ver mi horario del día" },
-                { text: "📝 Tareas", value: "Ver mis tareas pendientes" },
-            ]);
+    // Scroll to bottom when messages change
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
-    };
+    }, [messages]);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    useEffect(() => scrollToBottom(), [messages]);
+    // ========== EARLY RETURN AFTER ALL HOOKS ==========
+    if (!user) return null;
 
     const handleSend = async (textOverride = null) => {
         const text = textOverride || inputText;

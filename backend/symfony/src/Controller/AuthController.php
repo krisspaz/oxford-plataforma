@@ -42,10 +42,18 @@ class AuthController extends AbstractController
         $email = $data['email'] ?? '';
         $password = $data['password'] ?? '';
 
+        // DEBUG LOGGING
+        file_put_contents(__DIR__.'/../../var/log/auth_debug.log', date('[Y-m-d H:i:s] ') . "Login attempt for: " . ($data['email'] ?? 'unknown') . "\n", FILE_APPEND);
+
         try {
             $user = $this->authService->authenticate($email, $password);
+            file_put_contents(__DIR__.'/../../var/log/auth_debug.log', date('[Y-m-d H:i:s] ') . "Success for: $email\n", FILE_APPEND);
         } catch (\Symfony\Component\Security\Core\Exception\AuthenticationException $e) {
+            file_put_contents(__DIR__.'/../../var/log/auth_debug.log', date('[Y-m-d H:i:s] ') . "Failed for $email: " . $e->getMessage() . "\n", FILE_APPEND);
             return $this->json(['error' => $e->getMessage()], Response::HTTP_UNAUTHORIZED);
+        } catch (\Exception $e) {
+            file_put_contents(__DIR__.'/../../var/log/auth_debug.log', date('[Y-m-d H:i:s] ') . "CRITICAL ERROR: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n", FILE_APPEND);
+            throw $e;
         }
 
         // Create response based on Accept header or client type
@@ -214,9 +222,9 @@ class AuthController extends AbstractController
         return [
             'id' => $user->getId(),
             'email' => $user->getEmail(),
-            'username' => $user->getUsername(),
+            'username' => $user->getUserIdentifier(),
             'roles' => $user->getRoles(),
-            'isActive' => $user->isActive(),
+            'isActive' => $user->getIsActive(),
         ];
     }
 }

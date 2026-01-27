@@ -138,7 +138,7 @@ const AsignacionMateriasPage = () => {
                         <div className="overflow-y-auto flex-1 pr-2">
                             <table className="w-full">
                                 <thead className={`sticky top-0 ${darkMode ? 'bg-gray-800' : 'bg-white'} z-10`}>
-                                    <tr className={`text-left text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                    <tr className={`text-left text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} border-b ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'}`}>
                                         <th className="pb-4 pl-4 font-medium">Materia</th>
                                         <th className="pb-4 font-medium">Docente Encargado</th>
                                         <th className="pb-4 pr-4 text-right font-medium">Estado</th>

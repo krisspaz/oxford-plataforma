@@ -131,7 +131,7 @@ const CalendarioGlobalPage = () => {
                 </div>
 
                 {/* Grid Body */}
-                <div className={`flex-1 overflow-y-auto border-t border-l ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
+                <div className={`flex-1 overflow-y-auto border-t border-l ${darkMode ? 'border-gray-800' : 'bg-white border-gray-200 text-gray-900'}`}>
                     <div className="grid grid-cols-7">
                         {renderCalendarGrid()}
                     </div>
@@ -139,7 +139,7 @@ const CalendarioGlobalPage = () => {
             </div>
 
             {/* Sidebar Details (Responsive) */}
-            <div className={`w-full md:w-80 flex flex-col border-l pl-0 md:pl-6 pt-6 md:pt-0 border-t md:border-t-0 ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
+            <div className={`w-full md:w-80 flex flex-col border-l pl-0 md:pl-6 pt-6 md:pt-0 border-t md:border-t-0 ${darkMode ? 'border-gray-800' : 'bg-white border-gray-200 text-gray-900'}`}>
                 <h2 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                     {selectedDate ? `Detalles del ${selectedDate.date}` : 'Próximos Eventos'}
                 </h2>

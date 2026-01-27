@@ -65,15 +65,30 @@ class PaymentController extends AbstractController
     }
 
     #[Route('/pending/{studentId}', name: 'api_v1_payments_pending', methods: ['GET'])]
-    public function getPendingQuotas(int $studentId): \Symfony\Component\HttpFoundation\JsonResponse
+    public function getPendingQuotas(int $studentId, \Doctrine\ORM\EntityManagerInterface $em): \Symfony\Component\HttpFoundation\JsonResponse
     {
-        // Mock pending quotas
+        $quotas = $em->getRepository(\App\Entity\Quota::class)->createQueryBuilder('q')
+            ->join('q.paymentPlan', 'pp')
+            ->where('pp.student = :studentId')
+            ->andWhere('q.status != :paidStatus')
+            ->setParameter('studentId', $studentId)
+            ->setParameter('paidStatus', \App\Entity\Quota::STATUS_PAID)
+            ->orderBy('q.dueDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        $data = array_map(fn($q) => [
+            'id' => $q->getId(),
+            'concept' => $q->getConcept(),
+            'amount' => (float)$q->getPendingAmount(),
+            'dueDate' => $q->getDueDate()->format('Y-m-d'),
+            'status' => $q->getStatus(),
+            'quotaNumber' => $q->getQuotaNumber()
+        ], $quotas);
+
         return $this->json([
             'success' => true,
-            'data' => [
-                ['id' => 101, 'concept' => 'Mensualidad Marzo', 'amount' => 750.00, 'dueDate' => '2025-03-30'],
-                ['id' => 102, 'concept' => 'Material Didáctico', 'amount' => 250.00, 'dueDate' => '2025-03-15'],
-            ]
+            'data' => $data
         ]);
     }
 }

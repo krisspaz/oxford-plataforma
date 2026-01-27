@@ -174,7 +174,7 @@ const CorteDiaPage = () => {
 
             {/* Detailed Table */}
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm overflow-hidden`}>
-                <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'}`}>
                     <h2 className={`font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Detalle de Pagos</h2>
                 </div>
                 {loading ? (

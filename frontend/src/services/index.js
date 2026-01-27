@@ -35,3 +35,6 @@ export { default as academicService } from './academicService';
 export { default as teacherRatingService } from './teacherRatingService';
 export { default as helpTicketService } from './helpTicketService';
 export { default as activityService } from './activityService';
+
+// Content/Resource management
+export { default as resourceService } from './resourceService';

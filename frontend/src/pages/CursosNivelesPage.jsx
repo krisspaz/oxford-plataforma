@@ -60,17 +60,29 @@ const CursosNivelesPage = () => {
     const handleSave = async () => {
         try {
             if (!formData.name) return toast.info('El nombre es obligatorio');
+            if (!formData.code) return toast.info('El código es obligatorio');
 
+            console.log('Sending data:', formData); // Debug
+
+            let response;
             if (selectedLevel) {
-                await catalogService.updateAcademicLevel(selectedLevel.id, formData);
+                response = await catalogService.updateAcademicLevel(selectedLevel.id, formData);
             } else {
-                await catalogService.createAcademicLevel(formData);
+                response = await catalogService.createAcademicLevel(formData);
             }
+
+            console.log('Server response:', response);
+
+            // Check response status if accessible, or assume success if no throw
+            toast.success(selectedLevel ? 'Nivel actualizado' : 'Nivel creado correctamente');
+
             setShowModal(false);
-            loadData();
+            await loadData(); // Ensure await
         } catch (error) {
-            console.error(error);
-            toast.info('Error al guardar el nivel');
+            console.error('Error saving level:', error);
+            // Show detailed error if available
+            const message = error.response?.data?.message || error.response?.data?.detail || error.message || 'Error desconocido';
+            toast.error('Error al guardar: ' + message);
         }
     };
 
@@ -85,7 +97,7 @@ const CursosNivelesPage = () => {
         }
     };
 
-    const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
+    const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
 
     return (
         <div className="space-y-8">

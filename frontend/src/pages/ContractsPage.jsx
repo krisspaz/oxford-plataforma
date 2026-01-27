@@ -299,7 +299,7 @@ const ContractsPage = () => {
             {showGenerateModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
                     <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto`}>
-                        <div className={`sticky top-0 ${darkMode ? 'bg-gray-800' : 'bg-white'} p-6 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex justify-between items-center`}>
+                        <div className={`sticky top-0 ${darkMode ? 'bg-gray-800' : 'bg-white'} p-6 border-b ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'} flex justify-between items-center`}>
                             <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Generar Contrato de Servicios Educativos</h2>
                             <button onClick={() => setShowGenerateModal(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                                 <X size={20} />
@@ -427,7 +427,7 @@ const ContractsPage = () => {
                             </div>
                         </div>
 
-                        <div className={`sticky bottom-0 ${darkMode ? 'bg-gray-800' : 'bg-white'} p-6 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex justify-end gap-3`}>
+                        <div className={`sticky bottom-0 ${darkMode ? 'bg-gray-800' : 'bg-white'} p-6 border-t ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'} flex justify-end gap-3`}>
                             <button onClick={() => setShowGenerateModal(false)} className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>
                                 Cancelar
                             </button>
@@ -460,7 +460,7 @@ const ContractsPage = () => {
                             <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{selectedContract.grade} - Ciclo {selectedContract.cycle}</p>
                         </div>
 
-                        <div className={`border-2 border-dashed rounded-xl p-8 text-center ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
+                        <div className={`border-2 border-dashed rounded-xl p-8 text-center ${darkMode ? 'border-gray-600' : 'bg-white border-gray-300 text-gray-900'}`}>
                             <Upload size={48} className={`mx-auto mb-4 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} />
                             <p className={`mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Arrastra el PDF escaneado o</p>
                             <label className="cursor-pointer">

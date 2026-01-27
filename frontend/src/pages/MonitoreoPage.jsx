@@ -73,7 +73,7 @@ const MonitoreoPage = () => {
 
             {/* Logs Section */}
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm overflow-hidden`}>
-                <div className={`p-6 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                <div className={`p-6 border-b ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'}`}>
                     <h2 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-800'} flex items-center gap-2`}>
                         <FileText size={20} /> Logs Recientes
                     </h2>

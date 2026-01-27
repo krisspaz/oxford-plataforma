@@ -475,7 +475,7 @@ const Academic = () => {
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                                 placeholder="Ej: Quita el receso..."
-                                className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-sm ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-200'}`}
+                                className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-sm ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-200 text-gray-900'}`}
                                 disabled={aiProcessing}
                             />
                             <button onClick={handleSend} disabled={aiProcessing}

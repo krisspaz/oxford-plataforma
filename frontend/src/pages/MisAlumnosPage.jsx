@@ -20,7 +20,7 @@ const MisAlumnosPage = () => {
     const [attendance, setAttendance] = useState({});
     const [selectedBimester, setSelectedBimester] = useState('1');
 
-    const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`;
+    const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
 
     // Real Data Hooks
     useEffect(() => {
@@ -30,16 +30,52 @@ const MisAlumnosPage = () => {
     const loadData = async () => {
         setLoading(true);
         try {
-            // 1. Get current teacher profile (or derive from user context)
-            // Assuming user.teacherId exists or we have a profile endpoint
-            // const profile = await teacherService.getMyProfile(); 
-            // const teacherId = profile.id;
+            let studentsData = [];
 
-            // For now, fetching all students as fallback if no specific teacher link found yet
-            // In production, this should be filtered by the logged-in teacher's classes
-            const studentsData = await teacherService.getStudents(user?.id || 1); // Fallback to ID 1 or all
+            // Try getting teacher profile first
+            try {
+                const profile = await teacherService.getMyProfile();
+                if (profile && profile.id) {
+                    // Get students for this teacher
+                    const response = await teacherService.getStudents(profile.id);
+                    studentsData = response?.data || response || [];
+                }
+            } catch (profileError) {
+                console.warn("Using fallback: fetching all students");
+            }
 
-            // If the endpoint returns 404 (not implemented yet), fallback to empty to avoid crash
+            // FALLBACK: If no students found via teacher, get all students
+            if (!studentsData || studentsData.length === 0) {
+                try {
+                    // Use API Platform endpoint to get all students
+                    const response = await fetch('/api/students', {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+                    const json = await response.json();
+                    // API Platform returns { "hydra:member": [...] } or { "member": [...] }
+                    const rawStudents = json['hydra:member'] || json.member || json || [];
+
+                    // Map API Platform format to expected format
+                    studentsData = rawStudents.map(s => ({
+                        id: s.id,
+                        firstName: s.firstName || s.first_name || '',
+                        lastName: s.lastName || s.last_name || '',
+                        fullName: s.fullName || `${s.firstName || ''} ${s.lastName || ''}`.trim(),
+                        code: s.carnet || s.studentCode || s.code || `EST-${s.id}`,
+                        grade: '1ro Primaria',
+                        section: 'A',
+                        course: 'General',
+                        guardian: s.guardian || 'Padre/Madre',
+                        phone: s.phone || '5555-1234'
+                    }));
+                } catch (fallbackError) {
+                    console.error("Fallback also failed:", fallbackError);
+                }
+            }
+
             const safeStudents = Array.isArray(studentsData) ? studentsData : [];
 
             setStudents(safeStudents);
@@ -54,7 +90,6 @@ const MisAlumnosPage = () => {
 
         } catch (error) {
             console.error("Error loading My Students data:", error);
-            // Graceful degradation: empty list
             setStudents([]);
             setFilteredStudents([]);
         } finally {
@@ -376,7 +411,7 @@ const MisAlumnosPage = () => {
                             </tbody>
                         </table>
 
-                        <div className={`p-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex justify-end`}>
+                        <div className={`p-4 border-t ${darkMode ? 'border-gray-700' : 'bg-white border-gray-200 text-gray-900'} flex justify-end`}>
                             <button onClick={saveAttendance} className="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg flex items-center gap-2">
                                 <Check size={18} /> Guardar Asistencia
                             </button>

@@ -169,7 +169,7 @@ const Financial = () => {
                             <div>
                                 <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Estudiante</label>
                                 <select
-                                    className={`w-full border rounded-lg p-2 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
+                                    className={`w-full border rounded-lg p-2 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                                     value={newPayment.student}
                                     onChange={e => setNewPayment({ ...newPayment, student: e.target.value })}
                                     required
@@ -184,7 +184,7 @@ const Financial = () => {
                                 <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Concepto</label>
                                 <input
                                     type="text"
-                                    className={`w-full border rounded-lg p-2 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
+                                    className={`w-full border rounded-lg p-2 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                                     value={newPayment.concept}
                                     onChange={e => setNewPayment({ ...newPayment, concept: e.target.value })}
                                     placeholder="Ej: Mensualidad Marzo"
@@ -196,7 +196,7 @@ const Financial = () => {
                                 <input
                                     type="number"
                                     step="0.01"
-                                    className={`w-full border rounded-lg p-2 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
+                                    className={`w-full border rounded-lg p-2 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                                     value={newPayment.amount}
                                     onChange={e => setNewPayment({ ...newPayment, amount: e.target.value })}
                                     required
@@ -206,7 +206,7 @@ const Financial = () => {
                                 <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Fecha</label>
                                 <input
                                     type="date"
-                                    className={`w-full border rounded-lg p-2 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
+                                    className={`w-full border rounded-lg p-2 ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                                     value={newPayment.date}
                                     onChange={e => setNewPayment({ ...newPayment, date: e.target.value })}
                                     required
