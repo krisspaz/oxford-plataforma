@@ -163,7 +163,7 @@ const BimestresPage = () => {
                                 </div>
                                 <div>
                                     <h3 className={`font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{bimester.name}</h3>
-                                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Ciclo 2025</p>
+                                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Ciclo {bimester.year || 2026}</p>
                                 </div>
                             </div>
                             {isCurrentBimester(bimester) && (

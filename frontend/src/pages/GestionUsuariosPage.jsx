@@ -7,11 +7,15 @@ import { userService } from '../services';
 const GestionUsuariosPage = () => {
     const { darkMode } = useTheme();
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterRole, setFilterRole] = useState('');
+    const [filterStatus, setFilterStatus] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(null);
     const [users, setUsers] = useState([]);
+    const [showCredentials, setShowCredentials] = useState(false);
+    const [createdUser, setCreatedUser] = useState(null);
 
     const roles = [
         { value: 'ROLE_SUPER_ADMIN', label: 'Super Admin' },
@@ -67,17 +71,27 @@ const GestionUsuariosPage = () => {
         }
     };
 
-    const filteredUsers = users.filter(u =>
-        u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const filteredUsers = users.filter(u => {
+        const matchesSearch = u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        const matchesRole = !filterRole || (u.roles && u.roles.includes(filterRole));
+        const matchesStatus = filterStatus === '' ||
+            (filterStatus === 'active' && u.isActive) ||
+            (filterStatus === 'inactive' && !u.isActive);
+        return matchesSearch && matchesRole && matchesStatus;
+    });
 
     const toggleUserStatus = async (id) => {
         setActionLoading(id);
         try {
-            await userService.toggleStatus(id);
-            // Optimistic update
-            setUsers(users.map(u => u.id === id ? { ...u, active: !u.active } : u));
+            const response = await userService.toggleStatus(id);
+            // Update with backend response, not optimistic
+            if (response?.data) {
+                setUsers(users.map(u => u.id === id ? { ...u, isActive: response.data.isActive } : u));
+            } else {
+                // Fallback: reload all
+                loadUsers();
+            }
         } catch (error) {
             console.error('Error toggling status:', error);
         } finally {
@@ -162,8 +176,17 @@ const GestionUsuariosPage = () => {
 
             if (selectedUser) {
                 await userService.update(selectedUser.id, payload);
+                toast.success('Usuario actualizado correctamente');
             } else {
                 await userService.create(payload);
+                // Show credentials modal for new user
+                setCreatedUser({
+                    name: payload.name,
+                    email: formData.email,
+                    password: formData.password,
+                    role: roles.find(r => r.value === formData.role)?.label || formData.role
+                });
+                setShowCredentials(true);
             }
 
             setShowModal(false);
@@ -172,6 +195,13 @@ const GestionUsuariosPage = () => {
             console.error('Error saving user:', error);
             toast.error('Error al guardar usuario: ' + error.message);
         }
+    };
+
+    const copyCredentials = () => {
+        if (!createdUser) return;
+        const text = `Usuario: ${createdUser.email}\nContraseña: ${createdUser.password}`;
+        navigator.clipboard.writeText(text);
+        toast.success('Credenciales copiadas al portapapeles');
     };
 
     const getRoleColor = (role) => {
@@ -197,17 +227,38 @@ const GestionUsuariosPage = () => {
                 </button>
             </div>
 
-            {/* Search */}
+            {/* Search and Filters */}
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-4 shadow-sm`}>
-                <div className="relative max-w-md">
-                    <Search className={`absolute left-3 top-2.5 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={18} />
-                    <input
-                        type="text"
-                        placeholder="Buscar por nombre o email..."
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                        className={`${inputClass} w-full pl-10`}
-                    />
+                <div className="flex flex-wrap gap-4 items-center">
+                    <div className="relative flex-1 min-w-[200px] max-w-md">
+                        <Search className={`absolute left-3 top-2.5 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={18} />
+                        <input
+                            type="text"
+                            placeholder="Buscar por nombre o email..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className={`${inputClass} w-full pl-10`}
+                        />
+                    </div>
+                    <select
+                        value={filterRole}
+                        onChange={e => setFilterRole(e.target.value)}
+                        className={`${inputClass} min-w-[150px]`}
+                    >
+                        <option value="">Todos los Roles</option>
+                        {roles.map(r => (
+                            <option key={r.value} value={r.value}>{r.label}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={filterStatus}
+                        onChange={e => setFilterStatus(e.target.value)}
+                        className={`${inputClass} min-w-[130px]`}
+                    >
+                        <option value="">Todo Estado</option>
+                        <option value="active">Activo</option>
+                        <option value="inactive">Inactivo</option>
+                    </select>
                 </div>
             </div>
 
@@ -241,7 +292,7 @@ const GestionUsuariosPage = () => {
                                     </span>
                                 </td>
                                 <td className="px-4 py-3 text-center">
-                                    {user.active ? (
+                                    {user.isActive ? (
                                         <span className="flex items-center justify-center gap-1 text-green-500"><Check size={16} /> Activo</span>
                                     ) : (
                                         <span className="flex items-center justify-center gap-1 text-red-500"><AlertCircle size={16} /> Inactivo</span>
@@ -252,8 +303,8 @@ const GestionUsuariosPage = () => {
                                         <button onClick={() => openModal(user)} className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`} title="Editar">
                                             <Edit size={16} className="text-blue-500" />
                                         </button>
-                                        <button onClick={() => toggleUserStatus(user.id)} disabled={actionLoading === user.id} className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`} title={user.active ? "Desactivar usuario" : "Activar usuario"}>
-                                            {actionLoading === user.id ? <RefreshCw size={16} className="animate-spin text-gray-500" /> : (user.active ? <Lock size={16} className="text-orange-500" /> : <Unlock size={16} className="text-emerald-500" />)}
+                                        <button onClick={() => toggleUserStatus(user.id)} disabled={actionLoading === user.id} className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`} title={user.isActive ? "Desactivar usuario" : "Activar usuario"}>
+                                            {actionLoading === user.id ? <RefreshCw size={16} className="animate-spin text-gray-500" /> : (user.isActive ? <Lock size={16} className="text-orange-500" /> : <Unlock size={16} className="text-emerald-500" />)}
                                         </button>
                                         <button onClick={() => handleDelete(user.id, user.name)} disabled={actionLoading === user.id} className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`} title="Eliminar usuario">
                                             <Trash2 size={16} className="text-red-500" />
@@ -359,6 +410,52 @@ const GestionUsuariosPage = () => {
                         <div className="flex justify-end gap-3 mt-6">
                             <button onClick={() => setShowModal(false)} className={`px-4 py-2 rounded-lg ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}>Cancelar</button>
                             <button onClick={handleSave} className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Credentials Modal */}
+            {showCredentials && createdUser && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl`}>
+                        <div className="text-center mb-4">
+                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <Check size={32} className="text-green-600" />
+                            </div>
+                            <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Usuario Creado</h2>
+                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{createdUser.name}</p>
+                        </div>
+
+                        <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-xl p-4 space-y-3 font-mono text-sm`}>
+                            <div>
+                                <span className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Usuario:</span>
+                                <span className={`ml-2 font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{createdUser.email}</span>
+                            </div>
+                            <div>
+                                <span className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Contraseña:</span>
+                                <span className={`ml-2 font-semibold ${darkMode ? 'text-teal-400' : 'text-teal-600'}`}>{createdUser.password}</span>
+                            </div>
+                            <div>
+                                <span className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Rol:</span>
+                                <span className={`ml-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>{createdUser.role}</span>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button
+                                onClick={copyCredentials}
+                                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium"
+                            >
+                                <Key size={18} />
+                                Copiar Credenciales
+                            </button>
+                            <button
+                                onClick={() => { setShowCredentials(false); setCreatedUser(null); }}
+                                className={`px-4 py-3 rounded-xl font-medium ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                            >
+                                Cerrar
+                            </button>
                         </div>
                     </div>
                 </div>
