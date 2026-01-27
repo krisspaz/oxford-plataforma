@@ -88,8 +88,7 @@ services:
       context: ./backend/symfony
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://oxford_user:%env(file:DB_PASSWORD_FILE)%@database:5432/oxford_db?serverVersion=16&charset=utf8
-      DB_PASSWORD_FILE: /run/secrets/db_password
+      DATABASE_URL: postgresql://oxford_user:83f7f5adff8aa40ffa0f0a9e28d1627c58e12c185d8bb4bc@database:5432/oxford_db?serverVersion=16&charset=utf8
       APP_ENV: ${APP_ENV:-dev}
       APP_SECRET_FILE: /run/secrets/app_secret
       # APP_SECRET is now handled via APP_SECRET_FILE in config
@@ -134,8 +133,7 @@ services:
       dockerfile: Dockerfile
     command: php bin/console messenger:consume async -vv
     environment:
-      DATABASE_URL: postgresql://oxford_user:%env(file:DB_PASSWORD_FILE)%@database:5432/oxford_db?serverVersion=16&charset=utf8
-      DB_PASSWORD_FILE: /run/secrets/db_password
+      DATABASE_URL: postgresql://oxford_user:83f7f5adff8aa40ffa0f0a9e28d1627c58e12c185d8bb4bc@database:5432/oxford_db?serverVersion=16&charset=utf8
       APP_ENV: ${APP_ENV:-dev}
       APP_SECRET_FILE: /run/secrets/app_secret
       CORPOSISTEMAS_API_URL: ${CORPOSISTEMAS_API_URL:-https://api.corposistemas.gt}
