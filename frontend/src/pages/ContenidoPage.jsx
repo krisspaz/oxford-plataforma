@@ -130,7 +130,7 @@ const ContenidoPage = () => {
     };
 
     const filteredResources = resources.filter(r => r.subjectId === parseInt(selectedSubject));
-    const currentSubject = mockSubjects.find(s => s.id === parseInt(selectedSubject));
+    const currentSubject = subjects.find(s => s.id === parseInt(selectedSubject));
 
     if (loading) {
         return (
@@ -158,7 +158,7 @@ const ContenidoPage = () => {
                     </p>
                 </div>
                 <button
-                    onClick={loadResources}
+                    onClick={loadInitialData}
                     className={`p-2 rounded-lg ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'}`}
                     title="Recargar recursos"
                 >

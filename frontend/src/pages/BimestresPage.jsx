@@ -11,6 +11,15 @@ const BimestresPage = () => {
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(null);
     const [bimesters, setBimesters] = useState([]);
+    const [formData, setFormData] = useState({
+        number: 1,
+        year: new Date().getFullYear(),
+        name: '',
+        startDate: '',
+        endDate: '',
+        maxScore: 100,
+        percentage: 25
+    });
 
     const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
     const labelClass = `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`;
@@ -58,26 +67,47 @@ const BimestresPage = () => {
         }
     };
 
+    const openModal = (bimester = null) => {
+        if (bimester) {
+            setSelectedBimester(bimester);
+            setFormData({
+                number: bimester.number,
+                year: bimester.year || new Date().getFullYear(),
+                name: bimester.name,
+                startDate: bimester.startDate,
+                endDate: bimester.endDate,
+                maxScore: bimester.maxScore,
+                percentage: bimester.percentage
+            });
+        } else {
+            setSelectedBimester(null);
+            setFormData({
+                number: bimesters.length + 1,
+                year: new Date().getFullYear(),
+                name: `Bimestre ${bimesters.length + 1}`,
+                startDate: new Date().toISOString().split('T')[0],
+                endDate: new Date().toISOString().split('T')[0],
+                maxScore: 100,
+                percentage: 25
+            });
+        }
+        setShowModal(true);
+    };
+
     const handleSave = async () => {
         try {
             if (selectedBimester) {
-                await bimesterService.update(selectedBimester.id, selectedBimester);
+                await bimesterService.update(selectedBimester.id, formData);
             } else {
-                // Create new
-                await bimesterService.create({
-                    number: bimesters.length + 1,
-                    name: `Bimestre ${bimesters.length + 1}`,
-                    startDate: new Date().toISOString().split('T')[0],
-                    endDate: new Date().toISOString().split('T')[0],
-                    maxScore: 100,
-                    percentage: 25
-                });
+                await bimesterService.create(formData);
             }
             loadBimesters();
             setShowModal(false);
             setSelectedBimester(null);
+            toast.success('Bimestre guardado correctamente');
         } catch (error) {
             console.error('Error saving bimester:', error);
+            toast.error('Error al guardar bimestre');
             setShowModal(false);
         }
     };
@@ -100,7 +130,7 @@ const BimestresPage = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Gestión Bimestral</h1>
-                <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg">
+                <button onClick={() => openModal()} className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg">
                     <Plus size={18} /> Nuevo Bimestre
                 </button>
             </div>
@@ -163,7 +193,7 @@ const BimestresPage = () => {
 
                             <div className="flex gap-2">
                                 <button
-                                    onClick={() => { setSelectedBimester(bimester); setShowModal(true); }}
+                                    onClick={() => openModal(bimester)}
                                     className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-sm ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                                         }`}
                                 >
@@ -203,38 +233,39 @@ const BimestresPage = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className={labelClass}>Número</label>
-                                    <input type="number" className={inputClass} defaultValue={selectedBimester?.number} />
+                                    <input type="number" className={inputClass} value={formData.number} onChange={e => setFormData({ ...formData, number: parseInt(e.target.value) })} />
                                 </div>
                                 <div>
                                     <label className={labelClass}>Ciclo</label>
-                                    <select className={inputClass} defaultValue="2025">
-                                        <option>2025</option>
-                                        <option>2024</option>
+                                    <select className={inputClass} value={formData.year} onChange={e => setFormData({ ...formData, year: parseInt(e.target.value) })}>
+                                        <option value={2026}>2026</option>
+                                        <option value={2025}>2025</option>
+                                        <option value={2024}>2024</option>
                                     </select>
                                 </div>
                             </div>
                             <div>
                                 <label className={labelClass}>Nombre</label>
-                                <input type="text" className={inputClass} defaultValue={selectedBimester?.name} placeholder="Ej: Primer Bimestre" />
+                                <input type="text" className={inputClass} value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Ej: Primer Bimestre" />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className={labelClass}>Fecha Inicio</label>
-                                    <input type="date" className={inputClass} defaultValue={selectedBimester?.startDate} />
+                                    <input type="date" className={inputClass} value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
                                 </div>
                                 <div>
                                     <label className={labelClass}>Fecha Fin</label>
-                                    <input type="date" className={inputClass} defaultValue={selectedBimester?.endDate} />
+                                    <input type="date" className={inputClass} value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className={labelClass}>Punteo Máximo</label>
-                                    <input type="number" className={inputClass} defaultValue={selectedBimester?.maxScore || 100} />
+                                    <input type="number" className={inputClass} value={formData.maxScore} onChange={e => setFormData({ ...formData, maxScore: parseInt(e.target.value) })} />
                                 </div>
                                 <div>
                                     <label className={labelClass}>Porcentaje Anual</label>
-                                    <input type="number" className={inputClass} defaultValue={selectedBimester?.percentage || 25} />
+                                    <input type="number" className={inputClass} value={formData.percentage} onChange={e => setFormData({ ...formData, percentage: parseInt(e.target.value) })} />
                                 </div>
                             </div>
                         </div>
