@@ -33,7 +33,6 @@ class TaskController extends AbstractController
     #[Route('', methods: ['POST'])]
     public function create(\Symfony\Component\HttpFoundation\Request $request, \Doctrine\ORM\EntityManagerInterface $em): JsonResponse
     {
-        // ... (methods implementation kept but ensuring singular class closing)
         $data = json_decode($request->getContent(), true);
         
         $task = new \App\Entity\Task();

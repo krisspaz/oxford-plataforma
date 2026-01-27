@@ -25,10 +25,19 @@ const ScholarshipsPage = () => {
         try {
             const res = await scholarshipService.getAll();
             if (res.success) {
-                // Controller returns {success:true, data: Array}
-                // or if it fails, it returns the array directly depending on service handling
-                // Service wrapper normalized it to {success: true, data: ...}
-                setScholarships(res.data || []);
+                let data = res.data;
+                // Normalize Hydra/JSON-LD response
+                if (data && !Array.isArray(data)) {
+                    if (Array.isArray(data['hydra:member'])) {
+                        data = data['hydra:member'];
+                    } else if (Array.isArray(data.member)) {
+                        data = data.member;
+                    } else {
+                        // Fallback or empty if structure is unknown
+                        data = [];
+                    }
+                }
+                setScholarships(Array.isArray(data) ? data : []);
             }
         } catch (error) {
             console.error(error);

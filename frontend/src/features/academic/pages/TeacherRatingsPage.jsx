@@ -17,8 +17,29 @@ const TeacherRatingsPage = () => {
                 teacherRatingService.getAll(),
                 teacherService.getAll()
             ]);
-            setRatings(ratingsData);
-            setTeachers(teachersData);
+
+            // Validate Ratings Data
+            let safeRatings = [];
+            if (Array.isArray(ratingsData)) {
+                safeRatings = ratingsData;
+            } else if (ratingsData && Array.isArray(ratingsData['hydra:member'])) {
+                safeRatings = ratingsData['hydra:member'];
+            } else if (ratingsData && Array.isArray(ratingsData.member)) {
+                safeRatings = ratingsData.member;
+            }
+
+            // Validate Teachers Data
+            let safeTeachers = [];
+            if (Array.isArray(teachersData)) {
+                safeTeachers = teachersData;
+            } else if (teachersData && Array.isArray(teachersData['hydra:member'])) {
+                safeTeachers = teachersData['hydra:member'];
+            } else if (teachersData && Array.isArray(teachersData.member)) {
+                safeTeachers = teachersData.member;
+            }
+
+            setRatings(safeRatings);
+            setTeachers(safeTeachers);
         } catch (error) {
             console.error(error);
             toast.error('Error al cargar datos');

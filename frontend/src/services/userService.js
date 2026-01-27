@@ -22,6 +22,9 @@ export const userService = {
     // Update password
     updatePassword: (id, password) => api.patch(`/users/${id}/password`, { password }),
 
+    // Delete user
+    delete: (id) => api.delete(`/users/${id}`),
+
     // Get available roles
     getRoles: () => api.get('/users/roles'),
 };

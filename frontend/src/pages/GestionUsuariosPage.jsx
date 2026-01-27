@@ -1,6 +1,6 @@
 import { toast } from '../utils/toast';
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Edit, Lock, Unlock, Key, Search, X, RefreshCw, Check, AlertCircle } from 'lucide-react';
+import { Users, Plus, Edit, Lock, Unlock, Key, Search, X, RefreshCw, Check, AlertCircle, Trash2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { userService } from '../services';
 
@@ -80,6 +80,23 @@ const GestionUsuariosPage = () => {
             setUsers(users.map(u => u.id === id ? { ...u, active: !u.active } : u));
         } catch (error) {
             console.error('Error toggling status:', error);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleDelete = async (id, name) => {
+        if (!confirm(`¿Estás seguro de que deseas eliminar al usuario "${name}"? Esta acción no se puede deshacer.`)) return;
+
+        setActionLoading(id);
+        try {
+            await userService.delete(id);
+            toast.success('Usuario eliminado correctamente');
+            // Remove from list
+            setUsers(users.filter(u => u.id !== id));
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            toast.error('Error al eliminar usuario');
         } finally {
             setActionLoading(null);
         }
@@ -237,6 +254,9 @@ const GestionUsuariosPage = () => {
                                         </button>
                                         <button onClick={() => toggleUserStatus(user.id)} disabled={actionLoading === user.id} className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`} title={user.active ? "Desactivar usuario" : "Activar usuario"}>
                                             {actionLoading === user.id ? <RefreshCw size={16} className="animate-spin text-gray-500" /> : (user.active ? <Lock size={16} className="text-orange-500" /> : <Unlock size={16} className="text-emerald-500" />)}
+                                        </button>
+                                        <button onClick={() => handleDelete(user.id, user.name)} disabled={actionLoading === user.id} className={`p-1.5 rounded ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'}`} title="Eliminar usuario">
+                                            <Trash2 size={16} className="text-red-500" />
                                         </button>
                                     </div>
                                 </td>

@@ -129,6 +129,11 @@ const EstadoCuentaPage = () => {
         });
     };
 
+    const inputClass = `rounded-xl border px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors ${darkMode
+            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+            : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'
+        }`;
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
