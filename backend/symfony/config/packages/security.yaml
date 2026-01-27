@@ -62,7 +62,7 @@ security:
         - { path: ^/api/ai/health, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/logout, roles: PUBLIC_ACCESS }
-        - { path: ^/api/seed, roles: PUBLIC_ACCESS }
+        - { path: ^/api/seed, roles: ROLE_SUPER_ADMIN }
         # - { path: ^/api/users, roles: ROLE_ADMIN }
         # - { path: ^/api/financial, roles: ROLE_ADMIN }
         - { path: ^/api/doc, roles: PUBLIC_ACCESS } # Swagger UI
