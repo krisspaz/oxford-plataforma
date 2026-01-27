@@ -28,6 +28,8 @@ class TaskController extends AbstractController
         $tasks = $this->taskRepository->findBy([], ['dueDate' => 'DESC'], 50);
 
         return $this->json($tasks, 200, [], ['groups' => ['task:read']]);
+    }
+
     #[Route('', methods: ['POST'])]
     public function create(\Symfony\Component\HttpFoundation\Request $request, \Doctrine\ORM\EntityManagerInterface $em): JsonResponse
     {
