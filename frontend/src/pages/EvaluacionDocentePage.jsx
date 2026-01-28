@@ -42,7 +42,7 @@ const EvaluacionDocentePage = () => {
 
     const handleSubmit = async (id) => {
         const teacher = teachers.find(t => t.id === id);
-        if (teacher.rating === 0) return alert("Por favor selecciona una calificación");
+        if (teacher.rating === 0) return toast.warning("Por favor selecciona una calificación");
 
         await studentService.submitTeacherRating({ teacherId: id, rating: teacher.rating, comment: teacher.comment });
 

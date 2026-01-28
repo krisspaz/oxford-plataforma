@@ -8,7 +8,10 @@ use App\Entity\Teacher;
 use App\Entity\Grade;
 use App\Entity\Section;
 use App\Entity\Subject;
+use App\Entity\SubjectAssignment;
 use App\Entity\Bimester;
+use App\Entity\SchoolCycle;
+use App\Entity\AcademicLevel;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -26,26 +29,24 @@ class AppFixtures extends Fixture
         // Create Users with different roles
         $users = [
             // Administración
-            ['email' => 'admin@oxford.edu', 'role' => User::ROLE_SUPER_ADMIN, 'name' => 'Super Admin', 'password' => $_ENV['APP_DEFAULT_PASSWORD'] ?? 'oxford123'],
+            ['email' => 'admin@oxford.edu.gt', 'role' => User::ROLE_SUPER_ADMIN, 'name' => 'Administrador Sistema', 'password' => 'oxford2026'],
+            ['email' => 'krispaz77@gmail.com', 'role' => User::ROLE_SUPER_ADMIN, 'name' => 'Kristopher Paz', 'password' => 'oxford2026'],
             
             // Dirección
-            ['email' => 'director@oxford.edu', 'role' => 'ROLE_DIRECTOR', 'name' => 'Pedro Hernández', 'password' => 'oxford123'],
+            ['email' => 'direccion@colegiooxford.edu.gt', 'role' => 'ROLE_DIRECCION', 'name' => 'Adriana Alvarado', 'password' => 'oxford2026'],
             
             // Coordinación
-            ['email' => 'coordinacion@oxford.edu', 'role' => 'ROLE_COORDINACION', 'name' => 'María López', 'password' => 'oxford123'],
+            ['email' => 'coordinacion@colegiooxford.edu.gt', 'role' => 'ROLE_COORDINACION', 'name' => 'Coordinación Académica', 'password' => 'oxford2026'],
             
             // Docentes
+            ['email' => 'sindry@colegiooxford.edu.gt', 'role' => 'ROLE_DOCENTE', 'name' => 'Sindry Botzoc', 'password' => 'oxford2026'],
             ['email' => 'docente1@oxford.edu', 'role' => 'ROLE_DOCENTE', 'name' => 'Juan Pérez García', 'password' => 'oxford123'],
-            ['email' => 'docente2@oxford.edu', 'role' => 'ROLE_DOCENTE', 'name' => 'Ana Martínez Ruiz', 'password' => 'oxford123'],
-            ['email' => 'docente3@oxford.edu', 'role' => 'ROLE_DOCENTE', 'name' => 'Roberto Sánchez', 'password' => 'oxford123'],
             
             // Secretaría
             ['email' => 'secretaria@oxford.edu', 'role' => 'ROLE_SECRETARIA', 'name' => 'Laura Gómez', 'password' => 'oxford123'],
             
-            // Contabilidad
-            ['email' => 'contabilidad@oxford.edu', 'role' => 'ROLE_CONTABILIDAD', 'name' => 'Pedro Ramírez', 'password' => 'oxford123'],
-            
             // Alumno
+            ['email' => 'julia@colegiooxford.edu.gt', 'role' => 'ROLE_ALUMNO', 'name' => 'Julia Quiroa', 'password' => 'oxford2026'],
             ['email' => 'alumno@oxford.edu', 'role' => 'ROLE_ALUMNO', 'name' => 'Diego Morales', 'password' => 'oxford123'],
             
             // Padre de familia
@@ -108,6 +109,123 @@ class AppFixtures extends Fixture
             $manager->persist($student);
         }
 
+        $manager->flush(); // Flush users first
+
+        // Create Teacher Profiles
+        $teacherRepository = $manager->getRepository(Teacher::class);
+        $subjectRepository = $manager->getRepository(Subject::class);
+        $gradeRepository = $manager->getRepository(Grade::class);
+        
+        // Ensure Subjects and Grades exist (if not created by other fixtures)
+        // Creating basic subjects if missing
+        $subjectsList = ['Matemáticas', 'Lenguaje', 'Ciencias Naturales', 'Ciencias Sociales', 'Inglés', 'Artes'];
+        $subjects = [];
+        foreach ($subjectsList as $subName) {
+            $s = $subjectRepository->findOneBy(['name' => $subName]);
+            if (!$s) {
+                $s = new Subject();
+                $s->setName($subName);
+                $s->setCode(strtoupper(substr($subName, 0, 3)));
+                $manager->persist($s);
+            }
+            $subjects[] = $s;
+        }
+
+        // Creating Academic Levels
+        $levelNames = ['Preprimaria', 'Primaria', 'Básico', 'Diversificado'];
+        $levels = [];
+        $levelRepository = $manager->getRepository(AcademicLevel::class);
+        
+        foreach ($levelNames as $lName) {
+            $l = $levelRepository->findOneBy(['name' => $lName]);
+            if (!$l) {
+                $l = new AcademicLevel();
+                $l->setName($lName);
+                $l->setCode(strtoupper(substr($lName, 0, 3)));
+                $l->setIsActive(true);
+                $manager->persist($l);
+            }
+            $levels[$lName] = $l;
+        }
+        $manager->flush(); // Need IDs for levels
+
+        // Create Current School Cycle
+        $cycleRepository = $manager->getRepository(SchoolCycle::class);
+        $currentYear = date('Y');
+        $cycle = $cycleRepository->findOneBy(['name' => $currentYear]);
+        if (!$cycle) {
+            $cycle = new SchoolCycle();
+            $cycle->setName($currentYear);
+            $cycle->setStartDate(new \DateTime($currentYear . '-01-15'));
+            $cycle->setEndDate(new \DateTime($currentYear . '-10-31'));
+            $cycle->setIsActive(true);
+            $manager->persist($cycle);
+        }
+        $manager->flush();
+
+        // Creating basic grades if missing
+        $gradesList = ['1ro Primaria', '2do Primaria', '3ro Primaria', '4to Primaria', '5to Primaria', '6to Primaria'];
+        $grades = [];
+        foreach ($gradesList as $gradeName) {
+            $g = $gradeRepository->findOneBy(['name' => $gradeName]);
+            if (!$g) {
+                $g = new Grade();
+                $g->setName($gradeName);
+                $g->setLevel($levels['Primaria']);
+                $manager->persist($g);
+            }
+            $grades[] = $g;
+        }
+        $manager->flush();
+
+        // Link Users to Teacher Profiles
+        $allUsers = $this->userRepository->findAll();
+        $docentes = array_filter($allUsers, function($u) {
+            return in_array('ROLE_DOCENTE', $u->getRoles());
+        });
+
+        foreach ($docentes as $user) {
+            $teacher = $teacherRepository->findOneBy(['email' => $user->getEmail()]);
+            if (!$teacher) {
+                $teacher = new Teacher();
+                $teacher->setUser($user);
+                $teacher->setFirstName(explode(' ', $user->getName())[0]);
+                $teacher->setLastName(substr($user->getName(), strpos($user->getName(), ' ') + 1));
+                $teacher->setEmail($user->getEmail());
+                $teacher->setEmployeeCode('EMP-' . rand(1000, 9999));
+                $teacher->setSpecialization('General');
+                $teacher->setPhone('5555-0000');
+                $teacher->setContractType('Full-time');
+                $teacher->setHireDate(new \DateTime('-1 year'));
+                $teacher->setIsActive(true);
+                $manager->persist($teacher);
+                
+                // Assign random subjects
+                if ($user->getEmail() === 'sindry@colegiooxford.edu.gt') {
+                     // Assign specific subjects to Sindry for demo
+                     for ($i = 0; $i < 3; $i++) {
+                         $sa = new SubjectAssignment();
+                         $sa->setTeacher($teacher);
+                         $sa->setSubject($subjects[$i]);
+                         $sa->setGrade($grades[0]); // 1ro Primaria
+                         $sa->setSchoolCycle($cycle);
+                         $sa->setHoursPerWeek(5);
+                         $sa->setIsActive(true);
+                         $manager->persist($sa);
+                     }
+                } else {
+                    // Random assignment for others
+                     $sa = new SubjectAssignment();
+                     $sa->setTeacher($teacher);
+                     $sa->setSubject($subjects[array_rand($subjects)]);
+                     $sa->setGrade($grades[array_rand($grades)]);
+                     $sa->setSchoolCycle($cycle);
+                     $sa->setIsActive(true);
+                     $manager->persist($sa);
+                }
+            }
+        }
+        
         $manager->flush();
     }
 }

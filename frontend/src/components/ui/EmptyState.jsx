@@ -1,17 +1,43 @@
-import React from 'react';
-import { Archive } from 'lucide-react';
+/**
+ * EmptyState Component
+ * Displays empty states with optional action button
+ */
+import { Inbox } from 'lucide-react';
+import { Button } from './index.jsx';
+import { cn } from '../../utils/cn';
 
-const EmptyState = ({ title, description, action }) => {
+export const EmptyState = ({
+    icon: Icon = Inbox,
+    title = 'Sin datos',
+    description = 'No hay elementos para mostrar.',
+    action,
+    actionLabel,
+    actionIcon,
+    className,
+}) => {
     return (
-        <div className="text-center py-12">
-            <div className="flex justify-center mb-4">
-                <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-full">
-                    <Archive className="h-8 w-8 text-gray-400" />
-                </div>
+        <div className={cn('flex flex-col items-center justify-center py-16 px-4 text-center', className)}>
+            {/* Icon */}
+            <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
+                <Icon className="text-gray-400 dark:text-gray-500" size={32} />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">{title}</h3>
-            <p className="mt-1 text-sm text-gray-500 max-w-sm mx-auto">{description}</p>
-            {action && <div className="mt-6">{action}</div>}
+
+            {/* Title */}
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                {title}
+            </h3>
+
+            {/* Description */}
+            <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md">
+                {description}
+            </p>
+
+            {/* Action Button */}
+            {action && actionLabel && (
+                <Button onClick={action} icon={actionIcon}>
+                    {actionLabel}
+                </Button>
+            )}
         </div>
     );
 };

@@ -66,7 +66,7 @@ const AsignarConvenioPage = () => {
             }, 3000);
         } catch (error) {
             console.error("Error assigning convenio:", error);
-            alert("Error al asignar convenio");
+            toast.error("Error al asignar convenio");
         } finally {
             setAssigning(false);
         }

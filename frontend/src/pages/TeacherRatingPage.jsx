@@ -70,7 +70,7 @@ const TeacherRatingPage = () => {
             }, 2000); // UI feedback delay
         } catch (error) {
             console.error("Error submitting rating:", error);
-            alert("Error al enviar la evaluación");
+            toast.error("Error al enviar la evaluación");
         }
     };
 

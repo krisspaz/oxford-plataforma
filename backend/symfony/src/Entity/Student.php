@@ -164,9 +164,13 @@ class Student
     #[ORM\ManyToMany(targetEntity: Guardian::class, mappedBy: 'students')]
     private Collection $guardians;
 
+    #[ORM\OneToMany(mappedBy: 'student', targetEntity: StudentScholarship::class)]
+    private Collection $scholarships;
+
     public function __construct()
     {
         $this->guardians = new ArrayCollection();
+        $this->scholarships = new ArrayCollection();
     }
 
     #[ORM\ManyToOne(inversedBy: 'students')]
@@ -259,5 +263,13 @@ class Student
     public function getVersion(): ?int
     {
         return $this->version;
+    }
+
+    /**
+     * @return Collection<int, StudentScholarship>
+     */
+    public function getScholarships(): Collection
+    {
+        return $this->scholarships;
     }
 }

@@ -51,8 +51,8 @@ const FinancialHub = () => {
             ],
             pendingInvoices: [
                 { id: 1, family: 'López Mejía', amount: 2500, dueDate: '2026-01-10', daysOverdue: 0 },
-                { id: 2, family: 'Ramírez Sol', amount: 1800, dueDate: '2025-12-28', daysOverdue: 10 },
-                { id: 3, family: 'Castro Vega', amount: 3200, dueDate: '2025-12-20', daysOverdue: 18 },
+                { id: 2, family: 'Ramírez Sol', amount: 1800, dueDate: '2026-12-28', daysOverdue: 10 },
+                { id: 3, family: 'Castro Vega', amount: 3200, dueDate: '2026-12-20', daysOverdue: 18 },
             ],
         });
     };
@@ -119,8 +119,8 @@ const FinancialHub = () => {
                                         {formatCurrency(payment.amount)}
                                     </p>
                                     <span className={`text-xs px-2 py-0.5 rounded-full ${payment.status === 'completed'
-                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
                                         }`}>
                                         {payment.status === 'completed' ? 'Completado' : 'Pendiente'}
                                     </span>
@@ -211,8 +211,8 @@ const FinancialHub = () => {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex-1 min-w-[120px] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${isActive
-                                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
-                                    : darkMode ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
+                                : darkMode ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                                 }`}
                         >
                             <Icon size={16} />

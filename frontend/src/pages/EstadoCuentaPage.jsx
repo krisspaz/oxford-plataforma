@@ -1,6 +1,6 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { User, Search, DollarSign, Check, Clock, AlertCircle, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
+import React, { useState, useEffect, useMemo } from 'react';
+import { User, Search, DollarSign, Check, Clock, AlertCircle, Loader2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { studentService } from '../services';
 
@@ -130,8 +130,8 @@ const EstadoCuentaPage = () => {
     };
 
     const inputClass = `rounded-xl border px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors ${darkMode
-            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-            : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'
+        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'
         }`;
 
     return (
@@ -183,7 +183,7 @@ const EstadoCuentaPage = () => {
             {/* Loading */}
             {loading && (
                 <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-12 text-center`}>
-                    <RefreshCw className="animate-spin mx-auto text-teal-500" size={32} />
+                    <Loader2 className="animate-spin mx-auto text-teal-500" size={32} />
                     <p className={`mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Cargando estado de cuenta...</p>
                 </div>
             )}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { jobTitleService } from '../../../services';
 import { Briefcase, Plus, Search, Users, Edit2, Trash2, X, Save } from 'lucide-react';
+import { toast } from '../../../utils/toast';
 
 const AdminChargesPage = () => {
     // Real Data State
@@ -58,14 +59,14 @@ const AdminChargesPage = () => {
                 loadCargos();
             } catch (error) {
                 console.error("Error deleting:", error);
-                alert("No se pudo eliminar el cargo. Verifique que no tenga personal asignado.");
+                toast.error("No se pudo eliminar el cargo. Verifique que no tenga personal asignado.");
             }
         }
     };
 
     const handleSave = async () => {
         if (!formData.name || !formData.department) {
-            alert('Por favor completa todos los campos');
+            toast.warning('Por favor completa todos los campos');
             return;
         }
 
@@ -79,7 +80,7 @@ const AdminChargesPage = () => {
             loadCargos();
         } catch (error) {
             console.error("Error saving:", error);
-            alert("Error al guardar el cargo");
+            toast.error("Error al guardar el cargo");
         }
     };
 

@@ -1,51 +1,36 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Search, RefreshCw, Check, User, Calendar, GraduationCap, CreditCard, FileText, ChevronRight, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Search, Loader2, Check, User, Calendar, GraduationCap, CreditCard, FileText, ChevronRight, AlertCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { studentService, catalogService, packageService, enrollmentService } from '../services';
 
 const MatriculacionPage = () => {
     const { darkMode } = useTheme();
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const [students, setStudents] = useState([]);
     const [selectedStudent, setSelectedStudent] = useState(null);
-    const [loading, setLoading] = useState(false);
     const [searching, setSearching] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
-    const [catalogs, setCatalogs] = useState({ grades: [], packages: [] });
-    const [formData, setFormData] = useState({
-        grade: '',
-        section: '',
-        package: '',
-        jornada: 'MATUTINA'
-    });
+    const [formData, setFormData] = useState({ grade: '', section: '', package: '', jornada: 'MATUTINA' });
 
     const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
     const labelClass = `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`;
 
-    useEffect(() => {
-        loadCatalogs();
-    }, []);
-
-    const loadCatalogs = async () => {
-        setLoading(true);
-        try {
+    // === QUERIES ===
+    const { data: catalogs = { grades: [], packages: [] }, isLoading: loading } = useQuery({
+        queryKey: ['enrollment-catalogs'],
+        queryFn: async () => {
             const [gradesRes, packagesRes] = await Promise.all([
                 catalogService.getGrades(),
                 packageService.getAll({ active: true })
             ]);
-            setCatalogs({
+            return {
                 grades: gradesRes.success ? gradesRes.data : [],
                 packages: packagesRes.success ? packagesRes.data : []
-            });
-        } catch (error) {
-            console.error("Error loading catalogs:", error);
-            // Graceful degradation
-            setCatalogs({ grades: [], packages: [] });
-        } finally {
-            setLoading(false);
-        }
-    };
+            };
+        },
+    });
 
     const searchStudents = async () => {
         if (!searchTerm.trim()) return;
@@ -77,9 +62,9 @@ const MatriculacionPage = () => {
         }
     };
 
-    const handleSubmit = async () => {
-        setSubmitting(true);
-        try {
+    // === ENROLLMENT MUTATION ===
+    const enrollMutation = useMutation({
+        mutationFn: async () => {
             const payload = {
                 student: `/api/students/${selectedStudent.id}`,
                 grade: `/api/grades/${formData.grade}`,
@@ -88,21 +73,19 @@ const MatriculacionPage = () => {
                 status: 'ENROLLED',
                 enrollmentDate: new Date().toISOString()
             };
-
-            await enrollmentService.create(payload);
-
-            toast.info(`✅ Reinscripción completada para ${selectedStudent.firstName} ${selectedStudent.lastName}`);
+            return enrollmentService.create(payload);
+        },
+        onSuccess: () => {
+            toast.success(`✅ Reinscripción completada para ${selectedStudent.firstName} ${selectedStudent.lastName}`);
             setSelectedStudent(null);
             setStudents([]);
             setSearchTerm('');
             setFormData({ grade: '', section: '', package: '', jornada: 'MATUTINA' });
-        } catch (error) {
-            console.error('Error in enrollment:', error);
-            toast.info('Error al procesar la reinscripción. Verifique los datos.');
-        } finally {
-            setSubmitting(false);
-        }
-    };
+        },
+        onError: () => toast.error('Error al procesar la reinscripción. Verifique los datos.'),
+    });
+
+    const handleSubmit = () => enrollMutation.mutate();
 
     const getNextGrade = (currentGrade) => {
         const grades = [
@@ -116,7 +99,7 @@ const MatriculacionPage = () => {
     if (loading) {
         return (
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-12 text-center`}>
-                <RefreshCw className="animate-spin mx-auto text-teal-500" size={32} />
+                <Loader2 className="animate-spin mx-auto text-teal-500" size={32} />
                 <p className={`mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Cargando...</p>
             </div>
         );
@@ -163,7 +146,7 @@ const MatriculacionPage = () => {
                         disabled={searching || !searchTerm.trim()}
                         className="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg flex items-center gap-2 disabled:opacity-50"
                     >
-                        {searching ? <RefreshCw size={18} className="animate-spin" /> : <Search size={18} />}
+                        {searching ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
                         Buscar
                     </button>
                 </div>
@@ -311,10 +294,10 @@ const MatriculacionPage = () => {
                         </button>
                         <button
                             onClick={handleSubmit}
-                            disabled={submitting || !formData.grade || !formData.section || !formData.package}
+                            disabled={enrollMutation.isPending || !formData.grade || !formData.section || !formData.package}
                             className="flex items-center gap-2 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg disabled:opacity-50"
                         >
-                            {submitting ? <><RefreshCw size={18} className="animate-spin" /> Procesando...</> : <><Check size={18} /> Completar Reinscripción</>}
+                            {enrollMutation.isPending ? <><Loader2 size={18} className="animate-spin" /> Procesando...</> : <><Check size={18} /> Completar Reinscripción</>}
                         </button>
                     </div>
                 </div>

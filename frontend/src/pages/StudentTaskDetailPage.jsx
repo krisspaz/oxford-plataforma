@@ -62,10 +62,10 @@ const StudentTaskDetailPage = () => {
                 content: submissionContent,
                 attachmentUrl: 'https://example.com/file.pdf' // Placeholder as we don't have real file upload yet
             });
-            alert("Tarea entregada con éxito!");
+            toast.success("Tarea entregada con éxito!");
             navigate('/mis-tareas');
         } catch (err) {
-            alert("Error al entregar: " + (err.response?.data?.error || err.message));
+            toast.error("Error al entregar: " + (err.response?.data?.error || err.message));
         } finally {
             setIsSubmitting(false);
         }

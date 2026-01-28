@@ -1,6 +1,7 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Users, Search, Eye, Plus, X, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
+import React, { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Users, Search, Eye, Plus, X, Loader2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../services';
 
@@ -9,45 +10,30 @@ const FamiliasPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedFamily, setSelectedFamily] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [families, setFamilies] = useState([]);
 
     const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
 
-    useEffect(() => {
-        loadFamilies();
-    }, []);
-
-    const loadFamilies = async () => {
-        setLoading(true);
-        try {
+    // === QUERY ===
+    const { data: families = [], isLoading: loading } = useQuery({
+        queryKey: ['families'],
+        queryFn: async () => {
             const response = await api.get('/families');
-            if (response.success) {
-                setFamilies(response.data);
-            } else {
-                setFamilies([]);
-            }
-        } catch (error) {
-            console.error('Error loading families:', error);
-            toast.error('Error al cargar familias: ' + error.message);
-            setFamilies([]);
-        } finally {
-            setLoading(false);
-        }
-    };
+            return response.success ? response.data : [];
+        },
+    });
 
-    const filteredFamilies = families.filter(f => {
+    const filteredFamilies = useMemo(() => families.filter(f => {
         if (!searchTerm) return true;
         const search = searchTerm.toLowerCase();
-        return f.father?.name.toLowerCase().includes(search) ||
-            f.mother?.name.toLowerCase().includes(search) ||
-            f.students.some(s => s.name.toLowerCase().includes(search) || s.carnet.includes(search));
-    });
+        return f.father?.name?.toLowerCase().includes(search) ||
+            f.mother?.name?.toLowerCase().includes(search) ||
+            f.students?.some(s => s.name?.toLowerCase().includes(search) || s.carnet?.includes(search));
+    }), [families, searchTerm]);
 
     if (loading) {
         return (
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-12 text-center`}>
-                <RefreshCw className="animate-spin mx-auto text-teal-500" size={32} />
+                <Loader2 className="animate-spin mx-auto text-teal-500" size={32} />
                 <p className={`mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Cargando familias...</p>
             </div>
         );

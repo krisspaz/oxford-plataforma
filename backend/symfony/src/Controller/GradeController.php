@@ -80,7 +80,7 @@ class GradeController extends AbstractController
 
             return $this->json([
                 'success' => true,
-                'id' => $grade->getId(),
+                'data' => $this->serializeGrade($grade),
                 'message' => 'Grado creado correctamente'
             ], Response::HTTP_CREATED);
         } catch (\Throwable $e) {
@@ -113,7 +113,11 @@ class GradeController extends AbstractController
 
         $this->em->flush();
 
-        return $this->json(['success' => true, 'message' => 'Grado actualizado']);
+        return $this->json([
+            'success' => true,
+            'data' => $this->serializeGrade($grade),
+            'message' => 'Grado actualizado'
+        ]);
     }
 
     /**

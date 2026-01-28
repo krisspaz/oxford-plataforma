@@ -1,52 +1,52 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Users, Plus, Search, Edit, Eye, Book, RefreshCw, X } from 'lucide-react';
+import { toast } from 'sonner';
+import React, { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Users, Plus, Search, Edit, Eye, Book, Loader2, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { catalogService, teacherService } from '../services';
 
 const DocentesPage = () => {
     const { darkMode } = useTheme();
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [selectedTeacher, setSelectedTeacher] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [teachers, setTeachers] = useState([]);
     const [formData, setFormData] = useState({
         code: '', name: '', email: '', phone: '', hireDate: '', specialization: 'Matemáticas'
     });
-    const [saving, setSaving] = useState(false);
 
     const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
     const labelClass = `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`;
 
-    useEffect(() => {
-        loadTeachers();
-    }, []);
-
-    const loadTeachers = async () => {
-        setLoading(true);
-        try {
-            const response = await teacherService.getAll();
-            if (response.data) {
-                // Ensure array
-                const list = Array.isArray(response.data) ? response.data : (response.data['hydra:member'] || []);
-                setTeachers(list);
-            } else {
-                setTeachers([]);
-            }
-        } catch (error) {
-            console.error('Error loading teachers:', error);
-            // Fallback to catalog service if teacherService implementation differs
+    // === QUERY ===
+    const { data: teachers = [], isLoading: loading } = useQuery({
+        queryKey: ['teachers'],
+        queryFn: async () => {
             try {
+                const response = await teacherService.getAll();
+                if (response.data) {
+                    return Array.isArray(response.data) ? response.data : (response.data['hydra:member'] || []);
+                }
+                return [];
+            } catch {
                 const res = await catalogService.getTeachers();
-                setTeachers(res && res.data ? res.data : []);
-            } catch (e) {
-                setTeachers([]);
+                return res?.data || [];
             }
-        } finally {
-            setLoading(false);
-        }
-    };
+        },
+    });
+
+    // === MUTATION ===
+    const saveMutation = useMutation({
+        mutationFn: async ({ id, data }) => {
+            return id ? teacherService.update(id, data) : teacherService.create(data);
+        },
+        onSuccess: (_, vars) => {
+            queryClient.invalidateQueries({ queryKey: ['teachers'] });
+            toast.success(vars.id ? 'Docente actualizado' : 'Docente creado');
+            setShowModal(false);
+        },
+        onError: (err) => toast.error('Error al guardar: ' + err.message),
+    });
 
     const handleOpenModal = (teacher = null) => {
         if (teacher) {
@@ -68,41 +68,24 @@ const DocentesPage = () => {
         setShowModal(true);
     };
 
-    const handleSave = async () => {
+    const handleSave = () => {
         if (!formData.name || !formData.email) {
             toast.error('Nombre y Email son requeridos');
             return;
         }
-
-        setSaving(true);
-        try {
-            if (selectedTeacher) {
-                await teacherService.update(selectedTeacher.id, formData);
-                toast.success('Docente actualizado');
-            } else {
-                await teacherService.create(formData);
-                toast.success('Docente creado');
-            }
-            setShowModal(false);
-            loadTeachers();
-        } catch (error) {
-            console.error('Error saving teacher:', error);
-            toast.error('Error al guardar: ' + error.message);
-        } finally {
-            setSaving(false);
-        }
+        saveMutation.mutate({ id: selectedTeacher?.id, data: formData });
     };
 
-    const filteredTeachers = Array.isArray(teachers) ? teachers.filter(t =>
+    const filteredTeachers = useMemo(() => Array.isArray(teachers) ? teachers.filter(t =>
         (t.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (t.code || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (t.specialization || '').toLowerCase().includes(searchTerm.toLowerCase())
-    ) : [];
+    ) : [], [teachers, searchTerm]);
 
     if (loading) {
         return (
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-12 text-center`}>
-                <RefreshCw className="animate-spin mx-auto text-teal-500" size={32} />
+                <Loader2 className="animate-spin mx-auto text-teal-500" size={32} />
                 <p className={`mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Cargando docentes...</p>
             </div>
         );
@@ -257,10 +240,10 @@ const DocentesPage = () => {
                             <button onClick={() => setShowModal(false)} className={`px-4 py-2 rounded-lg ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}>Cancelar</button>
                             <button
                                 onClick={handleSave}
-                                disabled={saving}
+                                disabled={saveMutation.isPending}
                                 className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg flex items-center gap-2"
                             >
-                                {saving && <RefreshCw size={14} className="animate-spin" />}
+                                {saveMutation.isPending && <Loader2 size={14} className="animate-spin" />}
                                 Guardar
                             </button>
                         </div>

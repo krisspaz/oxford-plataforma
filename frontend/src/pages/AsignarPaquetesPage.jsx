@@ -48,7 +48,7 @@ const AsignarPaquetesPage = () => {
 
     const handleAssign = async () => {
         if (!selectedStudent || !selectedPackage) {
-            alert("Por favor seleccione un estudiante y un paquete.");
+            toast.warning("Por favor seleccione un estudiante y un paquete.");
             return;
         }
 
@@ -62,15 +62,15 @@ const AsignarPaquetesPage = () => {
             });
 
             if (response.success) {
-                alert("Paquete asignado correctamente.");
+                toast.success("Paquete asignado correctamente.");
                 setSelectedStudent('');
                 setSelectedPackage('');
             } else {
-                alert("Error al asignar paquete: " + (response.message || "Error desconocido"));
+                toast.error("Error al asignar paquete: " + (response.message || "Error desconocido"));
             }
         } catch (error) {
             console.error("Error:", error);
-            alert("Ocurrió un error al procesar la solicitud.");
+            toast.error("Ocurrió un error al procesar la solicitud.");
         } finally {
             setLoading(false);
         }

@@ -1,16 +1,15 @@
-import { toast } from '../utils/toast';
-import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
+import { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
-import { Plus, Search, Trash2, Edit, X } from 'lucide-react';
+import { Plus, Search, Trash2, Edit, X, Loader2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 const Students = () => {
     const { darkMode } = useTheme();
-    const [students, setStudents] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
-    const [saving, setSaving] = useState(false);
     const [newStudent, setNewStudent] = useState({
         firstName: '',
         lastName: '',
@@ -20,52 +19,40 @@ const Students = () => {
         grade: ''
     });
 
-    const fetchStudents = async () => {
-        try {
+    // === QUERY ===
+    const { data: students = [], isLoading: loading } = useQuery({
+        queryKey: ['students'],
+        queryFn: async () => {
             const res = await api.get('/students');
-            setStudents(res['hydra:member'] || res.member || res || []);
-        } catch (err) {
-            console.error('Error fetching students:', err);
-            toast.error('Error al cargar lista de estudiantes');
-        } finally {
-            setLoading(false);
-        }
-    };
+            return res['hydra:member'] || res.member || res || [];
+        },
+    });
 
-    useEffect(() => {
-        fetchStudents();
-    }, []);
-
-    const handleCreateStudent = async (e) => {
-        e.preventDefault();
-        setSaving(true);
-        try {
-            await api.post('/students', {
-                ...newStudent,
-                isActive: true
-            }, {
-                headers: {
-                    'Content-Type': 'application/ld+json'
-                }
-            });
+    // === MUTATION ===
+    const createMutation = useMutation({
+        mutationFn: async (data) => api.post('/students', { ...data, isActive: true }, {
+            headers: { 'Content-Type': 'application/ld+json' }
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['students'] });
+            toast.success('Estudiante creado exitosamente');
             setShowModal(false);
             setNewStudent({ firstName: '', lastName: '', carnet: '', email: '', birthDate: '', grade: '' });
-            fetchStudents();
-            toast.success('Estudiante creado exitosamente');
-        } catch (error) {
-            console.error('Error creating student:', error);
-            toast.info('Error al crear estudiante. Verifica los datos.');
-        } finally {
-            setSaving(false);
-        }
+        },
+        onError: () => toast.error('Error al crear estudiante'),
+    });
+
+    const handleCreateStudent = (e) => {
+        e.preventDefault();
+        createMutation.mutate(newStudent);
     };
 
-    const filtered = students.filter((s) =>
+    const filtered = useMemo(() => students.filter((s) =>
         [s.firstName, s.lastName, s.carnet]
             .join(' ')
             .toLowerCase()
             .includes(searchTerm.toLowerCase())
-    );
+    ), [students, searchTerm]);
 
     const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'}`;
     const labelClass = `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`;
@@ -115,7 +102,7 @@ const Students = () => {
                                         value={newStudent.carnet}
                                         onChange={e => setNewStudent({ ...newStudent, carnet: e.target.value })}
                                         className={inputClass}
-                                        placeholder="2025-001"
+                                        placeholder="2026-001"
                                         required
                                     />
                                 </div>
@@ -172,10 +159,11 @@ const Students = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={saving}
-                                    className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg disabled:opacity-50"
+                                    disabled={createMutation.isPending}
+                                    className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg disabled:opacity-50 flex items-center gap-2"
                                 >
-                                    {saving ? 'Guardando...' : 'Guardar'}
+                                    {createMutation.isPending && <Loader2 size={16} className="animate-spin" />}
+                                    {createMutation.isPending ? 'Guardando...' : 'Guardar'}
                                 </button>
                             </div>
                         </form>

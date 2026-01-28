@@ -1,45 +1,50 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Layers, Plus, Edit, Trash, Check, X, BookOpen, ChevronRight, Users, GraduationCap, RefreshCw } from 'lucide-react';
+import { Layers, Plus, Edit, Trash, Check, X, BookOpen, ChevronRight, Users, GraduationCap, Loader2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { catalogService } from '../services';
 
 const CursosNivelesPage = () => {
     const { darkMode } = useTheme();
     const navigate = useNavigate();
-    const [levels, setLevels] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({ name: '', code: '', sortOrder: 0, isActive: true });
     const [selectedLevel, setSelectedLevel] = useState(null);
 
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    const loadData = async () => {
-        setLoading(true);
-        try {
+    // === QUERY ===
+    const { data: levels = [], isLoading: loading } = useQuery({
+        queryKey: ['academic-levels'],
+        queryFn: async () => {
             const response = await catalogService.getAcademicLevels();
-            // The controller returns a direct array, or an array inside data? 
-            // Controller returns: $this->json(array_map(...)) -> which is an array directly.
-            // But api.js wrapper returns 'data'. 
-            // If the symfony controller returns json array, axios sees it as data.
-            // Let's assume response is the array of levels.
-            // Wait, api.js: if (contentType.includes('application/json')) data = await response.json(); return data;
-            // So if controller returns [..], then response is [..].
-            // If controller returns {success:true, data:[]}, then response is {success...}
-            // My AcademicLevelController returns simple array for index(), OR objects.
-            // Let's protect against both structure.
             const data = Array.isArray(response) ? response : (response.data || []);
-            setLevels(data);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
+            return data;
+        },
+    });
+
+    // === MUTATION ===
+    const saveMutation = useMutation({
+        mutationFn: async (payload) => {
+            if (selectedLevel) {
+                return catalogService.updateAcademicLevel(selectedLevel.id, payload);
+            }
+            return catalogService.createAcademicLevel(payload);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['academic-levels'] });
+            toast.success(selectedLevel ? 'Nivel actualizado' : 'Nivel creado correctamente');
+            setShowModal(false);
+        },
+        onError: (err) => toast.error('Error: ' + (err.message || 'Error desconocido')),
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id) => catalogService.deleteAcademicLevel(id),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['academic-levels'] }),
+        onError: () => toast.info('No se puede eliminar el nivel (posiblemente tiene grados asociados)'),
+    });
 
     const handleOpenModal = (level = null) => {
         if (level) {
@@ -57,44 +62,15 @@ const CursosNivelesPage = () => {
         setShowModal(true);
     };
 
-    const handleSave = async () => {
-        try {
-            if (!formData.name) return toast.info('El nombre es obligatorio');
-            if (!formData.code) return toast.info('El código es obligatorio');
-
-            console.log('Sending data:', formData); // Debug
-
-            let response;
-            if (selectedLevel) {
-                response = await catalogService.updateAcademicLevel(selectedLevel.id, formData);
-            } else {
-                response = await catalogService.createAcademicLevel(formData);
-            }
-
-            console.log('Server response:', response);
-
-            // Check response status if accessible, or assume success if no throw
-            toast.success(selectedLevel ? 'Nivel actualizado' : 'Nivel creado correctamente');
-
-            setShowModal(false);
-            await loadData(); // Ensure await
-        } catch (error) {
-            console.error('Error saving level:', error);
-            // Show detailed error if available
-            const message = error.response?.data?.message || error.response?.data?.detail || error.message || 'Error desconocido';
-            toast.error('Error al guardar: ' + message);
-        }
+    const handleSave = () => {
+        if (!formData.name) return toast.info('El nombre es obligatorio');
+        if (!formData.code) return toast.info('El código es obligatorio');
+        saveMutation.mutate(formData);
     };
 
-    const handleDelete = async (id) => {
+    const handleDelete = (id) => {
         if (!window.confirm('¿Está seguro de eliminar este nivel? Esta acción no se puede deshacer.')) return;
-        try {
-            await catalogService.deleteAcademicLevel(id);
-            loadData();
-        } catch (error) {
-            console.error(error);
-            toast.info('No se puede eliminar el nivel (posiblemente tiene grados asociados)');
-        }
+        deleteMutation.mutate(id);
     };
 
     const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
@@ -115,7 +91,7 @@ const CursosNivelesPage = () => {
             </div>
 
             {loading ? (
-                <div className="flex justify-center p-12"><RefreshCw className="animate-spin text-indigo-500" /></div>
+                <div className="flex justify-center p-12"><Loader2 className="animate-spin text-indigo-500" /></div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {levels.map((level) => (
@@ -212,7 +188,10 @@ const CursosNivelesPage = () => {
                         </div>
                         <div className="flex justify-end gap-3 mt-6">
                             <button onClick={() => setShowModal(false)} className={`px-4 py-2 rounded-lg ${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}>Cancelar</button>
-                            <button onClick={handleSave} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Guardar</button>
+                            <button onClick={handleSave} disabled={saveMutation.isPending} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-2">
+                                {saveMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : null}
+                                Guardar
+                            </button>
                         </div>
                     </div>
                 </div>

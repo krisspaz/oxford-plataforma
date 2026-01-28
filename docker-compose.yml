@@ -1,7 +1,7 @@
 services:
   # === DATABASE ===
   database:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-oxford_db}
       POSTGRES_USER: ${POSTGRES_USER:-oxford_user}
@@ -22,7 +22,7 @@ services:
 
   # === MONGODB (NoSQL) ===
   mongodb:
-    image: mongo:latest
+    image: mongo:8.0
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-oxford_mongo}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-xK9mPqR7vL2nT5wB}
@@ -70,7 +70,7 @@ services:
 
   # === REDIS (Cache) ===
   redis:
-    image: redis:7-alpine
+    image: redis:7.4-alpine
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
@@ -88,7 +88,7 @@ services:
       context: ./backend/symfony
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://oxford_user:83f7f5adff8aa40ffa0f0a9e28d1627c58e12c185d8bb4bc@database:5432/oxford_db?serverVersion=16&charset=utf8
+      DATABASE_URL: postgresql://oxford_user:oxford2026@database:5432/oxford_db?serverVersion=18&charset=utf8
       APP_ENV: ${APP_ENV:-dev}
       APP_SECRET_FILE: /run/secrets/app_secret
       # APP_SECRET is now handled via APP_SECRET_FILE in config
@@ -133,7 +133,7 @@ services:
       dockerfile: Dockerfile
     command: php bin/console messenger:consume async -vv
     environment:
-      DATABASE_URL: postgresql://oxford_user:83f7f5adff8aa40ffa0f0a9e28d1627c58e12c185d8bb4bc@database:5432/oxford_db?serverVersion=16&charset=utf8
+      DATABASE_URL: postgresql://oxford_user:oxford2026@database:5432/oxford_db?serverVersion=18&charset=utf8
       APP_ENV: ${APP_ENV:-dev}
       APP_SECRET_FILE: /run/secrets/app_secret
       CORPOSISTEMAS_API_URL: ${CORPOSISTEMAS_API_URL:-https://api.corposistemas.gt}
@@ -208,7 +208,7 @@ services:
 
   # === GATEWAY (Nginx) ===
   nginx:
-    image: nginx:alpine
+    image: nginx:1.27-alpine
     ports:
       - "8000:80"
     volumes:

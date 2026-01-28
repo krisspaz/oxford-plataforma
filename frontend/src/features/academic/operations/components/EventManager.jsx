@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme } from '../../../../contexts/ThemeContext';
 import { Calendar, Plus, MapPin, Trash2 } from 'lucide-react';
 
 const EventManager = () => {

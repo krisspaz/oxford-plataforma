@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\GradeRecord;
+use App\Entity\Teacher;
 use App\Repository\GradeRecordRepository;
 use App\Repository\BimesterRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -10,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[Route('/api/grade-records')]
 class GradeRecordController extends AbstractController
@@ -154,8 +156,45 @@ class GradeRecordController extends AbstractController
             }
         }
         
+        // Security: Verify if user is allowed to grade this assignment
+        $user = $this->getUser();
+        $isTeacher = $this->isGranted('ROLE_DOCENTE') && !$this->isGranted('ROLE_COORDINACION') && !$this->isGranted('ROLE_ADMIN');
+        $teacher = null;
+        
+        if ($isTeacher) {
+             // Find teacher profile by user ID (OneToOne relation in Person)
+             // We need to find the Teacher entity associated with this User
+             $teacher = $this->em->getRepository(Teacher::class)->findOneBy(['user' => $user]);
+             
+             if (!$teacher) {
+                 // Fallback: try finding by email if relation not set (Person/User separation)
+                 $teacher = $this->em->getRepository(Teacher::class)->findOneBy(['email' => $user->getUserIdentifier()]);
+             }
+             
+             if (!$teacher) {
+                 throw $this->createAccessDeniedException('Perfil de docente no encontrado.');
+             }
+        }
+        
         $saved = 0;
         foreach ($records as $recordData) {
+            // Security check inside loop
+            if ($isTeacher) {
+                 $assignmentId = $recordData['subjectAssignmentId'] ?? null;
+                 // If updating existing record, get assignment from it
+                 if (isset($recordData['id'])) {
+                     $existingRecord = $this->gradeRecordRepository->find($recordData['id']);
+                     if ($existingRecord) $assignmentId = $existingRecord->getSubjectAssignment()->getId();
+                 }
+                 
+                 if ($assignmentId) {
+                     $assignment = $this->em->getRepository(\App\Entity\SubjectAssignment::class)->find($assignmentId);
+                     if ($assignment && $assignment->getTeacher() !== $teacher) {
+                         continue; // Skip records not owned by this teacher
+                     }
+                 }
+            }
+
             $record = null;
             if (isset($recordData['id'])) {
                 $record = $this->gradeRecordRepository->find($recordData['id']);

@@ -1,87 +1,65 @@
-import { toast } from '../utils/toast';
-import { useState, useEffect } from 'react';
-import { DollarSign, FileText, Plus, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { DollarSign, FileText, Plus, Loader2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import paymentService from '../services/paymentService'; // direct import or from index
+import paymentService from '../services/paymentService';
 import studentService from '../services/studentService';
 
 const Financial = () => {
     const { darkMode } = useTheme();
-    const [payments, setPayments] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
     const [showModal, setShowModal] = useState(false);
     const [newPayment, setNewPayment] = useState({ student: '', amount: '', concept: '', date: new Date().toISOString().split('T')[0] });
-    const [students, setStudents] = useState([]);
 
-    const fetchPayments = async () => {
-        try {
-            // Service handles auth and base URL
+    // === QUERIES ===
+    const { data: payments = [], isLoading: loadingPayments } = useQuery({
+        queryKey: ['payments'],
+        queryFn: async () => {
             const response = await paymentService.getAll();
-            // Handle different response structures
-            if (response && response['hydra:member']) {
-                setPayments(response['hydra:member']);
-            } else if (response && response.member) {
-                setPayments(response.member);
-            } else if (Array.isArray(response)) {
-                setPayments(response);
-            } else {
-                setPayments([]);
-            }
-        } catch (error) {
-            console.error('Error fetching payments', error);
-            setPayments([]);
-        }
-    };
+            if (response?.['hydra:member']) return response['hydra:member'];
+            if (response?.member) return response.member;
+            if (Array.isArray(response)) return response;
+            return [];
+        },
+    });
 
-    const fetchStudents = async () => {
-        try {
-            const response = await studentService.getAll(); // Assuming getAll exists or similar
-            // Handle different response structures
-            if (response && response['hydra:member']) {
-                setStudents(response['hydra:member']);
-            } else if (response && response.member) {
-                setStudents(response.member);
-            } else if (Array.isArray(response)) {
-                setStudents(response);
-            } else {
-                setStudents([]);
-            }
-        } catch (error) {
-            console.error('Error fetching students', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { data: students = [] } = useQuery({
+        queryKey: ['students'],
+        queryFn: async () => {
+            const response = await studentService.getAll();
+            if (response?.['hydra:member']) return response['hydra:member'];
+            if (response?.member) return response.member;
+            if (Array.isArray(response)) return response;
+            return [];
+        },
+    });
 
-    useEffect(() => {
-        const init = async () => {
-            await fetchPayments();
-            await fetchStudents();
-        };
-        init();
-    }, []);
+    const loading = loadingPayments;
 
-    const handleCreatePayment = async (e) => {
-        e.preventDefault();
-        try {
-            await paymentService.create({
-                ...newPayment,
-                // If API expects IRI
-                student: `/api/students/${newPayment.student}`,
-                amount: parseFloat(newPayment.amount),
-                status: 'PAID',
-                paymentDate: newPayment.date
-            });
+    // === MUTATION ===
+    const createMutation = useMutation({
+        mutationFn: async (data) => paymentService.create({
+            ...data,
+            student: `/api/students/${data.student}`,
+            amount: parseFloat(data.amount),
+            status: 'PAID',
+            paymentDate: data.date
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['payments'] });
+            toast.success('Pago registrado exitosamente');
             setShowModal(false);
-            fetchPayments();
-        } catch (error) {
-            toast.info('Error registrando pago');
-            console.error(error);
-        }
+        },
+        onError: () => toast.error('Error registrando pago'),
+    });
+
+    const handleCreatePayment = (e) => {
+        e.preventDefault();
+        createMutation.mutate(newPayment);
     };
 
     const downloadReceipt = (paymentId) => {
-        // Use relative path matching API proxy
         window.open(`/api/payments/${paymentId}/receipt`, '_blank');
     };
 
@@ -116,7 +94,7 @@ const Financial = () => {
                                 </tr>
                             </thead>
                             <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-100'}`}>
-                                {loading ? <tr><td colSpan="6" className={`text-center p-4 ${darkMode ? 'text-gray-400' : ''}`}><RefreshCw className="animate-spin inline mr-2" />Cargando...</td></tr> :
+                                {loading ? <tr><td colSpan="6" className={`text-center p-4 ${darkMode ? 'text-gray-400' : ''}`}><Loader2 className="animate-spin inline mr-2" />Cargando...</td></tr> :
                                     payments.length === 0 ? <tr><td colSpan="6" className={`text-center p-4 ${darkMode ? 'text-gray-400' : ''}`}>No hay pagos registrados.</td></tr> :
                                         payments.map(payment => (
                                             <tr key={payment.id} className={`${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}>

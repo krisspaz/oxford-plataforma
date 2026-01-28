@@ -49,16 +49,37 @@ class ScheduleController extends AbstractController
     public function getMyStudentSchedule(): JsonResponse
     {
         $user = $this->getUser();
-        // In a real scenario, we'd link User -> Student. 
-        // For now, if user has mapped student, use it. Otherwise, return empty or sample if needed.
-        // Assuming we have a way to get the student ID from the user context:
-        // $student = $user->getStudent(); 
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        // Find Student linked to User (via Person or OneToOne)
+        // Assuming Student extends Person which has User
+        $student = $this->entityManager->getRepository(Student::class)->findOneBy(['user' => $user]);
+
+        if (!$student) {
+             // Fallback: try finding by email
+             $student = $this->entityManager->getRepository(Student::class)->findOneBy(['email' => $user->getUserIdentifier()]);
+        }
         
-        // Fallback for demo if no direct link:
-        // Try to find a student with same email or just first student if in dev
-        // This part depends on your User-Student relation structure.
+        if (!$student) {
+            return $this->json(['error' => 'Student profile not found'], 404);
+        }
+
+        // Get Active Enrollment
+        $enrollment = $this->entityManager->getRepository(\App\Entity\Enrollment::class)->findOneBy([
+            'student' => $student,
+            'status' => 'INSCRITO'
+        ], ['id' => 'DESC']);
+
+        if (!$enrollment) {
+            return $this->json([], 200); // No enrollment means no schedule
+        }
+
+        $schedules = $this->scheduleRepository->findByGradeAndSection(
+            $enrollment->getGrade()->getId(),
+            $enrollment->getSection()?->getId()
+        );
         
-        return $this->json([]); // Implementation Pending proper User-Student link
+        return $this->json($this->serializeSchedules($schedules));
     }
 
     #[Route('/my-schedule', name: 'schedule_teacher_my', methods: ['GET'])]

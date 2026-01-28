@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Package;
 use App\Entity\PackageDetail;
+use App\Entity\SchoolCycle;
 use App\Repository\PackageRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -60,7 +61,21 @@ class PackageController extends AbstractController
         $package = new Package();
         $package->setName($data['name']);
         $package->setDescription($data['description'] ?? null);
-        // TODO: Set schoolCycle and grades
+        $package->setDescription($data['description'] ?? null);
+        
+        // Assign current SchoolCycle
+        $year = date('Y');
+        $cycle = $this->em->getRepository(SchoolCycle::class)->findOneBy(['name' => $year]);
+        
+        if (!$cycle) {
+            $cycle = new SchoolCycle();
+            $cycle->setName($year);
+            $cycle->setStartDate(new \DateTime($year . '-01-01'));
+            $cycle->setEndDate(new \DateTime($year . '-12-31'));
+            $cycle->setIsActive(true);
+            $this->em->persist($cycle);
+        }
+        $package->setSchoolCycle($cycle);
         
         // Crear detalles si vienen
         if (isset($data['details']) && is_array($data['details'])) {

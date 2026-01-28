@@ -31,18 +31,47 @@ class StudentFeaturesController extends AbstractController
     #[Route('/teachers/{studentId}', name: 'student_get_teachers', methods: ['GET'])]
     public function getMyTeachers(int $studentId, StudentRepository $studentRepo): JsonResponse
     {
-        // In a real app, this would query SubjectAssignments for the student's Grade/Section
-        // For now, we return ALL teachers to facilitate testing
-        // TODO: Filter by student's section assignments
-        
-        $teachers = $this->em->getRepository(Teacher::class)->findAll();
+        // Filter by student's active enrollment
+        $activeEnrollment = $this->em->getRepository(\App\Entity\Enrollment::class)->findOneBy([
+            'student' => $studentId, 
+            'status' => 'INSCRITO'
+        ], ['id' => 'DESC']);
+
+        if (!$activeEnrollment) {
+            // Fallback for demo or if not enrolled yet
+            $teachers = $this->em->getRepository(Teacher::class)->findAll();
+        } else {
+            $assignments = $this->em->getRepository(\App\Entity\SubjectAssignment::class)->findBy([
+                'grade' => $activeEnrollment->getGrade(),
+                'section' => $activeEnrollment->getSection(),
+                'schoolCycle' => $activeEnrollment->getSchoolCycle()
+            ]);
+            
+            $teachers = [];
+            $seenTeachers = [];
+            
+            foreach ($assignments as $assignment) {
+                $t = $assignment->getTeacher();
+                if ($t && !isset($seenTeachers[$t->getId()])) {
+                    $seenTeachers[$t->getId()] = true;
+                    // Add subject to teacher object for response context
+                    $t->contextSubject = $assignment->getSubject()->getName();
+                    $teachers[] = $t;
+                }
+            }
+            
+            // If no assignments found (e.g. data missing), fallback to all
+            if (empty($teachers)) {
+                $teachers = $this->em->getRepository(Teacher::class)->findAll();
+            }
+        }
         
         $data = [];
         foreach ($teachers as $t) {
             $data[] = [
                 'id' => $t->getId(),
                 'name' => $t->getFirstName() . ' ' . $t->getLastName(),
-                'subject' => 'Docente General', // TODO: Get from assignment
+                'subject' => $t->contextSubject ?? 'Docente General',
                 'avatar' => substr($t->getFirstName(), 0, 1) . substr($t->getLastName(), 0, 1),
                 'online' => (bool)random_int(0, 1) // Mock status
             ];

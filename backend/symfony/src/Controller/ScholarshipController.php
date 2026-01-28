@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Scholarship;
+use App\Entity\StudentScholarship;
+use App\Entity\SchoolCycle;
 use App\Repository\ScholarshipRepository;
 use App\Repository\StudentRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -44,8 +46,29 @@ class ScholarshipController extends AbstractController
             return $this->json(['success' => false, 'error' => 'Convenio no encontrado'], 404);
         }
 
-        // TODO: Create StudentScholarship entity to track assignments
-        // For now, we'll just return success
+        // Create StudentScholarship entity to track assignments
+        $year = date('Y');
+        $cycle = $this->em->getRepository(SchoolCycle::class)->findOneBy(['name' => $year]);
+        
+        if (!$cycle) {
+            $cycle = new SchoolCycle();
+            $cycle->setName($year);
+            $cycle->setStartDate(new \DateTime($year . '-01-01'));
+            $cycle->setEndDate(new \DateTime($year . '-12-31'));
+            $cycle->setIsActive(true);
+            $this->em->persist($cycle);
+        }
+
+        $assignment = new StudentScholarship();
+        $assignment->setStudent($student);
+        $assignment->setScholarship($scholarship);
+        $assignment->setSchoolCycle($cycle);
+        $assignment->setAssignedAt(new \DateTime());
+        $assignment->setIsActive(true);
+        $assignment->setNotes($data['notes'] ?? null);
+
+        $this->em->persist($assignment);
+        $this->em->flush();
         
         return $this->json([
             'success' => true,

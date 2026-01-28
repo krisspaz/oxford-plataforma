@@ -63,6 +63,24 @@ class TeacherController extends AbstractController
     }
 
     /**
+     * Get subjects assigned to the current logged-in teacher
+     */
+    #[Route('/me/assignments', name: 'teacher_me_assignments', methods: ['GET'])]
+    public function getMyAssignments(): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!$user) return $this->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+
+        $teacher = $this->teacherRepository->findOneBy(['user' => $user]);
+        if (!$teacher) $teacher = $this->teacherRepository->findOneBy(['email' => $user->getEmail()]);
+        
+        if (!$teacher) return $this->json(['error' => 'Teacher profile not found'], 404);
+
+        return $this->getSubjects($teacher->getId());
+    }
+
+    /**
      * Get subjects assigned to a teacher
      */
     #[Route('/{id}/subjects', name: 'teacher_subjects', methods: ['GET'])]

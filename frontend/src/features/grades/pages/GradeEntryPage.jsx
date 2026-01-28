@@ -2,6 +2,7 @@ import React from 'react';
 import { Save, Lock, Unlock, AlertCircle, CheckCircle } from 'lucide-react';
 import { useGradeEntry } from '../hooks/useGradeEntry';
 import { Button, Card, Badge, Spinner } from '../../../components/ui';
+import { toast } from '../../../utils/toast';
 
 const GradeEntryPage = () => {
     const {
@@ -14,9 +15,9 @@ const GradeEntryPage = () => {
     const handleSave = async () => {
         const res = await actions.saveGrades();
         if (res.success) {
-            alert('Notas guardadas exitosamente');
+            toast.success('Notas guardadas exitosamente');
         } else {
-            alert('Error al guardar: ' + res.error);
+            toast.error('Error al guardar: ' + res.error);
         }
     };
 
@@ -123,8 +124,8 @@ const GradeEntryPage = () => {
                                             value={student.score ?? ''}
                                             onChange={(e) => actions.updateScore(student.id, e.target.value)}
                                             className={`w-24 px-3 py-1 border rounded focus:ring-2 focus:ring-blue-500 text-center ${(student.score === null || student.score === '') ? 'bg-gray-50' :
-                                                    student.score < 60 ? 'text-red-600 border-red-300 bg-red-50' :
-                                                        'text-gray-900 border-gray-300'
+                                                student.score < 60 ? 'text-red-600 border-red-300 bg-red-50' :
+                                                    'text-gray-900 border-gray-300'
                                                 } dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
                                         />
                                     </td>

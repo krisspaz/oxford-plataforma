@@ -195,6 +195,12 @@ const apiFetch = async (endpoint, options = {}, retry = true) => {
             throw new Error(errorMessage);
         }
 
+        // Handle Hydra Collection automatic unwrapping (Experimental but safe)
+        if (data && typeof data === 'object') {
+            if (data['hydra:member']) return data['hydra:member'];
+            if (data.member) return data.member;
+        }
+
         return data;
     } catch (error) {
         if (import.meta.env.DEV) {

@@ -1,8 +1,10 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Calendar, Users, BookOpen, Save, AlertCircle, RefreshCw, Wand2, Info } from 'lucide-react';
+import { toast } from 'sonner';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Calendar, Users, BookOpen, Save, AlertCircle, Loader2, Wand2, Info } from 'lucide-react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../services/api';
 
 // Item Types for DnD
@@ -61,54 +63,27 @@ const DroppableSlot = ({ day, period, onDrop, children, conflict }) => {
 };
 
 const HorariosPage = () => {
-    const [schedule, setSchedule] = useState({}); // { 1: { 1: { subject, teacher } } }
-    const [pool, setPool] = useState([]);
+    const { darkMode } = useTheme();
+    const [schedule, setSchedule] = useState({});
     const [conflicts, setConflicts] = useState({});
-    const [loading, setLoading] = useState(false);
     const [generating, setGenerating] = useState(false);
-    const [darkMode, setDarkMode] = useState(false); // Should come from context usually
 
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    const loadData = async () => {
-        setLoading(true);
-        try {
-            // Fetch real data from backend
-            const [subjectsRes, teachersRes] = await Promise.all([
-                api.get('/subjects'),
-                api.get('/teachers') // Assuming /teachers endpoint exists or users?role=teacher
-            ]);
-
-            // Transform into pool items
-            // This is a temporary mapping. Ideally we fetch "Assignments" or similar.
-            // For now, let's create a pool from Subjects x Teachers (or just Subjects)
-
-            // If API returns Hydra collection:
-            const subjects = subjectsRes['hydra:member'] || subjectsRes;
-
-            const newPool = subjects.map((sub, index) => ({
+    // === QUERY ===
+    const { data: pool = [], isLoading: loading } = useQuery({
+        queryKey: ['schedule', 'pool'],
+        queryFn: async () => {
+            const subjectsRes = await api.get('/subjects');
+            const subjects = subjectsRes['hydra:member'] || subjectsRes || [];
+            const colors = ['bg-blue-100 dark:bg-blue-900', 'bg-green-100 dark:bg-green-900', 'bg-yellow-100 dark:bg-yellow-900', 'bg-purple-100 dark:bg-purple-900'];
+            return subjects.map((sub, index) => ({
                 id: sub.id,
                 subject: sub.name,
-                teacher: 'Por Asignar', // Default or fetch assignment
-                color: ['bg-blue-100 dark:bg-blue-900', 'bg-green-100 dark:bg-green-900', 'bg-yellow-100 dark:bg-yellow-900', 'bg-purple-100 dark:bg-purple-900'][index % 4]
+                teacher: 'Por Asignar',
+                color: colors[index % 4]
             }));
-
-            // If we have teachers, maybe valid assignments? 
-            // For now, just showing subjects available for scheduling is a good first step.
-
-            setPool(newPool);
-        } catch (error) {
-            console.error("Error loading schedule data:", error);
-            // Fallback for demo if API fails
-            setPool([
-                { id: 1, subject: 'Matemáticas (Demo)', teacher: 'Juan Pérez', color: 'bg-blue-100 dark:bg-blue-900' },
-            ]);
-        } finally {
-            setLoading(false);
-        }
-    };
+        },
+        staleTime: 10 * 60 * 1000,
+    });
 
     const handleDrop = (day, period, item) => {
         setSchedule(prev => ({

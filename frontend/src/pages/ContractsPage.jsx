@@ -1,6 +1,7 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { FileText, Download, RefreshCw, Plus, Upload, Eye, X, User, GraduationCap, Phone, Mail, MapPin, Calendar } from 'lucide-react';
+import { toast } from 'sonner';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { FileText, Download, Loader2, Plus, Upload, Eye, X, User, GraduationCap, Phone, Mail, MapPin, Calendar } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePdfExport } from '../hooks/usePdfExport';
 import { contractService, studentService } from '../services';
@@ -8,73 +9,50 @@ import { contractService, studentService } from '../services';
 const ContractsPage = () => {
     const { darkMode } = useTheme();
     const { createDoc } = usePdfExport();
+    const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState('all');
-    const [contracts, setContracts] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [selectedContract, setSelectedContract] = useState(null);
-    const [generating, setGenerating] = useState(false);
 
     // Form state para generar contrato
     const [formData, setFormData] = useState({
-        // Datos del representante
         representante: {
-            nombres: '',
-            apellidos: '',
-            edad: '',
-            estadoCivil: 'casado(a)',
-            nacionalidad: 'guatemalteco(a)',
-            profesion: '',
-            dpi: '',
-            direccion: '',
-            telefonoCasa: '',
-            telefonoOficina: '',
-            celular: '',
-            email: ''
+            nombres: '', apellidos: '', edad: '', estadoCivil: 'casado(a)',
+            nacionalidad: 'guatemalteco(a)', profesion: '', dpi: '', direccion: '',
+            telefonoCasa: '', telefonoOficina: '', celular: '', email: ''
         },
-        // Datos del educando
         educando: {
-            nombres: '',
-            apellidos: '',
-            grado: '',
-            nivel: 'Primaria',
-            jornada: 'Jornada Matutina'
+            nombres: '', apellidos: '', grado: '', nivel: 'Primaria', jornada: 'Jornada Matutina'
         },
-        // Cuotas
-        inscripcion: 600,
-        colegiatura: 600,
-        ciclo: new Date().getFullYear(),
-        formaPago: 'anticipada',
-        diasPago: 5
+        inscripcion: 600, colegiatura: 600, ciclo: new Date().getFullYear(),
+        formaPago: 'anticipada', diasPago: 5
     });
 
-    useEffect(() => {
-        loadContracts();
-    }, []);
-
-    const loadContracts = async () => {
-        setLoading(true);
-        try {
+    // === QUERY ===
+    const { data: contracts = [], isLoading: loading } = useQuery({
+        queryKey: ['contracts'],
+        queryFn: async () => {
             const { success, data } = await contractService.getAll();
-            if (success && Array.isArray(data)) {
-                setContracts(data);
-            } else {
-                throw new Error("Failed to load");
-            }
-        } catch (error) {
-            console.error("Error loading contracts:", error);
-            // Mock Data Fallback
-            setContracts([
-                { id: 1, student: 'Ana García López', carnet: '2025-001', grade: '1ro Primaria', cycle: '2025', date: '2024-12-19', status: 'SIGNED', signedFile: '/contracts/signed_001.pdf' },
-                { id: 2, student: 'Pedro López Martínez', carnet: '2025-002', grade: '2do Primaria', cycle: '2025', date: '2024-12-20', status: 'PENDING' },
-                { id: 3, student: 'Luisa Martínez Ruiz', carnet: '2025-003', grade: '3ro Primaria', cycle: '2025', date: '2024-11-15', status: 'SIGNED', signedFile: '/contracts/signed_002.pdf' },
-                { id: 4, student: 'Carlos Fernández', carnet: '2025-004', grade: 'Kinder', cycle: '2025', date: '2024-12-21', status: 'PENDING' },
-            ]);
-        } finally {
-            setLoading(false);
-        }
-    };
+            if (success && Array.isArray(data)) return data;
+            // Mock fallback
+            return [
+                { id: 1, student: 'Ana García López', carnet: '2026-001', grade: '1ro Primaria', cycle: '2026', date: '2026-01-19', status: 'SIGNED', signedFile: '/contracts/signed_001.pdf' },
+                { id: 2, student: 'Pedro López Martínez', carnet: '2026-002', grade: '2do Primaria', cycle: '2026', date: '2026-01-20', status: 'PENDING' },
+            ];
+        },
+    });
+
+    // === MUTATION ===
+    const generateMutation = useMutation({
+        mutationFn: async (payload) => contractService.create(payload),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['contracts'] });
+            toast.success('Contrato generado exitosamente');
+            setShowGenerateModal(false);
+        },
+        onError: () => toast.error('Error al generar contrato'),
+    });
 
     const handleDownloadPdf = (contract) => {
         // Generar contrato con datos del estudiante
@@ -119,7 +97,7 @@ const ContractsPage = () => {
             });
         } catch (error) {
             console.error("Error generating contract:", error);
-            alert("Error al generar contrato");
+            toast.error("Error al generar contrato");
         } finally {
             setGenerating(false);
         }
@@ -131,7 +109,7 @@ const ContractsPage = () => {
 
         try {
             await contractService.upload(selectedContract.id, file);
-            alert("Contrato firmado subido exitosamente");
+            toast.success("Contrato firmado subido exitosamente");
             setShowUploadModal(false);
             setSelectedContract(null);
             loadContracts();

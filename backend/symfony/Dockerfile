@@ -1,5 +1,5 @@
 # Backend Symfony Production Dockerfile
-FROM php:8.3-fpm-alpine AS base
+FROM php:8.4-fpm-alpine AS base
 
 # Install system dependencies
 RUN apk add --no-cache \

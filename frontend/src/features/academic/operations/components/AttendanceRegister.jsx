@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme } from '../../../../contexts/ThemeContext';
 import { Check, X, Clock, Save, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -27,8 +27,8 @@ const AttendanceRegister = () => {
         <button
             onClick={() => handleStatusChange(student.id, type)}
             className={`p-2 rounded-lg transition-all ${student.status === type
-                    ? colorClass
-                    : darkMode ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                ? colorClass
+                : darkMode ? 'bg-gray-700 text-gray-400 hover:bg-gray-600' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
                 }`}
             title={type.toUpperCase()}
         >

@@ -74,7 +74,7 @@ const ComplaintsPage = () => {
             setTimeout(() => setSubmitted(false), 3000); // Keep UI feedback
         } catch (error) {
             console.error("Error submitting complaint:", error);
-            alert("Error al enviar el reporte. Intente nuevamente.");
+            toast.error("Error al enviar el reporte. Intente nuevamente.");
         }
     };
 

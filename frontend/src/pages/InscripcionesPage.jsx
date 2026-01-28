@@ -1,16 +1,14 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { UserPlus, ChevronRight, ChevronLeft, Check, User, Users, FileText, RefreshCw, UserCheck } from 'lucide-react';
+import { toast } from 'sonner';
+import React, { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { UserPlus, ChevronRight, ChevronLeft, Check, User, Users, FileText, Loader2, UserCheck } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { enrollmentService, catalogService, packageService } from '../services';
 
 const InscripcionesPage = () => {
     const { darkMode } = useTheme();
     const [currentStep, setCurrentStep] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
-    const [guardianType, setGuardianType] = useState(null); // 'father', 'mother', 'other'
-    const [catalogs, setCatalogs] = useState({ grades: [], packages: [], relationships: [], levels: [] });
+    const [guardianType, setGuardianType] = useState(null);
     const [formData, setFormData] = useState({
         student: { firstName: '', lastName: '', birthDate: '', gender: '', cui: '' },
         father: { name: '', dpi: '', phone: '', email: '', occupation: '' },
@@ -29,33 +27,39 @@ const InscripcionesPage = () => {
         { num: 4, title: 'Inscripción', icon: FileText },
     ];
 
-    useEffect(() => {
-        loadCatalogs();
-    }, []);
-
-    const loadCatalogs = async () => {
-        setLoading(true);
-        try {
+    // === QUERY ===
+    const { data: catalogs = { grades: [], packages: [], relationships: [], levels: [] }, isLoading: loading } = useQuery({
+        queryKey: ['enrollments', 'catalogs'],
+        queryFn: async () => {
             const [gradesRes, packagesRes, relRes, levelsRes] = await Promise.all([
                 catalogService.getGrades(),
                 packageService.getAll({ active: true }),
                 catalogService.getRelationshipTypes(),
                 catalogService.getAcademicLevels()
             ]);
-            setCatalogs({
+            return {
                 grades: gradesRes.success ? gradesRes.data : [],
                 packages: packagesRes.success ? packagesRes.data : [],
                 relationships: relRes.success ? relRes.data : [],
                 levels: levelsRes.success ? levelsRes.data : []
-            });
-        } catch (error) {
-            console.error('Error loading catalogs:', error);
-            toast.error('Error al cargar catálogos: ' + error.message);
-            setCatalogs({ grades: [], packages: [], relationships: [], levels: [] });
-        } finally {
-            setLoading(false);
-        }
-    };
+            };
+        },
+        staleTime: 10 * 60 * 1000,
+    });
+
+    // === MUTATION ===
+    const enrollMutation = useMutation({
+        mutationFn: async (payload) => enrollmentService.create(payload),
+        onSuccess: (response) => {
+            if (response.success) {
+                toast.success('✅ Inscripción completada exitosamente');
+                resetForm();
+            } else {
+                toast.error('Error al crear inscripción: ' + (response.message || 'Error desconocido'));
+            }
+        },
+        onError: (err) => toast.error('Error al crear inscripción: ' + err.message),
+    });
 
     const updateField = (section, field, value) => {
         setFormData(prev => ({
@@ -96,32 +100,17 @@ const InscripcionesPage = () => {
         }
     };
 
-    const handleSubmit = async () => {
-        setSubmitting(true);
-        try {
-            const response = await enrollmentService.create({
-                student: formData.student,
-                father: formData.father,
-                mother: formData.mother,
-                guardian: formData.guardian,
-                guardianType: guardianType,
-                gradeId: formData.enrollment.grade,
-                sectionId: formData.enrollment.section,
-                packageId: formData.enrollment.package
-            });
-
-            if (response.success) {
-                toast.info('✅ Inscripción completada exitosamente');
-                resetForm();
-            } else {
-                toast.error('Error al crear inscripción: ' + (response.message || 'Error desconocido'));
-            }
-        } catch (error) {
-            console.error('Error submitting enrollment:', error);
-            toast.error('Error al crear inscripción: ' + error.message);
-        } finally {
-            setSubmitting(false);
-        }
+    const handleSubmit = () => {
+        enrollMutation.mutate({
+            student: formData.student,
+            father: formData.father,
+            mother: formData.mother,
+            guardian: formData.guardian,
+            guardianType: guardianType,
+            gradeId: formData.enrollment.grade,
+            sectionId: formData.enrollment.section,
+            packageId: formData.enrollment.package
+        });
     };
 
     const resetForm = () => {
@@ -139,7 +128,7 @@ const InscripcionesPage = () => {
     if (loading) {
         return (
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-12 text-center`}>
-                <RefreshCw className="animate-spin mx-auto text-teal-500" size={32} />
+                <Loader2 className="animate-spin mx-auto text-teal-500" size={32} />
                 <p className={`mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Cargando...</p>
             </div>
         );
@@ -450,8 +439,8 @@ const InscripcionesPage = () => {
                         Siguiente <ChevronRight size={18} />
                     </button>
                 ) : (
-                    <button onClick={handleSubmit} disabled={submitting} className="flex items-center gap-2 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg disabled:opacity-50">
-                        {submitting ? <><RefreshCw size={18} className="animate-spin" /> Procesando...</> : <><Check size={18} /> Completar Inscripción</>}
+                    <button onClick={handleSubmit} disabled={enrollMutation.isPending} className="flex items-center gap-2 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg disabled:opacity-50">
+                        {enrollMutation.isPending ? <><Loader2 size={18} className="animate-spin" /> Procesando...</> : <><Check size={18} /> Completar Inscripción</>}
                     </button>
                 )}
             </div>

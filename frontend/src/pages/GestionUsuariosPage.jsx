@@ -1,19 +1,19 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Users, Plus, Edit, Lock, Unlock, Key, Search, X, RefreshCw, Check, AlertCircle, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import React, { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Users, Plus, Edit, Lock, Unlock, Key, Search, X, Loader2, Check, AlertCircle, Trash2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { userService } from '../services';
 
 const GestionUsuariosPage = () => {
     const { darkMode } = useTheme();
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRole, setFilterRole] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(null);
-    const [users, setUsers] = useState([]);
     const [showCredentials, setShowCredentials] = useState(false);
     const [createdUser, setCreatedUser] = useState(null);
 
@@ -31,69 +31,44 @@ const GestionUsuariosPage = () => {
 
     const inputClass = `px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300 text-gray-900 bg-white'}`;
 
-    // State for form data
     const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        role: 'ROLE_USER',
-        password: '',
-        profileImage: null
+        firstName: '', lastName: '', email: '', role: 'ROLE_USER', password: '', profileImage: null
     });
     const [showPassword, setShowPassword] = useState(false);
 
-    useEffect(() => {
-        loadUsers();
-    }, []);
-
-    const loadUsers = async () => {
-        setLoading(true);
-        try {
+    // === QUERY ===
+    const { data: users = [], isLoading: loading } = useQuery({
+        queryKey: ['users'],
+        queryFn: async () => {
             const response = await userService.getAll();
-            // Handle custom backend format: { success: true, data: [] }
-            if (response && response.data && Array.isArray(response.data)) {
-                setUsers(response.data);
-            } else if (response && response.member) {
-                setUsers(response.member);
-            } else if (response && response['hydra:member']) {
-                setUsers(response['hydra:member']);
-            } else if (Array.isArray(response)) {
-                setUsers(response);
-            } else {
-                console.error('Unexpected response format:', response);
-                setUsers([]);
-            }
-        } catch (error) {
-            console.error('Error loading users:', error);
-            // Fallback for demo
-        } finally {
-            setLoading(false);
-        }
-    };
+            if (response?.data && Array.isArray(response.data)) return response.data;
+            if (response?.member) return response.member;
+            if (response?.['hydra:member']) return response['hydra:member'];
+            if (Array.isArray(response)) return response;
+            return [];
+        },
+    });
 
-    const filteredUsers = users.filter(u => {
-        const matchesSearch = u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (u.name && u.name.toLowerCase().includes(searchTerm.toLowerCase()));
-        const matchesRole = !filterRole || (u.roles && u.roles.includes(filterRole));
+    // === MUTATIONS ===
+    const toggleMutation = useMutation({
+        mutationFn: (id) => userService.toggleStatus(id),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
+    });
+
+    const filteredUsers = useMemo(() => users.filter(u => {
+        const matchesSearch = u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            u.name?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesRole = !filterRole || u.roles?.includes(filterRole);
         const matchesStatus = filterStatus === '' ||
             (filterStatus === 'active' && u.isActive) ||
             (filterStatus === 'inactive' && !u.isActive);
         return matchesSearch && matchesRole && matchesStatus;
-    });
+    }), [users, searchTerm, filterRole, filterStatus]);
 
     const toggleUserStatus = async (id) => {
         setActionLoading(id);
         try {
-            const response = await userService.toggleStatus(id);
-            // Update with backend response, not optimistic
-            if (response?.data) {
-                setUsers(users.map(u => u.id === id ? { ...u, isActive: response.data.isActive } : u));
-            } else {
-                // Fallback: reload all
-                loadUsers();
-            }
-        } catch (error) {
-            console.error('Error toggling status:', error);
+            await toggleMutation.mutateAsync(id);
         } finally {
             setActionLoading(null);
         }

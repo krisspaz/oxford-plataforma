@@ -72,7 +72,7 @@ const SuggestionsPage = () => {
             setTimeout(() => setSubmitted(false), 3000);
         } catch (error) {
             console.error("Error submitting suggestion:", error);
-            alert("Error al enviar la sugerencia");
+            toast.error("Error al enviar la sugerencia");
         }
     };
 

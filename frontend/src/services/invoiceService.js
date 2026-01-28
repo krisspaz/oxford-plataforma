@@ -1,5 +1,23 @@
 import api from './api';
-import jsPDF from 'jspdf';
+
+/**
+ * Invoice Service
+ * PERFORMANCE: Uses dynamic imports for jsPDF to avoid loading in initial bundle
+ */
+
+// Cached module reference
+let jsPDFModule = null;
+
+/**
+ * Lazy-load jsPDF
+ */
+const loadJsPDF = async () => {
+    if (!jsPDFModule) {
+        const jspdf = await import('jspdf');
+        jsPDFModule = jspdf.default;
+    }
+    return jsPDFModule;
+};
 
 const invoiceService = {
     getAll: async (params = {}) => {
@@ -65,7 +83,8 @@ const invoiceService = {
                 }
             }
 
-            // Generate PDF
+            // Lazy-load jsPDF only when generating PDF
+            const jsPDF = await loadJsPDF();
             const doc = new jsPDF();
 
             // Header

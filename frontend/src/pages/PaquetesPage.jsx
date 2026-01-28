@@ -1,70 +1,65 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Package, Plus, ChevronDown, ChevronRight, Edit, X, RefreshCw, Trash2, Save } from 'lucide-react';
+import { toast } from 'sonner';
+import React, { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Package, Plus, ChevronDown, ChevronRight, Edit, X, Loader2, Trash2, Save } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { packageService, catalogService } from '../services';
 
 const PaquetesPage = () => {
     const { darkMode } = useTheme();
+    const queryClient = useQueryClient();
     const [expandedPackage, setExpandedPackage] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [packages, setPackages] = useState([]);
 
-    const [grades, setGrades] = useState([]);
     const [cycleOptions] = useState(() => {
         const currentYear = new Date().getFullYear();
         return [currentYear, currentYear + 1, currentYear + 2];
     });
     const [selectedCycle, setSelectedCycle] = useState(new Date().getFullYear().toString());
 
-    // Form state
     const [formData, setFormData] = useState({
-        id: null,
-        name: '',
-        description: '',
-        cycle: new Date().getFullYear().toString(),
-        isActive: true,
-        applicableGrades: [],
-        details: []
+        id: null, name: '', description: '', cycle: new Date().getFullYear().toString(),
+        isActive: true, applicableGrades: [], details: []
     });
 
     const documentTypes = ['FACTURA_SAT', 'RECIBO_SAT', 'NOTA_DEBITO'];
-
     const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
     const labelClass = `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`;
 
-    useEffect(() => {
-        loadData();
-    }, []);
+    // === QUERIES ===
+    const { data: packages = [], isLoading: loadingPackages } = useQuery({
+        queryKey: ['packages'],
+        queryFn: async () => {
+            const res = await packageService.getAll();
+            return res.success || Array.isArray(res.data) ? (res.data || []) : [];
+        },
+    });
 
-    const loadData = async () => {
-        setLoading(true);
-        try {
-            // Load packages and grades in parallel
-            const [packagesRes, gradesRes] = await Promise.all([
-                packageService.getAll(),
-                catalogService.getGrades()
-            ]);
-
-            if (packagesRes.success || Array.isArray(packagesRes.data)) {
-                setPackages(packagesRes.data || []);
+    const { data: grades = [], isLoading: loadingGrades } = useQuery({
+        queryKey: ['grades', 'names'],
+        queryFn: async () => {
+            try {
+                const res = await catalogService.getGrades();
+                const list = res.success || Array.isArray(res.data) ? (res.data || []) : [];
+                return list.map(g => g.name);
+            } catch {
+                return ['Prekinder', 'Kinder', 'Preparatoria', '1ro Primaria', '2do Primaria', '3ro Primaria'];
             }
+        },
+    });
 
-            if (gradesRes.success || Array.isArray(gradesRes.data)) {
-                // Flatten grades if they come in levels, or just use the list
-                const gradeList = Array.isArray(gradesRes.data) ? gradesRes.data : [];
-                setGrades(gradeList.map(g => g.name)); // Store names for the UI toggle match
-            }
+    const loading = loadingPackages || loadingGrades;
 
-        } catch (error) {
-            console.error('Error loading data:', error);
-            // Fallback for grades if API fails
-            setGrades(['Prekinder', 'Kinder', 'Preparatoria', '1ro Primaria', '2do Primaria', '3ro Primaria', '4to Primaria', '5to Primaria', '6to Primaria', '1ro Básico', '2do Básico', '3ro Básico', '4to Bachillerato', '5to Bachillerato']);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // === MUTATION ===
+    const saveMutation = useMutation({
+        mutationFn: async (pkg) => pkg.id ? packageService.update(pkg.id, pkg) : packageService.create(pkg),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['packages'] });
+            toast.success('Paquete guardado');
+            setShowModal(false);
+        },
+        onError: () => toast.error('Error al guardar paquete'),
+    });
 
     const openNewPackage = () => {
         setFormData({
@@ -87,41 +82,17 @@ const PaquetesPage = () => {
         setShowModal(true);
     };
 
-    const handleSave = async () => {
+    const handleSave = () => {
         if (!formData.name) {
-            toast.info('Por favor ingresa un nombre para el paquete');
+            toast.warning('Por favor ingresa un nombre para el paquete');
             return;
         }
         if (formData.details.some(d => !d.productName || d.price <= 0)) {
-            toast.info('Por favor completa todos los productos con nombre y precio válido');
+            toast.warning('Por favor completa todos los productos con nombre y precio válido');
             return;
         }
-
         const totalPrice = formData.details.reduce((sum, d) => sum + (d.price * (d.quantity || 1)), 0);
-        const packageData = { ...formData, totalPrice };
-
-        try {
-            if (formData.id) {
-                await packageService.update(formData.id, packageData);
-                setPackages(prev => prev.map(p => p.id === formData.id ? packageData : p));
-            } else {
-                const newId = Math.max(0, ...packages.map(p => p.id)) + 1;
-                const newPackage = { ...packageData, id: newId };
-                await packageService.create(newPackage);
-                setPackages(prev => [...prev, newPackage]);
-            }
-            setShowModal(false);
-        } catch (error) {
-            console.error('Error saving package:', error);
-            // Still update local state for demo
-            if (formData.id) {
-                setPackages(prev => prev.map(p => p.id === formData.id ? { ...formData, totalPrice } : p));
-            } else {
-                const newId = Math.max(0, ...packages.map(p => p.id)) + 1;
-                setPackages(prev => [...prev, { ...formData, id: newId, totalPrice }]);
-            }
-            setShowModal(false);
-        }
+        saveMutation.mutate({ ...formData, totalPrice });
     };
 
     const addProduct = () => {
@@ -161,7 +132,7 @@ const PaquetesPage = () => {
     if (loading) {
         return (
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-12 text-center`}>
-                <RefreshCw className="animate-spin mx-auto text-teal-500" size={32} />
+                <Loader2 className="animate-spin mx-auto text-teal-500" size={32} />
                 <p className={`mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Cargando paquetes...</p>
             </div>
         );

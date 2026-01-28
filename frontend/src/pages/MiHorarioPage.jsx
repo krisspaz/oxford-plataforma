@@ -278,7 +278,7 @@ const MiHorarioPage = () => {
                                                 ) : classInfo ? (
                                                     <div className={`p-1.5 rounded text-xs ${darkMode ? 'bg-teal-900/50 text-teal-300' : 'bg-teal-100 text-teal-800'}`}>
                                                         <div className="font-bold">{classInfo.subject}</div>
-                                                        <div className="opacity-70">{classInfo.teacher.split(' ')[1]}</div>
+                                                        <div className="opacity-70">{classInfo.teacher?.split(' ')[1] || classInfo.teacher}</div>
                                                     </div>
                                                 ) : (
                                                     <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-300'}`}>-</span>

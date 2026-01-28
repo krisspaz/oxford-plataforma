@@ -4,20 +4,61 @@ namespace App\Controller;
 
 use App\Repository\PaymentRepository;
 use App\Repository\StudentRepository;
+use App\Service\ReportBuilderService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/reports', name: 'api_reports_')]
 class ReportController extends AbstractController
 {
-    #[Route('/grades/{studentId}', name: 'grades', methods: ['GET'])]
-    public function downloadGrades(int $studentId): JsonResponse
+    private $reportBuilder;
+
+    public function __construct(ReportBuilderService $reportBuilder)
     {
-        // Logic to generate PDF would go here.
-        // For now, returning a success message to simulate the action.
-        return $this->json(['status' => 'PDF Generated', 'link' => '/downloads/boleta_2025.pdf']);
+        $this->reportBuilder = $reportBuilder;
+    }
+
+    #[Route('/grades/{studentId}', name: 'grades', methods: ['GET'])]
+    public function downloadGrades(int $studentId): Response
+    {
+        try {
+            $pdfContent = $this->reportBuilder->buildAcademicReport($studentId);
+
+            return new Response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="boleta_calificaciones.pdf"',
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 404);
+        }
+    }
+
+    #[Route('/grades/me', name: 'my_grades', methods: ['GET'])]
+    public function downloadMyGrades(StudentRepository $studentRepo): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(['error' => 'Usuario no autenticado'], 401);
+        }
+
+        // Find student associated with user
+        // Assuming User entity has relation to Student or we find by email
+        // Or checking if User IS a Student (if mapped directly)
+        // Let's assume user->getEmail() matches student email or user->getStudent()
+        
+        $student = $studentRepo->findOneBy(['email' => $user->getUserIdentifier()]);
+        
+        if (!$student) {
+             // Fallback: Check if there is a 'studentId' in token claims or user object
+             // This depends on User entity implementation.
+             // For now, retry finding by user ID link if schema allows
+             return new JsonResponse(['error' => 'No se encontró perfil de estudiante asociado'], 404);
+        }
+
+        return $this->downloadGrades($student->getId());
     }
 
     #[Route('/certificates', name: 'certificates', methods: ['GET'])]
@@ -61,4 +102,3 @@ class ReportController extends AbstractController
         ]);
     }
 }
-

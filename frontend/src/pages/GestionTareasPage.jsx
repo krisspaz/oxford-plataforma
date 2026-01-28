@@ -1,11 +1,13 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { ClipboardList, Plus, Search, Filter, Calendar, BookOpen, GraduationCap, Edit, Trash2, Eye, Check, Clock, AlertCircle, X, Save, ChevronDown, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
+import React, { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ClipboardList, Plus, Search, Calendar, BookOpen, GraduationCap, Edit, Trash2, Check, Clock, AlertCircle, X, Save, Loader2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
-import { taskService, subjectService, gradeService, bimesterService, teacherService } from '../services';
+import { taskService, gradeService, bimesterService, teacherService } from '../services';
+import { Select, EmptyState, ErrorState } from '../components/ui';
 
-const GestionTareasPage = () => {
+const GestionTareasPage = ({ viewMode = 'management' }) => {
     const { darkMode } = useTheme();
     const { user, hasRole } = useAuth(); // Assuming user has { id, teacherId } attached if role is teacher? 
     // If not, we might need to fetch teacher profile or rely on backend 'my-tasks'.
@@ -16,20 +18,13 @@ const GestionTareasPage = () => {
     // Let's assume we can get it from a profile call or AuthContext.
     // For now, let's try to fetch "Me" from teacher service if needed.
 
-    const [loading, setLoading] = useState(true);
-    const [tasks, setTasks] = useState([]);
-    const [filteredTasks, setFilteredTasks] = useState([]);
+    const queryClient = useQueryClient();
+
+    // UI State
     const [showModal, setShowModal] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
-
-    // Catalogs
-    const [subjects, setSubjects] = useState([]);
-    const [grades, setGrades] = useState([]); // This would be the grades/sections available
-    const [bimesters, setBimesters] = useState([]);
-    const [currentTeacher, setCurrentTeacher] = useState(null);
-
     const [selectedBimester, setSelectedBimester] = useState('');
-    const [selectedCourse, setSelectedCourse] = useState('');
+    const [selectedSubject, setSelectedSubject] = useState('');
     const [selectedGrade, setSelectedGrade] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -44,62 +39,98 @@ const GestionTareasPage = () => {
         dueDate: '',
         points: 10,
         type: 'tarea',
-        cycleId: 1, // Default to 1 or active
-        grades: [], // Array of { gradeId, sectionId }
+        cycleId: 1,
+        grades: [],
     });
 
-    useEffect(() => {
-        loadData();
-    }, []);
+    // === QUERIES ===
+    const { data: myAssignments = [], isLoading: loadingAssignments } = useQuery({
+        queryKey: ['teacher', 'assignments'],
+        queryFn: () => teacherService.getMyAssignments(),
+        staleTime: 5 * 60 * 1000,
+    });
 
-    const loadData = async () => {
-        setLoading(true);
-        try {
-            // Load catalogs
-            const [subjectsData, gradesData, bimestersData, myTasks] = await Promise.all([
-                subjectService.getAll({ active: true }),
-                gradeService.getAll(),
-                bimesterService.getAll({ active: true }),
-                taskService.getMyTasks() // Use my-tasks for the list
-            ]);
+    const { data: grades = [], isLoading: loadingGrades } = useQuery({
+        queryKey: ['grades'],
+        queryFn: () => gradeService.getAll(),
+    });
 
-            setSubjects(subjectsData);
-            setGrades(gradesData);
-            setBimesters(bimestersData);
-            setTasks(myTasks);
-            setFilteredTasks(myTasks);
+    const { data: bimesters = [], isLoading: loadingBimesters } = useQuery({
+        queryKey: ['bimesters', 'active'],
+        queryFn: () => bimesterService.getAll({ active: true }),
+    });
 
-            // Try to find teacher profile
-            // If user is teacher, we need their ID for creation
-            if (hasRole('ROLE_DOCENTE')) {
-                const teacherProfile = await teacherService.getMe(); // Ensure this exists or similar
-                setCurrentTeacher(teacherProfile);
-            } else {
-                // Admin mode?
-                // For now, assume teacher operates this page.
+    const { data: tasks = [], isLoading: loadingTasks, error: tasksError, refetch: refetchTasks } = useQuery({
+        queryKey: ['tasks', 'mine'],
+        queryFn: () => taskService.getMyTasks(),
+    });
+
+    const { data: currentTeacher } = useQuery({
+        queryKey: ['teacher', 'me'],
+        queryFn: () => teacherService.getMe(),
+        enabled: hasRole('ROLE_DOCENTE'),
+    });
+
+    // Derived subjects from assignments
+    const subjects = useMemo(() => {
+        const uniqueSubjects = [];
+        const seenIds = new Set();
+        myAssignments.forEach(a => {
+            if (a.subject && !seenIds.has(a.subject.id)) {
+                seenIds.add(a.subject.id);
+                uniqueSubjects.push(a.subject);
             }
+        });
+        return uniqueSubjects;
+    }, [myAssignments]);
 
-        } catch (error) {
-            console.error("Error loading data", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const isLoading = loadingAssignments || loadingGrades || loadingBimesters || loadingTasks;
 
-    useEffect(() => {
+    // Filtered tasks (derived)
+    const filteredTasks = useMemo(() => {
         let filtered = [...tasks];
         if (searchTerm) {
             const term = searchTerm.toLowerCase();
-            filtered = filtered.filter(t => t.title.toLowerCase().includes(term));
+            filtered = filtered.filter(t => t.title?.toLowerCase().includes(term));
         }
-        if (selectedBimester) filtered = filtered.filter(t => t.bimester?.id === parseInt(selectedBimester));
-        if (selectedCourse) filtered = filtered.filter(t => t.subject?.id === parseInt(selectedCourse));
-        // Grade filtering on frontend might be complex if tasks have multiple grades.
-        // Simplified check:
-        // if (selectedGrade) filtered = filtered.filter(t => t.grades.some(g => g.gradeId === parseInt(selectedGrade)));
+        if (selectedBimester) {
+            filtered = filtered.filter(t => t.bimester?.id === parseInt(selectedBimester));
+        }
+        if (selectedSubject) {
+            filtered = filtered.filter(t => t.subject?.id === parseInt(selectedSubject));
+        }
+        return filtered;
+    }, [tasks, searchTerm, selectedBimester, selectedSubject]);
 
-        setFilteredTasks(filtered);
-    }, [searchTerm, selectedBimester, selectedCourse, selectedGrade, tasks]);
+    // === MUTATIONS ===
+    const createTaskMutation = useMutation({
+        mutationFn: (data) => taskService.create(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            toast.success('Tarea creada exitosamente');
+            setShowModal(false);
+        },
+        onError: (err) => toast.error(err.message || 'Error al crear tarea'),
+    });
+
+    const updateTaskMutation = useMutation({
+        mutationFn: ({ id, data }) => taskService.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            toast.success('Tarea actualizada');
+            setShowModal(false);
+        },
+        onError: (err) => toast.error(err.message || 'Error al actualizar tarea'),
+    });
+
+    const deleteTaskMutation = useMutation({
+        mutationFn: (id) => taskService.delete(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            toast.success('Tarea eliminada');
+        },
+        onError: () => toast.error('Error al eliminar tarea'),
+    });
 
     const openNewTask = () => {
         setEditingTask(null);
@@ -133,55 +164,37 @@ const GestionTareasPage = () => {
         setShowModal(true);
     };
 
-    const handleSave = async () => {
+    const handleSave = () => {
         if (!formData.title || !formData.dueDate || formData.grades.length === 0) {
-            toast.info('Por favor complete todos los campos requeridos (Título, Fecha, Grados)');
+            toast.warning('Por favor complete todos los campos requeridos (Título, Fecha, Grados)');
             return;
         }
 
-        // We need a teacher ID.
-        // For testing, if we don't have currentTeacher, use a hardcoded one or let backend fail?
-        // Let's assume currentTeacher is set or we fallback to 1 for dev.
-        // In real prod, this MUST be from Auth.
         const teacherId = currentTeacher?.id || 1;
 
         const payload = {
             ...formData,
-            teacherId: teacherId,
+            teacherId,
             points: parseInt(formData.points),
             subjectId: parseInt(formData.subjectId),
             bimesterId: parseInt(formData.bimesterId),
-            grades: formData.grades // Ensure structure is [{gradeId, sectionId}]
+            grades: formData.grades,
         };
 
-        try {
-            if (editingTask) {
-                await taskService.update(editingTask.id, payload);
-                alert("Tarea actualizada");
-            } else {
-                await taskService.create(payload);
-                alert("Tarea creada");
-            }
-            setShowModal(false);
-            loadData(); // Reload list
-        } catch (error) {
-            console.error("Error saving task", error);
-            alert("Error al guardar: " + (error.response?.data?.error || error.message));
+        if (editingTask) {
+            updateTaskMutation.mutate({ id: editingTask.id, data: payload });
+        } else {
+            createTaskMutation.mutate(payload);
         }
     };
 
-    const handleDelete = async (taskId) => {
-        if (confirm('¿Está seguro de eliminar esta tarea?')) {
-            try {
-                await taskService.delete(taskId);
-                setTasks(prev => prev.filter(t => t.id !== taskId));
-            } catch (error) {
-                alert("Error al eliminar");
-            }
+    const handleDelete = (taskId) => {
+        if (window.confirm('¿Está seguro de eliminar esta tarea?')) {
+            deleteTaskMutation.mutate(taskId);
         }
     };
 
-    const toggleGrade = (gradeId, sectionId = null) => {
+    const toggleGrade = (gradeId, sectionId = 1) => {
         setFormData(prev => {
             const exists = prev.grades.find(g => g.gradeId === gradeId && g.sectionId === sectionId);
             if (exists) {
@@ -193,7 +206,7 @@ const GestionTareasPage = () => {
     };
 
     // Helper to check if grade is selected
-    const isGradeSelected = (gradeId, sectionId = null) => {
+    const isGradeSelected = (gradeId, sectionId = 1) => {
         return formData.grades.some(g => g.gradeId === gradeId && g.sectionId === sectionId);
     };
 
@@ -214,7 +227,7 @@ const GestionTareasPage = () => {
     };
 
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-12 text-center`}>
                 <ClipboardList className="animate-pulse mx-auto text-teal-500" size={32} />
@@ -228,7 +241,9 @@ const GestionTareasPage = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Gestión de Tareas</h1>
+                    <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                        {viewMode === 'grading' ? 'Tareas Calificadas / Por Calificar' : 'Gestión de Tareas'}
+                    </h1>
                     <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Cree y administre tareas, exámenes y proyectos</p>
                 </div>
                 <button onClick={openNewTask} className="px-4 py-2 bg-gradient-to-r from-obs-pink to-obs-purple hover:from-pink-600 hover:to-purple-700 text-white rounded-lg flex items-center gap-2 shadow-lg shadow-obs-pink/20 transition-all hover:scale-105">

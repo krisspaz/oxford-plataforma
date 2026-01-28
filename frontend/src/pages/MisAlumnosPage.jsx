@@ -143,7 +143,7 @@ const MisAlumnosPage = () => {
             toast.info('✅ Asistencia guardada correctamente en el sistema');
         } catch (error) {
             console.error("Error saving attendance:", error);
-            alert("Error al guardar asistencia. Intente nuevamente.");
+            toast.error("Error al guardar asistencia. Intente nuevamente.");
         }
     };
 
@@ -165,7 +165,7 @@ const MisAlumnosPage = () => {
             // Here implementation would trigger PDF download
         } catch (error) {
             console.error("Error exporting report:", error);
-            alert("No se pudo generar el reporte.");
+            toast.error("No se pudo generar el reporte.");
         }
     };
 

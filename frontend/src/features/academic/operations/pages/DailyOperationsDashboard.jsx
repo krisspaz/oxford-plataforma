@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme } from '../../../../contexts/ThemeContext';
 import AttendanceRegister from '../components/AttendanceRegister';
 import EventManager from '../components/EventManager';
 import { Briefcase } from 'lucide-react';

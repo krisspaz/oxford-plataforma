@@ -20,6 +20,44 @@ class StudentController extends AbstractController
         private \App\Repository\QuotaRepository $quotaRepository
     ) {}
 
+    /**
+     * Get current student profile (for logged-in student)
+     */
+    #[Route('/me', name: 'student_me', methods: ['GET'], priority: 10)]
+    public function getMyProfile(): JsonResponse
+    {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        
+        if (!$user) {
+            return $this->json(['error' => 'No authenticated user'], 401);
+        }
+
+        // Try to find student by User relationship (Person.user) - wait, Student doesn't inherit Person in code?
+        // Let's check Student entity again. 
+        // In previous steps I saw Student did NOT inherit Person.
+        // It has 'email' field.
+        
+        $student = $this->studentRepository->findOneBy(['user' => $user]);
+        
+        if (!$student) {
+             // Fallback by email
+             $student = $this->studentRepository->findOneBy(['email' => $user->getEmail()]);
+        }
+        
+        if (!$student) {
+            return $this->json([
+                'error' => 'Student profile not found',
+                'userId' => $user->getId()
+            ], 404);
+        }
+
+        return $this->json([
+            'success' => true,
+            'data' => $this->serializeStudent($student, true)
+        ]);
+    }
+
     #[Route('/{id}/account', methods: ['GET'])]
     public function accountStatus(int $id): JsonResponse
     {

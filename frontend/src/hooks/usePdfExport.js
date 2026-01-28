@@ -1,5 +1,24 @@
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+/**
+ * PDF Export Hook
+ * PERFORMANCE: Uses dynamic imports to avoid loading jsPDF in initial bundle
+ */
+
+// Cached module reference
+let jsPDFModule = null;
+
+/**
+ * Lazy-load jsPDF and jspdf-autotable
+ */
+const loadJsPDF = async () => {
+    if (!jsPDFModule) {
+        const [jspdf] = await Promise.all([
+            import('jspdf'),
+            import('jspdf-autotable')
+        ]);
+        jsPDFModule = jspdf.default;
+    }
+    return jsPDFModule;
+};
 
 export const usePdfExport = () => {
 
@@ -7,7 +26,8 @@ export const usePdfExport = () => {
     const SCHOOL_NAME = "CORPORACIÓN EDUCACIONAL OXFORD";
     const SCHOOL_ADDRESS = "Ciudad de Guatemala";
 
-    const createDoc = (title, subtitle, orientation = 'portrait') => {
+    const createDoc = async (title, subtitle, orientation = 'portrait') => {
+        const jsPDF = await loadJsPDF();
         const doc = new jsPDF({ orientation });
         const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -32,8 +52,8 @@ export const usePdfExport = () => {
         return doc;
     };
 
-    const exportTable = ({ title, subtitle, columns, data, filename = 'reporte.pdf', orientation = 'portrait', autoTableOptions = {} }) => {
-        const doc = createDoc(title, subtitle, orientation);
+    const exportTable = async ({ title, subtitle, columns, data, filename = 'reporte.pdf', orientation = 'portrait', autoTableOptions = {} }) => {
+        const doc = await createDoc(title, subtitle, orientation);
 
         doc.autoTable({
             head: [columns],

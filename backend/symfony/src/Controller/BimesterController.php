@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Bimester;
+use App\Entity\SchoolCycle;
 use App\Repository\BimesterRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -61,7 +62,22 @@ class BimesterController extends AbstractController
         $bimester->setEndDate(new \DateTime($data['endDate']));
         $bimester->setMaxScore($data['maxScore'] ?? 100);
         $bimester->setPercentage($data['percentage'] ?? 25);
-        // TODO: Set schoolCycle
+        $bimester->setPercentage($data['percentage'] ?? 25);
+        
+        // Find or create SchoolCycle
+        $year = $data['year'] ?? (new \DateTime($data['startDate']))->format('Y');
+        $cycle = $this->em->getRepository(SchoolCycle::class)->findOneBy(['name' => $year]);
+        
+        if (!$cycle) {
+            $cycle = new SchoolCycle();
+            $cycle->setName((string)$year);
+            $cycle->setStartDate(new \DateTime($year . '-01-01'));
+            $cycle->setEndDate(new \DateTime($year . '-12-31'));
+            $cycle->setIsActive(true);
+            $this->em->persist($cycle);
+        }
+        
+        $bimester->setSchoolCycle($cycle);
         
         $this->em->persist($bimester);
         $this->em->flush();

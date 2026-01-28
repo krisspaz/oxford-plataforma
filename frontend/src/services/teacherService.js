@@ -69,6 +69,13 @@ const teacherService = {
     },
 
     /**
+     * Get subjects assigned to the current logged-in teacher
+     */
+    getMyAssignments: async () => {
+        return api.get('/teachers/me/assignments');
+    },
+
+    /**
      * Get students for a teacher
      * @param {number} teacherId - Teacher ID
      */

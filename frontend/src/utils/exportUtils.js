@@ -1,11 +1,40 @@
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import * as XLSX from 'xlsx';
-
 /**
  * Export Utilities for PDF and Excel
  * Used for: boletas, reportes, listas de estudiantes
+ * 
+ * PERFORMANCE: Uses dynamic imports to avoid loading jsPDF/xlsx in initial bundle
  */
+
+// ==========================================
+// LAZY LOADING HELPERS
+// ==========================================
+
+let jsPDFModule = null;
+let XLSXModule = null;
+
+/**
+ * Lazy-load jsPDF and jspdf-autotable
+ */
+const loadJsPDF = async () => {
+    if (!jsPDFModule) {
+        const [jspdf] = await Promise.all([
+            import('jspdf'),
+            import('jspdf-autotable')
+        ]);
+        jsPDFModule = jspdf.default;
+    }
+    return jsPDFModule;
+};
+
+/**
+ * Lazy-load xlsx
+ */
+const loadXLSX = async () => {
+    if (!XLSXModule) {
+        XLSXModule = await import('xlsx');
+    }
+    return XLSXModule;
+};
 
 // ==========================================
 // PDF EXPORT
@@ -14,7 +43,8 @@ import * as XLSX from 'xlsx';
 /**
  * Exportar tabla a PDF
  */
-export const exportToPDF = (data, columns, filename = 'reporte', title = 'Reporte') => {
+export const exportToPDF = async (data, columns, filename = 'reporte', title = 'Reporte') => {
+    const jsPDF = await loadJsPDF();
     const doc = new jsPDF();
 
     // Header
@@ -67,7 +97,8 @@ export const exportToPDF = (data, columns, filename = 'reporte', title = 'Report
 /**
  * Exportar boleta de calificaciones
  */
-export const exportBoletaPDF = (student, grades, period = 'Primer Bimestre') => {
+export const exportBoletaPDF = async (student, grades, period = 'Primer Bimestre') => {
+    const jsPDF = await loadJsPDF();
     const doc = new jsPDF();
 
     // Header con logo
@@ -138,7 +169,8 @@ export const exportBoletaPDF = (student, grades, period = 'Primer Bimestre') => 
 /**
  * Exportar reporte de asistencia PDF
  */
-export const exportAttendancePDF = (data, dateRange, className) => {
+export const exportAttendancePDF = async (data, dateRange, className) => {
+    const jsPDF = await loadJsPDF();
     const doc = new jsPDF('landscape');
 
     doc.setFontSize(18);
@@ -170,7 +202,9 @@ export const exportAttendancePDF = (data, dateRange, className) => {
 /**
  * Exportar a Excel
  */
-export const exportToExcel = (data, columns, filename = 'reporte') => {
+export const exportToExcel = async (data, columns, filename = 'reporte') => {
+    const XLSX = await loadXLSX();
+
     // Transform data
     const exportData = data.map(row => {
         const obj = {};
@@ -205,7 +239,7 @@ export const exportToExcel = (data, columns, filename = 'reporte') => {
 /**
  * Exportar lista de estudiantes
  */
-export const exportStudentListExcel = (students, className) => {
+export const exportStudentListExcel = async (students, className) => {
     const columns = [
         { header: 'Código', key: 'code' },
         { header: 'Nombre', key: 'name' },
@@ -215,13 +249,13 @@ export const exportStudentListExcel = (students, className) => {
         { header: 'Teléfono', key: 'phone' }
     ];
 
-    exportToExcel(students, columns, `lista_estudiantes_${className}`);
+    await exportToExcel(students, columns, `lista_estudiantes_${className}`);
 };
 
 /**
  * Exportar calificaciones a Excel
  */
-export const exportGradesExcel = (grades, className, period) => {
+export const exportGradesExcel = async (grades, className, period) => {
     const columns = [
         { header: 'Código', key: 'code' },
         { header: 'Estudiante', key: 'name' },
@@ -235,7 +269,7 @@ export const exportGradesExcel = (grades, className, period) => {
         status: g.grade >= 60 ? 'Aprobado' : 'Reprobado'
     }));
 
-    exportToExcel(data, columns, `calificaciones_${className}_${period}`);
+    await exportToExcel(data, columns, `calificaciones_${className}_${period}`);
 };
 
 // ==========================================
@@ -246,12 +280,12 @@ export const exportGradesExcel = (grades, className, period) => {
  * Hook para exportar
  */
 export const useExport = () => {
-    const exportPDF = (data, columns, filename, title) => {
-        exportToPDF(data, columns, filename, title);
+    const exportPDF = async (data, columns, filename, title) => {
+        await exportToPDF(data, columns, filename, title);
     };
 
-    const exportExcel = (data, columns, filename) => {
-        exportToExcel(data, columns, filename);
+    const exportExcel = async (data, columns, filename) => {
+        await exportToExcel(data, columns, filename);
     };
 
     return { exportPDF, exportExcel };

@@ -1,16 +1,16 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Calendar, Lock, Unlock, Edit, Plus, AlertTriangle, X, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Calendar, Lock, Unlock, Edit, Plus, AlertTriangle, X, Loader2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { bimesterService } from '../services';
 
 const BimestresPage = () => {
     const { darkMode } = useTheme();
+    const queryClient = useQueryClient();
     const [showModal, setShowModal] = useState(false);
     const [selectedBimester, setSelectedBimester] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(null);
-    const [bimesters, setBimesters] = useState([]);
     const [formData, setFormData] = useState({
         number: 1,
         year: new Date().getFullYear(),
@@ -21,50 +21,45 @@ const BimestresPage = () => {
         percentage: 25
     });
 
+    // === QUERY ===
+    const { data: bimesters = [], isLoading: loading, refetch } = useQuery({
+        queryKey: ['bimesters'],
+        queryFn: async () => {
+            const response = await bimesterService.getAll();
+            return response.success ? response.data : (response || []);
+        },
+    });
+
+    // === MUTATIONS ===
+    const toggleMutation = useMutation({
+        mutationFn: async ({ id, isClosed }) => {
+            return isClosed ? bimesterService.open(id) : bimesterService.close(id);
+        },
+        onMutate: (vars) => setActionLoading(vars.id),
+        onSettled: () => setActionLoading(null),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bimesters'] }),
+        onError: (err) => toast.error('Error: ' + err.message),
+    });
+
+    const saveMutation = useMutation({
+        mutationFn: async ({ id, data }) => {
+            return id ? bimesterService.update(id, data) : bimesterService.create(data);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['bimesters'] });
+            toast.success('Bimestre guardado correctamente');
+            setShowModal(false);
+            setSelectedBimester(null);
+        },
+        onError: () => toast.error('Error al guardar bimestre'),
+    });
+
     const inputClass = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
     const labelClass = `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`;
 
-    useEffect(() => {
-        loadBimesters();
-    }, []);
-
-    const loadBimesters = async () => {
-        setLoading(true);
-        try {
-            const response = await bimesterService.getAll();
-            if (response.success) {
-                setBimesters(response.data);
-            } else {
-                setBimesters([]);
-            }
-        } catch (error) {
-            console.error('Error loading bimesters:', error);
-            toast.error('Error al cargar bimestres: ' + error.message);
-            setBimesters([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const toggleClosed = async (id) => {
+    const toggleClosed = (id) => {
         const bimester = bimesters.find(b => b.id === id);
-        setActionLoading(id);
-        try {
-            const response = bimester.isClosed
-                ? await bimesterService.open(id)
-                : await bimesterService.close(id);
-
-            if (response.success) {
-                setBimesters(bimesters.map(b => b.id === id ? { ...b, isClosed: !b.isClosed } : b));
-            } else {
-                toast.info('Error al cambiar estado del bimestre');
-            }
-        } catch (error) {
-            console.error('Error toggling bimester:', error);
-            toast.error('Error: ' + error.message);
-        } finally {
-            setActionLoading(null);
-        }
+        toggleMutation.mutate({ id, isClosed: bimester?.isClosed });
     };
 
     const openModal = (bimester = null) => {
@@ -94,22 +89,11 @@ const BimestresPage = () => {
         setShowModal(true);
     };
 
-    const handleSave = async () => {
-        try {
-            if (selectedBimester) {
-                await bimesterService.update(selectedBimester.id, formData);
-            } else {
-                await bimesterService.create(formData);
-            }
-            loadBimesters();
-            setShowModal(false);
-            setSelectedBimester(null);
-            toast.success('Bimestre guardado correctamente');
-        } catch (error) {
-            console.error('Error saving bimester:', error);
-            toast.error('Error al guardar bimestre');
-            setShowModal(false);
-        }
+    const handleSave = () => {
+        saveMutation.mutate({
+            id: selectedBimester?.id,
+            data: formData
+        });
     };
 
     const isCurrentBimester = (b) => {

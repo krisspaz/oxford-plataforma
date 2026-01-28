@@ -1,6 +1,7 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Book, Plus, Search, Edit, X, Users, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Book, Plus, Search, Edit, X, Users, Loader2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { catalogService } from '../services';
 import teacherService from '../services/teacherService';
@@ -9,29 +10,16 @@ import subjectService from '../services/subjectService';
 
 const MateriasPage = () => {
     const { darkMode } = useTheme();
+    const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState('materias');
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    // Data States
-    const [subjects, setSubjects] = useState([]);
-    const [assignments] = useState([]);
-    const [teachers, setTeachers] = useState([]);
-    const [grades, setGrades] = useState([]);
-    const [sections, setSections] = useState([]); // Filtered sections based on selected grade
+    const [sections, setSections] = useState([]);
 
     const [formData, setFormData] = useState({
-        code: '',
-        name: '',
-        hoursWeek: '',
-        active: true,
-        // Assignment fields
-        subjectId: '',
-        teacherId: '',
-        gradeId: '',
-        sectionId: ''
+        code: '', name: '', hoursWeek: '', active: true,
+        subjectId: '', teacherId: '', gradeId: '', sectionId: ''
     });
 
     const inputClass = darkMode
@@ -39,9 +27,32 @@ const MateriasPage = () => {
         : 'px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none bg-white border-gray-300 text-gray-900';
     const labelClass = `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`;
 
-    useEffect(() => {
-        loadData();
-    }, []);
+    // === QUERIES ===
+    const { data: subjects = [], isLoading: loadingSubjects } = useQuery({
+        queryKey: ['subjects'],
+        queryFn: async () => {
+            const res = await subjectService.getAll();
+            return res?.data || res?.['hydra:member'] || (Array.isArray(res) ? res : []);
+        },
+    });
+
+    const { data: teachers = [] } = useQuery({
+        queryKey: ['teachers'],
+        queryFn: async () => {
+            const res = await teacherService.getAll();
+            return res?.data || res?.['hydra:member'] || (Array.isArray(res) ? res : []);
+        },
+    });
+
+    const { data: grades = [] } = useQuery({
+        queryKey: ['grades'],
+        queryFn: async () => {
+            const res = await gradeService.getAll();
+            return res?.data || res?.['hydra:member'] || (Array.isArray(res) ? res : []);
+        },
+    });
+
+    const loading = loadingSubjects;
 
     // Watch for grade changes to load sections
     useEffect(() => {
@@ -78,7 +89,7 @@ const MateriasPage = () => {
             } else {
                 // Assignment Logic
                 if (!formData.subjectId || !formData.teacherId || !formData.gradeId) {
-                    alert("Por favor complete todos los campos requeridos");
+                    toast.warning("Por favor complete todos los campos requeridos");
                     return;
                 }
                 const payload = {

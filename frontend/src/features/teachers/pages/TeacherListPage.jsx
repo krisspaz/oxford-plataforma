@@ -4,6 +4,7 @@ import { useTeachers } from '../hooks/useTeachers';
 import { TeacherCard } from '../components/TeacherCard';
 import { Button, Input, Spinner, Modal, EmptyState } from '../../../components/ui';
 import { useDebounce } from '../../../utils/performanceUtils';
+import { toast } from '../../../utils/toast';
 
 const TeacherListPage = () => {
     const { teachers, loading, refetch, createTeacher } = useTeachers();
@@ -57,7 +58,7 @@ const TeacherListPage = () => {
 
         // Basic validation
         if (!formData.firstName || !formData.lastName || !formData.email) {
-            alert('Por favor complete los campos obligatorios');
+            toast.warning('Por favor complete los campos obligatorios');
             setSubmitting(false);
             return;
         }
@@ -68,7 +69,7 @@ const TeacherListPage = () => {
             setShowModal(false);
             // Optionally show success toast
         } else {
-            alert(result.error);
+            toast.error(result.error);
         }
         setSubmitting(false);
     };

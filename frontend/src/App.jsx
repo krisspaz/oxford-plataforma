@@ -4,7 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Toaster } from 'sonner';
 import { AIProvider } from './contexts/AIContext';
-import ErrorBoundary from './components/ErrorBoundary';
+import CentralizedErrorBoundary from './components/CentralizedErrorBoundary';
 import { Helmet } from 'react-helmet-async';
 import VoiceChat from './components/VoiceChat';
 import NotificationListener from './components/NotificationListener';
@@ -69,12 +69,13 @@ function App() {
   }, []);
 
   return (
-    <ErrorBoundary>
+    <CentralizedErrorBoundary>
       <Helmet>
         <title>Sistema Oxford</title>
         <meta http-equiv="X-Content-Type-Options" content="nosniff" />
         <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
         <meta name="referrer" content="strict-origin-when-cross-origin" />
+        <meta name="google" content="notranslate" />
       </Helmet>
       <AuthProvider>
         <ThemeProvider>
@@ -90,7 +91,7 @@ function App() {
           </BrowserRouter>
         </ThemeProvider>
       </AuthProvider>
-    </ErrorBoundary>
+    </CentralizedErrorBoundary>
   );
 }
 

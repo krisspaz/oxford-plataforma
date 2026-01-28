@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, Search, Filter, Edit, Trash2, X, Save, RefreshCw, ChevronLeft, ChevronRight, Download, Eye } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { api } from '../../services';
+import { toast } from '../../utils/toast';
 
 /**
  * EntityManager - Generic CRUD Component
@@ -118,7 +119,7 @@ const EntityManager = ({
             loadData();
         } catch (error) {
             console.error('Error saving:', error);
-            alert('Error al guardar: ' + error.message);
+            toast.error('Error al guardar: ' + error.message);
         }
     };
 
@@ -129,7 +130,7 @@ const EntityManager = ({
             loadData();
         } catch (error) {
             console.error('Error deleting:', error);
-            alert('Error al eliminar: ' + error.message);
+            toast.error('Error al eliminar: ' + error.message);
         }
     };
 

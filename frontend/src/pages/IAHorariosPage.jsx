@@ -115,7 +115,7 @@ const IAHorariosPage = () => {
 
     const startListening = () => {
         if (!('webkitSpeechRecognition' in window)) {
-            alert("Tu navegador no soporta reconocimiento de voz.");
+            toast.warning("Tu navegador no soporta reconocimiento de voz.");
             return;
         }
         const recognition = new window.webkitSpeechRecognition();

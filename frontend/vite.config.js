@@ -8,9 +8,10 @@ export default defineConfig({
   plugins: [
     react(),
     visualizer({
-      open: true,
+      open: false, // Don't auto-open in production
       gzipSize: true,
       brotliSize: true,
+      filename: 'stats.html'
     }),
   ],
   resolve: {
@@ -64,16 +65,77 @@ export default defineConfig({
     },
   },
   build: {
+    target: 'esnext',
+    minify: 'esbuild',
+    sourcemap: false, // Disable source maps in production
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          // Separation of concerns: Dashboard heavy libs
-          'pdf-worker': ['jspdf', 'jspdf-autotable'],
-          'excel-worker': ['xlsx'],
-          'calendar-vendor': ['@fullcalendar/core', '@fullcalendar/daygrid', '@fullcalendar/interaction', '@fullcalendar/react', '@fullcalendar/timegrid'],
-          // UI Libs shared but isolated
-          ui: ['framer-motion', 'sonner', 'lucide-react'],
+        manualChunks: (id) => {
+          // Core React - always needed
+          if (id.includes('node_modules/react/') ||
+            id.includes('node_modules/react-dom/')) {
+            return 'react-core';
+          }
+
+          // Router - always needed
+          if (id.includes('react-router')) {
+            return 'router';
+          }
+
+          // React Query - frequently used
+          if (id.includes('@tanstack')) {
+            return 'query-libs';
+          }
+
+          // PDF libraries - lazy loaded via dynamic import
+          if (id.includes('jspdf') || id.includes('jspdf-autotable')) {
+            return 'pdf-libs';
+          }
+
+          // Excel library - lazy loaded via dynamic import
+          if (id.includes('xlsx')) {
+            return 'excel-libs';
+          }
+
+          // Calendar - route-level split
+          if (id.includes('@fullcalendar')) {
+            return 'calendar-libs';
+          }
+
+          // HTML to canvas - lazy loaded
+          if (id.includes('html2canvas')) {
+            return 'screenshot-libs';
+          }
+
+          // Charts - keep separate
+          if (id.includes('recharts')) {
+            return 'chart-libs';
+          }
+
+          // Animation libs
+          if (id.includes('framer-motion')) {
+            return 'animation-libs';
+          }
+
+          // i18n
+          if (id.includes('i18next')) {
+            return 'i18n-libs';
+          }
+
+          // UI icons - frequently used
+          if (id.includes('lucide-react')) {
+            return 'icons';
+          }
+
+          // Form validation
+          if (id.includes('react-hook-form') || id.includes('zod') || id.includes('@hookform')) {
+            return 'form-libs';
+          }
+
+          // Drag and drop
+          if (id.includes('react-dnd') || id.includes('dnd-core')) {
+            return 'dnd-libs';
+          }
         },
       },
     },

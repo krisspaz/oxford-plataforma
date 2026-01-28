@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from '../utils/toast';
 
 /**
  * FASE 20: Crisis Mode Dashboard
@@ -71,7 +72,7 @@ const CrisisModeDashboard = () => {
         // Call AI backend for automatic resolution
         setTimeout(() => {
             setLoading(false);
-            alert('✅ Crisis resuelta automáticamente. Se asignó sustituto y se notificó a los grupos.');
+            toast.success('Crisis resuelta automáticamente. Se asignó sustituto y se notificó a los grupos.');
             handleResolve(selectedCrisis?.id);
         }, 2000);
     };
@@ -119,8 +120,8 @@ const CrisisModeDashboard = () => {
                                             key={crisis.id}
                                             onClick={() => handleSelectCrisis(crisis)}
                                             className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedCrisis?.id === crisis.id
-                                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                                                 }`}
                                         >
                                             <div className="flex items-center gap-2 mb-2">

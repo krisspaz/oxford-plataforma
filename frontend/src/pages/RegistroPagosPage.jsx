@@ -1,6 +1,6 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { CreditCard, DollarSign, Receipt, Check, User, Search, RefreshCw, X } from 'lucide-react';
+import { toast } from 'sonner';
+import React, { useState, useEffect, useMemo } from 'react';
+import { CreditCard, DollarSign, Receipt, Check, User, Search, Loader2, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { studentService, paymentService } from '../services';
 
@@ -160,7 +160,7 @@ const RegistroPagosPage = () => {
                     </h2>
                     {loading ? (
                         <div className="py-8 text-center">
-                            <RefreshCw className="animate-spin mx-auto text-teal-500" size={24} />
+                            <Loader2 className="animate-spin mx-auto text-teal-500" size={24} />
                         </div>
                     ) : selectedStudent ? (
                         <div className="space-y-2">
@@ -273,7 +273,7 @@ const RegistroPagosPage = () => {
                                 className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-bold flex items-center justify-center gap-2 disabled:opacity-50"
                             >
                                 {processing ? (
-                                    <><RefreshCw size={20} className="animate-spin" /> Procesando...</>
+                                    <><Loader2 size={20} className="animate-spin" /> Procesando...</>
                                 ) : (
                                     <><DollarSign size={20} /> Procesar Pago</>
                                 )}

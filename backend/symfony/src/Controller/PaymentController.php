@@ -149,8 +149,38 @@ class PaymentController extends AbstractController
 
         $em->persist($payment);
         
-        // Process quotas... (Assuming simple marking for now as we don't have Quota entity logic fully exposed in snippet)
-        // For now, allow the payment to be recorded.
+        $em->persist($payment);
+        
+        // Process quotas
+        $quotaIds = $data['quotaIds'] ?? [];
+        $remainingPayment = (float)$payment->getAmount();
+        
+        if (!empty($quotaIds)) {
+            $quotas = $em->getRepository(\App\Entity\Quota::class)->findBy(['id' => $quotaIds]);
+            
+            // Sort by due date ASC to pay oldest first if multiple selected
+            usort($quotas, fn($a, $b) => $a->getDueDate() <=> $b->getDueDate());
+            
+            foreach ($quotas as $quota) {
+                if ($remainingPayment <= 0) break;
+                
+                $pending = (float)$quota->getPendingAmount();
+                if ($pending <= 0) continue; // Already paid
+                
+                $toPay = min($remainingPayment, $pending);
+                
+                // Update Quota
+                $currentPaid = (float)$quota->getPaidAmount();
+                $quota->setPaidAmount((string)($currentPaid + $toPay));
+                
+                // If using Invoice, link it? Payment is linked to Quota implicitly?
+                // Quota has 'invoice' field but maybe we should link Payment context?
+                // For now, updating amount and status (handled by entity) is key.
+                
+                $remainingPayment -= $toPay;
+                $em->persist($quota);
+            }
+        }
 
         $em->flush();
 

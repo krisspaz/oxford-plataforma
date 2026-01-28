@@ -1,5 +1,23 @@
 import api from './api';
-import jsPDF from 'jspdf';
+
+/**
+ * Contract Service
+ * PERFORMANCE: Uses dynamic imports for jsPDF to avoid loading in initial bundle
+ */
+
+// Cached module reference
+let jsPDFModule = null;
+
+/**
+ * Lazy-load jsPDF
+ */
+const loadJsPDF = async () => {
+    if (!jsPDFModule) {
+        const jspdf = await import('jspdf');
+        jsPDFModule = jspdf.default;
+    }
+    return jsPDFModule;
+};
 
 const contractService = {
     getAll: async () => {
@@ -49,7 +67,9 @@ const contractService = {
      * Genera el contrato oficial de adhesión por prestación de servicios educativos
      * Formato aprobado por DIACO según resolución DDC-___-2022
      */
-    generateOfficialContract: (contractData) => {
+    generateOfficialContract: async (contractData) => {
+        const jsPDF = await loadJsPDF();
+
         const {
             // Datos del representante
             representante = {},
@@ -350,7 +370,7 @@ const contractService = {
         try {
             // Si hay datos completos, generar contrato oficial
             if (contractData && contractData.representante) {
-                const doc = contractService.generateOfficialContract(contractData);
+                const doc = await contractService.generateOfficialContract(contractData);
                 const fileName = `contrato_${contractData.educando?.apellidos || 'estudiante'}_${contractData.ciclo || new Date().getFullYear()}.pdf`;
                 doc.save(fileName);
                 return { success: true };
@@ -375,7 +395,7 @@ const contractService = {
             }
 
             // Generar contrato oficial con datos básicos
-            const doc = contractService.generateOfficialContract({
+            const doc = await contractService.generateOfficialContract({
                 educando: {
                     nombres: contract.studentName?.split(' ')[0] || '',
                     apellidos: contract.studentName?.split(' ').slice(1).join(' ') || '',

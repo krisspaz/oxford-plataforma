@@ -1,110 +1,84 @@
-import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Save, Lock, Unlock, Check, AlertCircle, RefreshCw, CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Save, Lock, Unlock, Check, AlertCircle, Loader2, CheckCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { gradeRecordService, bimesterService, teacherService } from '../services';
 
 const CargaNotasPage = () => {
     const { darkMode } = useTheme();
+    const queryClient = useQueryClient();
     const [selectedSubject, setSelectedSubject] = useState('');
     const [selectedBimester, setSelectedBimester] = useState('');
-    const [saving, setSaving] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [bimesters, setBimesters] = useState([]);
-    const [subjects, setSubjects] = useState([]); // Added missing state
     const [students, setStudents] = useState([]);
     const [currentBimesterData, setCurrentBimesterData] = useState(null);
 
-    // Load bimesters and subjects on mount
-    useEffect(() => {
-        const loadInitialData = async () => {
-            try {
-                // 1. Load Bimesters
-                const bimesterRes = await bimesterService.getAll();
-                if (bimesterRes.success) {
-                    setBimesters(bimesterRes.data);
-                    const current = bimesterRes.data.find(b => !b.isClosed);
-                    if (current) setSelectedBimester(current.id.toString());
-                }
+    // === QUERIES ===
+    const { data: bimesters = [] } = useQuery({
+        queryKey: ['bimesters'],
+        queryFn: async () => {
+            const res = await bimesterService.getAll();
+            return res.success ? res.data : [];
+        },
+    });
 
-                // 2. Load Subjects (Real)
-                const profileRes = await teacherService.getMyProfile();
-                const profile = profileRes.data;
-
-                if (profile && profile.id) {
-                    const assignments = await teacherService.getSubjects(profile.id);
-                    // Format for dropdown
-                    // assignments.data is likely the array if using axios response directly or helper
-                    // Checking teacherService.getSubjects implementation: returns api.get(...)
-                    // So we expect response.data
-                    const data = assignments.data || [];
-
-                    const formatted = data.map(a => ({
-                        id: a.id, // SubjectAssignment ID
-                        name: a.subject?.name || 'Materia',
-                        grade: a.grade?.name || 'Grado',
-                        full_name: `${a.subject?.name} - ${a.grade?.name} ${a.section ? `(${a.section.name})` : ''}`
-                    }));
-                    setSubjects(formatted);
-                }
-            } catch (error) {
-                console.error('Error loading initial data:', error);
-                // Fallback for demo/dev if backend fails
-                if (process.env.NODE_ENV === 'development') {
-                    setBimesters([
-                        { id: 1, name: '1er Bimestre', isClosed: false },
-                        { id: 2, name: '2do Bimestre', isClosed: false },
-                        { id: 3, name: '3er Bimestre', isClosed: false },
-                        { id: 4, name: '4to Bimestre', isClosed: false },
-                    ]);
-                    setSubjects([
-                        { id: 101, full_name: "Matemáticas - 5to Bachillerato (A)" },
-                        { id: 102, full_name: "Física - 5to Bachillerato (A)" }
-                    ]);
-                }
+    const { data: subjects = [] } = useQuery({
+        queryKey: ['teacher-subjects'],
+        queryFn: async () => {
+            const profileRes = await teacherService.getMyProfile();
+            const profile = profileRes.data;
+            if (profile && profile.id) {
+                const assignments = await teacherService.getSubjects(profile.id);
+                const data = assignments.data || [];
+                return data.map(a => ({
+                    id: a.id,
+                    name: a.subject?.name || 'Materia',
+                    grade: a.grade?.name || 'Grado',
+                    full_name: `${a.subject?.name} - ${a.grade?.name} ${a.section ? `(${a.section.name})` : ''}`
+                }));
             }
-        };
-        loadInitialData();
-    }, []);
+            return [];
+        },
+    });
 
-    // Load students when subject/bimester change
+    // Set default bimester
     useEffect(() => {
-        if (selectedSubject && selectedBimester) {
-            loadGrades();
+        if (bimesters.length > 0 && !selectedBimester) {
+            const current = bimesters.find(b => !b.isClosed);
+            if (current) setSelectedBimester(current.id.toString());
         }
-    }, [selectedSubject, selectedBimester]);
+    }, [bimesters, selectedBimester]);
 
-    const loadGrades = async () => {
-        setLoading(true);
-        try {
+    // === GRADE RECORDS QUERY ===
+    const { data: gradeData, isLoading: loading } = useQuery({
+        queryKey: ['grade-records', selectedSubject, selectedBimester],
+        queryFn: async () => {
             const response = await gradeRecordService.getByAssignmentAndBimester(
                 parseInt(selectedSubject),
                 parseInt(selectedBimester)
             );
-            if (response.success) {
-                setCurrentBimesterData(response.bimester);
-                setStudents((response.records || []).map(r => ({
-                    id: r.id,
-                    studentId: r.student,
-                    name: r.studentName,
-                    carnet: r.studentCarnet,
-                    score: r.score,
-                    isLocked: r.isLocked
-                })));
-            } else {
-                setCurrentBimesterData(bimesters.find(b => b.id === parseInt(selectedBimester)));
-                setStudents([]);
-            }
-        } catch (error) {
-            console.error('Error loading grades:', error);
-            toast.error('Error al cargar notas: ' + error.message);
+            return response;
+        },
+        enabled: !!selectedSubject && !!selectedBimester,
+    });
+
+    useEffect(() => {
+        if (gradeData?.success) {
+            setCurrentBimesterData(gradeData.bimester);
+            setStudents((gradeData.records || []).map(r => ({
+                id: r.id,
+                studentId: r.student,
+                name: r.studentName,
+                carnet: r.studentCarnet,
+                score: r.score,
+                isLocked: r.isLocked
+            })));
+        } else if (gradeData && !gradeData.success) {
             setCurrentBimesterData(bimesters.find(b => b.id === parseInt(selectedBimester)));
             setStudents([]);
-        } finally {
-            setLoading(false);
         }
-    };
+    }, [gradeData, bimesters, selectedBimester]);
 
     const isLocked = currentBimesterData?.isClosed;
 
@@ -113,29 +87,28 @@ const CargaNotasPage = () => {
         setStudents(students.map(s => s.id === studentId ? { ...s, score } : s));
     };
 
-    const handleSave = async () => {
-        setSaving(true);
-        try {
+    // === SAVE MUTATION ===
+    const saveMutation = useMutation({
+        mutationFn: async () => {
             const records = students.map(s => ({
-                id: s.id, // GradeRecord ID (might be null if new)
-                studentId: s.studentId, // Essential for creating new records
+                id: s.id,
+                studentId: s.studentId,
                 score: s.score
             }));
-
-            const response = await gradeRecordService.saveBatch(records, parseInt(selectedBimester));
-
+            return gradeRecordService.saveBatch(records, parseInt(selectedBimester));
+        },
+        onSuccess: (response) => {
             if (response.success) {
-                toast.info(`✅ ${response.saved} notas guardadas correctamente`);
+                toast.success(`✅ ${response.saved} notas guardadas correctamente`);
+                queryClient.invalidateQueries({ queryKey: ['grade-records'] });
             } else {
-                toast.info(`❌ Error: ${response.error}`);
+                toast.error(`Error: ${response.error}`);
             }
-        } catch (error) {
-            console.error('Error saving grades:', error);
-            toast.info('Notas guardadas (demo mode)');
-        } finally {
-            setSaving(false);
-        }
-    };
+        },
+        onError: () => toast.info('Notas guardadas (demo mode)'),
+    });
+
+    const handleSave = () => saveMutation.mutate();
 
     const selectClass = `w-full p-2.5 rounded-lg border transition-colors outline-none focus:ring-2 focus:ring-indigo-500/20 ${darkMode ? 'bg-gray-700 border-gray-600 text-white focus:border-indigo-500' : 'bg-white border-gray-300 text-gray-900 focus:border-indigo-500'}`;
     const inputClass = `p-2 rounded-lg border transition-colors outline-none focus:ring-2 focus:ring-indigo-500/20 ${darkMode ? 'bg-gray-700 border-gray-600 text-white focus:border-indigo-500' : 'bg-white border-gray-300 text-gray-900 focus:border-indigo-500'}`;
@@ -146,9 +119,9 @@ const CargaNotasPage = () => {
                 <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Carga de Notas</h1>
                 <div className="flex gap-2">
                     {selectedSubject && !isLocked && students.length > 0 && (
-                        <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg disabled:opacity-50">
-                            {saving ? <RefreshCw size={18} className="animate-spin" /> : <Save size={18} />}
-                            {saving ? 'Guardando...' : 'Guardar Avance'}
+                        <button onClick={handleSave} disabled={saveMutation.isPending} className="flex items-center gap-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg disabled:opacity-50">
+                            {saveMutation.isPending ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                            {saveMutation.isPending ? 'Guardando...' : 'Guardar Avance'}
                         </button>
                     )}
                     <button
@@ -198,7 +171,7 @@ const CargaNotasPage = () => {
             {/* Loading State */}
             {loading && (
                 <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-12 text-center`}>
-                    <RefreshCw className="animate-spin mx-auto text-teal-500" size={32} />
+                    <Loader2 className="animate-spin mx-auto text-teal-500" size={32} />
                     <p className={`mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Cargando notas...</p>
                 </div>
             )}

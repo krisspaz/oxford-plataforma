@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '../utils/toast';
+import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
     Users,
     AlertTriangle,
@@ -621,7 +622,6 @@ const Dashboard = () => {
     const { darkMode } = useTheme();
     const { user, loading: authLoading } = useAuth();
 
-    const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState(null);
 
     const userRole = useMemo(() => {
@@ -630,25 +630,16 @@ const Dashboard = () => {
         return mainRole || user.roles[0];
     }, [user?.roles]);
 
-    useEffect(() => {
-        let mounted = true;
-
-        const fetchStats = async () => {
-            try {
-                // AXIOS: JSON -> response.data
-                const response = await api.get('/dashboard/stats');
-                if (!mounted) return;
-                setStats(response.data); // ✅
-            } catch (error) {
-                console.error('Error fetching dashboard stats:', error);
-            } finally {
-                if (mounted) setLoading(false);
-            }
-        };
-
-        fetchStats();
-        return () => { mounted = false; };
-    }, [userRole]); // si tu backend cambia stats por rol, está bien; si no, puedes dejar []
+    // === QUERY ===
+    const { isLoading: loading } = useQuery({
+        queryKey: ['dashboard', 'stats', userRole],
+        queryFn: async () => {
+            const response = await api.get('/dashboard/stats');
+            setStats(response.data);
+            return response.data;
+        },
+        staleTime: 2 * 60 * 1000,
+    });
 
     // Prevenir el error de hooks: retornar después de TODOS los hooks
     if (authLoading) {
