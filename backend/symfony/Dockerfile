@@ -2,13 +2,13 @@
 FROM php:8.4-fpm-alpine AS base
 
 # Install system dependencies
+# Install system dependencies
 RUN apk add --no-cache \
     icu-dev \
-    postgresql-dev \
     libzip-dev \
     && docker-php-ext-install \
     intl \
-    pdo_pgsql \
+    pdo_mysql \
     zip \
     opcache
 

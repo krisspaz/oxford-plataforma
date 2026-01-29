@@ -14,12 +14,15 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Model\TenantAwareInterface;
+use App\Model\TenantAwareTrait;
 
 #[ORM\Entity(repositoryClass: GradeRepository::class)]
 // Disable API Platform auto-routes - using custom GradeController instead
 // #[ApiResource(...)] is removed intentionally
-class Grade
+class Grade implements TenantAwareInterface
 {
+    use TenantAwareTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { Bell, Filter, Trash2, Check, ChevronLeft, X } from 'lucide-react';
+import { Bell, Filter, Trash2, Check, ChevronLeft, X, Settings, Mail, Smartphone, Monitor, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import notificationService from '../services/notificationService';
 import { toast } from '../utils/toast';
@@ -12,6 +12,12 @@ const NotificationsPage = () => {
     const [selectedNotification, setSelectedNotification] = useState(null);
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showPreferences, setShowPreferences] = useState(false);
+    const [channels, setChannels] = useState({
+        email: { enabled: true, types: ['payment', 'grade', 'event'] },
+        push: { enabled: false, types: ['payment'] },
+        inApp: { enabled: true, types: ['payment', 'grade', 'task', 'event', 'message'] },
+    });
 
     useEffect(() => {
         loadNotifications();
@@ -143,6 +149,12 @@ const NotificationsPage = () => {
                     </div>
                 </div>
                 <div className="flex gap-2">
+                    <button
+                        onClick={() => setShowPreferences(true)}
+                        className={`px-4 py-2 rounded-lg flex items-center gap-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+                    >
+                        <Settings size={16} /> Preferencias
+                    </button>
                     {unreadCount > 0 && (
                         <button
                             onClick={handleMarkAllAsRead}
@@ -284,6 +296,147 @@ const NotificationsPage = () => {
                     )}
                 </div>
             </div>
+
+            {/* Preferences Modal */}
+            {showPreferences && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg w-full max-w-lg p-6`}>
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className={`text-xl font-bold flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                                <Settings size={24} /> Preferencias de Notificaciones
+                            </h2>
+                            <button onClick={() => setShowPreferences(false)}>
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Channel Settings */}
+                        <div className="space-y-6">
+                            {/* Email Channel */}
+                            <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <Mail size={24} className="text-blue-500" />
+                                        <div>
+                                            <h3 className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>Correo Electrónico</h3>
+                                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Recibe notificaciones por email</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setChannels({ ...channels, email: { ...channels.email, enabled: !channels.email.enabled } })}
+                                        className="text-blue-500"
+                                    >
+                                        {channels.email.enabled ? <ToggleRight size={32} /> : <ToggleLeft size={32} className="text-gray-400" />}
+                                    </button>
+                                </div>
+                                {channels.email.enabled && (
+                                    <div className="flex flex-wrap gap-2 mt-3">
+                                        {['payment', 'grade', 'event'].map(type => (
+                                            <label key={type} className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${channels.email.types.includes(type)
+                                                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                                    : 'bg-gray-200 text-gray-500 dark:bg-gray-600 dark:text-gray-400'
+                                                }`}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={channels.email.types.includes(type)}
+                                                    onChange={(e) => {
+                                                        const newTypes = e.target.checked
+                                                            ? [...channels.email.types, type]
+                                                            : channels.email.types.filter(t => t !== type);
+                                                        setChannels({ ...channels, email: { ...channels.email, types: newTypes } });
+                                                    }}
+                                                    className="hidden"
+                                                />
+                                                {typeLabels[type] || type}
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Push Channel */}
+                            <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <Smartphone size={24} className="text-green-500" />
+                                        <div>
+                                            <h3 className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>Notificaciones Push</h3>
+                                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>En tu dispositivo móvil</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setChannels({ ...channels, push: { ...channels.push, enabled: !channels.push.enabled } })}
+                                        className="text-green-500"
+                                    >
+                                        {channels.push.enabled ? <ToggleRight size={32} /> : <ToggleLeft size={32} className="text-gray-400" />}
+                                    </button>
+                                </div>
+                                {channels.push.enabled && (
+                                    <div className="flex flex-wrap gap-2 mt-3">
+                                        {['payment', 'grade', 'task', 'event'].map(type => (
+                                            <label key={type} className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${channels.push.types.includes(type)
+                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                                    : 'bg-gray-200 text-gray-500 dark:bg-gray-600 dark:text-gray-400'
+                                                }`}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={channels.push.types.includes(type)}
+                                                    onChange={(e) => {
+                                                        const newTypes = e.target.checked
+                                                            ? [...channels.push.types, type]
+                                                            : channels.push.types.filter(t => t !== type);
+                                                        setChannels({ ...channels, push: { ...channels.push, types: newTypes } });
+                                                    }}
+                                                    className="hidden"
+                                                />
+                                                {typeLabels[type] || type}
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* In-App Channel */}
+                            <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <Monitor size={24} className="text-purple-500" />
+                                        <div>
+                                            <h3 className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>En la Aplicación</h3>
+                                            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Campanita y centro de notificaciones</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setChannels({ ...channels, inApp: { ...channels.inApp, enabled: !channels.inApp.enabled } })}
+                                        className="text-purple-500"
+                                    >
+                                        {channels.inApp.enabled ? <ToggleRight size={32} /> : <ToggleLeft size={32} className="text-gray-400" />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Save Button */}
+                        <div className="mt-6 flex gap-3">
+                            <button
+                                onClick={() => setShowPreferences(false)}
+                                className={`flex-1 px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={() => {
+                                    toast.success('Preferencias guardadas');
+                                    setShowPreferences(false);
+                                }}
+                                className="flex-1 px-4 py-2 bg-gradient-to-r from-obs-pink to-obs-purple text-white rounded-lg font-medium"
+                            >
+                                Guardar Preferencias
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

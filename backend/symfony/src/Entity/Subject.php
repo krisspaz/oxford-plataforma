@@ -9,14 +9,17 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Model\TenantAwareInterface;
+use App\Model\TenantAwareTrait;
 
 #[ORM\Entity(repositoryClass: SubjectRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['subject:read']],
     denormalizationContext: ['groups' => ['subject:write']]
 )]
-class Subject
+class Subject implements TenantAwareInterface
 {
+    use TenantAwareTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

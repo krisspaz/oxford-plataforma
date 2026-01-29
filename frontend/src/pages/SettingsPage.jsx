@@ -1,6 +1,6 @@
 import { toast } from '../utils/toast';
 import { useState, useEffect } from 'react';
-import { Settings, User, Bell, Shield, Database, Palette, Save, Check } from 'lucide-react';
+import { Settings, User, Bell, Shield, Database, Palette, Save, Check, Image, Upload, Eye } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../services/api';
 
@@ -18,7 +18,15 @@ const SettingsPage = () => {
         emailAlerts: true,
         autoBackup: true,
         language: 'es',
-        currency: 'GTQ'
+        currency: 'GTQ',
+        // Branding
+        logoMain: null,
+        logoAlt: null,
+        favicon: null,
+        primaryColor: '#14B8A6',
+        secondaryColor: '#0F766E',
+        pdfHeader: 'Colegio Oxford - Excelencia Académica',
+        pdfFooter: 'www.colegiooxford.edu.gt',
     });
 
     useEffect(() => {
@@ -51,6 +59,7 @@ const SettingsPage = () => {
     const tabs = [
         { id: 'general', label: 'General', icon: Settings },
         { id: 'profile', label: 'Perfil', icon: User },
+        { id: 'branding', label: 'Branding', icon: Image },
         { id: 'notifications', label: 'Notificaciones', icon: Bell },
         { id: 'security', label: 'Seguridad', icon: Shield },
         { id: 'database', label: 'Base de Datos', icon: Database },
@@ -263,10 +272,141 @@ const SettingsPage = () => {
         </div>
     );
 
+    const BrandingSettings = () => (
+        <div className="space-y-6">
+            {/* Logo Uploads */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Main Logo */}
+                <div className={`p-4 rounded-xl border-2 border-dashed ${darkMode ? 'border-gray-600 bg-gray-700/50' : 'border-gray-300 bg-gray-50'} text-center`}>
+                    <div className={`w-16 h-16 mx-auto mb-2 rounded-lg flex items-center justify-center ${darkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                        {settings.logoMain ? (
+                            <img src={settings.logoMain} alt="Logo" className="w-full h-full object-contain rounded-lg" />
+                        ) : (
+                            <Image size={32} className="text-gray-400" />
+                        )}
+                    </div>
+                    <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>Logo Principal</p>
+                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2`}>Para encabezados</p>
+                    <label className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-lg cursor-pointer inline-flex items-center gap-1">
+                        <Upload size={14} /> Subir
+                        <input type="file" className="hidden" accept="image/*" onChange={(e) => toast.info('Subida de logo – funcionalidad pendiente')} />
+                    </label>
+                </div>
+
+                {/* Alt Logo */}
+                <div className={`p-4 rounded-xl border-2 border-dashed ${darkMode ? 'border-gray-600 bg-gray-700/50' : 'border-gray-300 bg-gray-50'} text-center`}>
+                    <div className={`w-16 h-16 mx-auto mb-2 rounded-lg flex items-center justify-center ${darkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                        {settings.logoAlt ? (
+                            <img src={settings.logoAlt} alt="Logo Alt" className="w-full h-full object-contain rounded-lg" />
+                        ) : (
+                            <Image size={32} className="text-gray-400" />
+                        )}
+                    </div>
+                    <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>Logo Alternativo</p>
+                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2`}>Versión reducida</p>
+                    <label className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-lg cursor-pointer inline-flex items-center gap-1">
+                        <Upload size={14} /> Subir
+                        <input type="file" className="hidden" accept="image/*" onChange={(e) => toast.info('Subida de logo – funcionalidad pendiente')} />
+                    </label>
+                </div>
+
+                {/* Favicon */}
+                <div className={`p-4 rounded-xl border-2 border-dashed ${darkMode ? 'border-gray-600 bg-gray-700/50' : 'border-gray-300 bg-gray-50'} text-center`}>
+                    <div className={`w-16 h-16 mx-auto mb-2 rounded-lg flex items-center justify-center ${darkMode ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                        {settings.favicon ? (
+                            <img src={settings.favicon} alt="Favicon" className="w-full h-full object-contain rounded-lg" />
+                        ) : (
+                            <Image size={32} className="text-gray-400" />
+                        )}
+                    </div>
+                    <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>Favicon</p>
+                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2`}>Icono de pestaña</p>
+                    <label className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-lg cursor-pointer inline-flex items-center gap-1">
+                        <Upload size={14} /> Subir
+                        <input type="file" className="hidden" accept="image/*,.ico" onChange={(e) => toast.info('Subida de favicon – funcionalidad pendiente')} />
+                    </label>
+                </div>
+            </div>
+
+            {/* Colors */}
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className={labelClass}>Color Primario</label>
+                    <div className="flex items-center gap-3">
+                        <input
+                            type="color"
+                            value={settings.primaryColor}
+                            onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
+                            className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-300"
+                        />
+                        <input
+                            type="text"
+                            value={settings.primaryColor}
+                            onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
+                            className={`flex-1 ${inputClass}`}
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label className={labelClass}>Color Secundario</label>
+                    <div className="flex items-center gap-3">
+                        <input
+                            type="color"
+                            value={settings.secondaryColor}
+                            onChange={(e) => setSettings({ ...settings, secondaryColor: e.target.value })}
+                            className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-300"
+                        />
+                        <input
+                            type="text"
+                            value={settings.secondaryColor}
+                            onChange={(e) => setSettings({ ...settings, secondaryColor: e.target.value })}
+                            className={`flex-1 ${inputClass}`}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* PDF Configuration */}
+            <div className={`p-4 rounded-xl ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                <h3 className={`font-medium mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Configuración de PDFs</h3>
+                <div className="space-y-4">
+                    <div>
+                        <label className={labelClass}>Encabezado de PDFs</label>
+                        <input
+                            type="text"
+                            value={settings.pdfHeader}
+                            onChange={(e) => setSettings({ ...settings, pdfHeader: e.target.value })}
+                            className={inputClass}
+                            placeholder="Texto que aparece en el encabezado de documentos"
+                        />
+                    </div>
+                    <div>
+                        <label className={labelClass}>Pie de Página de PDFs</label>
+                        <input
+                            type="text"
+                            value={settings.pdfFooter}
+                            onChange={(e) => setSettings({ ...settings, pdfFooter: e.target.value })}
+                            className={inputClass}
+                            placeholder="Texto que aparece en el pie de documentos"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Preview Login */}
+            <div>
+                <button className={`w-full py-3 px-4 flex items-center justify-center gap-2 ${darkMode ? 'bg-blue-900/50 text-blue-300 hover:bg-blue-900/70' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'} rounded-xl transition-colors font-medium`}>
+                    <Eye size={20} /> Vista Previa Pantalla de Login
+                </button>
+            </div>
+        </div>
+    );
+
     const renderContent = () => {
         switch (activeTab) {
             case 'general': return <GeneralSettings />;
             case 'profile': return <ProfileSettings />;
+            case 'branding': return <BrandingSettings />;
             case 'notifications': return <NotificationSettings />;
             case 'security': return <SecuritySettings />;
             case 'database': return <DatabaseSettings />;

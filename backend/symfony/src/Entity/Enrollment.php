@@ -6,6 +6,8 @@ use ApiPlatform\Metadata\ApiResource;
 use App\Repository\EnrollmentRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Model\TenantAwareInterface;
+use App\Model\TenantAwareTrait;
 
 #[ORM\Entity(repositoryClass: EnrollmentRepository::class)]
 #[ApiResource(
@@ -27,8 +29,9 @@ use Doctrine\ORM\Mapping as ORM;
         )
     ]
 )]
-class Enrollment
+class Enrollment implements TenantAwareInterface
 {
+    use TenantAwareTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

@@ -8,14 +8,17 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Model\TenantAwareInterface;
+use App\Model\TenantAwareTrait;
 
 #[ORM\Entity(repositoryClass: PersonRepository::class)]
 #[ORM\InheritanceType('JOINED')]
 #[ORM\DiscriminatorColumn(name: 'person_type', type: 'string')]
 #[ORM\DiscriminatorMap(['person' => Person::class, 'parent' => Guardian::class, 'teacher' => Teacher::class, 'staff' => Staff::class])]
 #[ApiResource]
-class Person
+class Person implements TenantAwareInterface
 {
+    use TenantAwareTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

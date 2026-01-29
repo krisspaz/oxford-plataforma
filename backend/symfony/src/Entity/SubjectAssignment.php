@@ -5,11 +5,14 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\SubjectAssignmentRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Model\TenantAwareInterface;
+use App\Model\TenantAwareTrait;
 
 #[ORM\Entity(repositoryClass: SubjectAssignmentRepository::class)]
 #[ApiResource]
-class SubjectAssignment
+class SubjectAssignment implements TenantAwareInterface
 {
+    use TenantAwareTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

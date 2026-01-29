@@ -19,9 +19,14 @@ class JWTCreatedListener
         // Add the user ID to the payload
         if ($user instanceof User) {
             $payload['id'] = $user->getId();
-            
-            // Optionally add other useful claims
             $payload['name'] = $user->getName();
+            
+            // Add Tenant Information
+            $tenant = $user->getTenant();
+            if ($tenant) {
+                $payload['tenant_id'] = $tenant->getId();
+                $payload['tenant_slug'] = $tenant->getSlug();
+            }
         }
 
         $event->setData($payload);

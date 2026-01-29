@@ -5,10 +5,9 @@ redis
 python-jose[cryptography]
 pytest
 flask-cors
-pymongo==4.6.1
 chromadb
 pypdf
 sentence-transformers
 minio
-psycopg2-binary
+mysql-connector-python
 python-dotenv

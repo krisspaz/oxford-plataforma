@@ -1,17 +1,37 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { AlertCircle, Check, X, Eye, Clock, FileText, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { AlertCircle, Check, X, Eye, Clock, FileText, RefreshCw, ChevronRight, Shield, UserCheck } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import { requestService } from '../services';
 
 const SolicitudesPage = () => {
     const { darkMode } = useTheme();
+    const { user } = useAuth();
     const [filter, setFilter] = useState('pendiente');
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(null);
     const [requests, setRequests] = useState([]);
+
+    // Determine user role for authorization
+    const userRole = useMemo(() => {
+        if (!user?.roles) return null;
+        if (user.roles.includes('ROLE_SUPER_ADMIN') || user.roles.includes('ROLE_ADMIN')) return 'ADMIN';
+        if (user.roles.includes('ROLE_ACCOUNTANT') || user.roles.includes('ROLE_CONTABILIDAD')) return 'CONTABILIDAD';
+        return 'OTHER';
+    }, [user?.roles]);
+
+    // Status workflow for SAT cancellations (dual authorization)
+    const STATUS_WORKFLOW = {
+        'PENDIENTE_CONTABILIDAD': { label: 'Pendiente Contabilidad', color: 'yellow', next: 'PENDIENTE_ADMIN', approver: 'CONTABILIDAD' },
+        'PENDIENTE_ADMIN': { label: 'Pendiente Admin', color: 'orange', next: 'ANULADO', approver: 'ADMIN' },
+        'PENDIENTE': { label: 'Pendiente', color: 'yellow', next: 'APROBADA', approver: 'ADMIN' },
+        'APROBADA': { label: 'Aprobada', color: 'green', next: null, approver: null },
+        'ANULADO': { label: 'Anulado', color: 'green', next: null, approver: null },
+        'RECHAZADA': { label: 'Rechazada', color: 'red', next: null, approver: null },
+    };
 
     useEffect(() => {
         loadRequests();
@@ -46,32 +66,62 @@ const SolicitudesPage = () => {
 
     const getTypeLabel = (type) => {
         switch (type) {
-            case 'ANULACION_FACTURA': return { label: 'Anulación Factura', color: 'red' };
-            case 'ANULACION_RECIBO': return { label: 'Anulación Recibo', color: 'orange' };
-            case 'HABILITACION_NOTAS': return { label: 'Habilitación Notas', color: 'blue' };
-            default: return { label: type, color: 'gray' };
+            case 'ANULACION_FACTURA': return { label: 'Anulación Factura SAT', color: 'red', isSAT: true };
+            case 'ANULACION_RECIBO': return { label: 'Anulación Recibo SAT', color: 'orange', isSAT: true };
+            case 'HABILITACION_NOTAS': return { label: 'Habilitación Notas', color: 'blue', isSAT: false };
+            default: return { label: type, color: 'gray', isSAT: false };
         }
+    };
+
+    // Check if current user can approve this request
+    const canApprove = (request) => {
+        const statusInfo = STATUS_WORKFLOW[request.status];
+        if (!statusInfo?.approver) return false;
+        return userRole === statusInfo.approver || userRole === 'ADMIN';
     };
 
     const handleAction = async (id, action) => {
         setActionLoading(id);
         try {
-            const response = action === 'APROBADA'
-                ? await requestService.approve(id)
-                : await requestService.reject(id, 'Rechazado por administración');
+            const request = requests.find(r => r.id === id);
+            const typeInfo = getTypeLabel(request?.type);
+            const statusInfo = STATUS_WORKFLOW[request?.status];
+
+            let response;
+            if (action === 'APROBADA') {
+                // For SAT cancellations, move to next step in workflow
+                if (typeInfo?.isSAT && statusInfo?.next) {
+                    response = await requestService.approve(id, { nextStatus: statusInfo.next });
+                } else {
+                    response = await requestService.approve(id);
+                }
+            } else {
+                response = await requestService.reject(id, 'Rechazado por administración');
+            }
 
             if (response.success) {
-                // Update local state to reflect change
-                setRequests(prev => prev.map(r => r.id === id ? { ...r, status: action } : r));
-                // If filter is 'pendiente', remove it or refresh
-                if (filter === 'pendiente') {
+                const newStatus = typeInfo?.isSAT && statusInfo?.next && action === 'APROBADA'
+                    ? statusInfo.next
+                    : action;
+
+                setRequests(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
+
+                // If filter is 'pendiente' and it's no longer pending, remove from view
+                if (filter === 'pendiente' && (newStatus === 'APROBADA' || newStatus === 'ANULADO' || newStatus === 'RECHAZADA')) {
                     setRequests(prev => prev.filter(r => r.id !== id));
                 }
                 setShowDetailModal(false);
+
+                // Show appropriate message
+                if (typeInfo?.isSAT && newStatus === 'PENDIENTE_ADMIN') {
+                    toast.success('Aprobado por Contabilidad. Pendiente aprobación de Admin.');
+                } else if (newStatus === 'ANULADO' || newStatus === 'APROBADA') {
+                    toast.success('Solicitud procesada exitosamente.');
+                }
             }
         } catch (error) {
             console.error('Error processing request:', error);
-            toast.info('Error al procesar la solicitud');
+            toast.error('Error al procesar la solicitud');
         } finally {
             setActionLoading(null);
         }
@@ -118,12 +168,14 @@ const SolicitudesPage = () => {
                         <div key={request.id} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm p-4`}>
                             <div className="flex items-start justify-between">
                                 <div className="flex items-start gap-4">
-                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${request.status === 'PENDIENTE' ? 'bg-yellow-100 text-yellow-600' :
-                                        request.status === 'APROBADA' ? 'bg-green-100 text-green-600' :
-                                            'bg-red-100 text-red-600'
+                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${request.status === 'PENDIENTE' || request.status === 'PENDIENTE_CONTABILIDAD' ? 'bg-yellow-100 text-yellow-600' :
+                                            request.status === 'PENDIENTE_ADMIN' ? 'bg-orange-100 text-orange-600' :
+                                                request.status === 'APROBADA' || request.status === 'ANULADO' ? 'bg-green-100 text-green-600' :
+                                                    'bg-red-100 text-red-600'
                                         }`}>
-                                        {request.status === 'PENDIENTE' ? <Clock size={20} /> :
-                                            request.status === 'APROBADA' ? <Check size={20} /> : <X size={20} />}
+                                        {request.status === 'PENDIENTE' || request.status === 'PENDIENTE_CONTABILIDAD' ? <Clock size={20} /> :
+                                            request.status === 'PENDIENTE_ADMIN' ? <Shield size={20} /> :
+                                                request.status === 'APROBADA' || request.status === 'ANULADO' ? <Check size={20} /> : <X size={20} />}
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
@@ -132,21 +184,48 @@ const SolicitudesPage = () => {
                                                     'bg-blue-100 text-blue-700'
                                                 }`}>{typeInfo.label}</span>
                                             <span className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>{request.document}</span>
+                                            {typeInfo.isSAT && (
+                                                <span className="px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700">
+                                                    Doble Autorización
+                                                </span>
+                                            )}
                                         </div>
                                         <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                                             Estudiante: {request.student} • Solicitado por: {request.requestedBy}
                                         </p>
+                                        {/* Status Workflow Indicator for SAT */}
+                                        {typeInfo.isSAT && (
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <div className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${request.status === 'PENDIENTE_CONTABILIDAD' || request.status === 'PENDIENTE_ADMIN' || request.status === 'ANULADO'
+                                                        ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                                                    }`}>
+                                                    <UserCheck size={12} /> Contabilidad
+                                                </div>
+                                                <ChevronRight size={12} className="text-gray-400" />
+                                                <div className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${request.status === 'PENDIENTE_ADMIN' || request.status === 'ANULADO'
+                                                        ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                                                    }`}>
+                                                    <Shield size={12} /> Admin
+                                                </div>
+                                                <ChevronRight size={12} className="text-gray-400" />
+                                                <div className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${request.status === 'ANULADO'
+                                                        ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                                                    }`}>
+                                                    <Check size={12} /> Anulado
+                                                </div>
+                                            </div>
+                                        )}
                                         <p className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>{request.date}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    {request.status === 'PENDIENTE' && (
+                                    {canApprove(request) && request.status !== 'APROBADA' && request.status !== 'ANULADO' && request.status !== 'RECHAZADA' && (
                                         <>
                                             <button
                                                 onClick={() => handleAction(request.id, 'APROBADA')}
                                                 disabled={actionLoading === request.id}
-                                                className="p-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200"
-                                                title="Aprobar"
+                                                className="p-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 flex items-center gap-1"
+                                                title={getTypeLabel(request.type).isSAT ? 'Aprobar (siguiente paso)' : 'Aprobar'}
                                             >
                                                 {actionLoading === request.id ? <RefreshCw size={18} className="animate-spin" /> : <Check size={18} />}
                                             </button>
@@ -159,6 +238,11 @@ const SolicitudesPage = () => {
                                                 <X size={18} />
                                             </button>
                                         </>
+                                    )}
+                                    {!canApprove(request) && request.status !== 'APROBADA' && request.status !== 'ANULADO' && request.status !== 'RECHAZADA' && (
+                                        <span className={`text-xs px-2 py-1 rounded ${darkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
+                                            {STATUS_WORKFLOW[request.status]?.approver === 'CONTABILIDAD' ? 'Requiere Contabilidad' : 'Requiere Admin'}
+                                        </span>
                                     )}
                                     <button onClick={() => { setSelectedRequest(request); setShowDetailModal(true); }} className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
                                         <Eye size={18} className={darkMode ? 'text-gray-400' : 'text-gray-500'} />

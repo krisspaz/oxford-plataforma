@@ -2,10 +2,97 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import taskService from '../services/taskService';
 import attendanceService from '../services/attendanceService';
 import scheduleService from '../services/scheduleService';
+import catalogService from '../services/catalogService';
+import gradeRecordService from '../services/gradeRecordService';
 
 /**
  * React Query hooks for data fetching with caching
+ * 
+ * IMPORTANT: All queryKeys include filters to prevent cache collisions
  */
+
+// ============================================
+// CATALOG HOOKS (Academic Levels, Grades, etc.)
+// ============================================
+
+export const useAcademicLevels = () => {
+    return useQuery({
+        queryKey: ['academic-levels'],
+        queryFn: catalogService.getAcademicLevels,
+        staleTime: 10 * 60 * 1000, // 10 min - rarely changes
+    });
+};
+
+export const useGrades = (levelId = null) => {
+    return useQuery({
+        queryKey: ['grades', { levelId }],
+        queryFn: () => catalogService.getGrades(levelId),
+        staleTime: 10 * 60 * 1000,
+    });
+};
+
+export const useSections = (gradeId = null) => {
+    return useQuery({
+        queryKey: ['sections', { gradeId }],
+        queryFn: () => catalogService.getSections(gradeId),
+        enabled: !!gradeId,
+        staleTime: 10 * 60 * 1000,
+    });
+};
+
+export const useSubjects = () => {
+    return useQuery({
+        queryKey: ['subjects'],
+        queryFn: catalogService.getSubjects,
+        staleTime: 10 * 60 * 1000,
+    });
+};
+
+export const useTeachers = () => {
+    return useQuery({
+        queryKey: ['teachers'],
+        queryFn: catalogService.getTeachers,
+        staleTime: 5 * 60 * 1000,
+    });
+};
+
+export const useSchoolCycles = () => {
+    return useQuery({
+        queryKey: ['school-cycles'],
+        queryFn: catalogService.getSchoolCycles,
+        staleTime: 30 * 60 * 1000, // 30 min
+    });
+};
+
+export const useCurrentCycle = () => {
+    return useQuery({
+        queryKey: ['current-cycle'],
+        queryFn: catalogService.getCurrentCycle,
+        staleTime: 60 * 60 * 1000, // 1 hour
+    });
+};
+
+export const useBimesters = (cycleId = null) => {
+    return useQuery({
+        queryKey: ['bimesters', { cycleId }],
+        queryFn: () => catalogService.getBimesters?.(cycleId) || catalogService.getSchoolCycles(),
+        enabled: !!cycleId,
+        staleTime: 30 * 60 * 1000,
+    });
+};
+
+// ============================================
+// GRADE RECORDS HOOKS
+// ============================================
+
+export const useGradeRecords = ({ cycleId, subjectId, bimesterId, sectionId } = {}) => {
+    return useQuery({
+        queryKey: ['grade-records', { cycleId, subjectId, bimesterId, sectionId }],
+        queryFn: () => gradeRecordService.getByFilters?.({ cycleId, subjectId, bimesterId, sectionId }),
+        enabled: !!cycleId && !!subjectId && !!bimesterId,
+        staleTime: 2 * 60 * 1000, // 2 min - more volatile
+    });
+};
 
 // ============================================
 // TASK HOOKS

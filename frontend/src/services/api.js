@@ -1,41 +1,33 @@
 /**
- * Base API Configuration - Sistema Oxford
- * =========================================
- * JWT Token-based Authentication with Automatic Refresh
- * Uses localStorage for token storage with Authorization header
+ * API Client - Sistema Oxford
+ * ============================
+ * JWT Auth + Error Handling + Hydra Support
+ * VERSIÓN ROBUSTA - No hay toast sin response.ok
+ * 
+ * Soporta:
+ * - API Platform (Hydra format)
+ * - Custom controllers ({ success: true, data: [...] })
  */
 
 const API_BASE_URL = '/api';
 
-// Token refresh state
-let isRefreshing = false;
-let refreshSubscribers = [];
+// Custom API Error class
+export class ApiError extends Error {
+    constructor(status, data, message) {
+        super(message || `API Error ${status}`);
+        this.status = status;
+        this.data = data;
+        this.name = 'ApiError';
+    }
+}
 
-/**
- * Subscribe to token refresh
- */
-const subscribeTokenRefresh = (callback) => {
-    refreshSubscribers.push(callback);
-};
-
-/**
- * Notify all subscribers that token was refreshed
- */
-const onTokenRefreshed = (token) => {
-    refreshSubscribers.forEach(callback => callback(token));
-    refreshSubscribers = [];
-};
-
-// Sanitize token retrieval
+// Token management
 export const getToken = () => {
     const token = localStorage.getItem('token');
     if (!token || token === 'undefined' || token === 'null') return null;
-    return token.replace(/^"(.*)"$/, '$1'); // Remove surrounding quotes if present
+    return token.replace(/^"(.*)"$/, '$1');
 };
 
-/**
- * Set JWT token
- */
 export const setToken = (token) => {
     if (token && typeof token === 'string') {
         localStorage.setItem('token', token);
@@ -44,34 +36,33 @@ export const setToken = (token) => {
     }
 };
 
-/**
- * Check if user is authenticated (has token)
- */
 export const isAuthenticated = () => !!getToken();
 
-/**
- * Refresh the access token
- */
+// Token refresh state
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+const subscribeTokenRefresh = (callback) => refreshSubscribers.push(callback);
+const onTokenRefreshed = (token) => {
+    refreshSubscribers.forEach(cb => cb(token));
+    refreshSubscribers = [];
+};
+
 const refreshToken = async () => {
     try {
         const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include', // For refresh token cookie if used
+            credentials: 'include',
         });
-
-        if (!response.ok) {
-            throw new Error('Refresh failed');
-        }
-
+        if (!response.ok) throw new Error('Refresh failed');
         const data = await response.json();
         if (data.token) {
             setToken(data.token);
             return data.token;
         }
-        throw new Error('No token in refresh response');
+        throw new Error('No token');
     } catch (error) {
-        // Refresh failed - clear token and redirect to login
         setToken(null);
         if (!window.location.pathname.includes('/login')) {
             window.location.href = '/login';
@@ -81,37 +72,70 @@ const refreshToken = async () => {
 };
 
 /**
- * Base fetch wrapper with JWT authentication
+ * Unwrap response data from various formats
+ * Handles both API Platform (Hydra) and custom { success, data } responses
+ */
+const unwrapResponse = (data, options = {}) => {
+    if (!data || typeof data !== 'object') return data;
+
+    // If fullResponse requested, return as-is
+    if (options.fullResponse) return data;
+
+    // API Platform Hydra format
+    if (data['hydra:member']) {
+        return data['hydra:member'];
+    }
+
+    // Alternative Hydra format
+    if (data.member && Array.isArray(data.member)) {
+        return data.member;
+    }
+
+    // Custom controller format { success: true, data: [...] }
+    if (data.success === true && Array.isArray(data.data)) {
+        return data.data;
+    }
+
+    // Single entity or other response
+    return data;
+};
+
+/**
+ * Core fetch wrapper
+ * @param {string} endpoint - API endpoint
+ * @param {object} options - Fetch options (method, body, headers, fullResponse, etc.)
+ * @param {boolean} retry - Whether to retry on 401
+ * @returns {Promise<any>} - Response data (unwrapped if collection)
+ * @throws {ApiError} - If response is not ok
  */
 const apiFetch = async (endpoint, options = {}, retry = true) => {
     const token = getToken();
-
-    // Check if we have a token before even trying, unless it's a login/public endpoint
-    const isPublicEndpoint = endpoint === '/login_check' || endpoint.includes('/public');
+    const isPublicEndpoint = endpoint === '/login_check' ||
+        endpoint === '/auth/login' ||
+        endpoint.includes('/public') ||
+        endpoint.includes('/health');
 
     if (!token && !isPublicEndpoint) {
-        console.warn(`[API] Aborting request to ${endpoint}: No token found.`);
-        // Force redirect if trying to access protected resource without token
         if (!window.location.pathname.includes('/login')) {
             window.location.href = '/login';
         }
-        throw new Error('Sesión no válida. Redirigiendo...');
+        throw new ApiError(401, null, 'Sesión no válida');
     }
 
+    // ✅ MERGE HEADERS CORRECTLY - custom headers override defaults
     const headers = {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
         ...options.headers,
     };
 
-    // Add Authorization header if token exists
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
-        // Redundant header to bypass stripping issues
-        headers['X-Auth-Token'] = token;
-        if (import.meta.env.DEV) {
-            console.log(`[API] 🔐 Attaching Token to ${options.method || 'GET'} ${endpoint}`);
-        }
+    }
+
+    // Remove Content-Type for FormData (browser sets it with boundary)
+    if (options.body instanceof FormData) {
+        delete headers['Content-Type'];
     }
 
     try {
@@ -121,24 +145,26 @@ const apiFetch = async (endpoint, options = {}, retry = true) => {
             credentials: 'include',
         });
 
-        // Parse response body primarily for error checking
+        // Parse response
         let data;
         const contentType = response.headers.get('content-type');
-        if (contentType && (contentType.includes('application/json') || contentType.includes('application/ld+json'))) {
-            data = await response.json();
+        if (contentType?.includes('application/json') || contentType?.includes('application/ld+json')) {
+            try {
+                data = await response.json();
+            } catch {
+                data = null;
+            }
         } else {
             data = await response.text();
         }
 
-        // Handle 401 OR Specific Backend Auth Errors that might return as 500/400
+        // Handle 401 - Auth errors
         const isAuthError = response.status === 401 ||
-            (typeof data === 'object' && data.message === 'JWT Token not found') ||
-            (typeof data === 'object' && data.message === 'Expired JWT Token') ||
-            (typeof data === 'string' && data.includes('JWT Token not found'));
+            (typeof data === 'object' && data?.message === 'JWT Token not found') ||
+            (typeof data === 'object' && data?.message === 'Expired JWT Token');
 
         if (isAuthError) {
-            console.warn(`[API] Auth Error for ${endpoint}: ${response.status} - ${typeof data === 'object' ? data.message : data}`);
-
+            console.warn(`[API] Auth error on ${endpoint}:`, response.status);
             if (retry && token) {
                 if (!isRefreshing) {
                     isRefreshing = true;
@@ -146,84 +172,75 @@ const apiFetch = async (endpoint, options = {}, retry = true) => {
                         const newToken = await refreshToken();
                         isRefreshing = false;
                         onTokenRefreshed(newToken);
-                        // Retry original request with new token
                         return apiFetch(endpoint, options, false);
-                    } catch (refreshError) {
+                    } catch {
                         isRefreshing = false;
-                        throw refreshError;
+                        throw new ApiError(401, data, 'Sesión expirada');
                     }
                 } else {
-                    // Wait for token refresh and retry
                     return new Promise((resolve, reject) => {
-                        subscribeTokenRefresh((newToken) => {
-                            headers['Authorization'] = `Bearer ${newToken}`;
-                            apiFetch(endpoint, options, false)
-                                .then(resolve)
-                                .catch(reject);
+                        subscribeTokenRefresh(() => {
+                            apiFetch(endpoint, options, false).then(resolve).catch(reject);
                         });
                     });
                 }
             } else {
-                // If 401/AuthError and no retry allowed (or no token), force logout
                 setToken(null);
                 if (!window.location.pathname.includes('/login')) {
                     window.location.href = '/login';
                 }
-                throw new Error('Sesión expirada. Por favor inicia sesión nuevamente.');
+                throw new ApiError(401, data, 'Sesión expirada');
             }
         }
 
-        // Handle 429 - Rate limited
-        if (response.status === 429) {
-            throw new Error('Demasiadas solicitudes. Por favor, espera un momento.');
-        }
-
-        // Handle 403 - Forbidden
-        if (response.status === 403) {
-            throw new Error('Acceso denegado.');
-        }
-
-        // Handle 404
-        if (response.status === 404) {
-            throw new Error('Recurso no encontrado.');
-        }
-
+        // ✅ ALWAYS THROW ON NON-2XX
         if (!response.ok) {
-            const errorMessage =
-                (typeof data === 'object' && (data.error || data.message || data.detail)) ||
-                `Error ${response.status}`;
-            throw new Error(errorMessage);
+            const errorMessage = typeof data === 'object'
+                ? (data.error || data.message || data.detail || data['hydra:description'] || `Error ${response.status}`)
+                : `Error ${response.status}`;
+            throw new ApiError(response.status, data, errorMessage);
         }
 
-        // Handle Hydra Collection automatic unwrapping (Experimental but safe)
-        if (data && typeof data === 'object') {
-            if (data['hydra:member']) return data['hydra:member'];
-            if (data.member) return data.member;
-        }
+        // ✅ UNWRAP RESPONSE (handles both Hydra and {success, data})
+        return unwrapResponse(data, options);
 
-        return data;
     } catch (error) {
+        if (error instanceof ApiError) throw error;
         if (import.meta.env.DEV) {
-            console.error(`API Error [${endpoint}]:`, error);
+            console.error(`[API] ${options.method || 'GET'} ${endpoint}:`, error);
         }
-        throw error;
+        throw new ApiError(0, null, error.message || 'Error de conexión');
     }
 };
 
 /**
- * API methods with JWT authentication
+ * API methods - Properly handle options including custom headers
  */
 export const api = {
+    /**
+     * GET request
+     * @param {string} endpoint
+     * @param {object} options - { headers, fullResponse, ... }
+     */
     get: (endpoint, options = {}) =>
         apiFetch(endpoint, { method: 'GET', ...options }),
 
+    /**
+     * POST request
+     * @param {string} endpoint
+     * @param {object|FormData} body
+     * @param {object} options - { headers: { 'Content-Type': 'application/ld+json' }, ... }
+     */
     post: (endpoint, body, options = {}) =>
         apiFetch(endpoint, {
             method: 'POST',
-            body: JSON.stringify(body),
+            body: body instanceof FormData ? body : JSON.stringify(body),
             ...options,
         }),
 
+    /**
+     * PUT request
+     */
     put: (endpoint, body, options = {}) =>
         apiFetch(endpoint, {
             method: 'PUT',
@@ -231,6 +248,9 @@ export const api = {
             ...options,
         }),
 
+    /**
+     * PATCH request
+     */
     patch: (endpoint, body, options = {}) =>
         apiFetch(endpoint, {
             method: 'PATCH',
@@ -238,9 +258,11 @@ export const api = {
             ...options,
         }),
 
+    /**
+     * DELETE request
+     */
     delete: (endpoint, options = {}) =>
         apiFetch(endpoint, { method: 'DELETE', ...options }),
 };
 
 export default api;
-

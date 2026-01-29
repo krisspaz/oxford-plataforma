@@ -1,8 +1,23 @@
 <?php
+/**
+ * CatalogController - Sistema Oxford
+ * ===================================
+ * ONLY for simple lookup catalogs that don't need full CRUD.
+ * 
+ * For entities with API Platform (grades, sections, subjects, teachers, academic_levels):
+ * Use /api/{entity} endpoints directly - they are managed by API Platform.
+ * 
+ * This controller provides static lookup data for:
+ * - Payment Methods
+ * - Document Types
+ * - Relationship Types
+ * - Status Types
+ * 
+ * TODO: Migrate these to a Catalog entity for editability without deploy.
+ */
 
 namespace App\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -10,88 +25,10 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api/catalogs')]
 class CatalogController extends AbstractController
 {
-    public function __construct(
-        private EntityManagerInterface $em
-    ) {}
-
-    #[Route('/grades', methods: ['GET'])]
-    public function grades(): JsonResponse
-    {
-        // TODO: Get from Grade entity
-        $grades = [
-            ['id' => 1, 'level' => 'Preprimaria', 'name' => 'Kinder 4', 'sections' => ['A', 'B']],
-            ['id' => 2, 'level' => 'Preprimaria', 'name' => 'Kinder 5', 'sections' => ['A', 'B']],
-            ['id' => 3, 'level' => 'Primaria', 'name' => '1ro Primaria', 'sections' => ['A', 'B']],
-            ['id' => 4, 'level' => 'Básico', 'name' => '1ro Básico', 'sections' => ['A', 'B']],
-            ['id' => 5, 'level' => 'Básico', 'name' => '2do Básico', 'sections' => ['A', 'B']],
-            ['id' => 6, 'level' => 'Básico', 'name' => '3ro Básico', 'sections' => ['A']],
-        ];
-        
-        return $this->json(['success' => true, 'data' => $grades]);
-    }
-
-    #[Route('/sections', methods: ['GET'])]
-    public function sections(): JsonResponse
-    {
-        $sections = [
-            ['id' => 1, 'name' => 'A', 'schedule' => 'Matutina', 'capacity' => 30],
-            ['id' => 2, 'name' => 'B', 'schedule' => 'Matutina', 'capacity' => 30],
-            ['id' => 3, 'name' => 'C', 'schedule' => 'Vespertina', 'capacity' => 25],
-        ];
-        
-        return $this->json(['success' => true, 'data' => $sections]);
-    }
-
-    #[Route('/subjects', methods: ['GET'])]
-    public function subjects(): JsonResponse
-    {
-        $subjects = [
-            ['id' => 1, 'code' => 'MAT01', 'name' => 'Matemáticas', 'hoursWeek' => 5],
-            ['id' => 2, 'code' => 'ESP01', 'name' => 'Comunicación y Lenguaje', 'hoursWeek' => 5],
-            ['id' => 3, 'code' => 'CN01', 'name' => 'Ciencias Naturales', 'hoursWeek' => 4],
-            ['id' => 4, 'code' => 'CS01', 'name' => 'Ciencias Sociales', 'hoursWeek' => 3],
-            ['id' => 5, 'code' => 'ING01', 'name' => 'Inglés', 'hoursWeek' => 4],
-        ];
-        
-        return $this->json(['success' => true, 'data' => $subjects]);
-    }
-
-    #[Route('/teachers', methods: ['GET'])]
-    public function teachers(): JsonResponse
-    {
-        $teachers = [
-            ['id' => 1, 'code' => 'DOC-001', 'name' => 'Prof. Roberto García', 'specialization' => 'Matemáticas'],
-            ['id' => 2, 'code' => 'DOC-002', 'name' => 'Profa. María López', 'specialization' => 'Comunicación'],
-            ['id' => 3, 'code' => 'DOC-003', 'name' => 'Prof. Carlos Hernández', 'specialization' => 'Ciencias'],
-        ];
-        
-        return $this->json(['success' => true, 'data' => $teachers]);
-    }
-
-    #[Route('/school-cycles', methods: ['GET'])]
-    public function schoolCycles(): JsonResponse
-    {
-        $cycles = [
-            ['id' => 1, 'year' => 2025, 'name' => 'Ciclo 2025', 'isCurrent' => true],
-            ['id' => 2, 'year' => 2024, 'name' => 'Ciclo 2024', 'isCurrent' => false],
-        ];
-        
-        return $this->json(['success' => true, 'data' => $cycles]);
-    }
-
-    #[Route('/academic-levels', methods: ['GET'])]
-    public function academicLevels(): JsonResponse
-    {
-        $levels = [
-            ['id' => 1, 'code' => 'PRE', 'name' => 'Preprimaria'],
-            ['id' => 2, 'code' => 'PRI', 'name' => 'Primaria'],
-            ['id' => 3, 'code' => 'BAS', 'name' => 'Básico'],
-            ['id' => 4, 'code' => 'BAC', 'name' => 'Bachillerato'],
-        ];
-        
-        return $this->json(['success' => true, 'data' => $levels]);
-    }
-
+    /**
+     * Payment Methods - Static lookup
+     * These rarely change and are safe as static data.
+     */
     #[Route('/payment-methods', methods: ['GET'])]
     public function paymentMethods(): JsonResponse
     {
@@ -106,6 +43,9 @@ class CatalogController extends AbstractController
         return $this->json(['success' => true, 'data' => $methods]);
     }
 
+    /**
+     * Document Types - Static lookup
+     */
     #[Route('/document-types', methods: ['GET'])]
     public function documentTypes(): JsonResponse
     {
@@ -119,6 +59,9 @@ class CatalogController extends AbstractController
         return $this->json(['success' => true, 'data' => $types]);
     }
 
+    /**
+     * Relationship Types - Static lookup
+     */
     #[Route('/relationships', methods: ['GET'])]
     public function relationships(): JsonResponse
     {
@@ -134,6 +77,9 @@ class CatalogController extends AbstractController
         return $this->json(['success' => true, 'data' => $relationships]);
     }
 
+    /**
+     * Status Types - Static lookup
+     */
     #[Route('/statuses', methods: ['GET'])]
     public function statuses(): JsonResponse
     {

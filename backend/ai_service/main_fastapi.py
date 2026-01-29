@@ -11,6 +11,15 @@ def check_key(x_internal_key: str = Header(...)):
     if x_internal_key != os.getenv("AI_INTERNAL_KEY"):
         raise HTTPException(status_code=403, detail="Forbidden")
 
+@app.on_event("startup")
+def on_startup():
+    from database import db
+    try:
+        db.init_db()
+        print("✅ Tables initialized in MySQL")
+    except Exception as e:
+        print(f"❌ Error initializing DB: {e}")
+
 @app.get("/health")
 def health():
     return {"ok": True}

@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Tenant;
 use App\Entity\User;
 use App\Entity\Student;
 use App\Entity\Teacher;
@@ -9,6 +10,7 @@ use App\Entity\Grade;
 use App\Entity\Section;
 use App\Entity\Subject;
 use App\Entity\SubjectAssignment;
+use App\Entity\Enrollment;
 use App\Entity\Bimester;
 use App\Entity\SchoolCycle;
 use App\Entity\AcademicLevel;
@@ -26,6 +28,21 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
+        // 1. Ensure Tenant "Oxford" exists
+        $tenantRepo = $manager->getRepository(Tenant::class);
+        $oxfordTenant = $tenantRepo->findOneBy(['slug' => 'oxford']);
+        
+        if (!$oxfordTenant) {
+            $oxfordTenant = new Tenant();
+            $oxfordTenant->setName('Colegio Oxford');
+            $oxfordTenant->setSlug('oxford');
+            $oxfordTenant->setDomain('oxford.sistema.com');
+            $oxfordTenant->setIsActive(true);
+            $oxfordTenant->setCreatedAt(new \DateTimeImmutable());
+            $manager->persist($oxfordTenant);
+            $manager->flush(); // Flush to get ID if needed
+        }
+
         // Create Users with different roles
         $users = [
             // Administración
@@ -58,6 +75,11 @@ class AppFixtures extends Fixture
             // Skip if user already exists
             $existingUser = $this->userRepository->findOneBy(['email' => $userData['email']]);
             if ($existingUser) {
+                // UPDATE tenant if missing?
+                if (method_exists($existingUser, 'getTenant') && !$existingUser->getTenant()) {
+                    $existingUser->setTenant($oxfordTenant);
+                    $manager->persist($existingUser);
+                }
                 continue;
             }
             
@@ -65,6 +87,9 @@ class AppFixtures extends Fixture
             $u->setEmail($userData['email']);
             $u->setRoles([$userData['role']]);
             $u->setName($userData['name']);
+            // Assign Tenant explicitly
+            $u->setTenant($oxfordTenant);
+            
             $passToHash = $userData['password'] ?? $_ENV['APP_DEFAULT_PASSWORD'] ?? 'oxford123';
             $password = $this->passwordHasher->hashPassword($u, $passToHash);
             $u->setPassword($password); 
@@ -100,6 +125,7 @@ class AppFixtures extends Fixture
             }
             
             $student = new Student();
+            $student->setTenant($oxfordTenant);
             $student->setFirstName($studentData['firstName']);
             $student->setLastName($studentData['lastName']);
             $student->setCarnet($studentData['carnet']);
@@ -124,6 +150,7 @@ class AppFixtures extends Fixture
             $s = $subjectRepository->findOneBy(['name' => $subName]);
             if (!$s) {
                 $s = new Subject();
+                $s->setTenant($oxfordTenant);
                 $s->setName($subName);
                 $s->setCode(strtoupper(substr($subName, 0, 3)));
                 $manager->persist($s);
@@ -140,6 +167,7 @@ class AppFixtures extends Fixture
             $l = $levelRepository->findOneBy(['name' => $lName]);
             if (!$l) {
                 $l = new AcademicLevel();
+                $l->setTenant($oxfordTenant);
                 $l->setName($lName);
                 $l->setCode(strtoupper(substr($lName, 0, 3)));
                 $l->setIsActive(true);
@@ -155,6 +183,7 @@ class AppFixtures extends Fixture
         $cycle = $cycleRepository->findOneBy(['name' => $currentYear]);
         if (!$cycle) {
             $cycle = new SchoolCycle();
+            $cycle->setTenant($oxfordTenant);
             $cycle->setName($currentYear);
             $cycle->setStartDate(new \DateTime($currentYear . '-01-15'));
             $cycle->setEndDate(new \DateTime($currentYear . '-10-31'));
@@ -170,6 +199,7 @@ class AppFixtures extends Fixture
             $g = $gradeRepository->findOneBy(['name' => $gradeName]);
             if (!$g) {
                 $g = new Grade();
+                $g->setTenant($oxfordTenant);
                 $g->setName($gradeName);
                 $g->setLevel($levels['Primaria']);
                 $manager->persist($g);
@@ -188,6 +218,7 @@ class AppFixtures extends Fixture
             $teacher = $teacherRepository->findOneBy(['email' => $user->getEmail()]);
             if (!$teacher) {
                 $teacher = new Teacher();
+                $teacher->setTenant($oxfordTenant);
                 $teacher->setUser($user);
                 $teacher->setFirstName(explode(' ', $user->getName())[0]);
                 $teacher->setLastName(substr($user->getName(), strpos($user->getName(), ' ') + 1));
@@ -205,6 +236,7 @@ class AppFixtures extends Fixture
                      // Assign specific subjects to Sindry for demo
                      for ($i = 0; $i < 3; $i++) {
                          $sa = new SubjectAssignment();
+                         $sa->setTenant($oxfordTenant);
                          $sa->setTeacher($teacher);
                          $sa->setSubject($subjects[$i]);
                          $sa->setGrade($grades[0]); // 1ro Primaria
@@ -216,6 +248,7 @@ class AppFixtures extends Fixture
                 } else {
                     // Random assignment for others
                      $sa = new SubjectAssignment();
+                     $sa->setTenant($oxfordTenant);
                      $sa->setTeacher($teacher);
                      $sa->setSubject($subjects[array_rand($subjects)]);
                      $sa->setGrade($grades[array_rand($grades)]);
@@ -226,6 +259,23 @@ class AppFixtures extends Fixture
             }
         }
         
+        $manager->flush();
+
+        // Enroll all students in 1st Grade for demo purposes
+        $allStudents = $manager->getRepository(Student::class)->findAll();
+        foreach ($allStudents as $student) {
+            $existingEnrollment = $manager->getRepository(Enrollment::class)->findOneBy(['student' => $student, 'schoolCycle' => $cycle]);
+            if (!$existingEnrollment) {
+                $enrollment = new Enrollment();
+                $enrollment->setTenant($oxfordTenant);
+                $enrollment->setStudent($student);
+                $enrollment->setSchoolCycle($cycle);
+                $enrollment->setGrade($grades[0]); // 1ro Primaria
+                $enrollment->setEnrollmentDate(new \DateTime());
+                $enrollment->setStatus('INSCRITO');
+                $manager->persist($enrollment);
+            }
+        }
         $manager->flush();
     }
 }

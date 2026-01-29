@@ -1,6 +1,6 @@
 import { toast } from '../utils/toast';
-import { useState, useEffect } from 'react';
-import { AlertCircle, Search, DollarSign, Calendar, User, FileText, Loader } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { AlertCircle, Search, DollarSign, Calendar, User, FileText, Loader, Filter, CheckCircle, PartyPopper } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useTheme } from '../contexts/ThemeContext';
@@ -13,10 +13,13 @@ const InsolventesPage = () => {
     const { exportTable } = usePdfExport(); // Hook
     const [students, setStudents] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [showOnlyOverdue, setShowOnlyOverdue] = useState(true); // Default: only overdue
+    const [loading, setLoading] = useState(true);
 
     // Load Real Data
     useEffect(() => {
         const loadData = async () => {
+            setLoading(true);
             try {
                 const response = await api.get('/payment-plans/insolvents');
                 // Handle different response structures gracefully
@@ -28,16 +31,51 @@ const InsolventesPage = () => {
                 }
             } catch (err) {
                 console.error("Error loading insolvents:", err);
+            } finally {
+                setLoading(false);
             }
         };
         loadData();
     }, []);
 
-    const filteredStudents = students.filter(student =>
-        student.studentName?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Calculate days overdue for each student
+    const studentsWithDaysOverdue = useMemo(() => {
+        const today = new Date();
+        return students.map(student => {
+            const dueDate = new Date(student.dueDate);
+            const diffTime = today - dueDate;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return {
+                ...student,
+                daysOverdue: diffDays,
+                isOverdue: diffDays > 0
+            };
+        });
+    }, [students]);
+
+    // Filter students based on search and overdue toggle
+    const filteredStudents = useMemo(() => {
+        let result = studentsWithDaysOverdue;
+
+        // Apply overdue filter
+        if (showOnlyOverdue) {
+            result = result.filter(student => student.isOverdue);
+        }
+
+        // Apply search filter
+        if (searchTerm) {
+            result = result.filter(student =>
+                student.studentName?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        // Sort by days overdue (most overdue first)
+        return result.sort((a, b) => b.daysOverdue - a.daysOverdue);
+    }, [studentsWithDaysOverdue, showOnlyOverdue, searchTerm]);
 
     const totalDeuda = filteredStudents.reduce((acc, curr) => acc + (parseFloat(curr.amount) || 0), 0);
+    const overdueCount = studentsWithDaysOverdue.filter(s => s.isOverdue).length;
+    const allCount = studentsWithDaysOverdue.length;
 
     // Export Handler
     const handleExportPDF = () => {
@@ -102,8 +140,32 @@ const InsolventesPage = () => {
             </div>
 
             <div className={`rounded-xl shadow-sm border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} overflow-hidden`}>
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex gap-4">
-                    <div className="relative flex-1">
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-wrap gap-4 items-center">
+                    {/* Filter Toggle */}
+                    <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                        <button
+                            onClick={() => setShowOnlyOverdue(true)}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${showOnlyOverdue
+                                    ? 'bg-red-500 text-white shadow-sm'
+                                    : darkMode ? 'text-gray-300 hover:bg-gray-600' : 'text-gray-600 hover:bg-gray-200'
+                                }`}
+                        >
+                            <Filter size={16} />
+                            Solo Vencidos ({overdueCount})
+                        </button>
+                        <button
+                            onClick={() => setShowOnlyOverdue(false)}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${!showOnlyOverdue
+                                    ? 'bg-blue-500 text-white shadow-sm'
+                                    : darkMode ? 'text-gray-300 hover:bg-gray-600' : 'text-gray-600 hover:bg-gray-200'
+                                }`}
+                        >
+                            Todos ({allCount})
+                        </button>
+                    </div>
+
+                    {/* Search */}
+                    <div className="relative flex-1 min-w-[200px]">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                         <input
                             type="text"
@@ -125,6 +187,7 @@ const InsolventesPage = () => {
                                 <th className="px-6 py-4">Estudiante</th>
                                 <th className="px-6 py-4">Descripción</th>
                                 <th className="px-6 py-4">Fecha Vencimiento</th>
+                                <th className="px-6 py-4 text-center">Días Mora</th>
                                 <th className="px-6 py-4 text-right">Monto</th>
                                 <th className="px-6 py-4 text-center">Acciones</th>
                             </tr>
@@ -155,6 +218,22 @@ const InsolventesPage = () => {
                                             <span>{item.dueDate}</span>
                                         </div>
                                     </td>
+                                    <td className="px-6 py-4 text-center">
+                                        {item.isOverdue ? (
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${item.daysOverdue > 30
+                                                    ? 'bg-red-600 text-white'
+                                                    : item.daysOverdue > 15
+                                                        ? 'bg-orange-500 text-white'
+                                                        : 'bg-yellow-500 text-white'
+                                                }`}>
+                                                {item.daysOverdue} días
+                                            </span>
+                                        ) : (
+                                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                                Al día
+                                            </span>
+                                        )}
+                                    </td>
                                     <td className="px-6 py-4 text-right font-bold text-gray-900 dark:text-white">
                                         Q {parseFloat(item.amount).toFixed(2)}
                                     </td>
@@ -168,10 +247,42 @@ const InsolventesPage = () => {
                                     </td>
                                 </tr>
                             ))}
-                            {filteredStudents.length === 0 && (
+                            {filteredStudents.length === 0 && !loading && (
                                 <tr>
-                                    <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
-                                        No se encontraron registros de cuotas vencidas.
+                                    <td colSpan="6" className="px-6 py-16 text-center">
+                                        {showOnlyOverdue && overdueCount === 0 ? (
+                                            <div className="flex flex-col items-center gap-4">
+                                                <div className="p-4 bg-green-100 dark:bg-green-900/30 rounded-full">
+                                                    <PartyPopper className="text-green-500" size={48} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-xl font-bold text-green-600 dark:text-green-400 mb-2">
+                                                        🎉 ¡Excelente! Todos los estudiantes están al día
+                                                    </h3>
+                                                    <p className="text-gray-500 dark:text-gray-400">
+                                                        No hay cuotas vencidas pendientes de cobro.
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => setShowOnlyOverdue(false)}
+                                                    className="mt-2 px-4 py-2 text-blue-500 hover:text-blue-600 font-medium flex items-center gap-2"
+                                                >
+                                                    Ver estado de cuenta general
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="text-gray-500">
+                                                No se encontraron registros con los filtros aplicados.
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
+                            )}
+                            {loading && (
+                                <tr>
+                                    <td colSpan="6" className="px-6 py-12 text-center">
+                                        <Loader className="animate-spin mx-auto text-blue-500" size={32} />
+                                        <p className="mt-2 text-gray-500">Cargando datos...</p>
                                     </td>
                                 </tr>
                             )}

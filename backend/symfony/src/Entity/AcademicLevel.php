@@ -8,14 +8,17 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use App\Model\TenantAwareInterface;
+use App\Model\TenantAwareTrait;
 
 #[ORM\Entity(repositoryClass: AcademicLevelRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['academic_level:read']],
     denormalizationContext: ['groups' => ['academic_level:write']]
 )]
-class AcademicLevel
+class AcademicLevel implements TenantAwareInterface
 {
+    use TenantAwareTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
