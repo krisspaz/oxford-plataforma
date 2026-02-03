@@ -47,8 +47,8 @@ const CierreEscolarPage = () => {
             // Simulate API call for validation checks
             const response = await api.get('/school-cycles/pre-close-validation').catch(() => ({ data: {} }));
             setValidations({
-                gradesComplete: response.data?.gradesComplete ?? true, // Mock as true for demo
-                periodsComplete: response.data?.periodsComplete ?? true,
+                gradesComplete: response.data?.gradesComplete ?? false,
+                periodsComplete: response.data?.periodsComplete ?? false,
                 backupDone: false, // Always require manual confirmation
             });
         } catch (error) {
@@ -139,8 +139,8 @@ const CierreEscolarPage = () => {
                         </h3>
 
                         <div className={`p-4 rounded-lg flex items-center justify-between ${validations.gradesComplete
-                                ? 'bg-green-100 dark:bg-green-900/30'
-                                : 'bg-red-100 dark:bg-red-900/30'
+                            ? 'bg-green-100 dark:bg-green-900/30'
+                            : 'bg-red-100 dark:bg-red-900/30'
                             }`}>
                             <div className="flex items-center gap-3">
                                 {validations.gradesComplete ? <Check className="text-green-600" /> : <AlertTriangle className="text-red-600" />}
@@ -152,8 +152,8 @@ const CierreEscolarPage = () => {
                         </div>
 
                         <div className={`p-4 rounded-lg flex items-center justify-between ${validations.periodsComplete
-                                ? 'bg-green-100 dark:bg-green-900/30'
-                                : 'bg-red-100 dark:bg-red-900/30'
+                            ? 'bg-green-100 dark:bg-green-900/30'
+                            : 'bg-red-100 dark:bg-red-900/30'
                             }`}>
                             <div className="flex items-center gap-3">
                                 {validations.periodsComplete ? <Check className="text-green-600" /> : <AlertTriangle className="text-red-600" />}
@@ -165,8 +165,8 @@ const CierreEscolarPage = () => {
                         </div>
 
                         <div className={`p-4 rounded-lg flex items-center justify-between ${validations.backupDone
-                                ? 'bg-green-100 dark:bg-green-900/30'
-                                : 'bg-yellow-100 dark:bg-yellow-900/30'
+                            ? 'bg-green-100 dark:bg-green-900/30'
+                            : 'bg-yellow-100 dark:bg-yellow-900/30'
                             }`}>
                             <div className="flex items-center gap-3">
                                 <Database className={validations.backupDone ? 'text-green-600' : 'text-yellow-600'} />
@@ -388,24 +388,24 @@ const CierreEscolarPage = () => {
                         <React.Fragment key={step.id}>
                             <div className="flex flex-col items-center">
                                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${currentStep > step.id
-                                        ? 'bg-green-500 text-white'
-                                        : currentStep === step.id
-                                            ? 'bg-blue-600 text-white'
-                                            : darkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'
+                                    ? 'bg-green-500 text-white'
+                                    : currentStep === step.id
+                                        ? 'bg-blue-600 text-white'
+                                        : darkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'
                                     }`}>
                                     {currentStep > step.id ? <Check size={24} /> : <step.icon size={24} />}
                                 </div>
                                 <span className={`text-xs mt-2 text-center max-w-[80px] ${currentStep >= step.id
-                                        ? darkMode ? 'text-gray-300' : 'text-gray-700'
-                                        : darkMode ? 'text-gray-500' : 'text-gray-400'
+                                    ? darkMode ? 'text-gray-300' : 'text-gray-700'
+                                    : darkMode ? 'text-gray-500' : 'text-gray-400'
                                     }`}>
                                     {step.title}
                                 </span>
                             </div>
                             {index < steps.length - 1 && (
                                 <div className={`flex-1 h-1 mx-2 ${currentStep > step.id
-                                        ? 'bg-green-500'
-                                        : darkMode ? 'bg-gray-700' : 'bg-gray-200'
+                                    ? 'bg-green-500'
+                                    : darkMode ? 'bg-gray-700' : 'bg-gray-200'
                                     }`} />
                             )}
                         </React.Fragment>
@@ -425,8 +425,8 @@ const CierreEscolarPage = () => {
                         onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
                         disabled={currentStep === 0}
                         className={`px-6 py-3 rounded-lg font-medium ${currentStep === 0
-                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                : darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                            : darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                     >
                         Anterior

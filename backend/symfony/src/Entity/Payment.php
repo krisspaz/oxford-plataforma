@@ -9,6 +9,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PaymentRepository::class)]
+#[ORM\Table(name: 'payment')]
+#[ORM\Index(columns: ['status'], name: 'idx_payment_status')]
+#[ORM\Index(columns: ['payment_date'], name: 'idx_payment_date')]
+#[ORM\Index(columns: ['due_date'], name: 'idx_payment_due')]
+#[ORM\Index(columns: ['student_id'], name: 'idx_payment_student')]
 #[ApiResource]
 class Payment
 {
@@ -18,7 +23,7 @@ class Payment
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Student $student = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]

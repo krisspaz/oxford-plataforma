@@ -206,7 +206,14 @@ class StudentController extends AbstractController
             $data['birthDate'] = $s->getBirthDate()?->format('Y-m-d');
             $data['address'] = $s->getAddress();
             $data['gender'] = $s->getGender();
-            // TODO: Add enrollment info
+            $data['photo'] = $s->getPhoto();
+            
+            // Check for active enrollment
+            $latestEnrollment = $s->getEnrollments()->last();
+            if ($latestEnrollment) {
+                $data['currentGrade'] = $latestEnrollment->getGrade()?->getName();
+                $data['currentSection'] = $latestEnrollment->getSection()?->getName();
+            }
         }
         
         return $data;

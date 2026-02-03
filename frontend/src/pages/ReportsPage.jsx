@@ -42,61 +42,37 @@ const ReportsPage = () => {
         r.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleDownload = (report) => {
-        import('jspdf').then(({ default: jsPDF }) => {
-            import('jspdf-autotable').then(() => {
-                const doc = new jsPDF();
-
-                // Header
-                doc.setFontSize(20);
-                doc.setTextColor(40, 40, 40);
-                doc.text('CORPORACIÓN EDUCACIONAL OXFORD', 105, 20, { align: 'center' });
-
-                doc.setFontSize(14);
-                doc.setTextColor(100, 100, 100);
-                doc.text(report.name, 105, 30, { align: 'center' });
-
-                doc.setDrawColor(200, 200, 200);
-                doc.line(14, 35, 196, 35);
-
-                // Body content based on report type
-                doc.setFontSize(10);
-                doc.setTextColor(0, 0, 0);
-                doc.text(`Categoría: ${report.category}`, 14, 45);
-                doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 14, 50);
-                doc.text(`Descripción: ${report.description}`, 14, 60);
-
-                // Mock Table Data
-                const headers = [['#', 'Nombre Estudiante', 'Grado', 'Detalle', 'Estado']];
-                const data = [];
-
-                doc.autoTable({
-                    startY: 70,
-                    head: headers,
-                    body: data,
-                    theme: 'grid',
-                    styles: { fontSize: 8 },
-                    headStyles: { fillColor: [41, 128, 185], textColor: 255 }
+    const handleDownload = async (report) => {
+        const loadingToast = toast.info(`Generando ${report.name}...`, { duration: 0 });
+        try {
+            if (report.category === 'academic' && report.name.includes('Boletas')) {
+                // Immediate student report (example logic)
+                const blob = await reportService.getGrades(1); // Mocked ID 1 for now, should be from context
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${report.name}.pdf`;
+                a.click();
+                toast.success('Reporte descargado');
+            } else {
+                // Queued report
+                const result = await reportService.generate({
+                    type: report.id > 4 ? 'CUADROS' : 'BOLETAS',
+                    scope: 'MASSIVE',
+                    category: report.category
                 });
-
-                // Footer
-                const pageCount = doc.internal.getNumberOfPages();
-                doc.setFontSize(8);
-                for (let i = 1; i <= pageCount; i++) {
-                    doc.setPage(i);
-                    doc.text('Sistema Oxford - Reporte Generado Automáticamente', 14, 285);
-                    doc.text(`Página ${i} de ${pageCount}`, 196, 285, { align: 'right' });
+                if (result.success) {
+                    toast.success(result.data.message);
+                } else {
+                    throw new Error(result.message);
                 }
-
-                doc.save(`${report.name.replace(/ /g, '_')}.pdf`);
-            }).catch(err => {
-                console.error("Error loading jspdf-autotable:", err);
-                toast.info('Error al generar PDF: No se pudo cargar el plugin de tablas.');
-            });
-        }).catch(err => {
-            console.error("Error loading jsPDF:", err);
-            toast.info('Error al generar PDF: No se pudo cargar la librería.');
-        });
+            }
+        } catch (err) {
+            console.error("Error in report generation:", err);
+            toast.error('Error al generar el reporte: ' + err.message);
+        } finally {
+            toast.dismiss(loadingToast);
+        }
     };
 
     return (

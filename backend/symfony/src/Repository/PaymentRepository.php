@@ -21,9 +21,6 @@ class PaymentRepository extends ServiceEntityRepository
         parent::__construct($registry, Payment::class);
     }
 
-    /**
-     * @return Payment[] Returns an array of overdue Payment objects
-     */
     public function findOverduePayments(): array
     {
         return $this->createQueryBuilder('p')
@@ -32,6 +29,25 @@ class PaymentRepository extends ServiceEntityRepository
             ->setParameter('status', 'PENDING')
             ->setParameter('now', new \DateTime())
             ->orderBy('p.dueDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getTotalsByDate(\DateTimeInterface $date): array
+    {
+        $start = clone $date;
+        $start->setTime(0, 0, 0);
+        $end = clone $date;
+        $end->setTime(23, 59, 59);
+
+        return $this->createQueryBuilder('p')
+            ->select('p.method, SUM(p.amount) as total')
+            ->where('p.paymentDate BETWEEN :start AND :end')
+            ->andWhere('p.status = :status')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->setParameter('status', 'PAID')
+            ->groupBy('p.method')
             ->getQuery()
             ->getResult();
     }

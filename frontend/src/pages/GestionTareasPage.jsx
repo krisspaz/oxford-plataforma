@@ -170,11 +170,18 @@ const GestionTareasPage = ({ viewMode = 'management' }) => {
             return;
         }
 
-        const teacherId = currentTeacher?.id || 1;
+        const cycleId = bimesters[0]?.schoolCycle?.id || 1;
+        const teacherId = currentTeacher?.id;
+
+        if (!teacherId) {
+            toast.error('No se pudo identificar su perfil docente');
+            return;
+        }
 
         const payload = {
             ...formData,
             teacherId,
+            cycleId,
             points: parseInt(formData.points),
             subjectId: parseInt(formData.subjectId),
             bimesterId: parseInt(formData.bimesterId),

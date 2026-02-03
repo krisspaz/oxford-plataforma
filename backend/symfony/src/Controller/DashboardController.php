@@ -103,13 +103,81 @@ class DashboardController extends AbstractController
                         ->getSingleScalarResult();
                  }
 
+                 // 4. Pending Grades (Subjects with no grades for current bimester)
+                 $pendingGradesCount = $this->entityManager->getRepository(\App\Entity\SubjectAssignment::class)->createQueryBuilder('sa')
+                    ->select('count(sa.id)')
+                    ->leftJoin('sa.gradeRecords', 'gr', 'WITH', 'gr.bimester = :bimester')
+                    ->where('sa.teacher = :teacher')
+                    ->andWhere('gr.id IS NULL')
+                    ->setParameter('teacher', $teacher)
+                    ->setParameter('bimester', $activeCycle ? $activeCycle->getBimesters()->filter(fn($b) => !$b->isClosed())->first() : null)
+                    ->getQuery()
+                    ->getSingleScalarResult();
+
                  $teacherStats = [
                      'myClassesCount' => $myClassesCount, 
                      'myStudentsCount' => (int)$myStudentsCount,
                      'activeTasks' => $activeTasks,
-                     'pendingGrades' => 0 // Implement grade logic later
+                     'pendingGrades' => (int)$pendingGradesCount
                  ];
              }
+        }
+
+        if ($this->isGranted('ROLE_ALUMNO') || $this->isGranted('ROLE_STUDENT')) {
+            $student = $this->entityManager->getRepository(\App\Entity\Student::class)->findOneBy(['user' => $user]);
+            if ($student) {
+                // 1. Average
+                $avg = $this->entityManager->getRepository(\App\Entity\GradeRecord::class)->createQueryBuilder('gr')
+                    ->select('AVG(gr.score)')
+                    ->where('gr.student = :student')
+                    ->setParameter('student', $student)
+                    ->getQuery()
+                    ->getSingleScalarResult();
+
+                // 2. Pending Tasks
+                $pendingTasks = $taskRepo->createQueryBuilder('t')
+                    ->select('count(t.id)')
+                    ->join('t.grades', 'tg')
+                    ->where('tg.gradeId = :gradeId')
+                    ->andWhere('t.dueDate >= :today')
+                    // Logic to exclude already submitted tasks would go here if Submission entity exists
+                    ->setParameter('gradeId', $student->getGrade() ? $student->getGrade()->getId() : 0)
+                    ->setParameter('today', new \DateTime())
+                    ->getQuery()
+                    ->getSingleScalarResult();
+
+                // 3. Next Class
+                $now = new \DateTime();
+                $dayOfWeek = (int)$now->format('N'); // 1 (Mon) to 7 (Sun)
+                $time = $now->format('H:i:s');
+                
+                $nextClassEntry = $scheduleRepo->createQueryBuilder('s')
+                    ->where('s.grade = :grade')
+                    ->andWhere('s.dayOfWeek = :day')
+                    ->andWhere('s.startTime > :time')
+                    ->setParameter('grade', $student->getGrade())
+                    ->setParameter('day', $dayOfWeek)
+                    ->setParameter('time', $time)
+                    ->orderBy('s.startTime', 'ASC')
+                    ->setMaxResults(1)
+                    ->getQuery()
+                    ->getOneOrNullResult();
+
+                // 4. Attendance
+                $attendancePct = 0;
+                if (class_exists(\App\Entity\Attendance::class)) {
+                    $totalDays = $this->entityManager->getRepository(\App\Entity\Attendance::class)->count(['student' => $student]);
+                    $presentDays = $this->entityManager->getRepository(\App\Entity\Attendance::class)->count(['student' => $student, 'status' => 'PRESENT']);
+                    $attendancePct = $totalDays > 0 ? round(($presentDays / $totalDays) * 100) : 100;
+                }
+
+                $studentStats = [
+                    'average' => $avg ? number_format($avg, 1) : '0.0',
+                    'pendingTasks' => (int)$pendingTasks,
+                    'nextClass' => $nextClassEntry ? $nextClassEntry->getSubject()->getName() : 'No más clases hoy',
+                    'attendance' => $attendancePct . '%'
+                ];
+            }
         }
         
         // ... Teacher stats logic above ...
@@ -152,25 +220,29 @@ class DashboardController extends AbstractController
              // Income Today
              $todayIncome = $this->entityManager->getRepository(\App\Entity\Payment::class)->createQueryBuilder('p')
                  ->select('SUM(p.amount)')
-                 ->where('p.date >= :today')
-                 ->andWhere('p.date < :tomorrow')
+                 ->where('p.paymentDate >= :today')
+                 ->andWhere('p.paymentDate < :tomorrow')
+                 ->andWhere('p.status = :status')
                  ->setParameter('today', $today)
                  ->setParameter('tomorrow', $tomorrow)
+                 ->setParameter('status', 'PAID')
                  ->getQuery()
                  ->getSingleScalarResult();
              
              // Invoices Count
              $totalInvoices = $this->entityManager->getRepository(\App\Entity\Invoice::class)->count([]);
              
-             // Null/Canceled Invoices (assuming status field)
-             $canceledInvoices = 0; // Implement if status exists
-             // $canceledInvoices = $this->entityManager->getRepository(\App\Entity\Invoice::class)->count(['status' => 'ANULADO']);
+             // Canceled Invoices
+             $canceledInvoices = $this->entityManager->getRepository(\App\Entity\Invoice::class)->count(['status' => 'CANCELLED']);
+
+             // Pending exonerations
+             $pendingExonerations = $this->entityManager->getRepository(\App\Entity\ExonerationRequest::class)->count(['status' => 'PENDING']);
 
              $accountingStats = [
                  'todayIncome' => (float)$todayIncome,
                  'totalInvoices' => (int)$totalInvoices,
-                 'canceledInvoices' => $canceledInvoices,
-                 'exonerations' => 0 // Implement if Exoneration entity exists
+                 'canceledInvoices' => (int)$canceledInvoices,
+                 'exonerations' => (int)$pendingExonerations
              ];
         }
 

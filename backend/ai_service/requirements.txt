@@ -11,3 +11,5 @@ sentence-transformers
 minio
 mysql-connector-python
 python-dotenv
+deap
+numpy

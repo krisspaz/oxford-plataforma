@@ -14,52 +14,27 @@ use App\Model\TenantAwareInterface;
 use App\Model\TenantAwareTrait;
 
 #[ORM\Entity(repositoryClass: StudentRepository::class)]
+#[ORM\Table(name: 'student')]
+#[ORM\Index(columns: ['is_active'], name: 'idx_student_active')]
+#[ORM\Index(columns: ['first_name', 'last_name'], name: 'idx_student_full_name')]
+#[ORM\Index(columns: ['school_cycle_id'], name: 'idx_student_cycle')]
+#[ORM\Index(columns: ['course_id'], name: 'idx_student_course')]
+#[ORM\Index(columns: ['tenant_id'], name: 'idx_student_tenant')]
 #[ApiResource(
     processor: \App\State\StudentProcessor::class,
     normalizationContext: ['groups' => ['student:read', 'person:read']],
     denormalizationContext: ['groups' => ['student:write', 'person:write']]
 )]
-class Student implements TenantAwareInterface
+class Student extends Person
 {
     use TenantAwareTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['student:read'])]
-    private ?int $id = null;
-
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 2)]
-    #[Groups(['student:read', 'student:write'])]
-    private ?string $firstName = null;
-
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 2)]
-    #[Groups(['student:read', 'student:write'])]
-    private ?string $lastName = null;
-
-    #[ORM\Column(length: 20, unique: true)]
-    #[Assert\NotBlank]
+    #[ORM\Column(length: 20, unique: true, nullable: true)]
     #[Groups(['student:read', 'student:write'])]
     private ?string $carnet = null;
-
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['student:read', 'student:write'])]
-    private ?\DateTimeInterface $birthDate = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['student:read', 'student:write'])]
-    private ?string $email = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['student:read', 'student:write'])]
-    private ?string $address = null;
-
-    #[ORM\Column]
-    #[Groups(['student:read', 'student:write'])]
-    private ?bool $isActive = true;
 
     // Risks calculated by AI
     #[ORM\Column(nullable: true)]
@@ -75,88 +50,22 @@ class Student implements TenantAwareInterface
         return $this->id;
     }
 
-    public function getFirstName(): ?string
-    {
-        return $this->firstName;
-    }
-
-    public function setFirstName(string $firstName): static
-    {
-        $this->firstName = $firstName;
-
-        return $this;
-    }
-
-    public function getLastName(): ?string
-    {
-        return $this->lastName;
-    }
-
-    public function setLastName(string $lastName): static
-    {
-        $this->lastName = $lastName;
-
-        return $this;
-    }
-
     public function getCarnet(): ?string
     {
         return $this->carnet;
     }
 
-    public function setCarnet(string $carnet): static
+    public function setCarnet(?string $carnet): static
     {
         $this->carnet = $carnet;
-
         return $this;
     }
 
-    public function getBirthDate(): ?\DateTimeInterface
+    public function getStudentCode(): ?string
     {
-        return $this->birthDate;
+        return $this->carnet;
     }
 
-    public function setBirthDate(\DateTimeInterface $birthDate): static
-    {
-        $this->birthDate = $birthDate;
-
-        return $this;
-    }
-
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(?string $email): static
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
-    public function getAddress(): ?string
-    {
-        return $this->address;
-    }
-
-    public function setAddress(?string $address): static
-    {
-        $this->address = $address;
-
-        return $this;
-    }
-
-    public function isActive(): ?bool
-    {
-        return $this->isActive;
-    }
-
-    public function setIsActive(bool $isActive): static
-    {
-        $this->isActive = $isActive;
-        return $this;
-    }
 
     // Alias for compatibility
     public function setStudentCode(string $code): static
@@ -172,6 +81,7 @@ class Student implements TenantAwareInterface
 
     public function __construct()
     {
+        parent::__construct();
         $this->guardians = new ArrayCollection();
         $this->scholarships = new ArrayCollection();
     }
@@ -245,15 +155,6 @@ class Student implements TenantAwareInterface
         return $this;
     }
 
-    public function getFullName(): string
-    {
-        return $this->firstName . ' ' . $this->lastName;
-    }
-
-    public function getStudentCode(): ?string
-    {
-        return $this->carnet;
-    }
 
     #[ORM\OneToMany(mappedBy: 'student', targetEntity: Enrollment::class)]
     private Collection $enrollments;

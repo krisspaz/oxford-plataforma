@@ -1,8 +1,12 @@
 import os
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
+from routes.schedule_routes import schedule_router
 
 app = FastAPI()
+
+# Register Routers
+app.include_router(schedule_router, tags=["Scheduling"])
 
 class AskPayload(BaseModel):
     prompt: str

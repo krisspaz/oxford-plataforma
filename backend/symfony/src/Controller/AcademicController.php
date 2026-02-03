@@ -89,6 +89,27 @@ class AcademicController extends AbstractController
         return $this->json(['success' => true, 'message' => 'Assignments updated']);
     }
 
+    #[Route('/assignments/{gradeId}', name: 'api_academic_assignments', methods: ['GET'])]
+    public function getAssignments(int $gradeId, SubjectAssignmentRepository $assignmentRepo, SubjectRepository $subjectRepo): JsonResponse
+    {
+        $assignments = $assignmentRepo->findBy(['grade' => $gradeId]);
+        $allSubjects = $subjectRepo->findAll();
+
+        $data = array_map(function($subject) use ($assignments) {
+            $assignment = array_filter($assignments, fn($a) => $a->getSubject()->getId() === $subject->getId());
+            $assignment = reset($assignment); // Get first if exists
+
+            return [
+                'subjectId' => $subject->getId(),
+                'subjectName' => $subject->getName(),
+                'teacherId' => $assignment ? $assignment->getTeacher()->getId() : '',
+                'hours' => $assignment ? $assignment->getHoursPerWeek() : 5
+            ];
+        }, $allSubjects);
+
+        return $this->json($data);
+    }
+
     #[Route('/schedule-preview/{gradeId}', name: 'api_academic_schedule_preview', methods: ['GET'])]
     public function getSchedulePreview(int $gradeId): JsonResponse
     {

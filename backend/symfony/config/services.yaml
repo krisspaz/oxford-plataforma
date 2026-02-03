@@ -3,6 +3,8 @@ parameters:
     corposistemas_api_url: '%env(CORPOSISTEMAS_API_URL)%'
     corposistemas_api_key: '%env(CORPOSISTEMAS_API_KEY)%'
     corposistemas_nit: '%env(CORPOSISTEMAS_NIT)%'
+    ai_service_url: '%env(AI_SERVICE_URL)%'
+    ai_internal_key: '%env(AI_INTERNAL_KEY)%'
     env(MONGODB_URI): ''
     env(MONGODB_DB): ''
 
@@ -12,6 +14,8 @@ services:
         autoconfigure: true
         bind:
             $oxfordStorage: '@League\Flysystem\FilesystemOperator $oxfordStorage'
+            $aiServiceUrl: '%ai_service_url%'
+            $aiInternalKey: '%ai_internal_key%'
 
     # Redis Client
     Redis:

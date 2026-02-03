@@ -8,6 +8,9 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: GradeRecordRepository::class)]
+#[ORM\Table(name: 'grade_record')]
+#[ORM\Index(columns: ['student_id', 'bimester_id', 'subject_assignment_id'], name: 'idx_grade_report_lookup')]
+#[ORM\Index(columns: ['student_id'], name: 'idx_grade_student')]
 #[ApiResource]
 class GradeRecord
 {
@@ -17,15 +20,15 @@ class GradeRecord
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Student::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Student $student = null;
 
     #[ORM\ManyToOne(targetEntity: SubjectAssignment::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?SubjectAssignment $subjectAssignment = null;
 
     #[ORM\ManyToOne(targetEntity: Bimester::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Bimester $bimester = null;
 
     #[ORM\Column(type: 'decimal', precision: 5, scale: 2, nullable: true)]

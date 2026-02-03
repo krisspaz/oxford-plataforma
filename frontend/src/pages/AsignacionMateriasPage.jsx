@@ -39,26 +39,23 @@ const AsignacionMateriasPage = () => {
     const handleSelectGrade = async (grade) => {
         setSelectedGrade(grade);
         setLoading(true);
-        // Load existing assignments logic here if API supported it directly for a grade
-        // For now, we init with subjects and try to map if we had previous data
-        // Ideally we fetch current assignments for this grade
-        // Since we don't have a direct "get assignments by grade" endpoint in academicService yet (only assign), 
-        // we might rely on what we have or just show defaults.
-        // Actually, let's init assignments with all subjects and empty teachers
-        // IMPROVEMENT: Fetch existing assignments if possible.
-
         try {
-            // Mocking fetch of existing assignments or using a new endpoint if created
-            // For now, reset to blank state for subjects
-            const initialAssignments = subjects.map(sub => ({
-                subjectId: sub.id,
-                subjectName: sub.name,
-                teacherId: '',
-                hours: 5
-            }));
-            setAssignments(initialAssignments);
+            const data = await academicService.getAssignments(grade.id);
+            if (data && Array.isArray(data)) {
+                setAssignments(data);
+            } else {
+                // Fallback to subjects catalog if no assignments yet
+                const initialAssignments = subjects.map(sub => ({
+                    subjectId: sub.id,
+                    subjectName: sub.name,
+                    teacherId: '',
+                    hours: 5
+                }));
+                setAssignments(initialAssignments);
+            }
         } catch (error) {
-            console.error(error);
+            console.error("Error loading assignments", error);
+            toast.info('No se pudieron cargar las asignaciones actuales');
         } finally {
             setLoading(false);
         }

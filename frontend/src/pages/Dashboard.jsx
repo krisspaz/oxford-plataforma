@@ -430,7 +430,7 @@ const ParentDashboard = ({ navigate, darkMode, stats }) => {
     return (
         <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <StatCard title="Mis Hijos" value={stats?.parent?.childrenCount || 2} icon={Users} color="text-blue-500" bg={darkMode ? 'bg-blue-900/30' : 'bg-blue-100'} darkMode={darkMode} onClick={() => navigate('/padres/hijos')} />
+                <StatCard title="Mis Hijos" value={stats?.parent?.childrenCount || 0} icon={Users} color="text-blue-500" bg={darkMode ? 'bg-blue-900/30' : 'bg-blue-100'} darkMode={darkMode} onClick={() => navigate('/padres/hijos')} />
                 <StatCard title="Pagos Pendientes" value={stats?.parent?.pendingPayments || 0} icon={CreditCard} color="text-red-500" bg={darkMode ? 'bg-red-900/30' : 'bg-red-100'} darkMode={darkMode} onClick={() => navigate('/finanzas/estado-cuenta')} />
                 <StatCard title="Próxima Reunión" value="-" icon={Calendar} color="text-teal-500" bg={darkMode ? 'bg-teal-900/30' : 'bg-teal-100'} darkMode={darkMode} />
             </div>

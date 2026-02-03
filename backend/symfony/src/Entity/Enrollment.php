@@ -10,6 +10,11 @@ use App\Model\TenantAwareInterface;
 use App\Model\TenantAwareTrait;
 
 #[ORM\Entity(repositoryClass: EnrollmentRepository::class)]
+#[ORM\Table(name: 'enrollment')]
+#[ORM\Index(columns: ['status'], name: 'idx_enrollment_status')]
+#[ORM\Index(columns: ['student_id'], name: 'idx_enrollment_student')]
+#[ORM\Index(columns: ['school_cycle_id'], name: 'idx_enrollment_cycle')]
+#[ORM\Index(columns: ['tenant_id'], name: 'idx_enrollment_tenant')]
 #[ApiResource(
     operations: [
         new \ApiPlatform\Metadata\Get(),
@@ -38,7 +43,7 @@ class Enrollment implements TenantAwareInterface
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Student::class, inversedBy: 'enrollments')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Student $student = null;
 
     #[ORM\ManyToOne(targetEntity: SchoolCycle::class)]

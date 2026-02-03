@@ -107,14 +107,69 @@ class AttendanceController extends AbstractController
     #[Route('/report/{studentId}/bimester/{bimesterId}', methods: ['GET'])]
     public function getStudentReport(int $studentId, int $bimesterId): JsonResponse
     {
-        // Placeholder implementation - requires Bimester logic
-        return $this->json(['message' => 'Report not implemented yet but endpoint exists'], 200);
+        $student = $this->studentRepository->find($studentId);
+        if (!$student) {
+            return $this->json(['error' => 'Student not found'], 404);
+        }
+
+        $attendances = $this->attendanceRepository->createQueryBuilder('a')
+            ->join('a.subjectAssignment', 'sa')
+            ->where('a.student = :student')
+            ->andWhere('sa.schoolCycle = :cycle') // Simplification: assuming current cycle or fetch bimester's cycle
+            ->setParameter('student', $student)
+            ->setParameter('cycle', $student->getSchoolCycle())
+            ->getQuery()
+            ->getResult();
+
+        $summary = [
+            'PRESENT' => 0,
+            'ABSENT' => 0,
+            'LATE' => 0,
+            'JUSTIFIED' => 0,
+        ];
+
+        foreach ($attendances as $a) {
+            $status = $a->getStatus();
+            if (isset($summary[$status])) {
+                $summary[$status]++;
+            }
+        }
+
+        $total = array_sum($summary);
+        $attendancePct = $total > 0 ? round(($summary['PRESENT'] / $total) * 100, 2) : 100;
+
+        return $this->json([
+            'student' => $student->getFullName(),
+            'summary' => $summary,
+            'attendancePct' => $attendancePct,
+            'totalClasses' => $total
+        ]);
     }
     
     #[Route('/teacher-report/{teacherId}/bimester/{bimesterId}', methods: ['GET'])]
     public function getTeacherReport(int $teacherId, int $bimesterId): JsonResponse
     {
-         // Placeholder
-         return $this->json(['message' => 'Report not implemented yet but endpoint exists'], 200);
+        $attendances = $this->attendanceRepository->createQueryBuilder('a')
+            ->join('a.subjectAssignment', 'sa')
+            ->where('sa.teacher = :teacherId')
+            ->setParameter('teacherId', $teacherId)
+            ->getQuery()
+            ->getResult();
+
+        $stats = [];
+        foreach ($attendances as $a) {
+            $subId = $a->getSubjectAssignment()->getId();
+            $subName = $a->getSubjectAssignment()->getSubject()->getName();
+            
+            if (!isset($stats[$subId])) {
+                $stats[$subId] = ['name' => $subName, 'present' => 0, 'absent' => 0, 'total' => 0];
+            }
+            
+            $stats[$subId]['total']++;
+            if ($a->getStatus() === 'PRESENT') $stats[$subId]['present']++;
+            else $stats[$subId]['absent']++;
+        }
+
+        return $this->json(array_values($stats));
     }
 }

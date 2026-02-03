@@ -9,6 +9,12 @@ use App\Model\TenantAwareInterface;
 use App\Model\TenantAwareTrait;
 
 #[ORM\Entity(repositoryClass: SubjectAssignmentRepository::class)]
+#[ORM\Table(name: 'subject_assignment')]
+#[ORM\Index(columns: ['teacher_id'], name: 'idx_assignment_teacher')]
+#[ORM\Index(columns: ['grade_id'], name: 'idx_assignment_grade')]
+#[ORM\Index(columns: ['subject_id'], name: 'idx_assignment_subject')]
+#[ORM\Index(columns: ['school_cycle_id'], name: 'idx_assignment_cycle')]
+#[ORM\Index(columns: ['tenant_id'], name: 'idx_assignment_tenant')]
 #[ApiResource]
 class SubjectAssignment implements TenantAwareInterface
 {

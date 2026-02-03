@@ -99,26 +99,53 @@ class PaymentController extends AbstractController
     #[Route('/totals', name: 'api_payments_totals', methods: ['GET'])]
     public function getTotals(\Symfony\Component\HttpFoundation\Request $request): \Symfony\Component\HttpFoundation\JsonResponse
     {
-        $date = $request->query->get('date', date('Y-m-d'));
-        // Mock totals
-        return $this->json([
-            'date' => $date,
-            'total' => 1500.00,
-            'cash' => 500.00,
-            'card' => 1000.00
-        ]);
+        try {
+            $dateStr = $request->query->get('date', date('Y-m-d'));
+            $date = new \DateTime($dateStr);
+        } catch (\Exception $e) {
+            $date = new \DateTime();
+        }
+
+        $results = $this->paymentRepository->getTotalsByDate($date);
+        
+        $totals = [
+            'date' => $date->format('Y-m-d'),
+            'total' => 0,
+            'cash' => 0,
+            'card' => 0,
+            'deposit' => 0,
+            'transfer' => 0
+        ];
+
+        foreach ($results as $row) {
+            $method = $row['method'] ?? 'unknown';
+            $amount = (float)$row['total'];
+            $totals['total'] += $amount;
+            if (isset($totals[$method])) {
+                $totals[$method] = $amount;
+            }
+        }
+
+        return $this->json($totals);
     }
 
     #[Route('/pending/{studentId}', name: 'api_payments_pending', methods: ['GET'])]
-    public function getPendingQuotas(int $studentId): \Symfony\Component\HttpFoundation\JsonResponse
+    public function getPendingQuotas(int $studentId, \App\Repository\QuotaRepository $quotaRepository): \Symfony\Component\HttpFoundation\JsonResponse
     {
-        // Mock pending quotas
+        $quotas = $quotaRepository->findPendingByStudent($studentId);
+        
+        $data = array_map(fn($q) => [
+            'id' => $q->getId(),
+            'concept' => $q->getConcept(),
+            'amount' => (float)$q->getPendingAmount(),
+            'totalAmount' => (float)$q->getAmount(),
+            'dueDate' => $q->getDueDate()->format('Y-m-d'),
+            'status' => $q->getStatus()
+        ], $quotas);
+
         return $this->json([
             'success' => true,
-            'data' => [
-                ['id' => 101, 'concept' => 'Mensualidad Marzo', 'amount' => 750.00, 'dueDate' => '2025-03-30'],
-                ['id' => 102, 'concept' => 'Material Didáctico', 'amount' => 250.00, 'dueDate' => '2025-03-15'],
-            ]
+            'data' => $data
         ]);
     }
 

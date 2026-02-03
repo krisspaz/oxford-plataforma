@@ -163,8 +163,8 @@ const CentroAjustesPage = () => {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${activeTab === tab.id
-                                ? `bg-${tab.color}-600 text-white`
-                                : darkMode ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'
+                            ? `bg-${tab.color}-600 text-white`
+                            : darkMode ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'
                             }`}
                     >
                         <tab.icon size={18} />
@@ -198,8 +198,8 @@ const CentroAjustesPage = () => {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className={`w-full pl-10 pr-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none ${darkMode
-                                        ? 'bg-gray-700 border-gray-600 text-white'
-                                        : 'bg-gray-50 border-gray-300 text-gray-900'
+                                    ? 'bg-gray-700 border-gray-600 text-white'
+                                    : 'bg-gray-50 border-gray-300 text-gray-900'
                                     }`}
                             />
                         </div>
@@ -215,8 +215,8 @@ const CentroAjustesPage = () => {
                                 <span
                                     key={field.key}
                                     className={`px-3 py-1 rounded-full text-sm ${darkMode
-                                            ? 'bg-gray-600 text-gray-300'
-                                            : 'bg-white border border-gray-300 text-gray-600'
+                                        ? 'bg-gray-600 text-gray-300'
+                                        : 'bg-white border border-gray-300 text-gray-600'
                                         }`}
                                 >
                                     {field.label}
@@ -225,19 +225,23 @@ const CentroAjustesPage = () => {
                         </div>
                     </div>
 
-                    {/* Demo Action */}
-                    <div className="mt-6 p-4 border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600 text-center">
-                        <Settings size={48} className="mx-auto text-gray-300 mb-4" />
-                        <p className={`text-lg ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                            Busque un registro para realizar ajustes
-                        </p>
-                        <button
-                            onClick={() => handleOpenAdjust({ id: 1, name: 'Registro Demo' })}
-                            className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
-                        >
-                            <Edit size={18} className="inline mr-2" />
-                            Demo: Realizar Ajuste
-                        </button>
+                    {/* Main Content Area - Search Results */}
+                    <div className="mt-6">
+                        {searchTerm ? (
+                            <div className="text-center py-12">
+                                <Search size={48} className="mx-auto text-gray-300 mb-4" />
+                                <p className={`text-lg ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    No se encontraron resultados para "{searchTerm}"
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="text-center py-12">
+                                <Settings size={48} className="mx-auto text-gray-300 mb-4" />
+                                <p className={`text-lg ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    Utilice el buscador para localizar un registro
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -311,8 +315,8 @@ const CentroAjustesPage = () => {
                                                 value={selectedItem[field.key] || ''}
                                                 disabled
                                                 className={`w-full px-3 py-2 rounded-lg border ${darkMode
-                                                        ? 'bg-gray-700/50 border-gray-600 text-gray-400'
-                                                        : 'bg-gray-100 border-gray-300 text-gray-500'
+                                                    ? 'bg-gray-700/50 border-gray-600 text-gray-400'
+                                                    : 'bg-gray-100 border-gray-300 text-gray-500'
                                                     }`}
                                             />
                                         </div>
@@ -323,8 +327,8 @@ const CentroAjustesPage = () => {
                                                 value={adjustmentData[field.key] || ''}
                                                 onChange={(e) => setAdjustmentData({ ...adjustmentData, [field.key]: e.target.value })}
                                                 className={`w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none ${darkMode
-                                                        ? 'bg-gray-700 border-gray-600 text-white'
-                                                        : 'bg-white border-gray-300 text-gray-900'
+                                                    ? 'bg-gray-700 border-gray-600 text-white'
+                                                    : 'bg-white border-gray-300 text-gray-900'
                                                     }`}
                                             />
                                         </div>
@@ -344,8 +348,8 @@ const CentroAjustesPage = () => {
                                 rows={3}
                                 placeholder="Ingrese el motivo del ajuste (obligatorio)..."
                                 className={`w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none ${darkMode
-                                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500'
-                                        : 'bg-white border-gray-300 text-gray-900'
+                                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500'
+                                    : 'bg-white border-gray-300 text-gray-900'
                                     }`}
                             />
                         </div>

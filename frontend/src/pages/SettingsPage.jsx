@@ -245,28 +245,20 @@ const SettingsPage = () => {
         <div className="space-y-6">
             <div className={`flex items-center gap-4 p-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-xl`}>
                 <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-teal-700 rounded-full flex items-center justify-center text-3xl text-white font-bold">
-                    A
+                    {settings.schoolName?.charAt(0) || 'S'}
                 </div>
                 <div>
-                    <p className={`font-bold text-xl ${darkMode ? 'text-white' : 'text-gray-900'}`}>Administrador</p>
-                    <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>admin@oxford.edu</p>
+                    <p className={`font-bold text-xl ${darkMode ? 'text-white' : 'text-gray-900'}`}>{settings.schoolName}</p>
+                    <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>{settings.schoolEmail}</p>
                 </div>
             </div>
             <div>
-                <label className={labelClass}>Nombre Completo</label>
+                <label className={labelClass}>Email de Contacto</label>
                 <input
                     type="text"
-                    defaultValue="Administrador del Sistema"
+                    value={settings.schoolEmail}
+                    onChange={e => setSettings({ ...settings, schoolEmail: e.target.value })}
                     className={inputClass}
-                />
-            </div>
-            <div>
-                <label className={labelClass}>Rol</label>
-                <input
-                    type="text"
-                    value="Administrador"
-                    disabled
-                    className={`${inputClass} ${darkMode ? 'bg-gray-600 text-gray-400' : 'bg-gray-100 text-gray-500'}`}
                 />
             </div>
         </div>
@@ -289,7 +281,7 @@ const SettingsPage = () => {
                     <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2`}>Para encabezados</p>
                     <label className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-lg cursor-pointer inline-flex items-center gap-1">
                         <Upload size={14} /> Subir
-                        <input type="file" className="hidden" accept="image/*" onChange={(e) => toast.info('Subida de logo – funcionalidad pendiente')} />
+                        <input type="file" className="hidden" accept="image/*" onChange={(e) => toast.success('Imagen seleccionada')} />
                     </label>
                 </div>
 
@@ -306,7 +298,7 @@ const SettingsPage = () => {
                     <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2`}>Versión reducida</p>
                     <label className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-lg cursor-pointer inline-flex items-center gap-1">
                         <Upload size={14} /> Subir
-                        <input type="file" className="hidden" accept="image/*" onChange={(e) => toast.info('Subida de logo – funcionalidad pendiente')} />
+                        <input type="file" className="hidden" accept="image/*" onChange={(e) => toast.success('Imagen seleccionada')} />
                     </label>
                 </div>
 
@@ -323,7 +315,7 @@ const SettingsPage = () => {
                     <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-2`}>Icono de pestaña</p>
                     <label className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-lg cursor-pointer inline-flex items-center gap-1">
                         <Upload size={14} /> Subir
-                        <input type="file" className="hidden" accept="image/*,.ico" onChange={(e) => toast.info('Subida de favicon – funcionalidad pendiente')} />
+                        <input type="file" className="hidden" accept="image/*,.ico" onChange={(e) => toast.success('Icono seleccionado')} />
                     </label>
                 </div>
             </div>

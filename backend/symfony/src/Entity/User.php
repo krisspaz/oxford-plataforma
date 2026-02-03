@@ -16,6 +16,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
+#[ORM\Index(columns: ['is_active'], name: 'idx_user_active')]
+#[ORM\Index(columns: ['tenant_id'], name: 'idx_user_tenant')]
 #[ApiResource(
     processor: \App\State\UserPasswordHasher::class,
     normalizationContext: ['groups' => ['user:read']],

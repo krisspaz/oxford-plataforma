@@ -14,7 +14,7 @@ use App\Model\TenantAwareTrait;
 #[ORM\Entity(repositoryClass: PersonRepository::class)]
 #[ORM\InheritanceType('JOINED')]
 #[ORM\DiscriminatorColumn(name: 'person_type', type: 'string')]
-#[ORM\DiscriminatorMap(['person' => Person::class, 'parent' => Guardian::class, 'teacher' => Teacher::class, 'staff' => Staff::class])]
+#[ORM\DiscriminatorMap(['person' => Person::class, 'parent' => Guardian::class, 'teacher' => Teacher::class, 'staff' => Staff::class, 'student' => Student::class])]
 #[ApiResource]
 class Person implements TenantAwareInterface
 {
