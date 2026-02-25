@@ -35,6 +35,14 @@ class UserPasswordHasher implements ProcessorInterface
             $data->setPassword($hashedPassword);
         }
 
+        // Set tenant if not already set (default to tenant 1)
+        if ($data->getTenant() === null) {
+            $tenant = $this->entityManager->getRepository(\App\Entity\Tenant::class)->find(1);
+            if ($tenant) {
+                $data->setTenant($tenant);
+            }
+        }
+
         // Persist the user first to get an ID
         $result = $this->persistProcessor->process($data, $operation, $uriVariables, $context);
 
@@ -49,6 +57,7 @@ class UserPasswordHasher implements ProcessorInterface
     private function createLinkedProfile(User $user): void
     {
         $roles = $user->getRoles();
+        $tenant = $user->getTenant();
 
         // Check if Teacher profile already exists for this user
         if (in_array('ROLE_DOCENTE', $roles)) {
@@ -68,6 +77,9 @@ class UserPasswordHasher implements ProcessorInterface
                 $teacher->setIsActive(true);
                 $teacher->setContractType('Tiempo Completo');
                 $teacher->setHireDate(new \DateTime());
+                if ($tenant) {
+                    $teacher->setTenant($tenant);
+                }
 
                 $this->entityManager->persist($teacher);
                 $this->entityManager->flush();
@@ -91,6 +103,9 @@ class UserPasswordHasher implements ProcessorInterface
                 $student->setUser($user);
                 $student->setIsActive(true);
                 $student->setEnrollmentDate(new \DateTime());
+                if ($tenant) {
+                    $student->setTenant($tenant);
+                }
 
                 $this->entityManager->persist($student);
                 $this->entityManager->flush();
