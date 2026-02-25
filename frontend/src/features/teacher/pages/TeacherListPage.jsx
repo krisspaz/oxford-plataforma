@@ -2,8 +2,8 @@ import { toast } from 'sonner';
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Users, Plus, Search, Edit, Eye, Book, Loader2, X } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
-import { catalogService, teacherService } from '../services';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { catalogService, teacherService } from '../../../services';
 
 const DocentesPage = () => {
     const { darkMode } = useTheme();

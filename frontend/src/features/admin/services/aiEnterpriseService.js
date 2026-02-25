@@ -6,13 +6,12 @@ import { api } from '../../../services/api';
  */
 export const aiEnterpriseService = {
 
-    // Check System Health (Circuit Breaker Status)
+    // Check System Health (Symfony → Python GET /health)
     getHealth: async () => {
         try {
-            const response = await api.get('/ai/health');
-            return response.data || { status: 'unknown' };
+            const data = await api.get('/ai/health');
+            return data ?? { status: 'unknown' };
         } catch (error) {
-            // Emulate Circuit Breaker Response from backend
             return {
                 status: 'degraded',
                 service: 'ai_proxy',
@@ -22,38 +21,31 @@ export const aiEnterpriseService = {
         }
     },
 
-    // Predictive Risk Analysis
+    // Predictive Risk Analysis (Symfony → Python POST /analytics/predict-risk)
     getRiskAnalysis: async (studentId) => {
         try {
-            // In a real app, this might pass grades array
-            const response = await api.post('/ai/risk-analysis', {
+            const data = await api.post('/ai/risk-analysis', {
                 student_id: studentId,
-                grades: [65, 70, 58, 80] // Example data
+                grades: [65, 70, 58, 80]
             });
-            return response.data;
+            return data ?? MOCK_RISK_DATA;
         } catch (error) {
             return MOCK_RISK_DATA;
         }
     },
 
-    // Get Recommendations/Predictions
-    getPredictions: async () => {
-        // Simulating aggregate analysis
-        return MOCK_PREDICTIONS;
-    },
+    getPredictions: async () => MOCK_PREDICTIONS,
 
-    // Chat with Data
+    // Chat (Symfony → Python POST /chat/message). Respuesta: { response, suggestions, action, data }
     chat: async (message) => {
         try {
-            const response = await api.post('/ai/chat', { message });
-            return response.data;
+            const data = await api.post('/ai/chat', { message });
+            return data;
         } catch (error) {
             return {
-                success: true,
-                data: {
-                    response_text: "Modo Offline: No puedo conectar con el cerebro de Python ahora mismo, pero tus datos están seguros.",
-                    intent: 'offline_fallback'
-                }
+                response: 'Modo Offline: No puedo conectar con el servicio de IA. Tus datos están seguros.',
+                intent: 'offline_fallback',
+                suggestions: []
             };
         }
     }

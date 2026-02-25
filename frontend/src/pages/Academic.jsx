@@ -17,7 +17,8 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
-const AI_API_URL = '/ai';
+// IA siempre vía backend Symfony (auth + circuit breaker)
+const AI_API_PREFIX = '/ai';
 
 const Academic = () => {
     const { darkMode } = useTheme();
@@ -135,7 +136,7 @@ const Academic = () => {
 
         try {
             // Call Python AI backend
-            const result = await api.post(`${AI_API_URL}/process-command`, {
+            const result = await api.post(`${AI_API_PREFIX}/process-command`, {
                 text: userMessage,
                 current_config: config
             });
@@ -213,7 +214,7 @@ const Academic = () => {
         setLoading(true);
 
         try {
-            const data = await api.post(`${AI_API_URL}/generate-schedule`, {
+            const data = await api.post(`${AI_API_PREFIX}/generate-schedule`, {
                 config: config,
                 grade_groups: gradeGroups,
                 day_rules: dayRules,

@@ -138,8 +138,20 @@ const apiFetch = async (endpoint, options = {}, retry = true) => {
         delete headers['Content-Type'];
     }
 
+    // Build URL with query string if options.params is provided
+    let url = `${API_BASE_URL}${endpoint}`;
+    const params = options.params;
+    if (params != null && typeof params === 'object' && !Array.isArray(params)) {
+        const qs = new URLSearchParams();
+        Object.entries(params).forEach(([k, v]) => {
+            if (v !== undefined && v !== null && v !== '') qs.set(k, String(v));
+        });
+        const qsStr = qs.toString();
+        if (qsStr) url += (endpoint.includes('?') ? '&' : '?') + qsStr;
+    }
+
     try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        const response = await fetch(url, {
             ...options,
             headers,
             credentials: 'include',

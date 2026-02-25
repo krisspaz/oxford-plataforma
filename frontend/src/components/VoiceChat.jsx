@@ -90,32 +90,34 @@ const VoiceChat = () => {
         setContextSuggestions([]);
 
         try {
-            // Try the enhanced chat endpoint first
             const role = user?.roles?.[0]?.replace('ROLE_', '').toLowerCase() || 'student';
 
             let response;
             try {
-                response = await aiApi.post('/chat/message', {
+                // Endpoint principal: POST /api/ai/chat (Symfony → Python /chat/message)
+                response = await aiApi.post('/chat', {
                     message: text,
-                    role: role,
+                    role,
                     user_id: user?.id?.toString(),
                     context: { page: window.location.pathname }
                 });
             } catch {
-                // Fallback to process-command
-                response = await aiApi.post('/process-command', {
-                    text,
-                    role: role
-                });
-                response = { response: response.response_text, suggestions: [], action: response.action };
+                // Fallback: process-command devuelve response_text y action
+                response = await aiApi.post('/process-command', { text, role });
+                response = {
+                    response: response.response_text ?? response.response ?? '',
+                    suggestions: response.suggestions ?? [],
+                    action: response.action ?? null,
+                    data: response.data ?? null
+                };
             }
 
             setIsTyping(false);
 
-            // AI Response
+            const responseText = response.response ?? response.response_text ?? '';
             setMessages(prev => [...prev, {
                 type: 'ai',
-                text: response.response,
+                text: responseText,
                 timestamp: new Date(),
                 data: response.data
             }]);
@@ -232,17 +234,17 @@ const VoiceChat = () => {
                                     </div>
 
                                     {/* Message Bubble */}
-                                    <div className={`rounded-2xl px-4 py-3 text-sm shadow-sm ${msg.type === 'user'
-                                        ? 'bg-indigo-600 text-white rounded-tr-md'
-                                        : msg.type === 'error'
-                                            ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 rounded-tl-md border border-red-200 dark:border-red-800'
-                                            : 'bg-white dark:bg-gray-700 dark:text-white text-gray-800 rounded-tl-md border border-gray-100 dark:border-gray-600'
-                                        }`}>
-                                        <div className="whitespace-pre-wrap leading-relaxed" dangerouslySetInnerHTML={{
-                                            __html: msg.text
-                                                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                                                .replace(/\n/g, '<br>')
-                                        }} />
+                                    <div
+                                        className={`rounded-2xl px-4 py-3 text-sm shadow-sm ${msg.type === 'user'
+                                            ? 'bg-indigo-600 text-white rounded-tr-md'
+                                            : msg.type === 'error'
+                                                ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300 rounded-tl-md border border-red-200 dark:border-red-800'
+                                                : 'bg-white dark:bg-gray-700 dark:text-white text-gray-800 rounded-tl-md border border-gray-100 dark:border-gray-600'
+                                            }`}
+                                    >
+                                        <div className="whitespace-pre-wrap leading-relaxed">
+                                            {msg.text}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

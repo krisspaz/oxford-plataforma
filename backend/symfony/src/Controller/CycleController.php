@@ -19,6 +19,22 @@ class CycleController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
+    #[Route('/current', name: 'current', methods: ['GET'], priority: 5)]
+    public function current(): JsonResponse
+    {
+        $cycle = $this->entityManager->getRepository(SchoolCycle::class)->findOneBy(['isActive' => true]);
+        if (!$cycle) {
+            return $this->json(null, 404);
+        }
+        return $this->json([
+            'id' => $cycle->getId(),
+            'name' => $cycle->getName(),
+            'startDate' => $cycle->getStartDate()->format('Y-m-d'),
+            'endDate' => $cycle->getEndDate()->format('Y-m-d'),
+            'isActive' => $cycle->isIsActive(),
+        ]);
+    }
+
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(): JsonResponse
     {

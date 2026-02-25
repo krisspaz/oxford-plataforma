@@ -26,3 +26,10 @@ INSERT IGNORE INTO grade (id, name, level_id, is_active) VALUES
 (11, 'Tercero Básico', 3, 1),
 (12, 'Cuarto Bachillerato', 4, 1),
 (13, 'Quinto Bachillerato', 4, 1);
+
+-- 4. Bimesters (Critical for Grades)
+INSERT IGNORE INTO bimester (id, name, number, start_date, end_date, max_score, percentage, is_closed, is_active, school_cycle_id) VALUES
+(1, 'I Bimestre', 1, '2026-01-15', '2026-03-15', 100, 25, 0, 1, 1),
+(2, 'II Bimestre', 2, '2026-03-16', '2026-05-15', 100, 25, 0, 1, 1),
+(3, 'III Bimestre', 3, '2026-05-16', '2026-08-15', 100, 25, 0, 1, 1),
+(4, 'IV Bimestre', 4, '2026-08-16', '2026-10-15', 100, 25, 0, 1, 1);

@@ -1,0 +1,19 @@
+# Dockerfile.dev - Entorno de Desarrollo para Frontend
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiar configuración de dependencias
+COPY package*.json ./
+
+# Instalar dependencias
+RUN npm install
+
+# Copiar el resto del código (aunque el volumen lo sobreescribirá, es buena práctica)
+COPY . .
+
+# Exponer el puerto de Vite
+EXPOSE 5173
+
+# Ejecutar servidor de desarrollo expuesto a la red (host)
+CMD ["npm", "run", "dev", "--", "--host"]

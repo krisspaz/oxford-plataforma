@@ -3,22 +3,19 @@ import api from './api';
 const notificationService = {
     getAll: async () => {
         const response = await api.get('/notifications/');
-        return response.data.data;
+        return Array.isArray(response) ? response : (response?.data ?? []);
     },
 
     markAsRead: async (id) => {
-        const response = await api.post(`/notifications/${id}/read`);
-        return response.data;
+        await api.post(`/notifications/${id}/read`);
     },
 
     markAllAsRead: async () => {
-        const response = await api.post('/notifications/read-all');
-        return response.data;
+        await api.post('/notifications/read-all');
     },
 
     deleteAll: async () => {
-        const response = await api.delete('/notifications/reset');
-        return response.data;
+        await api.delete('/notifications/reset');
     },
 
     delete: async (id) => {

@@ -25,6 +25,41 @@ class AiService
         private string $internalKey = 'dev_secret'
     ) {}
 
+    /**
+     * GET request to AI service (health, suggestions, etc.)
+     */
+    public function get(string $endpoint, array $query = []): array
+    {
+        if ($this->isCircuitOpen()) {
+            $this->logger->warning('[CircuitBreaker] Circuit is OPEN. GET blocked.');
+            return $endpoint === '/health'
+                ? ['status' => 'unhealthy', 'circuit_broken' => true]
+                : [];
+        }
+
+        try {
+            $url = $this->aiUrl . $endpoint;
+            if ($query !== []) {
+                $url .= '?' . http_build_query($query);
+            }
+            $response = $this->client->request('GET', $url, [
+                'headers' => [
+                    'X-INTERNAL-KEY' => $this->internalKey,
+                ],
+                'timeout' => 5.0,
+            ]);
+            $data = $response->toArray();
+            $this->resetFailures();
+            return $data;
+        } catch (\Throwable $e) {
+            $this->recordFailure();
+            $this->logger->error('[CircuitBreaker] GET failed: ' . $e->getMessage());
+            return $endpoint === '/health'
+                ? ['status' => 'unhealthy', 'error' => $e->getMessage()]
+                : [];
+        }
+    }
+
     public function ask(array $payload, string $endpoint = '/process-command'): array
     {
         if ($this->isCircuitOpen()) {
@@ -50,6 +85,32 @@ class AiService
             $this->recordFailure();
             $this->logger->error('[CircuitBreaker] Call failed: ' . $e->getMessage());
             return $this->fallbackResponse($payload);
+        }
+    }
+
+    /**
+     * GET request to AI service (health, suggestions, etc.). No circuit breaker for read-only.
+     */
+    public function get(string $endpoint, array $query = []): array
+    {
+        try {
+            $options = [
+                'headers' => [
+                    'X-INTERNAL-KEY' => $this->internalKey,
+                ],
+                'timeout' => 5.0,
+            ];
+            if ($query !== []) {
+                $options['query'] = $query;
+            }
+            $response = $this->client->request('GET', $this->aiUrl . $endpoint, $options);
+            return $response->toArray();
+        } catch (\Throwable $e) {
+            $this->logger->error('[AI GET] ' . $endpoint . ': ' . $e->getMessage());
+            if (str_starts_with($endpoint, '/health')) {
+                return ['status' => 'unhealthy', 'error' => $e->getMessage()];
+            }
+            return ['suggestions' => [], 'error' => $e->getMessage()];
         }
     }
 

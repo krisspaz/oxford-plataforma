@@ -52,30 +52,45 @@ class Config:
 
     @classmethod
     def from_env(cls) -> "Config":
-        """Load configuration from environment variables"""
-        
-        # Security Check
-        secret = os.getenv("SECRET_KEY", "dev_secret")
-        # In prod, you'd raise error if secret is default, but for demo/local we allow it
-        
+        """Load configuration from environment variables with sane production defaults."""
+
+        env = os.getenv("APP_ENV", "production")
+
+        # Security: SECRET_KEY must be set in production
+        secret = os.getenv("SECRET_KEY")
+        if env == "production":
+            if not secret or secret.strip() in ("dev_secret", "", "CHANGE_ME_SECRET_KEY_64_HEX_CHARS"):
+                raise RuntimeError(
+                    "AI Service: SECRET_KEY must be set to a secure value in production"
+                )
+        else:
+            # In non-prod we allow a predictable secret for convenience
+            secret = secret or "dev_secret"
+
+        db_password = os.getenv("DB_PASSWORD", "password")
+        if env == "production" and db_password in ("password", "oxford2026", "CHANGE_ME_DB_PASSWORD"):
+            raise RuntimeError(
+                "AI Service: DB_PASSWORD must be set to a secure value in production"
+            )
+
         return cls(
             host=os.getenv("AI_SERVICE_HOST", "0.0.0.0"),
             port=int(os.getenv("AI_SERVICE_PORT", "8001")),
             log_level=os.getenv("LOG_LEVEL", "INFO"),
             debug=os.getenv("DEBUG", "false").lower() == "true",
-            environment=os.getenv("APP_ENV", "production"),
-            
+            environment=env,
+
             db_name=os.getenv("DB_NAME", "oxford_db"),
             db_user=os.getenv("DB_USER", "postgres"),
-            db_password=os.getenv("DB_PASSWORD", "password"),
+            db_password=db_password,
             db_host=os.getenv("DB_HOST", "localhost"),
-            
+
             secret_key=secret,
             algorithm=os.getenv("ALGORITHM", "HS256"),
-            
+
             population_size=int(os.getenv("POPULATION_SIZE", "50")),
             generations=int(os.getenv("GENERATIONS", "100")),
-            
+
             default_class_duration=int(os.getenv("CLASS_DURATION", "45")),
             default_start_time=os.getenv("START_TIME", "07:30")
         )

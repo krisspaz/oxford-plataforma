@@ -1,54 +1,46 @@
 import { api } from './api';
 
-const AI_BASE_URL = '/ai'; // Proxied to localhost:8001
-
 /**
  * AI Service Client
- * Uses the same auth cookies as the main API (assuming shared domain or proxy handling)
+ * Todas las llamadas pasan por el backend Symfony (`/api/ai/...`),
+ * que se encarga de auth, circuit breaker y headers internos.
  */
 export const aiApi = {
     get: async (endpoint, options = {}) => {
-        const response = await fetch(`${AI_BASE_URL}${endpoint}`, {
+        // endpoint debe empezar por '/', por ejemplo '/health'
+        return api.get(`/ai${endpoint}`, {
             ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers,
-            },
-            credentials: 'include',
+            // Mantener posibilidad de pedir respuesta completa si se necesita
+            fullResponse: options.fullResponse ?? false,
         });
-        if (!response.ok) throw new Error('AI Service Error');
-        return response.json();
     },
 
     post: async (endpoint, body, options = {}) => {
-        const response = await fetch(`${AI_BASE_URL}${endpoint}`, {
-            method: 'POST',
-            body: JSON.stringify(body),
+        return api.post(`/ai${endpoint}`, body, {
             ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers,
-            },
-            credentials: 'include',
+            fullResponse: options.fullResponse ?? false,
         });
-        if (!response.ok) throw new Error('AI Service Error');
-        return response.json();
     },
 
-    // Quick method to get insights
+    // Quick method to get insights (por ahora sigue siendo mock, pero centralizado)
     getInsights: async (role, userId) => {
-        // Mocking the call if endpoint doesn't exist yet, but planned for /analytics
-        // return aiApi.get('/analytics/institutional-health'); 
+        // En el futuro se puede cambiar a:
+        // return aiApi.get('/analytics/institutional-health');
 
-        // For now, return mock data to demonstrate the UI
-        return new Promise(resolve => setTimeout(() => resolve({
-            alertLevel: 'low', // low, medium, high
-            insight: 'Sistema funcionando correctamente. Análisis de IA iniciando...',
-            recommendation: 'El calendario escolar está actualizado.',
-            positiveTrend: 'Conectividad estable en todos los servicios.',
-            timestamp: new Date().toISOString()
-        }), 800));
-    }
+        return new Promise(resolve =>
+            setTimeout(
+                () =>
+                    resolve({
+                        alertLevel: 'low',
+                        insight: 'Sistema funcionando correctamente. Análisis de IA iniciando...',
+                        recommendation: 'El calendario escolar está actualizado.',
+                        positiveTrend: 'Conectividad estable en todos los servicios.',
+                        timestamp: new Date().toISOString(),
+                    }),
+                800,
+            ),
+        );
+    },
 };
 
 export default aiApi;

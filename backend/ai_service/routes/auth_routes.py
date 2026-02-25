@@ -41,11 +41,16 @@ async def get_current_user(request: Request):
 
 @auth_router.post("/login")
 def login(creds: LoginRequest):
-    u = db.query("SELECT * FROM users WHERE username = ?", (creds.username,), one=True)
-    
+    # mysql-connector-python usa %s como placeholder, no '?'
+    u = db.query(
+        "SELECT * FROM users WHERE username = %s",
+        (creds.username,),
+        one=True
+    )
+
     if not u or not verify_password(creds.password, u['hashed_password']):
         raise HTTPException(status_code=400, detail="Bad credentials")
-        
+
     token = create_access_token({"sub": u['username'], "rol": u['role']})
     return {"access_token": token, "token_type": "bearer"}
 
@@ -53,8 +58,12 @@ def login(creds: LoginRequest):
 def me(current_user: dict = Depends(get_current_user)):
     # current_user is the token payload
     username_from_token = current_user.get("sub") # 'sub' typically holds username/id
-    
-    u = db.query("SELECT * FROM users WHERE username = ?", (username_from_token,), one=True)
+
+    u = db.query(
+        "SELECT * FROM users WHERE username = %s",
+        (username_from_token,),
+        one=True
+    )
     
     if u:
         return {"id": u['id'], "username": u['username'], "rol": u['role']}

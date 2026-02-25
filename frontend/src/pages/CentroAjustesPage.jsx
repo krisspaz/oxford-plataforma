@@ -30,12 +30,11 @@ const CentroAjustesPage = () => {
 
     const loadRecentAdjustments = async () => {
         try {
-            const response = await api.get('/audit-logs', {
-                params: { action: 'ADJUSTMENT', limit: 10 }
+            const response = await api.get('/admin/logs', {
+                params: { limit: 10 }
             });
-            if (response.data) {
-                setRecentAdjustments(response.data['hydra:member'] || response.data || []);
-            }
+            const list = Array.isArray(response) ? response : (response?.data ?? response?.['hydra:member'] ?? []);
+            setRecentAdjustments(Array.isArray(list) ? list : []);
         } catch (error) {
             console.error('Error loading adjustments:', error);
         }

@@ -71,9 +71,13 @@ class ChatController extends AbstractController
     public function sendStudentMessage(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $studentId = $data['studentId'] ?? 1;
-        $teacherId = $data['teacherId'];
+        $studentId = $data['studentId'] ?? null;
+        $teacherId = $data['teacherId'] ?? null;
         $content = $data['message'];
+
+        if (!$studentId || !$teacherId) {
+            return $this->json(['success' => false, 'error' => 'Parámetros inválidos'], 400);
+        }
 
         $student = $this->studentRepository->find($studentId);
         $teacher = $this->teacherRepository->find($teacherId);
@@ -119,9 +123,18 @@ class ChatController extends AbstractController
     #[Route('/teachers/chat/{studentId}', methods: ['GET'])]
     public function getTeacherChatHistory(int $studentId): JsonResponse
     {
-        $teacherId = 1;
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['success' => false, 'error' => 'No autenticado'], 401);
+        }
 
-        $messages = $this->messageRepository->findChatHistory($studentId, $teacherId);
+        // Por ahora asumimos un único Teacher asociado; esto se puede refinar
+        $teacher = $this->teacherRepository->findOneBy(['user' => $user]) ?? $this->teacherRepository->findOneBy([]);
+        if (!$teacher) {
+            return $this->json(['success' => false, 'error' => 'Docente no encontrado'], 404);
+        }
+
+        $messages = $this->messageRepository->findChatHistory($studentId, $teacher->getId());
 
         $data = array_map(function ($msg) {
             return [
@@ -140,12 +153,25 @@ class ChatController extends AbstractController
     public function sendTeacherMessage(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $teacherId = 1;
-        $studentId = $data['studentId'];
+        $studentId = $data['studentId'] ?? null;
         $content = $data['message'];
 
+        if (!$studentId) {
+            return $this->json(['success' => false, 'error' => 'Parámetros inválidos'], 400);
+        }
+
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['success' => false, 'error' => 'No autenticado'], 401);
+        }
+
+        $teacher = $this->teacherRepository->findOneBy(['user' => $user]) ?? $this->teacherRepository->findOneBy([]);
+
         $student = $this->studentRepository->find($studentId);
-        $teacher = $this->teacherRepository->find($teacherId);
+
+        if (!$student || !$teacher) {
+            return $this->json(['success' => false, 'error' => 'Usuario no encontrado'], 404);
+        }
 
         $message = new StudentMessage();
         $message->setStudent($student);

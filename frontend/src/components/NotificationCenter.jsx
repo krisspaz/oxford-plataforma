@@ -45,7 +45,7 @@ const NotificationCenter = () => {
 
     const handleMarkAllAsRead = async () => {
         try {
-            await api.post('/notifications/mark-all-read');
+            await api.post('/notifications/read-all');
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
             setUnreadCount(0);
         } catch (error) {
@@ -58,7 +58,7 @@ const NotificationCenter = () => {
 
     const handleClearAll = async () => {
         try {
-            await api.delete('/notifications');
+            await api.delete('/notifications/reset');
             setNotifications([]);
             setUnreadCount(0);
         } catch (error) {

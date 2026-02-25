@@ -12,6 +12,9 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+      - ./seed_essentials.sql:/docker-entrypoint-initdb.d/01_essentials.sql
+      - ./seed_admin.sql:/docker-entrypoint-initdb.d/02_admin.sql
+      - ./seed_users.sql:/docker-entrypoint-initdb.d/03_users.sql
     networks:
       - app_net
     healthcheck:
@@ -171,11 +174,18 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000/api
     networks:
       - app_net
     healthcheck:
-      test: [ "CMD-SHELL", "curl -sf http://127.0.0.1:80/health || exit 1" ]
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5173" ]
       interval: 30s
       timeout: 10s
       retries: 3

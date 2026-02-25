@@ -19,14 +19,17 @@ const StudentGradesPage = () => {
         setLoading(true);
         try {
             // Real API Call
-            const { data } = await api.get('/students/me/grades');
+            const response = await api.get('/students/me/grades'); // returns { success: true, data: { student:..., grades: [...] } }
+
+            // Handle the wrapped data structure
+            const gradesData = response.data?.grades || [];
 
             // Validate response format
-            if (Array.isArray(data)) {
-                setGrades(data);
-                calculateStats(data);
+            if (Array.isArray(gradesData)) {
+                setGrades(gradesData);
+                calculateStats(gradesData);
             } else {
-                console.error("Link invalid format:", data);
+                console.error("Link invalid format:", response);
                 setGrades([]);
             }
         } catch (error) {

@@ -5,7 +5,7 @@ import { Route } from 'react-router-dom';
 const Academic = lazy(() => import('../../pages/Academic'));
 const GradosPage = lazy(() => import('../../pages/GradosPage'));
 const MateriasPage = lazy(() => import('../../pages/MateriasPage'));
-const TeacherListPage = lazy(() => import('../teachers/pages/TeacherListPage'));
+const TeacherListPage = lazy(() => import('../teacher/pages/TeacherListPage'));
 const BimestresPage = lazy(() => import('../../pages/BimestresPage'));
 const ReportsPage = lazy(() => import('../../pages/ReportsPage'));
 const TareasPage = lazy(() => import('../../pages/TareasPage'));

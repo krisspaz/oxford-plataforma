@@ -85,26 +85,23 @@ const aiService = {
      * @returns {Promise<object>} Processed command with intent and entities
      */
     async processCommand(text, currentConfig = {}) {
-        const data = await api.post('/ai/process-command', {
-            text,
-            current_config: currentConfig,
-        }, {
-            timeout: AI_CONFIG.timeout
-        });
-
-        return data;
-    } catch(error) {
-        console.error('AI Process error:', error);
-        const errorMessage = error.response?.data?.message || error.message;
-        return {
-            intent: 'unknown',
-            confidence: 0,
-            entities: {},
-            response_text: `No pude procesar tu comando. Error de conexión: ${errorMessage}`,
-            should_generate: false,
-        };
-    }
-},
+        try {
+            return await api.post('/ai/process-command', {
+                text,
+                current_config: currentConfig,
+            }, { timeout: AI_CONFIG.timeout });
+        } catch (error) {
+            console.error('AI Process error:', error);
+            const errorMessage = error.response?.data?.message || error.message;
+            return {
+                intent: 'unknown',
+                confidence: 0,
+                entities: {},
+                response_text: `No pude procesar tu comando. Error de conexión: ${errorMessage}`,
+                should_generate: false,
+            };
+        }
+    },
 
     /**
      * Generate a schedule using AI
@@ -149,23 +146,19 @@ const aiService = {
         };
     },
 
-        /**
-         * Validate a schedule for conflicts
-         * @param {Array} schedule - Schedule entries to validate
-         * @returns {Promise<object>} Validation result with conflicts
-         */
-        async validateSchedule(schedule) {
-    try {
-        return api.post('/ai/validate-schedule', { schedule });
-    } catch (error) {
-        console.error('Schedule validation error:', error);
-        return {
-            valid: false,
-            conflicts: [],
-            error: 'Error al validar el horario.',
-        };
-    }
-},
+    /**
+     * Validate a schedule for conflicts
+     * @param {Array} schedule - Schedule entries to validate
+     * @returns {Promise<object>} Validation result with conflicts
+     */
+    async validateSchedule(schedule) {
+        try {
+            return await api.post('/ai/validate-schedule', { schedule });
+        } catch (error) {
+            console.error('Schedule validation error:', error);
+            return { valid: false, conflicts: [], error: 'Error al validar el horario.' };
+        }
+    },
 
     /**
      * Get AI suggestions for schedule optimization
@@ -173,75 +166,74 @@ const aiService = {
      * @returns {Promise<Array>} List of suggestions
      */
     async getSuggestions(schedule) {
-    try {
-        const data = await api.post('/ai/suggestions', { schedule });
-        return data?.suggestions || [];
-    } catch (error) {
-        console.error('Suggestions error:', error);
-        return [];
-    }
-},
+        try {
+            const data = await api.post('/ai/suggestions', { schedule });
+            return data?.suggestions || [];
+        } catch (error) {
+            console.error('Suggestions error:', error);
+            return [];
+        }
+    },
 
     /**
-     * Check AI service health
+     * Check AI service health (vía Symfony → Python GET /health)
      * @returns {Promise<boolean>} True if service is healthy
      */
     async healthCheck() {
-    try {
-        const data = await api.get('/ai/health', { timeout: 5000 });
-        return data?.status === 'healthy';
-    } catch (error) {
-        console.error('AI health check failed:', error);
-        return false;
-    }
-},
+        try {
+            const data = await api.get('/ai/health');
+            return data?.status === 'healthy' || data?.ok === true;
+        } catch (error) {
+            console.error('AI health check failed:', error);
+            return false;
+        }
+    },
 
     async predictRisk(studentData) {
-    try {
-        return api.post('/ai/predict-risk', studentData);
-    } catch (error) {
-        console.error('Risk prediction error:', error);
-        return { error: 'Failed to predict risk' };
-    }
-},
+        try {
+            return await api.post('/ai/risk-analysis', studentData);
+        } catch (error) {
+            console.error('Risk prediction error:', error);
+            return { error: 'Failed to predict risk' };
+        }
+    },
 
     /**
      * Analyze teacher burnout
      */
     async analyzeTeacherBurnout(teacherId, schedule) {
-    try {
-        return api.post('/ai/analyze-burnout', { teacher_id: teacherId, schedule });
-    } catch (error) {
-        console.error('Burnout analysis error:', error);
-        return null;
-    }
-},
+        try {
+            return await api.post('/ai/analyze-burnout', { teacher_id: teacherId, schedule });
+        } catch (error) {
+            console.error('Burnout analysis error:', error);
+            return null;
+        }
+    },
 
     /**
      * Get Institutional Health Index (ISA)
      */
     async getInstitutionalHealth() {
-    try {
-        return api.get('/ai/institutional-health');
-    } catch (error) {
-        console.error('ISA error:', error);
-        return null;
-    }
-},
+        try {
+            return await api.get('/ai/institutional-health');
+        } catch (error) {
+            console.error('ISA error:', error);
+            return null;
+        }
+    },
 
-    // --- Enterprise Extensions (Phases 11-14) ---
-    async getAuditLog() { return api.get('/ai/audit/log'); },
-    async getLegalDefense(data) { return api.post('/ai/legal/defense', data); },
-    async validateEthics(command) { return api.post('/ai/ethics/validate', { command }); },
-    async getFutureSimulation() { return api.get('/ai/simulation/future'); },
-    async getMaturityIndex() { return api.get('/ai/context/maturity'); },
+    getAuditLog() { return api.get('/ai/audit/log'); },
+    getLegalDefense(data) { return api.post('/ai/legal/defense', data); },
+    validateEthics(command) { return api.post('/ai/ethics/validate', { command }); },
+    getFutureSimulation() { return api.get('/ai/simulation/future'); },
+    getMaturityIndex() { return api.get('/ai/context/maturity'); },
 
-/**
- * Get fallback response when AI is unavailable
- * @param {string} message - Original message
- * @returns {object} Fallback response
- */
-getFallbackResponse(message) {
+    /**
+     * Get fallback response when AI is unavailable
+     * @param {string} message - Original message
+     * @returns {object} Fallback response
+     */
+    getFallbackResponse(message) {
     const lowerMessage = message.toLowerCase();
 
     // Simple pattern matching fallback
@@ -284,13 +276,13 @@ getFallbackResponse(message) {
         response: 'No entendí tu mensaje. Intenta con "ayuda" para ver los comandos disponibles.',
         suggestions: ['Ayuda', 'Genera horario'],
     };
-},
+    },
 
-/**
- * Get help text with available commands
- * @returns {string} Help text
- */
-getHelpText() {
+    /**
+     * Get help text with available commands
+     * @returns {string} Help text
+     */
+    getHelpText() {
     return `🤖 **Comandos Disponibles:**
 
 **Generar Horarios:**
@@ -312,14 +304,14 @@ getHelpText() {
 **Otros:**
 - "Mostrar configuración"
 - "Limpiar restricciones"`;
-},
+    },
 
-/**
- * Clear the response cache
- */
-clearCache() {
-    responseCache.clear();
-},
+    /**
+     * Clear the response cache
+     */
+    clearCache() {
+        responseCache.clear();
+    },
 };
 
 export default aiService;

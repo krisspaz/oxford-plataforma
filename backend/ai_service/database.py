@@ -114,8 +114,32 @@ class DatabaseManager:
         print("AI Service: Verified all MySQL tables.")
 
     def seed_data(self):
-        """skip"""
-        pass
+        """Seed initial AI rules and patterns if empty."""
+        try:
+            # Check if rules exist
+            existing = self.query("SELECT COUNT(*) as count FROM ai_rules", one=True)
+            if existing and existing['count'] > 0:
+                print("AI Service: Rules already seeded.")
+                return
+
+            print("🌱 Seeding AI Rules...")
+            
+            # Default Academic Rules
+            rules = [
+                ("Rendimiento Bajo", "grade_average < 60", "flag_at_risk", "academic", "high"),
+                ("Asistencia Crítica", "attendance_percentage < 75", "alert_parents", "administrative", "high"),
+                ("Excelencia Académica", "grade_average >= 90", "recommend_scholarship", "academic", "medium")
+            ]
+            
+            sql = "INSERT INTO ai_rules (rule_description, rule_condition, rule_action, source, priority) VALUES (%s, %s, %s, %s, %s)"
+            
+            for r in rules:
+                self.execute(sql, r)
+                
+            print("✅ AI Service: Initial knowledge loaded.")
+            
+        except Exception as e:
+            print(f"Error seeding AI data: {e}")
 
     def query(self, sql: str, params: tuple = (), one: bool = False):
         """Execute a SELECT query."""
