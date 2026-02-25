@@ -145,12 +145,20 @@ const GestionUsuariosPage = () => {
             const payload = {
                 name: `${formData.firstName} ${formData.lastName}`.trim(),
                 email: formData.email,
-                roles: [formData.role], // Backend expects 'roles' array, matches User entity properties
-                password: formData.password
+                roles: [formData.role],
             };
+
+            // Only include password if provided (required for new, optional for edit)
+            if (formData.password) {
+                payload.password = formData.password;
+            }
 
             if (selectedUser) {
                 await userService.update(selectedUser.id, payload);
+                // If password was provided separately, update it too
+                if (formData.password) {
+                    await userService.updatePassword(selectedUser.id, formData.password);
+                }
                 toast.success('Usuario actualizado correctamente');
             } else {
                 await userService.create(payload);
@@ -165,7 +173,7 @@ const GestionUsuariosPage = () => {
             }
 
             setShowModal(false);
-            loadUsers();
+            queryClient.invalidateQueries({ queryKey: ['users'] });
         } catch (error) {
             console.error('Error saving user:', error);
             toast.error('Error al guardar usuario: ' + error.message);
