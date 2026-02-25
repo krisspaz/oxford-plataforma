@@ -36,7 +36,7 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Set permissions
-RUN chown -R www-data:www-data var
+RUN mkdir -p var && chown -R www-data:www-data var
 
 # Opcache configuration
 RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \

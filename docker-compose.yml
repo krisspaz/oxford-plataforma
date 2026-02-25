@@ -202,6 +202,12 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-password}
       MINIO_ENDPOINT: minio:9000
+      APP_ENV: ${APP_ENV:-dev}
+      DB_HOST: database
+      DB_USER: ${MYSQL_USER:-oxford_user}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-oxford2026}
+      DB_NAME: ${MYSQL_DATABASE:-oxford_db}
+      SECRET_KEY: ${SECRET_KEY:-dev_secret}
     ports:
       - "8001:8001"
     volumes:
