@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/ai', name: 'api_ai_')]
-class AIController extends AbstractController
+class AiController extends AbstractController
 {
     public function __construct(
         private AiService $aiService,

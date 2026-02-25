@@ -88,31 +88,7 @@ class AiService
         }
     }
 
-    /**
-     * GET request to AI service (health, suggestions, etc.). No circuit breaker for read-only.
-     */
-    public function get(string $endpoint, array $query = []): array
-    {
-        try {
-            $options = [
-                'headers' => [
-                    'X-INTERNAL-KEY' => $this->internalKey,
-                ],
-                'timeout' => 5.0,
-            ];
-            if ($query !== []) {
-                $options['query'] = $query;
-            }
-            $response = $this->client->request('GET', $this->aiUrl . $endpoint, $options);
-            return $response->toArray();
-        } catch (\Throwable $e) {
-            $this->logger->error('[AI GET] ' . $endpoint . ': ' . $e->getMessage());
-            if (str_starts_with($endpoint, '/health')) {
-                return ['status' => 'unhealthy', 'error' => $e->getMessage()];
-            }
-            return ['suggestions' => [], 'error' => $e->getMessage()];
-        }
-    }
+
 
     private function isCircuitOpen(): bool
     {

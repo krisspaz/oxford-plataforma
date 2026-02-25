@@ -23,18 +23,18 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://nginx:80',
         changeOrigin: true,
         secure: false,
       },
       '/ai': {
-        target: 'http://localhost:8001',
+        target: 'http://ai_service:8001',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/ai/, ''),
       },
       '/ai-api': {
-        target: 'http://127.0.0.1:8001',
+        target: 'http://ai_service:8001',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/ai-api/, ''),
       },

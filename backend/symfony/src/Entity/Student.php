@@ -15,11 +15,6 @@ use App\Model\TenantAwareTrait;
 
 #[ORM\Entity(repositoryClass: StudentRepository::class)]
 #[ORM\Table(name: 'student')]
-#[ORM\Index(columns: ['is_active'], name: 'idx_student_active')]
-#[ORM\Index(columns: ['first_name', 'last_name'], name: 'idx_student_full_name')]
-#[ORM\Index(columns: ['school_cycle_id'], name: 'idx_student_cycle')]
-#[ORM\Index(columns: ['course_id'], name: 'idx_student_course')]
-#[ORM\Index(columns: ['tenant_id'], name: 'idx_student_tenant')]
 #[ApiResource(
     processor: \App\State\StudentProcessor::class,
     normalizationContext: ['groups' => ['student:read', 'person:read']],
@@ -28,10 +23,6 @@ use App\Model\TenantAwareTrait;
 class Student extends Person
 {
     use TenantAwareTrait;
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    #[Groups(['student:read'])]
     #[ORM\Column(length: 20, unique: true, nullable: true)]
     #[Groups(['student:read', 'student:write'])]
     private ?string $carnet = null;
