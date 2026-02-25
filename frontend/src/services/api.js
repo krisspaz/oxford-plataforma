@@ -267,6 +267,7 @@ export const api = {
         apiFetch(endpoint, {
             method: 'PATCH',
             body: JSON.stringify(body),
+            headers: { 'Content-Type': 'application/merge-patch+json', ...options.headers },
             ...options,
         }),
 
