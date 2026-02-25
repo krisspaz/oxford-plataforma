@@ -1,7 +1,7 @@
 import { toast } from 'sonner';
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Users, Plus, Edit, Lock, Unlock, Key, Search, X, Loader2, Check, AlertCircle, Trash2 } from 'lucide-react';
+import { Users, Plus, Edit, Lock, Unlock, Key, Search, X, Loader2, Check, AlertCircle, Trash2, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { userService } from '../services';
 

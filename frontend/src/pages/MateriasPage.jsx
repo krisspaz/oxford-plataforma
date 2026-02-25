@@ -1,7 +1,7 @@
 import { toast } from 'sonner';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Book, Plus, Search, Edit, X, Users, Loader2 } from 'lucide-react';
+import { Book, Plus, Search, Edit, X, Users, Loader2, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { catalogService } from '../services';
 import teacherService from '../services/teacherService';

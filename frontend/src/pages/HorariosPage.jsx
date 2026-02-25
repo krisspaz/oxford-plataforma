@@ -1,7 +1,7 @@
 import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar, Users, BookOpen, Save, AlertCircle, Loader2, Wand2, Info } from 'lucide-react';
+import { Calendar, Users, BookOpen, Save, AlertCircle, Loader2, Wand2, Info, RefreshCw } from 'lucide-react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useTheme } from '../contexts/ThemeContext';

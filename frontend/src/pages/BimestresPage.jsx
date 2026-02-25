@@ -1,7 +1,7 @@
 import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Calendar, Lock, Unlock, Edit, Plus, AlertTriangle, X, Loader2 } from 'lucide-react';
+import { Calendar, Lock, Unlock, Edit, Plus, AlertTriangle, X, Loader2, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { bimesterService } from '../services';
 
