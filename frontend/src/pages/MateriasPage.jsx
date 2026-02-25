@@ -105,47 +105,17 @@ const MateriasPage = () => {
             }
 
             setShowModal(false);
-            loadData();
+            queryClient.invalidateQueries({ queryKey: ['subjects'] });
+            queryClient.invalidateQueries({ queryKey: ['teachers'] });
+            queryClient.invalidateQueries({ queryKey: ['grades'] });
         } catch (error) {
             console.error('Error saving:', error);
             toast.error('Error al guardar: ' + (error.message || 'Error desconocido'));
         }
     };
 
-    const loadData = async () => {
-        setLoading(true);
-        try {
-            // Parallel fetching
-            const [subjectsData, teachersData, gradesData] = await Promise.all([
-                catalogService.getSubjects(),
-                teacherService.getAll(),
-                gradeService.getAll()
-            ]);
-
-            // Handle Subjects
-            let loadedSubjects = [];
-            if (subjectsData && subjectsData.member) loadedSubjects = subjectsData.member;
-            else if (Array.isArray(subjectsData)) loadedSubjects = subjectsData;
-            else if (subjectsData.data) loadedSubjects = subjectsData.data;
-            setSubjects(loadedSubjects);
-
-            // Handle Teachers
-            setTeachers(Array.isArray(teachersData) ? teachersData : (teachersData.member || []));
-
-            // Handle Grades
-            setGrades(Array.isArray(gradesData) ? gradesData : (gradesData.member || []));
-
-            // For assignments, since we don't have a dedicated endpoint yet, we might need to 
-            // rely on subjects having 'assignments' property or implement a fetch later.
-            // For now, we leave it empty to avoid fake data, or maybe filter subjects?
-            // setAssignments([...]); 
-
-        } catch (error) {
-            console.error('Error loading data:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Assignments are derived from subjects data (placeholder for now)
+    const assignments = [];
 
     const filteredSubjects = subjects.filter(s =>
         s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -14,6 +14,7 @@ const ContractsPage = () => {
     const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [selectedContract, setSelectedContract] = useState(null);
+    const [generating, setGenerating] = useState(false);
 
     // Form state para generar contrato
     const [formData, setFormData] = useState({
@@ -87,7 +88,7 @@ const ContractsPage = () => {
             });
 
             setShowGenerateModal(false);
-            loadContracts();
+            queryClient.invalidateQueries({ queryKey: ['contracts'] });
 
             // Reset form
             setFormData({
@@ -112,15 +113,10 @@ const ContractsPage = () => {
             toast.success("Contrato firmado subido exitosamente");
             setShowUploadModal(false);
             setSelectedContract(null);
-            loadContracts();
+            queryClient.invalidateQueries({ queryKey: ['contracts'] });
         } catch (error) {
             console.error("Error uploading signed contract:", error);
-            // Demo mode - just update locally
-            setContracts(prev => prev.map(c =>
-                c.id === selectedContract.id
-                    ? { ...c, status: 'SIGNED', signedFile: URL.createObjectURL(file) }
-                    : c
-            ));
+            toast.error("Error al subir contrato");
             setShowUploadModal(false);
             setSelectedContract(null);
         }
@@ -157,7 +153,7 @@ const ContractsPage = () => {
             <div className="flex justify-between items-center">
                 <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Gestión de Contratos</h1>
                 <div className="flex gap-3">
-                    <button onClick={loadContracts} className={`px-4 py-2 rounded-lg flex items-center gap-2 ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                    <button onClick={() => queryClient.invalidateQueries({ queryKey: ['contracts'] })} className={`px-4 py-2 rounded-lg flex items-center gap-2 ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
                         <RefreshCw size={18} /> Actualizar
                     </button>
                     <button

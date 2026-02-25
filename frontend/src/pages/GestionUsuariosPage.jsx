@@ -81,8 +81,7 @@ const GestionUsuariosPage = () => {
         try {
             await userService.delete(id);
             toast.success('Usuario eliminado correctamente');
-            // Remove from list
-            setUsers(users.filter(u => u.id !== id));
+            queryClient.invalidateQueries({ queryKey: ['users'] });
         } catch (error) {
             console.error('Error deleting user:', error);
             toast.error('Error al eliminar usuario');
