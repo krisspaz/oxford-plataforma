@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { ClipboardList, Clock, CheckCircle, XCircle, Calendar, BookOpen, Filter, ChevronRight, AlertTriangle } from 'lucide-react';
+import { Clock, CheckCircle, XCircle } from 'lucide-react';
+import api from '../services/api';
 
 const StudentTasksPage = () => {
     const { darkMode } = useTheme();
@@ -9,23 +10,35 @@ const StudentTasksPage = () => {
     const [selectedBimester, setSelectedBimester] = useState('');
     const [selectedTask, setSelectedTask] = useState(null);
 
-    // Mock data - conectar con backend real
-    const subjects = ['Todas', 'Matemáticas', 'Física', 'Química', 'Historia', 'Inglés'];
-    const bimesters = ['Todos', '1er Bimestre', '2do Bimestre', '3er Bimestre', '4to Bimestre'];
+    const [tasks, setTasks] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [subjects, setSubjects] = useState(['Todas']);
+    const [bimesters, setBimesters] = useState(['Todos']);
 
-    const [tasks] = useState([
-        // Pending
-        { id: 1, title: 'Ejercicios de Álgebra', subject: 'Matemáticas', dueDate: '2026-01-20', points: 15, status: 'pending', bimester: '1er Bimestre', description: 'Resolver ejercicios 1-20 del capítulo 3', type: 'tarea' },
-        { id: 2, title: 'Ensayo sobre la Revolución', subject: 'Historia', dueDate: '2026-01-22', points: 20, status: 'pending', bimester: '1er Bimestre', description: 'Ensayo de 2 páginas sobre causas y consecuencias', type: 'proyecto' },
-        { id: 3, title: 'Examen Parcial', subject: 'Física', dueDate: '2026-01-25', points: 30, status: 'pending', bimester: '1er Bimestre', description: 'Estudiar capítulos 1-4: Movimiento rectilíneo', type: 'examen' },
-        // Submitted
-        { id: 4, title: 'Práctica de Laboratorio', subject: 'Química', dueDate: '2026-01-15', points: 15, status: 'submitted', bimester: '1er Bimestre', submittedDate: '2026-01-14', grade: 14, description: 'Reporte del experimento de reacciones', type: 'tarea' },
-        { id: 5, title: 'Reading Comprehension', subject: 'Inglés', dueDate: '2026-01-10', points: 10, status: 'submitted', bimester: '1er Bimestre', submittedDate: '2026-01-10', grade: 9, description: 'Leer texto y responder preguntas', type: 'tarea' },
-        { id: 6, title: 'Línea del Tiempo', subject: 'Historia', dueDate: '2026-01-12', points: 20, status: 'submitted', bimester: '1er Bimestre', submittedDate: '2026-01-11', grade: null, description: 'Crear línea del tiempo ilustrada', type: 'proyecto' },
-        // Overdue
-        { id: 7, title: 'Ecuaciones Cuadráticas', subject: 'Matemáticas', dueDate: '2026-01-05', points: 15, status: 'overdue', bimester: '1er Bimestre', description: 'Resolver problemas de aplicación', type: 'tarea' },
-        { id: 8, title: 'Vocabulary Quiz', subject: 'Inglés', dueDate: '2026-01-03', points: 10, status: 'overdue', bimester: '1er Bimestre', description: 'Estudiar vocabulario unidad 2', type: 'examen' },
-    ]);
+    useEffect(() => {
+        const fetchTasks = async () => {
+            try {
+                const res = await api.get('/student/tasks');
+                const data = res.data?.data || res.data || [];
+                setTasks(data);
+
+                const subs = new Set(['Todas']);
+                const bims = new Set(['Todos']);
+                data.forEach(t => {
+                    if (t.subject) subs.add(t.subject);
+                    if (t.bimester) bims.add(t.bimester);
+                });
+                setSubjects([...subs]);
+                setBimesters([...bims]);
+            } catch (err) {
+                console.error("Error fetching student tasks:", err);
+                setTasks([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchTasks();
+    }, []);
 
     const filterTasks = (status) => {
         return tasks.filter(task => {
@@ -136,7 +149,12 @@ const StudentTasksPage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Tasks List */}
                 <div className={`lg:col-span-2 ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-sm overflow-hidden`}>
-                    {currentTasks.length === 0 ? (
+                    {loading ? (
+                        <div className="p-12 text-center">
+                            <Loader className="animate-spin text-obs-purple mx-auto" size={32} />
+                            <p className={`mt-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Cargando tareas...</p>
+                        </div>
+                    ) : currentTasks.length === 0 ? (
                         <div className="p-12 text-center">
                             <ClipboardList size={48} className={`mx-auto ${darkMode ? 'text-gray-600' : 'text-gray-300'}`} />
                             <p className={`mt-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>

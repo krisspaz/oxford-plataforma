@@ -1,9 +1,7 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Star, MessageSquare, Award } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import studentService from '../services/studentService';
-import { motion } from 'framer-motion';
 
 const EvaluacionDocentePage = () => {
     const { darkMode } = useTheme();

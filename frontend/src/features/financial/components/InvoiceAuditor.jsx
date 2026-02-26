@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { financialEnterpriseService } from '../services/financialEnterpriseService';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { FileText, Search, XCircle, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 const InvoiceAuditor = () => {
@@ -21,6 +20,7 @@ const InvoiceAuditor = () => {
             toast.success('Documento anulado correctamente (Simulado)');
             // Update local state mock
             setInvoices(prev => prev.map(inv => inv.id === invoice.id ? { ...inv, status: 'ANULADO' } : inv));
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             toast.error('Error al anular');
         }

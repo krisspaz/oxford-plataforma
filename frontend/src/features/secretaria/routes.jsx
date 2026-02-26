@@ -1,14 +1,21 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
 
 // Lazy Imports
+// eslint-disable-next-line unused-imports/no-unused-vars
 const InscripcionesPage = lazy(() => import('../../pages/InscripcionesPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const MatriculacionPage = lazy(() => import('../../pages/MatriculacionPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const Students = lazy(() => import('../../pages/Students'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const FamiliasPage = lazy(() => import('../../pages/FamiliasPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ContractsPage = lazy(() => import('../../pages/ContractsPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const AsignarPaquetesPage = lazy(() => import('../../pages/AsignarPaquetesPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ConveniosPage = lazy(() => import('../../pages/ConveniosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const AsignarConvenioPage = lazy(() => import('../../pages/AsignarConvenioPage'));
 
 export const secretariaRouteElements = <>

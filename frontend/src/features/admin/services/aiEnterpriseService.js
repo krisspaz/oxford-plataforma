@@ -11,6 +11,7 @@ export const aiEnterpriseService = {
         try {
             const data = await api.get('/ai/health');
             return data ?? { status: 'unknown' };
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             return {
                 status: 'degraded',
@@ -29,6 +30,7 @@ export const aiEnterpriseService = {
                 grades: [65, 70, 58, 80]
             });
             return data ?? MOCK_RISK_DATA;
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             return MOCK_RISK_DATA;
         }
@@ -41,6 +43,7 @@ export const aiEnterpriseService = {
         try {
             const data = await api.post('/ai/chat', { message });
             return data;
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             return {
                 response: 'Modo Offline: No puedo conectar con el servicio de IA. Tus datos están seguros.',

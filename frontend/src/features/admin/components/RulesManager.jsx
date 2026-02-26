@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { securityService } from '../services/securityService';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { BookOpen, Plus, Edit2, Trash2, X, Save, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const RulesManager = () => {
@@ -29,6 +28,7 @@ const RulesManager = () => {
         try {
             const data = await securityService.getRules();
             setRules(data);
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             toast.error('Error al cargar reglas');
         } finally {
@@ -61,6 +61,7 @@ const RulesManager = () => {
                 toast.success('Regla creada');
             }
             setShowModal(false);
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             toast.error('Error al guardar regla');
         }
@@ -72,6 +73,7 @@ const RulesManager = () => {
             // await securityService.deleteRule(id);
             setRules(prev => prev.filter(r => r.id !== id));
             toast.success('Regla eliminada');
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             toast.error('Error al eliminar');
         }

@@ -1,5 +1,3 @@
-import React from 'react';
-import { Construction, ArrowLeft, Clock, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 

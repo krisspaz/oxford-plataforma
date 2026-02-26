@@ -1,6 +1,6 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Settings, Users, DollarSign, GraduationCap, Search, Edit, History, Save, X, AlertTriangle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Users, DollarSign, GraduationCap } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import api from '../services/api';
 
@@ -103,6 +103,7 @@ const CentroAjustesPage = () => {
 
     const content = getTabContent();
 
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const handleOpenAdjust = (item) => {
         setSelectedItem(item);
         setAdjustmentData({});

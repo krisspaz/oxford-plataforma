@@ -1,17 +1,18 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { aiApi } from '../services/aiApi';
 
 const AIContext = createContext();
 
 export const AIProvider = ({ children }) => {
     const location = useLocation();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { user } = useAuth();
     const [contextState, setContextState] = useState({
         currentPath: '/',
         viewingEntity: null, // e.g., { type: 'grade', id: 1 }
         lastAction: null,
+         
         timestamp: Date.now()
     });
 
@@ -30,6 +31,7 @@ export const AIProvider = ({ children }) => {
         // Example: If path is /grades/1, we infer viewingEntity
         // This logic can be expanded or moved to a utility
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location]);
 
     const registerAction = (action, details) => {
@@ -46,4 +48,5 @@ export const AIProvider = ({ children }) => {
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAI = () => useContext(AIContext);

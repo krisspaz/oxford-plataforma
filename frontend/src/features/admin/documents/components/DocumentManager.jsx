@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTheme } from '../../../../contexts/ThemeContext';
-import { FileText, UploadCloud, Trash2, Download, Search, Folder } from 'lucide-react';
 import { toast } from 'sonner';
 
 const DocumentManager = () => {

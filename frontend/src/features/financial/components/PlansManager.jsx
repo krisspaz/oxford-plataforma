@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { financialEnterpriseService } from '../services/financialEnterpriseService';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { CreditCard, Plus, Calendar, User, DollarSign } from 'lucide-react';
 
 const PlansManager = () => {
     const { darkMode } = useTheme();
@@ -10,6 +9,7 @@ const PlansManager = () => {
     const [activeTab, setActiveTab] = useState('insolvents'); // insolvents | plans
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/immutability
         loadData();
     }, []);
 

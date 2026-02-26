@@ -1,6 +1,5 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { FileText, Search, Download, X, Eye, AlertTriangle, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { invoiceService } from '../services';
 
@@ -26,10 +25,12 @@ const ComprobantesPage = () => {
         } else {
             loadInvoices();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location]);
 
     useEffect(() => {
         loadInvoices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filterType, filterStatus]);
 
     const loadInvoices = async () => {

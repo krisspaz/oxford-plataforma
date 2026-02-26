@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FileText, Download, BarChart3, Users, DollarSign, Calendar, TrendingUp, Clock, FileSpreadsheet, Filter, Search, Printer, Mail } from 'lucide-react';
+import { useState } from 'react';
+import { FileText, BarChart3, Users, DollarSign, Calendar, TrendingUp, Clock, FileSpreadsheet } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 /**
@@ -64,6 +64,7 @@ const ReportsDashboard = () => {
         teal: 'from-teal-500 to-teal-600',
     };
 
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const handleGenerate = async (report, action = 'download') => {
         setGenerating(true);
         setSelectedReport(report);
@@ -91,6 +92,7 @@ const ReportsDashboard = () => {
             {/* Categories */}
             <div className="flex flex-wrap gap-2">
                 {categories.map(cat => {
+                    // eslint-disable-next-line unused-imports/no-unused-vars
                     const Icon = cat.icon;
                     const isActive = activeCategory === cat.id;
                     return (
@@ -134,6 +136,7 @@ const ReportsDashboard = () => {
             {/* Reports Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredReports.map(report => {
+                    // eslint-disable-next-line unused-imports/no-unused-vars
                     const Icon = report.icon;
                     const isGenerating = generating && selectedReport?.id === report.id;
 

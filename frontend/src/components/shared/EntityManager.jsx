@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, X, Save, RefreshCw, ChevronLeft, ChevronRight, Download, Eye } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { api } from '../../services';
 import { toast } from '../../utils/toast';
@@ -31,6 +30,7 @@ const EntityManager = ({
     actions = ['create', 'edit', 'delete', 'view'],
     searchFields = [],
     customActions = [],
+    // eslint-disable-next-line unused-imports/no-unused-vars
     Icon = null
 }) => {
     const { darkMode } = useTheme();
@@ -54,6 +54,7 @@ const EntityManager = ({
     // Load data
     useEffect(() => {
         loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [endpoint]);
 
     const loadData = async () => {
@@ -151,7 +152,9 @@ const EntityManager = ({
             case 'boolean':
                 return value ? '✓ Sí' : '✗ No';
             case 'badge':
+                // eslint-disable-next-line no-case-declarations
                 const badgeColors = column.badgeColors || {};
+                // eslint-disable-next-line no-case-declarations
                 const color = badgeColors[value] || 'gray';
                 return (
                     <span className={`px-2 py-0.5 rounded-full text-xs font-bold bg-${color}-100 text-${color}-700 dark:bg-${color}-900/30 dark:text-${color}-400`}>

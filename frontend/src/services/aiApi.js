@@ -23,6 +23,7 @@ export const aiApi = {
     },
 
     // Quick method to get insights (por ahora sigue siendo mock, pero centralizado)
+    // eslint-disable-next-line unused-imports/no-unused-vars
     getInsights: async (role, userId) => {
         // En el futuro se puede cambiar a:
         // return aiApi.get('/analytics/institutional-health');

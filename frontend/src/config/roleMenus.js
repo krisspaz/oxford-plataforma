@@ -45,8 +45,6 @@ export const MENU_ITEMS = {
     estadoCuenta: { id: 'estadoCuenta', label: 'Estado de Cuenta', path: '/finanzas/estado-cuenta', icon: 'CreditCard' },
     registroPagos: { id: 'registroPagos', label: 'Registro de Pagos', path: '/finanzas/pagos', icon: 'PlusCircle' },
     paquetesSeleccionados: { id: 'paquetesSeleccionados', label: 'Paq. Seleccionados', path: '/finanzas/paquetes-seleccionados', icon: 'CheckSquare' },
-
-    paquetesSeleccionados: { id: 'paquetesSeleccionados', label: 'Paq. Seleccionados', path: '/finanzas/paquetes-seleccionados', icon: 'CheckSquare' },
     scholarships: { id: 'scholarships', label: 'Becas y Convenios', path: '/finanzas/becas', icon: 'Award' },
 
     // === SECRETARÍA / INSCRIPCIONES ===
@@ -285,12 +283,15 @@ export const getCombinedMenu = (roles) => {
 
     // Define section order preference
     const sectionOrder = [
-        'Principal', 'Administración', 'Sistema', 'Monitoreo',
-        'Inscripciones', 'Finanzas', 'Gestión Cobros', 'Operaciones',
+        'Principal', 'Dashboard',
+        'Finanzas', 'Gestión Cobros', 'Operaciones', 'Cobros',
+        'Secretaría', 'Inscripciones', 'Gestión',
         'Académico', 'Gestión Académica', 'Organización', 'Reportes', 'Supervisión',
         'Docente', 'Mis Clases', 'Actividades', 'Calificaciones',
-        'Estudiante', 'Mi Aprendizaje',
+        'Estudiante', 'Mi Aprendizaje', 'Evaluaciones',
         'Padres', 'Mis Hijos', 'Seguimiento',
+        'Administración', 'Sistema', 'Monitoreo', 'Soporte',
+        'Comunicación', 'Inteligencia Artificial',
         'Configuración'
     ];
 

@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, GraduationCap } from 'lucide-react';
 import { useState } from 'react';
 
 const loginSchema = z.object({
@@ -29,6 +28,7 @@ const Login = () => {
             } else {
                 toast.info('Credenciales inválidas');
             }
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             toast.info('Error iniciando sesión');
         }

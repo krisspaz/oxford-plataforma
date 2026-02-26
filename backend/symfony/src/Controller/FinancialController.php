@@ -108,12 +108,7 @@ class FinancialController extends AbstractController
         $enrollment = $enrollmentRepo->findOneBy(['student' => $student]); // Simplification
         
         if (!$enrollment) {
-             // Create mock enrollment if not exists for testing
-             $enrollment = new Enrollment();
-             $enrollment->setStudent($student);
-             $enrollment->setSchoolCycle($package->getSchoolCycle());
-             // grade/section needs to be handled
-             return $this->json(['error' => 'Student not enrolled yet'], 400);
+             return $this->json(['error' => 'Student not enrolled yet (No enrollment found)'], 400);
         }
 
         $enrollment->setPackage($package);

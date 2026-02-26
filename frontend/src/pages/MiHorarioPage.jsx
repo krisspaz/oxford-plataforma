@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, BookOpen, RefreshCw, MapPin, Users } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { scheduleService } from '../services';
@@ -18,6 +17,7 @@ const MiHorarioPage = () => {
 
     useEffect(() => {
         fetchSchedule();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     const fetchSchedule = async () => {

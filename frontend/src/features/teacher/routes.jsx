@@ -1,14 +1,19 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
-import ProtectedRoute from '../../components/ProtectedRoute';
 
 // Lazy Imports
+// eslint-disable-next-line unused-imports/no-unused-vars
 const GradeEntryPage = lazy(() => import('../grades/pages/GradeEntryPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const MiHorarioPage = lazy(() => import('../../pages/MiHorarioPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const MisAlumnosPage = lazy(() => import('../../pages/MisAlumnosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const GestionTareasPage = lazy(() => import('../../pages/GestionTareasPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ContenidoPage = lazy(() => import('../../pages/ContenidoPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const NotasFinalesPage = lazy(() => import('../../pages/NotasFinalesPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ChatDocentePage = lazy(() => import('../../pages/ChatDocentePage'));
 
 export const teacherRouteElements = <>

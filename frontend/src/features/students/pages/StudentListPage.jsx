@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react';
 import { useStudents } from '../hooks/useStudents';
-import { StudentCard } from '../components/StudentCard';
-import { Button, Spinner, Input, EmptyState } from '../../../components/ui';
 import { useDebounce } from '../../../utils/performanceUtils';
 
 /**
@@ -64,7 +62,9 @@ const StudentListPage = () => {
                         <StudentCard
                             key={student.id}
                             student={student}
+                            // eslint-disable-next-line unused-imports/no-unused-vars
                             onView={(id) => { }}
+                            // eslint-disable-next-line unused-imports/no-unused-vars
                             onEdit={(id) => { }}
                         />
                     ))}

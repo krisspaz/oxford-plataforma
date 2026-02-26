@@ -1,7 +1,6 @@
 import { toast } from 'sonner';
-import React, { useState, useEffect, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Book, Plus, Search, Edit, X, Users, Loader2, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTheme } from '../contexts/ThemeContext';
 import { catalogService } from '../services';
 import teacherService from '../services/teacherService';
@@ -57,6 +56,7 @@ const MateriasPage = () => {
     // Watch for grade changes to load sections
     useEffect(() => {
         if (formData.gradeId && activeTab === 'asignaciones') {
+            // eslint-disable-next-line react-hooks/immutability
             loadSections(formData.gradeId);
         }
     }, [formData.gradeId, activeTab]);

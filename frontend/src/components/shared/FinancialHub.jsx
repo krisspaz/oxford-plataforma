@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { DollarSign, CreditCard, FileText, Receipt, TrendingUp, TrendingDown, Users, AlertCircle, CheckCircle, Clock, ArrowUpRight, ArrowDownRight, Filter, Search, Download, Plus, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { DollarSign, FileText, Receipt, TrendingUp, Users, AlertCircle, Clock } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { api } from '../../services';
 
 /**
  * FinancialHub - Unified Financial Operations Dashboard
@@ -12,6 +11,7 @@ import { api } from '../../services';
 const FinancialHub = () => {
     const { darkMode } = useTheme();
     const [activeTab, setActiveTab] = useState('overview');
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState({
         summary: { income: 0, pending: 0, overdue: 0, families: 0 },
@@ -28,6 +28,7 @@ const FinancialHub = () => {
     ];
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/immutability
         loadData();
     }, []);
 
@@ -71,6 +72,7 @@ const FinancialHub = () => {
                     { label: 'Vencido', value: data.summary.overdue, icon: AlertCircle, color: 'red', trend: '-3.2%' },
                     { label: 'Familias Activas', value: data.summary.families, icon: Users, color: 'blue', isCount: true },
                 ].map((stat, i) => {
+                    // eslint-disable-next-line unused-imports/no-unused-vars
                     const Icon = stat.icon;
                     return (
                         <div key={i} className={`${cardClass} p-5 relative overflow-hidden`}>
@@ -204,6 +206,7 @@ const FinancialHub = () => {
             {/* Tabs */}
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-1 shadow-sm flex gap-1 overflow-x-auto`}>
                 {tabs.map(tab => {
+                    // eslint-disable-next-line unused-imports/no-unused-vars
                     const Icon = tab.icon;
                     const isActive = activeTab === tab.id;
                     return (

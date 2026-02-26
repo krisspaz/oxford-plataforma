@@ -1,8 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTheme } from '../../../contexts/ThemeContext';
-import SecurityWidgets from '../components/SecurityWidgets';
-import AuditLogTable from '../components/AuditLogTable';
-import RulesManager from '../components/RulesManager';
 import { Shield, Lock, FileText } from 'lucide-react';
 
 const SecurityDashboard = () => {

@@ -1,6 +1,5 @@
 import { toast } from 'sonner';
-import React, { useState, useEffect, useMemo } from 'react';
-import { CreditCard, DollarSign, Receipt, Check, User, Search, Loader2, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { studentService, paymentService } from '../services';
 
@@ -49,6 +48,7 @@ const RegistroPagosPage = () => {
             loadQuotas();
             setNit(selectedStudent.nit || 'CF');
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedStudent]);
 
     const loadQuotas = async () => {

@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { aiEnterpriseService } from '../services/aiEnterpriseService';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { Activity, Zap, ServerCrash } from 'lucide-react';
 
 const CircuitStatus = () => {
     const { darkMode } = useTheme();

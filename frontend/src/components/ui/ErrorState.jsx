@@ -2,8 +2,7 @@
  * ErrorState Component
  * Displays error states with retry functionality
  */
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
-import { Button } from './index';
+import { RefreshCw, Home } from 'lucide-react';
 
 export const ErrorState = ({
     title = 'Error al cargar',
@@ -13,6 +12,7 @@ export const ErrorState = ({
     onGoHome,
     fullScreen = false,
 }) => {
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const Container = fullScreen ? 'div' : 'div';
 
     return (

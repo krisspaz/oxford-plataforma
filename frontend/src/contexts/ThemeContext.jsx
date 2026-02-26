@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
@@ -16,6 +17,7 @@ export const ThemeProvider = ({ children }) => {
         try {
             const stored = localStorage.getItem('darkMode');
             return stored === 'true';
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (e) {
             return false;
         }

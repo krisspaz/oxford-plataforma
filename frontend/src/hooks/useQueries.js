@@ -233,6 +233,7 @@ export const useSaveAttendanceMutation = () => {
     return useMutation({
         mutationFn: ({ scheduleId, date, attendances }) =>
             attendanceService.saveBatch(scheduleId, date, attendances),
+        // eslint-disable-next-line unused-imports/no-unused-vars
         onSuccess: (_, { scheduleId, date }) => {
             queryClient.invalidateQueries({ queryKey: ['attendance', scheduleId] });
             queryClient.invalidateQueries({ queryKey: ['attendance-report'] });

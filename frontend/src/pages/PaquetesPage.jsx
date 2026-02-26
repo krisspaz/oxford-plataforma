@@ -1,7 +1,6 @@
 import { toast } from 'sonner';
-import React, { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Package, Plus, ChevronDown, ChevronRight, Edit, X, Loader2, Trash2, Save } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { packageService, catalogService } from '../services';
 
@@ -77,6 +76,7 @@ const PaquetesPage = () => {
     const openEditPackage = (pkg) => {
         setFormData({
             ...pkg,
+            // eslint-disable-next-line react-hooks/purity
             details: pkg.details?.length > 0 ? pkg.details : [{ id: Date.now(), productName: '', price: 0, documentType: 'FACTURA_SAT', productType: 'Servicio', quantity: 1 }]
         });
         setShowModal(true);

@@ -1,6 +1,4 @@
-import React from 'react';
 import { useRouteError } from 'react-router-dom';
-import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 
 const GlobalErrorBoundary = () => {
     const error = useRouteError();

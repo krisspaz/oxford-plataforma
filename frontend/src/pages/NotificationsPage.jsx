@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { Bell, Filter, Trash2, Check, ChevronLeft, X, Settings, Mail, Smartphone, Monitor, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import notificationService from '../services/notificationService';
 import { toast } from '../utils/toast';
@@ -21,6 +20,7 @@ const NotificationsPage = () => {
 
     useEffect(() => {
         loadNotifications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const loadNotifications = async () => {
@@ -107,6 +107,7 @@ const NotificationsPage = () => {
                 setSelectedNotification(null);
             }
             toast.info('Notificación eliminada');
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             // console.error(error); 
             // If backend delete not impl, handle optimistic UI?

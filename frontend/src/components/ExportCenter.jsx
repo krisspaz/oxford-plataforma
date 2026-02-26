@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { exportBoletaPDF, exportStudentListExcel, exportGradesExcel, exportAttendancePDF } from '../utils/exportUtils';
 
 /**

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { RefreshCw, AlertCircle, CheckCircle, Clock, FileText, ClipboardList } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { taskService } from '../services';
 import { useTheme } from '../contexts/ThemeContext';
 

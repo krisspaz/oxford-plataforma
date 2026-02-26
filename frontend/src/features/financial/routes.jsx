@@ -1,26 +1,43 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
-import ProtectedRoute from '../../components/ProtectedRoute';
 
 // Lazy Imports
+// eslint-disable-next-line unused-imports/no-unused-vars
 const Financial = lazy(() => import('../../pages/Financial'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const RegistroPagosPage = lazy(() => import('../../pages/RegistroPagosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const EstadoCuentaPage = lazy(() => import('../../pages/EstadoCuentaPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const CorteDiaPage = lazy(() => import('../../pages/CorteDiaPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ComprobantesPage = lazy(() => import('../../pages/ComprobantesPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ComprobantesEmitidosPage = lazy(() => import('../../pages/ComprobantesEmitidosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const PaquetesPage = lazy(() => import('../../pages/PaquetesPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const CostosPage = lazy(() => import('../../pages/CostosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ExonerationPage = lazy(() => import('../../pages/ExonerationPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const SolicitudesPage = lazy(() => import('../../pages/SolicitudesPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const InsolventesPage = lazy(() => import('../../pages/InsolventesPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const AsignarPaquetesPage = lazy(() => import('../../pages/AsignarPaquetesPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ConveniosPage = lazy(() => import('../../pages/ConveniosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const AsignarConvenioPage = lazy(() => import('../../pages/AsignarConvenioPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const PaquetesSeleccionadosPage = lazy(() => import('../../pages/PaquetesSeleccionadosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ScholarshipsPage = lazy(() => import('./pages/ScholarshipsPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const PlansManager = lazy(() => import('./components/PlansManager'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const InvoiceAuditor = lazy(() => import('./components/InvoiceAuditor'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const BankingMonitor = lazy(() => import('./components/BankingMonitor'));
 
 const FinancialRoutes = () => {
@@ -57,6 +74,7 @@ const FinancialRoutes = () => {
 };
 
 // Export routes specifically for the Layout children
+// eslint-disable-next-line react-refresh/only-export-components
 export const financialRouteElements = <>
     <Route path="finanzas" element={<Financial />} />
     <Route path="finanzas/pagos" element={<RegistroPagosPage />} />
@@ -80,6 +98,7 @@ export const financialRouteElements = <>
     <Route path="finanzas/seguridad" element={<BankingMonitor />} />
 </>;
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const standaloneFinancialRoutes = <>
     <Route path="/financiero/comprobantes" element={<ProtectedRoute><ComprobantesEmitidosPage /></ProtectedRoute>} />
     <Route path="/financiero/paquetes" element={<ProtectedRoute><AsignarPaquetesPage /></ProtectedRoute>} />

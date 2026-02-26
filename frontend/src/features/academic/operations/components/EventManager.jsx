@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTheme } from '../../../../contexts/ThemeContext';
-import { Calendar, Plus, MapPin, Trash2 } from 'lucide-react';
 
 const EventManager = () => {
     const { darkMode } = useTheme();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [events, setEvents] = useState([
         { id: 1, title: 'Aniversario del Colegio', date: '2024-03-15', type: 'holiday', location: 'Campus Central' },
         { id: 2, title: 'Entrega de Notas - I Bimestre', date: '2024-04-10', type: 'academic', location: 'Virtual' },

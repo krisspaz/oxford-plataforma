@@ -1,9 +1,7 @@
 import { toast } from 'sonner';
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Save, Lock, Unlock, Check, AlertCircle, Loader2, CheckCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
 import { gradeRecordService, bimesterService, teacherService } from '../services';
 
 const CargaNotasPage = () => {
@@ -46,6 +44,7 @@ const CargaNotasPage = () => {
     useEffect(() => {
         if (bimesters.length > 0 && !selectedBimester) {
             const current = bimesters.find(b => !b.isClosed);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             if (current) setSelectedBimester(current.id.toString());
         }
     }, [bimesters, selectedBimester]);
@@ -65,6 +64,7 @@ const CargaNotasPage = () => {
 
     useEffect(() => {
         if (gradeData?.success) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setCurrentBimesterData(gradeData.bimester);
             setStudents((gradeData.records || []).map(r => ({
                 id: r.id,

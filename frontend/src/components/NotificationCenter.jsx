@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { X } from 'lucide-react';
 import api from '../services/api';
 
 /**
@@ -13,6 +12,7 @@ import api from '../services/api';
  * - Modal para ver detalles completos
  */
 const NotificationCenter = () => {
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { user } = useAuth();
     const navigate = useNavigate();
     const [notifications, setNotifications] = useState([]);
@@ -37,6 +37,7 @@ const NotificationCenter = () => {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchNotifications();
         // Optional: Poll every minute
         const interval = setInterval(fetchNotifications, 60000);

@@ -1,6 +1,5 @@
 import { toast } from '../utils/toast';
 import { useState, useEffect, useMemo } from 'react';
-import { AlertCircle, Search, DollarSign, Calendar, User, FileText, Loader, Filter, CheckCircle, PartyPopper } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useTheme } from '../contexts/ThemeContext';

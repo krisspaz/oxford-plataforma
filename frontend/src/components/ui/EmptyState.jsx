@@ -3,10 +3,10 @@
  * Displays empty states with optional action button
  */
 import { Inbox } from 'lucide-react';
-import { Button } from './index.jsx';
 import { cn } from '../../utils/cn';
 
 export const EmptyState = ({
+    // eslint-disable-next-line unused-imports/no-unused-vars
     icon: Icon = Inbox,
     title = 'Sin datos',
     description = 'No hay elementos para mostrar.',

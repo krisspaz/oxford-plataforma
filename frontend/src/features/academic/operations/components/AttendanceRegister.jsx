@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTheme } from '../../../../contexts/ThemeContext';
-import { Check, X, Clock, Save, Calendar } from 'lucide-react';
+import { Check, X, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AttendanceRegister = () => {
@@ -23,6 +23,7 @@ const AttendanceRegister = () => {
         toast.success(`Asistencia guardada para el ${date}`);
     };
 
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const StatusButton = ({ student, type, icon: Icon, colorClass }) => (
         <button
             onClick={() => handleStatusChange(student.id, type)}

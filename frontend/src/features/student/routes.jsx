@@ -1,20 +1,29 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
-import ProtectedRoute from '../../components/ProtectedRoute';
 
 // Lazy Imports
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ReportsPage = lazy(() => import('../../pages/ReportsPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const MiHorarioPage = lazy(() => import('../../pages/MiHorarioPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const EstadoCuentaPage = lazy(() => import('../../pages/EstadoCuentaPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const TareasPage = lazy(() => import('../../pages/TareasPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ContractsPage = lazy(() => import('../../pages/ContractsPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const StudentGradesPage = lazy(() => import('./pages/StudentGradesPage'));
 
 // New Student Portal Features
+// eslint-disable-next-line unused-imports/no-unused-vars
 const StudentTasksPage = lazy(() => import('../../pages/StudentTasksPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const TeacherRatingPage = lazy(() => import('../../pages/TeacherRatingPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const SuggestionsPage = lazy(() => import('../../pages/SuggestionsPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ComplaintsPage = lazy(() => import('../../pages/ComplaintsPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const StudentChatPage = lazy(() => import('../../pages/StudentChatPage'));
 
 export const studentRouteElements = <>

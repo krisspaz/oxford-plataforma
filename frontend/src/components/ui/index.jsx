@@ -1,4 +1,3 @@
-import React from 'react';
 
 /**
  * Design System - Reusable Components
@@ -68,6 +67,7 @@ export const Input = ({
     type = 'text',
     ...props
 }) => {
+    // eslint-disable-next-line react-hooks/purity
     const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
 
     return (

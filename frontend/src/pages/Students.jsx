@@ -2,7 +2,6 @@ import { toast } from 'sonner';
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services/api';
-import { Plus, Search, Trash2, Edit, X, Loader2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 const Students = () => {

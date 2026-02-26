@@ -1,12 +1,12 @@
 import { toast } from 'sonner';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Loader2, Check, User, Calendar, GraduationCap, CreditCard, FileText, ChevronRight, AlertCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { studentService, catalogService, packageService, enrollmentService } from '../services';
 
 const MatriculacionPage = () => {
     const { darkMode } = useTheme();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const [students, setStudents] = useState([]);

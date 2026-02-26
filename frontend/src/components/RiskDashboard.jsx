@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { AlertTriangle, TrendingDown, CheckCircle, ShieldAlert } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import AiService from '../services/AiService';
 
 const RiskDashboard = ({ students }) => {

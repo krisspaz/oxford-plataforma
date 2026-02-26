@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { studentService } from '../services/studentService';
-import { MessageCircle, Send, User, Check, CheckCheck, Search, Image, Smile, Phone, Video, MoreVertical, Paperclip, Volume2 } from 'lucide-react';
 
 const StudentChatPage = () => {
     const { darkMode } = useTheme();
@@ -13,6 +12,7 @@ const StudentChatPage = () => {
     // State for teachers/conversations
     const [teachers, setTeachers] = useState([]);
     const [conversations, setConversations] = useState({});
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -103,6 +103,7 @@ const StudentChatPage = () => {
         scrollToBottom();
     }, [selectedTeacher, conversations]);
 
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const getTotalUnread = () => teachers.reduce((sum, t) => sum + (t.unread || 0), 0);
 
     return (

@@ -1,5 +1,5 @@
 import { toast } from '../utils/toast';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 
 const ExonerationPage = () => {

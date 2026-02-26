@@ -1,7 +1,4 @@
-import React from 'react';
-import { Save, Lock, Unlock, AlertCircle, CheckCircle } from 'lucide-react';
 import { useGradeEntry } from '../hooks/useGradeEntry';
-import { Button, Card, Badge, Spinner } from '../../../components/ui';
 import { toast } from '../../../utils/toast';
 
 const GradeEntryPage = () => {

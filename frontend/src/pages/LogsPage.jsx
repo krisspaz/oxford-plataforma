@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Activity, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import api from '../services/api';
 

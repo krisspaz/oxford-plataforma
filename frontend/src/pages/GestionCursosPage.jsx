@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings, BookOpen, Plus, Edit, Search, Filter, MoreVertical, Layout, Grid } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { catalogService } from '../services';
 
@@ -8,6 +7,7 @@ const GestionCursosPage = () => {
     const { darkMode } = useTheme();
     const navigate = useNavigate();
     const [grades, setGrades] = useState([]);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 

@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { Alert, Button } from './ui';
+/* eslint-disable react-refresh/only-export-components */
+import { Component } from 'react';
 
 /**
  * Centralized Error Boundary
@@ -33,7 +33,7 @@ class CentralizedErrorBoundary extends Component {
         this.logErrorToService(error, errorInfo);
 
         // Log to console in development
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
             console.error('Error caught by boundary:', error);
             console.error('Component stack:', errorInfo.componentStack);
         }
@@ -53,7 +53,7 @@ class CentralizedErrorBoundary extends Component {
             };
 
             // In production, send to monitoring service
-            if (process.env.NODE_ENV === 'production') {
+            if (import.meta.env.PROD) {
                 await fetch('/api/log-error', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -125,7 +125,7 @@ class CentralizedErrorBoundary extends Component {
                         )}
 
                         {/* Error details in development */}
-                        {process.env.NODE_ENV === 'development' && error && (
+                        {import.meta.env.DEV && error && (
                             <div className="mb-6 text-left p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
                                 <p className="font-mono text-sm text-red-700 dark:text-red-300 break-all">
                                     {error.message}
@@ -183,7 +183,7 @@ export const useErrorHandler = () => {
         }
 
         // Log to service
-        if (process.env.NODE_ENV === 'production') {
+        if (import.meta.env.PROD) {
             fetch('/api/log-error', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

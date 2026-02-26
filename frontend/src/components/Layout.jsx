@@ -1,20 +1,15 @@
 import { useState, useMemo } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
     Home,
     BookOpen,
     Calendar,
     Users,
     Settings,
-    LogOut,
     GraduationCap,
     DollarSign,
     FileText,
     Bell,
-    ChevronLeft,
-    ChevronRight,
-    Moon,
-    Sun,
     UserPlus,
     User,
     CreditCard,
@@ -38,20 +33,45 @@ import {
     Menu,
     Database,
     Brain,
-    MessageSquare
+    MessageSquare,
+    Search,
+    Maximize2,
+    X,
+    ChevronDown,
+    UserMinus,
+    HelpCircle,
+    PlusCircle,
+    CheckSquare,
+    Award,
+    File,
+    Briefcase,
+    TrendingUp,
+    Activity,
+    Mail,
+    Star,
+    Sliders,
+    BellOff,
+    Upload,
+    List,
+    PenTool,
+    AlertTriangle,
+    ClipboardList,
+    Lightbulb,
+    Archive,
+    Layout as LayoutIcon
 } from 'lucide-react';
+
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getMenuForRole, getCombinedMenu, ROLE_LABELS } from '../config/roleMenus';
-import NotificationCenter from './NotificationCenter';
 
 // Icon mapping
 const ICON_MAP = {
-    Home, BookOpen, Calendar, Users, Settings, GraduationCap, DollarSign,
-    FileText, UserPlus, User, CreditCard, FileCheck, FileSpreadsheet,
-    Receipt, AlertCircle, Package, MinusCircle, Layers, LayoutGrid,
-    Book, Link: LinkIcon, Lock, BarChart, Edit, Clock, Bookmark,
-    UserCog, Shield, Menu, Database, Bell, Brain, MessageSquare
+    Menu, Search, Settings, Calendar, Bell, Maximize2, X, ChevronDown,
+    Home, BookOpen, Users, GraduationCap, DollarSign, FileText, UserPlus, User, CreditCard,
+    FileCheck, FileSpreadsheet, Receipt, AlertCircle, Package, MinusCircle, Layers, LayoutGrid, Book,
+    Link: LinkIcon, Lock, BarChart, Edit, Clock, Bookmark, UserCog, Shield, Database, Brain, MessageSquare,
+    UserMinus, HelpCircle, PlusCircle, CheckSquare, Award, File, Briefcase, TrendingUp, Activity, Mail, Star, Sliders, BellOff, Upload, List, PenTool, AlertTriangle, ClipboardList, Lightbulb, Archive, Layout: LayoutIcon
 };
 
 // Section Color Mapping
@@ -83,6 +103,7 @@ const Layout = () => {
     const { user, logout } = useAuth();
     const { darkMode, toggleDarkMode } = useTheme();
 
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     const userRole = useMemo(() => {
         if (!user?.roles || user.roles.length === 0) return 'ROLE_ALUMNO';
         const mainRole = user.roles.find(r => r !== 'ROLE_USER');
@@ -93,6 +114,7 @@ const Layout = () => {
         return ROLE_LABELS[userRole] || 'Usuario';
     }, [userRole]);
 
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     const menuSections = useMemo(() => {
         if (user?.roles && user.roles.length > 0) {
             return getCombinedMenu(user.roles);

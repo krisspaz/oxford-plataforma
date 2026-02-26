@@ -24,6 +24,7 @@ export const usePdfExport = () => {
 
     // Configurable School Info
     const SCHOOL_NAME = "CORPORACIÓN EDUCACIONAL OXFORD";
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const SCHOOL_ADDRESS = "Ciudad de Guatemala";
 
     const createDoc = async (title, subtitle, orientation = 'portrait') => {

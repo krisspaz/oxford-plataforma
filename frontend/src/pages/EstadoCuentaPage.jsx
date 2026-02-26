@@ -1,6 +1,5 @@
 import { toast } from 'sonner';
-import React, { useState, useEffect, useMemo } from 'react';
-import { User, Search, DollarSign, Check, Clock, AlertCircle, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { studentService } from '../services';
 
@@ -10,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const EstadoCuentaPage = () => {
     const { darkMode } = useTheme();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { user, hasRole } = useAuth();
     const { exportTable } = usePdfExport(); // Hook
 

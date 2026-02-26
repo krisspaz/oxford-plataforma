@@ -1,11 +1,6 @@
-import React, { useState } from 'react';
-import { LazyMotion, domAnimation, m, AnimatePresence } from 'framer-motion';
-import {
-    ArrowRight, CheckCircle, Shield, Users, Zap,
-    BookOpen, DollarSign, Brain, Star, ChevronDown,
-    Menu, X, Play, School
-} from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { domAnimation } from 'framer-motion';
+
 
 const LandingPage = () => {
     const [activeTab, setActiveTab] = useState('academic');

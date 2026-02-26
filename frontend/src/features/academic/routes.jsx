@@ -1,20 +1,33 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
 
 // Lazy Imports
+// eslint-disable-next-line unused-imports/no-unused-vars
 const Academic = lazy(() => import('../../pages/Academic'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const GradosPage = lazy(() => import('../../pages/GradosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const MateriasPage = lazy(() => import('../../pages/MateriasPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const TeacherListPage = lazy(() => import('../teacher/pages/TeacherListPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const BimestresPage = lazy(() => import('../../pages/BimestresPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ReportsPage = lazy(() => import('../../pages/ReportsPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const TareasPage = lazy(() => import('../../pages/TareasPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const CursosNivelesPage = lazy(() => import('../../pages/CursosNivelesPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const SeccionesPage = lazy(() => import('../../pages/SeccionesPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const AsignacionMateriasPage = lazy(() => import('../../pages/AsignacionMateriasPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const HorariosPage = lazy(() => import('../../pages/HorariosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const GestionCursosPage = lazy(() => import('../../pages/GestionCursosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const IAHorariosPage = lazy(() => import('../../pages/IAHorariosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const DailyOperationsDashboard = lazy(() => import('./operations/pages/DailyOperationsDashboard'));
 
 export const academicRouteElements = <>

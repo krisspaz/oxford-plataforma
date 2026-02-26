@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 // ============================================
 // AUTH CONTEXT TESTS
@@ -23,6 +23,7 @@ describe('AuthContext', () => {
             roles: ['ROLE_ADMIN'],
             exp: Math.floor(Date.now() / 1000) + 3600
         }));
+        // eslint-disable-next-line unused-imports/no-unused-vars
         const mockToken = `header.${payload}.signature`;
 
         // Decode the payload
@@ -124,6 +125,7 @@ describe('Form Validations', () => {
 // ============================================
 describe('Component Rendering', () => {
     it('should handle loading states', () => {
+        // eslint-disable-next-line unused-imports/no-unused-vars
         const LoadingComponent = ({ loading }) => (
             loading ? <div data-testid="loading">Loading...</div> : <div data-testid="content">Content</div>
         );
@@ -136,6 +138,7 @@ describe('Component Rendering', () => {
     });
 
     it('should handle error states', () => {
+        // eslint-disable-next-line unused-imports/no-unused-vars
         const ErrorComponent = ({ error }) => (
             error ? <div data-testid="error">{error}</div> : <div data-testid="success">OK</div>
         );
@@ -145,6 +148,7 @@ describe('Component Rendering', () => {
     });
 
     it('should handle empty data states', () => {
+        // eslint-disable-next-line unused-imports/no-unused-vars
         const ListComponent = ({ items }) => (
             items.length === 0
                 ? <div data-testid="empty">No items</div>

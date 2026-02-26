@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { financialEnterpriseService } from '../services/financialEnterpriseService';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { ShieldAlert, AlertTriangle, Fingerprint } from 'lucide-react';
 
 const BankingMonitor = () => {
     const { darkMode } = useTheme();

@@ -1,6 +1,4 @@
-import React from 'react';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { Users, BookOpen, Clock, TrendingUp, AlertCircle, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const MyChildrenPage = () => {

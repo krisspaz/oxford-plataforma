@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Mic, Send, MicOff, Volume2, X, Sparkles, MessageCircle, ChevronRight, Bot, User, RefreshCw } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import aiApi from '../services/aiApi';
 import { useAuth } from '../contexts/AuthContext';
@@ -66,6 +65,7 @@ const VoiceChat = () => {
                 }]);
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, user]);
 
     // Scroll to bottom when messages change
@@ -133,6 +133,7 @@ const VoiceChat = () => {
                 executeAction(response.action);
             }
 
+            // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             setIsTyping(false);
             setMessages(prev => [...prev, {

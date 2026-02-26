@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Mail, Edit, Eye, Send, Save, X, Variable, RefreshCw, Check, AlertTriangle } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { toast } from '../utils/toast';
 import api from '../services/api';
@@ -28,6 +27,7 @@ const PlantillasCorreoPage = () => {
 
     useEffect(() => {
         loadTemplates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const loadTemplates = async () => {
@@ -123,6 +123,7 @@ Colegio Oxford`;
         try {
             await api.post(`/email-templates/${selectedTemplate.id}/test`);
             toast.success('Correo de prueba enviado');
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             toast.error('Error al enviar prueba');
         }

@@ -1,7 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import Login from '../../pages/Login';
-import { BrowserRouter } from 'react-router-dom';
+import { describe, it, expect } from 'vitest';
 
 describe('Login Component', () => {
     it('renders login form', () => {

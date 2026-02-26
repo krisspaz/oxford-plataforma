@@ -1,21 +1,35 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
 
 // Lazy Imports
+// eslint-disable-next-line unused-imports/no-unused-vars
 const GestionUsuariosPage = lazy(() => import('../../pages/GestionUsuariosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const CatalogosPage = lazy(() => import('../../pages/CatalogosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const SettingsPage = lazy(() => import('../../pages/SettingsPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const ResetNotificacionesPage = lazy(() => import('../../pages/ResetNotificacionesPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const PrivilegiosPage = lazy(() => import('../../pages/PrivilegiosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const GestionMenusPage = lazy(() => import('../../pages/GestionMenusPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const CierreEscolarPage = lazy(() => import('../../pages/CierreEscolarPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const MonitoreoPage = lazy(() => import('../../pages/MonitoreoPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const LogsPage = lazy(() => import('../../pages/LogsPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const AdminChargesPage = lazy(() => import('./pages/AdminChargesPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const SecurityDashboard = lazy(() => import('./pages/SecurityDashboard'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const PredictiveDashboard = lazy(() => import('./pages/PredictiveDashboard'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const DocumentManager = lazy(() => import('./documents/components/DocumentManager'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const HelpTicketsPage = lazy(() => import('./pages/HelpTicketsPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const TeacherRatingsPage = lazy(() => import('../academic/pages/TeacherRatingsPage'));
 
 

@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 const NotificationListener = () => {
     useEffect(() => {
-        const url = new URL('http://localhost:3000/.well-known/mercure');
+        const mercureUrl = import.meta.env.VITE_MERCURE_URL || `${window.location.protocol}//${window.location.hostname}:3000/.well-known/mercure`;
+        const url = new URL(mercureUrl);
         url.searchParams.append('topic', 'http://oxford.edu/notifications');
 
         const eventSource = new EventSource(url);

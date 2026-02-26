@@ -1,6 +1,3 @@
-import React from 'react';
-import { Edit, Eye, Book } from 'lucide-react';
-import { Button, Card, Badge } from '../../../components/ui';
 
 export const TeacherCard = ({ teacher, onEdit, onView }) => {
     return (

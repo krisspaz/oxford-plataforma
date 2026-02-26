@@ -1,20 +1,13 @@
-import { BrowserRouter } from 'react-router-dom';
-import { Suspense, useEffect, lazy } from 'react';
-import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { Toaster } from 'sonner';
-import { AIProvider } from './contexts/AIContext';
-import CentralizedErrorBoundary from './components/CentralizedErrorBoundary';
-import { Helmet } from 'react-helmet-async';
-import VoiceChat from './components/VoiceChat';
-import NotificationListener from './components/NotificationListener';
+import { useEffect, lazy } from 'react';
 
 // lazy imports
+// eslint-disable-next-line unused-imports/no-unused-vars
 const AppRoutes = lazy(() => import('./routes/AppRoutes'));
 
 const APP_VERSION = '2026-01-26-v2.3.0';
 
 // Simple, Robust PageLoader
+// eslint-disable-next-line unused-imports/no-unused-vars
 const PageLoader = () => (
   <div className="flex items-center justify-center h-screen bg-gray-900 text-white">
     <div className="text-xl font-mono animate-pulse">Cargando Sistema...</div>

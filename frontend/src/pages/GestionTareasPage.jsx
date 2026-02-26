@@ -1,14 +1,13 @@
 import { toast } from 'sonner';
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ClipboardList, Plus, Search, Calendar, BookOpen, GraduationCap, Edit, Trash2, Check, Clock, AlertCircle, X, Save, Loader2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { taskService, gradeService, bimesterService, teacherService } from '../services';
-import { Select, EmptyState, ErrorState } from '../components/ui';
 
 const GestionTareasPage = ({ viewMode = 'management' }) => {
     const { darkMode } = useTheme();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { user, hasRole } = useAuth(); // Assuming user has { id, teacherId } attached if role is teacher? 
     // If not, we might need to fetch teacher profile or rely on backend 'my-tasks'.
     // Actually, create task requires 'teacherId' in the body. If the backend doesn't infer it from the logged in user for creation, we need it.
@@ -60,6 +59,7 @@ const GestionTareasPage = ({ viewMode = 'management' }) => {
         queryFn: () => bimesterService.getAll({ active: true }),
     });
 
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { data: tasks = [], isLoading: loadingTasks, error: tasksError, refetch: refetchTasks } = useQuery({
         queryKey: ['tasks', 'mine'],
         queryFn: () => taskService.getMyTasks(),
@@ -325,7 +325,7 @@ const GestionTareasPage = ({ viewMode = 'management' }) => {
                     </div>
                     <div className="w-40">
                         <label className={`block text-xs font-medium mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Curso</label>
-                        <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)} className={inputClass}>
+                        <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} className={inputClass}>
                             <option value="">Todos</option>
                             {subjects.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                         </select>

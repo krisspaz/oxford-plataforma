@@ -1,13 +1,13 @@
 import { toast } from 'sonner';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FileText, Download, Loader2, Plus, Upload, Eye, X, User, GraduationCap, Phone, Mail, MapPin, Calendar, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePdfExport } from '../hooks/usePdfExport';
-import { contractService, studentService } from '../services';
+import { contractService } from '../services';
 
 const ContractsPage = () => {
     const { darkMode } = useTheme();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { createDoc } = usePdfExport();
     const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState('all');
@@ -36,15 +36,12 @@ const ContractsPage = () => {
         queryFn: async () => {
             const { success, data } = await contractService.getAll();
             if (success && Array.isArray(data)) return data;
-            // Mock fallback
-            return [
-                { id: 1, student: 'Ana García López', carnet: '2026-001', grade: '1ro Primaria', cycle: '2026', date: '2026-01-19', status: 'SIGNED', signedFile: '/contracts/signed_001.pdf' },
-                { id: 2, student: 'Pedro López Martínez', carnet: '2026-002', grade: '2do Primaria', cycle: '2026', date: '2026-01-20', status: 'PENDING' },
-            ];
+            return [];
         },
     });
 
     // === MUTATION ===
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const generateMutation = useMutation({
         mutationFn: async (payload) => contractService.create(payload),
         onSuccess: () => {

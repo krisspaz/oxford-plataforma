@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { jobTitleService } from '../../../services';
-import { Briefcase, Plus, Search, Users, Edit2, Trash2, X, Save } from 'lucide-react';
 import { toast } from '../../../utils/toast';
 
 const AdminChargesPage = () => {
     // Real Data State
     const [cargos, setCargos] = useState([]);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [loading, setLoading] = useState(true);
 
     const [searchTerm, setSearchTerm] = useState('');

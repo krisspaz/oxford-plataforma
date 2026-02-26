@@ -5,7 +5,7 @@
 
 const analytics = {
     track: (eventName, properties = {}) => {
-        if (process.env.NODE_ENV === 'production') {
+        if (import.meta.env.PROD) {
             console.log(`[Analytics] ${eventName}`, properties);
             // TODO: Integration implementation
             // window.gtag('event', eventName, properties);
@@ -15,13 +15,13 @@ const analytics = {
     },
 
     identify: (userId, traits = {}) => {
-        if (process.env.NODE_ENV === 'production') {
+        if (import.meta.env.PROD) {
             console.log(`[Analytics] Identify ${userId}`, traits);
         }
     },
 
     page: (pageName, properties = {}) => {
-        if (process.env.NODE_ENV === 'production') {
+        if (import.meta.env.PROD) {
             console.log(`[Analytics] Page ${pageName}`, properties);
         }
     }

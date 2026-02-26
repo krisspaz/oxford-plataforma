@@ -1,8 +1,7 @@
 import { toast } from 'sonner';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar, Users, BookOpen, Save, AlertCircle, Loader2, Wand2, Info, RefreshCw } from 'lucide-react';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../services/api';
@@ -12,6 +11,7 @@ const ItemTypes = {
     CLASS_CARD: 'class_card'
 };
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const DraggableClass = ({ id, subject, teacher, color }) => {
     const [{ isDragging }, drag] = useDrag(() => ({
         type: ItemTypes.CLASS_CARD,
@@ -31,6 +31,7 @@ const DraggableClass = ({ id, subject, teacher, color }) => {
     );
 };
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const DroppableSlot = ({ day, period, onDrop, children, conflict }) => {
     const [{ isOver }, drop] = useDrop(() => ({
         accept: ItemTypes.CLASS_CARD,
@@ -63,12 +64,14 @@ const DroppableSlot = ({ day, period, onDrop, children, conflict }) => {
 };
 
 const HorariosPage = () => {
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { darkMode } = useTheme();
     const [schedule, setSchedule] = useState({});
     const [conflicts, setConflicts] = useState({});
     const [generating, setGenerating] = useState(false);
 
     // === QUERY ===
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { data: pool = [], isLoading: loading } = useQuery({
         queryKey: ['schedule', 'pool'],
         queryFn: async () => {

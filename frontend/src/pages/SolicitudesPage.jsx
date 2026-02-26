@@ -1,6 +1,5 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect, useMemo } from 'react';
-import { AlertCircle, Check, X, Eye, Clock, FileText, RefreshCw, ChevronRight, Shield, UserCheck } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { requestService } from '../services';
@@ -35,6 +34,7 @@ const SolicitudesPage = () => {
 
     useEffect(() => {
         loadRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filter]);
 
     const loadRequests = async () => {

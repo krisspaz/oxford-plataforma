@@ -1,20 +1,8 @@
 import { toast } from '../utils/toast';
 import { useState, useRef, useEffect } from 'react';
 import { api } from '../services/api';
-import {
-    Sparkles,
-    Send,
-    Download,
-    Clock,
-    CheckCircle,
-    Bot,
-    FileText,
-    Calendar,
-    Settings,
-    X,
-    Save,
-    Loader2
-} from 'lucide-react';
+
+
 import { useTheme } from '../contexts/ThemeContext';
 
 // IA siempre vía backend Symfony (auth + circuit breaker)
@@ -292,6 +280,7 @@ const Academic = () => {
         toast.info(`Descargando PDF: ${type === 'grade' ? selectedGrade : 'Todos'}`);
     };
 
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const ConfigModal = () => (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">

@@ -1,6 +1,5 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ShieldOff } from 'lucide-react';
 
 /**
  * ProtectedRoute - Guards routes with authentication and role-based access

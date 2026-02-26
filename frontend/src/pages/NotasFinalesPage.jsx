@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const NotasFinalesPage = () => {
     const [year, setYear] = useState(new Date().getFullYear());

@@ -10,6 +10,7 @@ export const financialEnterpriseService = {
         try {
             const response = await api.get(`/payment-plans/student/${studentId}`);
             return response.data || [];
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             console.warn('Backend PaymentPlans offline, using mock.');
             return MOCK_PLANS;
@@ -25,6 +26,7 @@ export const financialEnterpriseService = {
         try {
             const response = await api.get('/payment-plans/insolvents');
             return response.data || [];
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             return MOCK_INSOLVENTS;
         }
@@ -36,6 +38,7 @@ export const financialEnterpriseService = {
             // filters: { type, status, dateFrom, dateTo }
             const response = await api.get('/invoices', { params: filters });
             return response.data || [];
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             return MOCK_INVOICES;
         }
@@ -51,6 +54,7 @@ export const financialEnterpriseService = {
             // This endpoint would come from BankingSecurityService
             const response = await api.get('/security/banking-alerts');
             return response.data || [];
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             return MOCK_ALERTS;
         }

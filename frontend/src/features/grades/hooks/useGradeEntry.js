@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { gradeRecordService, bimesterService, teacherService } from '../../../services'; // Adjust paths
 
 export const useGradeEntry = () => {
@@ -47,6 +47,7 @@ export const useGradeEntry = () => {
         if (selectedAssignmentId && selectedBimesterId) {
             loadStudents();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedAssignmentId, selectedBimesterId]);
 
     const loadStudents = async () => {

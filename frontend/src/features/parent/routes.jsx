@@ -1,10 +1,11 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
-import ProtectedRoute from '../../components/ProtectedRoute';
 
 // Lazy Imports
+// eslint-disable-next-line unused-imports/no-unused-vars
 const MyChildrenPage = lazy(() => import('./pages/MyChildrenPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const FamilyContractPage = lazy(() => import('./pages/FamilyContractPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const MonitoreoPage = lazy(() => import('../../pages/MonitoreoPage'));
 
 export const parentRouteElements = <>

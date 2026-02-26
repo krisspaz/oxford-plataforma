@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
-import { Users, Plus } from 'lucide-react';
+import { useState } from 'react';
 import { useTeachers } from '../hooks/useTeachers';
-import { TeacherCard } from '../components/TeacherCard';
-import { Button, Input, Spinner, Modal, EmptyState } from '../../../components/ui';
 import { useDebounce } from '../../../utils/performanceUtils';
 import { toast } from '../../../utils/toast';
 
 const TeacherListPage = () => {
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { teachers, loading, refetch, createTeacher } = useTeachers();
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
@@ -28,6 +26,7 @@ const TeacherListPage = () => {
         setShowModal(true);
     };
 
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const handleView = (teacher) => {
         // View logic
     };

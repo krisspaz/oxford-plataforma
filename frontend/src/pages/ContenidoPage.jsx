@@ -1,6 +1,5 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Book, Plus, Trash2, Link as LinkIcon, FileText, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import resourceService from '../services/resourceService';
@@ -19,12 +18,14 @@ const ContenidoPage = () => {
     // Load subjects and resources from API
     useEffect(() => {
         loadInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     const loadInitialData = async () => {
         setLoading(true);
         try {
             // 1. Get Teacher Profile
+            // eslint-disable-next-line unused-imports/no-unused-vars
             let teacherId = user?.id; // Fallback to user ID if linked directly
             // Try to get real teacher profile if needed, or assume backend handles 'me'
             // Ideally we fetch profile first to get teacher ID

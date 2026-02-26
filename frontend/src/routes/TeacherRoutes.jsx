@@ -1,9 +1,12 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const MisAlumnosPage = lazy(() => import('../pages/MisAlumnosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const CargaNotasPage = lazy(() => import('../pages/CargaNotasPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const AsistenciaPage = lazy(() => import('../pages/CorteDiaPage')); // Assuming usage
+// eslint-disable-next-line unused-imports/no-unused-vars
 const PlanificacionPage = lazy(() => import('../pages/TareasPage')); // Assuming usage
 
 export const teacherRouteElements = (

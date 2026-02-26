@@ -1,9 +1,8 @@
 import { toast } from 'sonner';
-import React, { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Layout, Plus, Edit, Trash, Loader2, X, ChevronRight, AlertCircle, Save } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { gradeService, catalogService } from '../services';
+import { gradeService } from '../services';
 
 const SeccionesPage = () => {
     const { darkMode } = useTheme();
@@ -72,6 +71,7 @@ const SeccionesPage = () => {
         }
     };
 
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const handleDelete = async (id) => {
         if (!window.confirm('¿Eliminar sección?')) return;
         // Need delete service

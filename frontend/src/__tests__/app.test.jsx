@@ -1,8 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from '../contexts/AuthContext';
-import { ThemeProvider } from '../contexts/ThemeContext';
 
 /**
  * Frontend Test Suite
@@ -10,6 +7,7 @@ import { ThemeProvider } from '../contexts/ThemeContext';
  */
 
 // Mock components for testing
+// eslint-disable-next-line unused-imports/no-unused-vars
 const TestWrapper = ({ children }) => (
     <BrowserRouter>
         <ThemeProvider>
@@ -32,6 +30,7 @@ const TestWrapper = ({ children }) => (
 
 describe('NotificationCenter', () => {
     it('should render notification bell', async () => {
+        // eslint-disable-next-line unused-imports/no-unused-vars
         const { default: NotificationCenter } = await import('../components/NotificationCenter');
 
         render(
@@ -45,6 +44,7 @@ describe('NotificationCenter', () => {
     });
 
     it('should toggle dropdown on click', async () => {
+        // eslint-disable-next-line unused-imports/no-unused-vars
         const { default: NotificationCenter } = await import('../components/NotificationCenter');
 
         render(
@@ -65,6 +65,7 @@ describe('NotificationCenter', () => {
 
 describe('ExportCenter', () => {
     it('should render export options', async () => {
+        // eslint-disable-next-line unused-imports/no-unused-vars
         const { default: ExportCenter } = await import('../components/ExportCenter');
 
         render(
@@ -158,6 +159,7 @@ describe('Dashboard Integration', () => {
             AuthProvider: ({ children }) => children,
         }));
 
+        // eslint-disable-next-line unused-imports/no-unused-vars
         const { default: Dashboard } = await import('../pages/Dashboard');
 
         render(

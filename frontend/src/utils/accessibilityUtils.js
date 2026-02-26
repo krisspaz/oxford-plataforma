@@ -7,6 +7,8 @@
 // FOCUS MANAGEMENT
 // ==========================================
 
+import { useEffect, useRef, useCallback, useState } from 'react';
+
 /**
  * Trap focus within an element (for modals)
  */
@@ -43,8 +45,6 @@ export const trapFocus = (element) => {
 /**
  * Hook for managing focus
  */
-import { useEffect, useRef, useCallback } from 'react';
-
 export const useFocusManagement = () => {
     const previousFocusRef = useRef(null);
 
@@ -134,8 +134,6 @@ export const useEscapeKey = (onEscape) => {
 // SCREEN READER ANNOUNCEMENTS
 // ==========================================
 
-import { useState } from 'react';
-
 /**
  * Hook for announcing messages to screen readers
  */
@@ -179,29 +177,36 @@ export const generateId = (prefix = 'a11y') => {
     return `${prefix}-${++idCounter}`;
 };
 
-/**
- * Hook for ARIA described by
- */
+/* eslint-disable react-hooks/refs */
 export const useAriaDescribedBy = () => {
     const id = useRef(generateId('description'));
 
+    const describedById = id.current;
+    const descriptionProps = { id: id.current };
+    const inputProps = { 'aria-describedby': id.current };
+
     return {
-        describedById: id.current,
-        descriptionProps: { id: id.current },
-        inputProps: { 'aria-describedby': id.current },
+        describedById,
+        descriptionProps,
+        inputProps,
     };
 };
 
 /**
  * Hook for ARIA labelled by
  */
+/* eslint-disable react-hooks/refs */
 export const useAriaLabelledBy = () => {
     const id = useRef(generateId('label'));
 
+    const labelledById = id.current;
+    const labelProps = { id: id.current };
+    const inputProps = { 'aria-labelledby': id.current };
+
     return {
-        labelledById: id.current,
-        labelProps: { id: id.current },
-        inputProps: { 'aria-labelledby': id.current },
+        labelledById,
+        labelProps,
+        inputProps,
     };
 };
 
@@ -235,6 +240,7 @@ export const usePrefersReducedMotion = () => {
 
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setPrefersReducedMotion(mediaQuery.matches);
 
         const handler = (e) => setPrefersReducedMotion(e.matches);
@@ -245,30 +251,6 @@ export const usePrefersReducedMotion = () => {
 
     return prefersReducedMotion;
 };
-
-// ==========================================
-// CSS CLASSES
-// ==========================================
-
-// Add to your global CSS:
-/*
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.focus-visible:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-*/
 
 export default {
     trapFocus,

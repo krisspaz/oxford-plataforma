@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Send, Search, MoreVertical, Phone, Video, Paperclip, Smile, ArrowLeft, Check, CheckCheck, Shield, MessageCircle, Volume2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import teacherService from '../services/teacherService';
 
@@ -12,6 +11,7 @@ const ChatDocentePage = () => {
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/immutability
         loadStudents();
     }, []);
 
@@ -74,6 +74,7 @@ const ChatDocentePage = () => {
         }
     };
 
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [isTyping, setIsTyping] = useState(false);
 
     const scrollToBottom = () => {

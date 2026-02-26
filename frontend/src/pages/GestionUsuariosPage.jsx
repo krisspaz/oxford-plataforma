@@ -1,7 +1,6 @@
 import { toast } from 'sonner';
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Users, Plus, Edit, Lock, Unlock, Key, Search, X, Loader2, Check, AlertCircle, Trash2, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { userService } from '../services';
 
@@ -37,6 +36,7 @@ const GestionUsuariosPage = () => {
     const [showPassword, setShowPassword] = useState(false);
 
     // === QUERY ===
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { data: users = [], isLoading: loading } = useQuery({
         queryKey: ['users'],
         queryFn: async () => {

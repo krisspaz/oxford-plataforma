@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from '../utils/toast';
 
 /**
@@ -14,6 +14,7 @@ const CrisisModeDashboard = () => {
     // Simulated data - conectar con backend real
     useEffect(() => {
         // Fetch active crises from backend
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setActiveCrises([
             {
                 id: 'CRISIS_001',
@@ -207,7 +208,7 @@ const CrisisModeDashboard = () => {
                                     </h3>
 
                                     <div className="space-y-3">
-                                        {playbook.map((step, idx) => (
+                                        {playbook.map((step) => (
                                             <div
                                                 key={step.step}
                                                 className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl"

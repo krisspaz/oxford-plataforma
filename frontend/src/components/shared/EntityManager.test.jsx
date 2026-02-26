@@ -1,7 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import EntityManager from './EntityManager';
-import { ThemeProvider } from '../../contexts/ThemeContext';
 
 // Mock the API
 vi.mock('../../services', () => ({

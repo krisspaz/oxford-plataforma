@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Activity, Server, Users, AlertTriangle, FileText, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Activity, Server, Users, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import api from '../services/api';
 
@@ -32,6 +32,7 @@ const MonitoreoPage = () => {
         return () => clearInterval(interval);
     }, []);
 
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const StatCard = ({ title, value, icon: Icon, color }) => (
         <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} p-6 rounded-xl shadow-sm border-l-4 ${color}`}>
             <div className="flex justify-between items-start">

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Shield, Users, Eye, Edit2, Check, X } from 'lucide-react';
 
 const PrivilegiosPage = () => {
     const [selectedRole, setSelectedRole] = useState(null);

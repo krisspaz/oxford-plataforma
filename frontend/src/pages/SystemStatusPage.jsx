@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import Layout from '../components/Layout';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Activity, Database, Server, HardDrive, RefreshCw } from 'lucide-react';
+import { Database, Server, HardDrive } from 'lucide-react';
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const StatusCard = ({ title, icon: Icon, status, details }) => {
     const isUp = status === 'up';
     return (
@@ -23,6 +23,7 @@ const StatusCard = ({ title, icon: Icon, status, details }) => {
 
 const SystemStatusPage = () => {
     const [data, setData] = useState(null);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const { token } = useAuth();
@@ -47,6 +48,7 @@ const SystemStatusPage = () => {
         fetchData();
         const interval = setInterval(fetchData, 5000); // Poll every 5 seconds
         return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     return (

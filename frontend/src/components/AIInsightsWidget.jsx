@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { Brain, Sparkles, TrendingUp, AlertTriangle, ArrowRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import aiApi from '../services/aiApi';
 
 const AIInsightsWidget = ({ darkMode, userRole }) => {

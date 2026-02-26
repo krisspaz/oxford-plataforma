@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MessageSquare, ThumbsUp, AlertTriangle, Send, CheckCircle, HelpCircle } from 'lucide-react';
+import { useState } from 'react';
+import { ThumbsUp, AlertTriangle, HelpCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import studentService from '../services/studentService';
 

@@ -1,7 +1,6 @@
 import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, ChevronDown, ChevronRight, X, RefreshCw, Trash, GraduationCap } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { catalogService, gradeService } from '../services';
 
@@ -83,6 +82,7 @@ const GradosPage = () => {
             queryClient.invalidateQueries(['grades']);
             toast.success('Grado eliminado');
         },
+        // eslint-disable-next-line unused-imports/no-unused-vars
         onError: (err) => toast.error('Error al eliminar grado')
     });
 

@@ -23,18 +23,18 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://nginx:80',
+        target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
       },
       '/ai': {
-        target: 'http://ai_service:8001',
+        target: 'http://localhost:8001',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/ai/, ''),
       },
       '/ai-api': {
-        target: 'http://ai_service:8001',
+        target: 'http://localhost:8001',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/ai-api/, ''),
       },
@@ -43,12 +43,6 @@ export default defineConfig({
     allowedHosts: true,
     host: true,
     cors: true,
-    hmr: {
-      clientPort: 443, // Forces the client to connect via standard HTTPS port (handled by Ngrok)
-      protocol: 'wss', // Use secure websocket
-      host: process.env.VITE_NGROK_HOST || undefined, // Use env var or dynamic
-    },
-
   },
   test: {
     globals: true,

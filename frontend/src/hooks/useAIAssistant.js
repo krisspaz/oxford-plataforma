@@ -92,11 +92,13 @@ export const useAIAssistant = (onScheduleGenerated = null) => {
         } finally {
             setIsProcessing(false);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [config, isProcessing, addMessage]);
 
     /**
      * Handle AI intent response
      */
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const handleIntent = useCallback(async (response, originalText) => {
         const { intent, confidence, response_text, entities, should_generate, config_changes } = response;
 
@@ -135,6 +137,7 @@ export const useAIAssistant = (onScheduleGenerated = null) => {
                         isError: true,
                     });
                 }
+            // eslint-disable-next-line unused-imports/no-unused-vars
             } catch (error) {
                 setMessages((prev) => prev.filter((m) => !m.isLoading));
                 addMessage('ai', '❌ Error al generar el horario. Por favor, verifica la configuración.', {
@@ -182,6 +185,7 @@ export const useAIAssistant = (onScheduleGenerated = null) => {
         addMessage('ai', response_text || 'Entendido. ¿Hay algo más en lo que pueda ayudarte?', {
             confidence,
         });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [config, addMessage, onScheduleGenerated]);
 
     /**

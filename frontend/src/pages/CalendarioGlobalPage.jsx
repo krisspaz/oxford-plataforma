@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalIcon, MapPin, Clock, Info } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import eventService from '../services/eventService';
 import taskService from '../services/taskService';
@@ -12,6 +11,7 @@ const CalendarioGlobalPage = () => {
     const [selectedDate, setSelectedDate] = useState(null);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/immutability
         loadData();
     }, []);
 

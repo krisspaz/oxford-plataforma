@@ -112,6 +112,7 @@ const contractService = {
             y += lines.length * fontSize * 0.4 + 2;
         };
 
+        // eslint-disable-next-line unused-imports/no-unused-vars
         const addBoldLabel = (label, value, fontSize = 9) => {
             doc.setFontSize(fontSize);
             doc.setFont('helvetica', 'bold');

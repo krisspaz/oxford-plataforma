@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { securityService } from '../services/securityService';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { Shield, AlertTriangle, CheckCircle, Search, Filter, Clock } from 'lucide-react';
 
 const AuditLogTable = () => {
     const { darkMode } = useTheme();

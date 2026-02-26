@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { FileText, Download, TrendingUp, AlertCircle, Loader } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import api from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import { toast } from '../../../utils/toast';
 
 const StudentGradesPage = () => {
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { user } = useAuth();
     const [grades, setGrades] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -13,6 +13,7 @@ const StudentGradesPage = () => {
 
     useEffect(() => {
         fetchGrades();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchGrades = async () => {

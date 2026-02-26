@@ -1,13 +1,13 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { RefreshCw, ArrowLeft, Upload, FileText, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { taskService, studentService } from '../services';
 import { useAuth } from '../contexts/AuthContext';
 
 const StudentTaskDetailPage = () => {
     const { taskId } = useParams();
     const navigate = useNavigate();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [task, setTask] = useState(null);
@@ -20,6 +20,7 @@ const StudentTaskDetailPage = () => {
 
     useEffect(() => {
         loadTaskAndProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [taskId]);
 
     const loadTaskAndProfile = async () => {

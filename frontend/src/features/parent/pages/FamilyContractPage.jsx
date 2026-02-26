@@ -1,6 +1,4 @@
-import React from 'react';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { FileText, Download, CheckCircle } from 'lucide-react';
 
 const FamilyContractPage = () => {
     const { darkMode } = useTheme();

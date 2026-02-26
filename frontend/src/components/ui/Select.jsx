@@ -3,7 +3,6 @@
  * Dropdown select with loading, error, and empty states
  */
 import { forwardRef } from 'react';
-import { ChevronDown, Loader2, AlertCircle } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 export const Select = forwardRef(({
@@ -18,6 +17,7 @@ export const Select = forwardRef(({
     id,
     ...props
 }, ref) => {
+    // eslint-disable-next-line react-hooks/purity
     const inputId = id || `select-${Math.random().toString(36).substr(2, 9)}`;
     const isEmpty = !loading && options.length === 0;
     const isDisabled = disabled || loading;

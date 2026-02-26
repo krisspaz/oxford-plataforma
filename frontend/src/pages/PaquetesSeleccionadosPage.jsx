@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Package, Check, X, RefreshCw, Search, Filter, Download } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePdfExport } from '../hooks/usePdfExport';
 import { packageService } from '../services/packageService';

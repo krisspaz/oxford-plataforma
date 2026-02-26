@@ -1,6 +1,4 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { NotificationCenter } from '../NotificationCenter';
 // Mock AuthContext if needed
 vi.mock('../../contexts/AuthContext', () => ({
     useAuth: () => ({ user: { id: 1 }, role: 'admin' })

@@ -1,12 +1,12 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Users, Search, Filter, GraduationCap, BookOpen, RefreshCw, User, Phone, Mail, Calendar, Check, X, Clock, FileText, Download, ChevronLeft, ChevronRight } from 'lucide-react';
-import { teacherService, attendanceService, scheduleService } from '../services';
+import { useState, useEffect } from 'react';
+import { teacherService, attendanceService } from '../services';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 
 const MisAlumnosPage = () => {
     const { darkMode } = useTheme();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [students, setStudents] = useState([]);
@@ -40,6 +40,7 @@ const MisAlumnosPage = () => {
                     const response = await teacherService.getStudents(profile.id);
                     studentsData = response?.data || response || [];
                 }
+            // eslint-disable-next-line unused-imports/no-unused-vars
             } catch (profileError) {
                 console.warn("Using fallback: fetching all students");
             }
@@ -159,6 +160,7 @@ const MisAlumnosPage = () => {
 
     const exportReport = async (studentId) => {
         try {
+            // eslint-disable-next-line unused-imports/no-unused-vars
             const report = await attendanceService.getStudentReport(studentId, selectedBimester);
             // Report data loaded
             toast.info(`📄 Reporte generado para estudiante ID ${studentId} (Simulación de descarga PDF real)`);

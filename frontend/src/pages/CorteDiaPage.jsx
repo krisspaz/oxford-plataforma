@@ -1,6 +1,5 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { FileSpreadsheet, Download, Calendar, DollarSign, CreditCard, Printer, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { invoiceService } from '../services';
 
@@ -41,6 +40,7 @@ const CorteDiaPage = () => {
 
     useEffect(() => {
         fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleExportPDF = () => {

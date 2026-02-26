@@ -1,0 +1,21 @@
+
+> frontend@0.0.0 lint
+> eslint .
+
+
+/Users/krispaz/Desktop/Por Terminar/Plataformas/corpo-oxford-sistema-main/frontend/src/components/VoiceChat.jsx
+  62:18  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+
+/Users/krispaz/Desktop/Por Terminar/Plataformas/corpo-oxford-sistema-main/frontend/src/contexts/AIContext.jsx
+  15:9  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/purity')
+
+/Users/krispaz/Desktop/Por Terminar/Plataformas/corpo-oxford-sistema-main/frontend/src/pages/ComprobantesEmitidosPage.jsx
+  13:5  warning  Unused eslint-disable directive (no problems were reported from 'unused-imports/no-unused-vars')
+  16:5  warning  Unused eslint-disable directive (no problems were reported from 'unused-imports/no-unused-vars')
+
+/Users/krispaz/Desktop/Por Terminar/Plataformas/corpo-oxford-sistema-main/frontend/src/pages/IAHorariosPage.jsx
+  578:13  warning  Unused eslint-disable directive (no problems were reported from 'no-useless-escape')
+
+✖ 5 problems (0 errors, 5 warnings)
+  0 errors and 5 warnings potentially fixable with the `--fix` option.
+

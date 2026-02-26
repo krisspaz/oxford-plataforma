@@ -1,7 +1,6 @@
 import { toast } from 'sonner';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Calendar, Lock, Unlock, Edit, Plus, AlertTriangle, X, Loader2, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { bimesterService } from '../services';
 
@@ -22,6 +21,7 @@ const BimestresPage = () => {
     });
 
     // === QUERY ===
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { data: bimesters = [], isLoading: loading, refetch } = useQuery({
         queryKey: ['bimesters'],
         queryFn: async () => {

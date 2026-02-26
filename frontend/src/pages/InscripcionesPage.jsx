@@ -1,7 +1,7 @@
 import { toast } from 'sonner';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { UserPlus, ChevronRight, ChevronLeft, Check, User, Users, FileText, Loader2, UserCheck } from 'lucide-react';
+import { User, Users, FileText, UserCheck } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { enrollmentService, catalogService, packageService } from '../services';
 

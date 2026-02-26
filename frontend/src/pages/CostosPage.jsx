@@ -1,6 +1,5 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { DollarSign, Save, Edit2, Plus, Check, X, RefreshCw, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import api from '../services/api';
 
@@ -26,13 +25,8 @@ const CostosPage = () => {
             setCosts(response.data.data || []);
         } catch (error) {
             console.error("Error loading costs", error);
-            // Fallback demo data if API fails
-            if (costs.length === 0) {
-                setCosts([
-                    { id: 1, gradeLevel: 'Pre-Kinder', enrollmentFee: 1500, monthlyFee: 800 },
-                    { id: 2, gradeLevel: 'Kinder', enrollmentFee: 1500, monthlyFee: 850 },
-                ]);
-            }
+            // Mostrar error real sin enmascarar con datos demo
+            toast.error('No se pudieron cargar los costos');
         } finally {
             setLoading(false);
         }
@@ -74,11 +68,7 @@ const CostosPage = () => {
             setNewCost({ gradeLevel: '', enrollmentFee: '', monthlyFee: '' });
         } catch (error) {
             console.error("Error creating cost", error);
-            // Demo fallback
-            const demoCost = { ...newCost, id: Date.now() };
-            setCosts([...costs, demoCost]);
-            setShowAddModal(false);
-            setNewCost({ gradeLevel: '', enrollmentFee: '', monthlyFee: '' });
+            toast.error('Error al crear el costo');
         } finally {
             setCreating(false);
         }

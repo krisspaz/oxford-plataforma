@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Menu, Layers, Eye, ChevronRight, ChevronDown, Home, Users, DollarSign, BookOpen, Settings } from 'lucide-react';
-import { ROLES, ROLE_MENUS, MENU_ITEMS } from '../config/roleMenus';
+import { Menu, Eye, Home, Users, DollarSign, BookOpen, Settings } from 'lucide-react';
+import { ROLE_MENUS, MENU_ITEMS } from '../config/roleMenus';
 
 const GestionMenusPage = () => {
     const [selectedRole, setSelectedRole] = useState('ROLE_ADMIN');
@@ -100,6 +100,7 @@ const GestionMenusPage = () => {
 
                     <div className="p-6 space-y-3">
                         {currentMenu.map((menuSection, idx) => {
+                            // eslint-disable-next-line unused-imports/no-unused-vars
                             const SectionIcon = sectionIcons[menuSection.section] || Menu;
                             const isExpanded = expandedSections[menuSection.section] !== false;
 

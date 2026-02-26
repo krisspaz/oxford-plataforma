@@ -1,8 +1,7 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { teacherService, teacherRatingService } from '../services';
 import { useTheme } from '../contexts/ThemeContext';
-import { Star, User, Send, CheckCircle, MessageSquare } from 'lucide-react';
 
 const TeacherRatingPage = () => {
     const { darkMode } = useTheme();
@@ -30,6 +29,7 @@ const TeacherRatingPage = () => {
 
     // Real Data Hooks
     const [teachers, setTeachers] = useState([]);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -78,6 +78,7 @@ const TeacherRatingPage = () => {
         ? (Object.values(ratings).reduce((a, b) => a + b, 0) / Object.values(ratings).filter(r => r > 0).length).toFixed(1)
         : 0;
 
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const StarRating = ({ value, onChange, size = 24 }) => (
         <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map(star => (

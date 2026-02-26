@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Brain, TrendingUp, AlertTriangle, CheckCircle, Search } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
 import { useApi } from '@/hooks/useApi';
 
 const AiInsightsPage = () => {
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const { fetch, post } = useApi();
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [loading, setLoading] = useState(false);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [students, setStudents] = useState([]);
     const [analyzing, setAnalyzing] = useState(false);
 
     // Mock initial student data since we don't have a bulk student endpoint with grades handy yet
     // In a real scenario, we'd fetch students, then ask AI to analyze them in batch.
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [mockStudents, setMockStudents] = useState([
         { id: 101, name: 'Juan Pérez', grade: '5to Bach', photo: null },
         { id: 102, name: 'Maria Gonzalez', grade: '5to Bach', photo: null },

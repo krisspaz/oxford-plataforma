@@ -1,6 +1,5 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Package, User, CheckCircle, Search, Save, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { studentService, packageService, financialService } from '../services';
 

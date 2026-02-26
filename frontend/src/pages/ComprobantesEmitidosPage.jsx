@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { FileText, Download, Search, RefreshCw, Filter, Calendar } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { invoiceService } from '../services';
 import { usePdfExport } from '../hooks/usePdfExport';
@@ -11,7 +10,11 @@ const ComprobantesEmitidosPage = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
+     
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [dateFrom, setDateFrom] = useState('');
+     
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [dateTo, setDateTo] = useState('');
 
     useEffect(() => {

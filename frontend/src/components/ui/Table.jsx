@@ -3,7 +3,6 @@
  * Reusable table with loading, empty, and sortable states
  */
 import { cn } from '../../utils/cn';
-import { ChevronUp, ChevronDown, Loader2, Inbox } from 'lucide-react';
 
 export const Table = ({
     columns = [],

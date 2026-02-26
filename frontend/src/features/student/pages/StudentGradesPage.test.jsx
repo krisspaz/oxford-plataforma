@@ -1,7 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import StudentGradesPage from './StudentGradesPage';
-import { AuthProvider } from '../../../contexts/AuthContext';
 
 // Mock API
 vi.mock('../../../services/api', () => ({
@@ -11,6 +9,7 @@ vi.mock('../../../services/api', () => ({
 }));
 
 // Mock Auth Context
+// eslint-disable-next-line unused-imports/no-unused-vars
 const MockAuthProvider = ({ children }) => (
     <AuthProvider value={{ user: { name: 'Test Student' } }}>
         {children}

@@ -1,8 +1,10 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const StudentGradesPage = lazy(() => import('../features/student/pages/StudentGradesPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const HorariosPage = lazy(() => import('../pages/HorariosPage'));
+// eslint-disable-next-line unused-imports/no-unused-vars
 const TareasPage = lazy(() => import('../pages/TareasPage'));
 
 export const studentRouteElements = (

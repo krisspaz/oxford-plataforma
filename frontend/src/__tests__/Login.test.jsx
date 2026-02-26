@@ -1,8 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import Login from '../pages/Login';
-import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from '../contexts/AuthContext';
 
 describe('Login Component Smoke Test', () => {
     it('renders login form', () => {

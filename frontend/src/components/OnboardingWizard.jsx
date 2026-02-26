@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -103,6 +103,7 @@ const OnboardingWizard = ({ onComplete }) => {
     useEffect(() => {
         const isCompleted = localStorage.getItem(`onboarding_completed_${user?.id}`);
         if (isCompleted) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setCompleted(true);
         }
     }, [user?.id]);

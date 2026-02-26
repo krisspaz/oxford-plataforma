@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Award, Plus, Trash2, Edit2, UserPlus, CheckCircle, Search, DollarSign, Percent } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { scholarshipService, studentService } from '@/services';
+import { useState, useEffect } from 'react';
+import { scholarshipService } from '@/services';
 import { toast } from '@/utils/toast';
 
 const ScholarshipsPage = () => {
     const [scholarships, setScholarships] = useState([]);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [showAssignModal, setShowAssignModal] = useState(false);
     const [selectedScholarship, setSelectedScholarship] = useState(null);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [studentQuery, setStudentQuery] = useState('');
 
     // Form State
@@ -59,6 +59,7 @@ const ScholarshipsPage = () => {
             setShowModal(false);
             setFormData({ name: '', type: 'PERCENTAGE', value: '', description: '' });
             loadData();
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             toast.error('Error al crear');
         }
@@ -70,6 +71,7 @@ const ScholarshipsPage = () => {
             await scholarshipService.delete(id);
             toast.success('Convenio desactivado');
             loadData();
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             toast.error('Error al eliminar');
         }
@@ -85,12 +87,14 @@ const ScholarshipsPage = () => {
             } else {
                 toast.error(res.message || 'Error al asignar');
             }
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             toast.error('Error de conexión');
         }
     };
 
     // Placeholder for student search
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const StudentSearch = () => {
         const [idInput, setIdInput] = useState('');
 

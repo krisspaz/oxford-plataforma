@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Star, User, AlertCircle, Trash2, Award, TrendingUp } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
 import { teacherRatingService, teacherService } from '@/services';
 import { toast } from '@/utils/toast';
 
 const TeacherRatingsPage = () => {
     const [ratings, setRatings] = useState([]);
     const [teachers, setTeachers] = useState([]);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [loading, setLoading] = useState(true);
 
     // Load data
@@ -100,6 +99,7 @@ const TeacherRatingsPage = () => {
             await teacherRatingService.delete(id);
             toast.success('Reseña eliminada');
             loadData();
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (e) {
             toast.error('Error al eliminar');
         }

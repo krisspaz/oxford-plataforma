@@ -1,6 +1,6 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const Login = lazy(() => import('../pages/Login'));
 
 export const authRouteElements = (

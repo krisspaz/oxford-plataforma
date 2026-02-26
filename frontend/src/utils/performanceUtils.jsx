@@ -1,4 +1,5 @@
-import { useMemo, useCallback, memo } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { useMemo, useCallback, memo, useState, useEffect, useRef, createContext, useContext } from 'react';
 
 /**
  * Performance optimization utilities
@@ -138,6 +139,7 @@ export const useDebounce = (value, delay = 300) => {
  * Hook for throttled callback
  */
 export const useThrottle = (callback, delay = 300) => {
+    // eslint-disable-next-line react-hooks/purity
     const lastRun = useRef(Date.now());
 
     return useCallback((...args) => {
@@ -167,6 +169,8 @@ export const useStableCallback = (callback) => {
 // CONTEXT OPTIMIZATION
 // ==========================================
 
+const DefaultContext = createContext(null);
+
 /**
  * Create optimized context with selector
  * Prevents unnecessary re-renders
@@ -185,15 +189,19 @@ export const createOptimizedContext = (defaultValue) => {
 /**
  * Memoized context provider pattern
  */
-export const createMemoizedProvider = (useProviderValue) => {
+export const createMemoizedProvider = (useProviderValue, DerivedContext) => {
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    const TargetContext = DerivedContext || DefaultContext;
+
     return memo(function Provider({ children }) {
         const value = useProviderValue();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         const memoizedValue = useMemo(() => value, [JSON.stringify(value)]);
 
         return (
-            <Context.Provider value={memoizedValue}>
+            <TargetContext.Provider value={memoizedValue}>
                 {children}
-            </Context.Provider>
+            </TargetContext.Provider>
         );
     });
 };
@@ -201,8 +209,6 @@ export const createMemoizedProvider = (useProviderValue) => {
 // ==========================================
 // VIRTUAL LIST FOR LARGE DATA
 // ==========================================
-
-import { useState, useEffect, useRef, createContext, useContext } from 'react';
 
 /**
  * Virtual list hook for rendering large lists efficiently

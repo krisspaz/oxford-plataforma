@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { BellOff, Trash2, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import api from '../services/api';
 

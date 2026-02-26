@@ -1,7 +1,5 @@
-import { toast } from 'sonner';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Settings, Plus, Edit, X, Loader2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { catalogService } from '../services';
 

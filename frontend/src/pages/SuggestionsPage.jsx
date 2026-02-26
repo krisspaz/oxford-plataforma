@@ -1,8 +1,8 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { helpTicketService } from '../services';
 import { useTheme } from '../contexts/ThemeContext';
-import { Lightbulb, Send, CheckCircle, Eye, Filter, Clock, MessageSquare } from 'lucide-react';
+import { Send, CheckCircle, Eye } from 'lucide-react';
 
 const SuggestionsPage = () => {
     const { darkMode } = useTheme();
@@ -22,6 +22,7 @@ const SuggestionsPage = () => {
 
     // Real Data State
     const [mySuggestions, setMySuggestions] = useState([]);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -214,6 +215,7 @@ const SuggestionsPage = () => {
                         <div className="divide-y divide-gray-200 dark:divide-gray-700">
                             {mySuggestions.map(suggestion => {
                                 const status = statusConfig[suggestion.status];
+                                // eslint-disable-next-line unused-imports/no-unused-vars
                                 const StatusIcon = status.icon;
 
                                 return (

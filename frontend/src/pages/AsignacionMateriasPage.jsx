@@ -1,6 +1,5 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
-import { Book, User, Search, Save, CheckCircle, AlertCircle, ChevronRight, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { subjectService, teacherService, gradeService, academicService } from '../services';
 
@@ -11,6 +10,7 @@ const AsignacionMateriasPage = () => {
     const [subjects, setSubjects] = useState([]);
     const [selectedGrade, setSelectedGrade] = useState(null);
     const [assignments, setAssignments] = useState([]); // [{subjectId, teacherId, hours}]
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 

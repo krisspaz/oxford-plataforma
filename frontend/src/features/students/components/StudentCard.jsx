@@ -1,5 +1,3 @@
-import React from 'react';
-import { Card, Badge, Button } from '../../../components/ui';
 
 /**
  * Student Card Component

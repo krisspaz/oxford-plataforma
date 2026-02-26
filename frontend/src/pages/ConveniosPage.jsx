@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Plus, Edit, Trash, Handshake } from 'lucide-react';
+import { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 
 const ConveniosPage = () => {

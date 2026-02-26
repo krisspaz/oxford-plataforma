@@ -1,8 +1,8 @@
 import { toast } from '../utils/toast';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { helpTicketService } from '../services';
 import { useTheme } from '../contexts/ThemeContext';
-import { AlertTriangle, Send, CheckCircle, Shield, Eye, Clock, MessageSquare, Lock } from 'lucide-react';
+import { Send, CheckCircle, Eye } from 'lucide-react';
 
 const ComplaintsPage = () => {
     const { darkMode } = useTheme();
@@ -34,6 +34,7 @@ const ComplaintsPage = () => {
 
     // Real Data State
     const [myComplaints, setMyComplaints] = useState([]);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -247,6 +248,7 @@ const ComplaintsPage = () => {
                         <div className="divide-y divide-gray-200 dark:divide-gray-700">
                             {myComplaints.map(complaint => {
                                 const status = statusConfig[complaint.status];
+                                // eslint-disable-next-line unused-imports/no-unused-vars
                                 const StatusIcon = status.icon;
 
                                 return (

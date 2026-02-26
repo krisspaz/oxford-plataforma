@@ -1,8 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTheme } from '../../../contexts/ThemeContext';
-import RiskHeatmap from '../components/RiskHeatmap';
-import CircuitStatus from '../components/CircuitStatus';
-import { Brain, Sparkles, MessageSquare } from 'lucide-react';
 import { aiEnterpriseService } from '../services/aiEnterpriseService';
 
 const PredictiveDashboard = () => {
@@ -19,6 +16,7 @@ const PredictiveDashboard = () => {
         try {
             const result = await aiEnterpriseService.chat(chatMessage);
             setChatResponse(result?.data?.response_text || "No se pudo obtener respuesta.");
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             setChatResponse("Error de conexión con el servicio de IA.");
         } finally {

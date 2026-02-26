@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Mail, CheckCircle, Clock, AlertCircle, Filter, Search, User } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
 import { helpTicketService } from '@/services';
 import { toast } from '@/utils/toast';
 
@@ -31,6 +29,7 @@ const HelpTicketsPage = () => {
             await helpTicketService.update(id, { status: 'closed' });
             toast.success('Ticket cerrado correctamente');
             loadTickets();
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             toast.error('Error al actualizar ticket');
         }

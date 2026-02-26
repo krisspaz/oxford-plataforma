@@ -17,6 +17,7 @@ export const securityService = {
             if (Array.isArray(response)) return response;
 
             return [];
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             console.warn('Backend AuditLog endpoint missing or offline, returning mock data for demo.');
             return MOCK_AUDIT_LOGS;
@@ -30,6 +31,7 @@ export const securityService = {
             if (response['hydra:member']) return response['hydra:member'];
             if (Array.isArray(response)) return response;
             return [];
+        // eslint-disable-next-line unused-imports/no-unused-vars
         } catch (error) {
             console.warn('Using mock Rules data');
             return MOCK_RULES;

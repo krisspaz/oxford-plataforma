@@ -1,6 +1,4 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 const Breadcrumbs = () => {
     const location = useLocation();

@@ -1,7 +1,8 @@
 import { toast } from '../utils/toast';
-import React, { useState } from 'react';
-import { FileText, Download, Filter, Search, FileSpreadsheet, File, Calendar, Users, DollarSign, BookOpen, TrendingUp, Clock } from 'lucide-react';
+import { useState } from 'react';
+import { FileText, FileSpreadsheet, Calendar, Users, DollarSign, BookOpen, TrendingUp, Clock } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { reportService } from '../services';
 
 const ReportsPage = () => {
     const { darkMode } = useTheme();
@@ -46,8 +47,12 @@ const ReportsPage = () => {
         const loadingToast = toast.info(`Generando ${report.name}...`, { duration: 0 });
         try {
             if (report.category === 'academic' && report.name.includes('Boletas')) {
-                // Immediate student report (example logic)
-                const blob = await reportService.getGrades(1); // Mocked ID 1 for now, should be from context
+                const studentId = window.prompt("Ingrese el ID del estudiante para generar la boleta:");
+                if (!studentId) {
+                    toast.dismiss(loadingToast);
+                    return;
+                }
+                const blob = await reportService.getGrades(parseInt(studentId));
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -88,6 +93,7 @@ const ReportsPage = () => {
             {/* Categories */}
             <div className={`flex gap-2 p-1 rounded-xl ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
                 {categories.map(cat => {
+                    // eslint-disable-next-line unused-imports/no-unused-vars
                     const Icon = cat.icon;
                     return (
                         <button
@@ -122,6 +128,7 @@ const ReportsPage = () => {
             {/* Reports Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredReports.map((report) => {
+                    // eslint-disable-next-line unused-imports/no-unused-vars
                     const Icon = report.icon;
                     return (
                         <div
